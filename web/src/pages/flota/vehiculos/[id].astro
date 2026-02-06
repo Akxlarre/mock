@@ -8,6 +8,15 @@ import Card from "../../../components/ui/Card.astro";
 import Button from "../../../components/ui/Button.astro";
 import { ESCUELA_ACTUAL } from "../../../lib/mockData";
 
+// Static paths for demo
+export function getStaticPaths() {
+    return [
+        { params: { id: "1" } },
+        { params: { id: "2" } },
+        { params: { id: "3" } },
+    ];
+}
+
 const vehiculoId = 1; // En producción vendría de params
 
 const vehiculo = {
