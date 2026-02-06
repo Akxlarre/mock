@@ -1,0 +1,13 @@
+---
+/**
+ * Gestión de Certificados (ruta raíz)
+ * RF-050-052: Certificación automática al completar clases
+ */
+import DashboardLayout from "../layouts/DashboardLayout.astro";
+import CertificadosContent from "../components/certificados/CertificadosContent.astro";
+import { ESCUELA_ACTUAL } from "../lib/mockData";
+---
+
+<DashboardLayout title="Certificados" escuela={ESCUELA_ACTUAL}>
+  <CertificadosContent basePath="" />
+</DashboardLayout>

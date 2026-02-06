@@ -1,0 +1,24 @@
+---
+/**
+ * Modal 04.2 – Validación Triple Match (Instructor, Vehículo, Alumno).
+ */
+import Modal from '../ui/Modal.astro';
+---
+<Modal id="modal-triple-match" title="Validación Triple Match">
+  <ul class="space-y-2 text-base-content">
+    <li class="flex items-center gap-2">
+      <span class="text-success" aria-hidden="true">✓</span> Instructor asignado
+    </li>
+    <li class="flex items-center gap-2">
+      <span class="text-success" aria-hidden="true">✓</span> Vehículo disponible
+    </li>
+    <li class="flex items-center gap-2">
+      <span class="text-error" aria-hidden="true">✗</span> Alumno bloqueado
+    </li>
+  </ul>
+  <p class="text-sm text-base-content/70 mt-4">Corrija el estado del alumno para poder confirmar la reserva.</p>
+  <div slot="footer" class="flex flex-wrap gap-3">
+    <a href="#" class="btn btn-ghost min-h-11">Cerrar</a>
+    <button type="button" class="btn btn-primary btn-disabled min-h-11" disabled>Confirmar (bloqueado)</button>
+  </div>
+</Modal>

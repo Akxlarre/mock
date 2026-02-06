@@ -1,0 +1,287 @@
+---
+/**
+ * Ayuda para Administrador - Guía de Módulos
+ * Documentación de todos los módulos disponibles para administradores
+ */
+import DashboardLayout from "../layouts/DashboardLayout.astro";
+import Card from "../components/ui/Card.astro";
+import Button from "../components/ui/Button.astro";
+
+// Módulos del sistema
+const modulos = [
+    {
+        nombre: "Dashboard",
+        icono: "📊",
+        descripcion: "Vista general del sistema con indicadores clave",
+        ruta: "/dashboard",
+        caracteristicas: [
+            "KPIs en tiempo real (matrículas, clases, ingresos)",
+            "Gráficos de rendimiento",
+            "Resumen de actividad reciente",
+            "Accesos rápidos a módulos frecuentes",
+        ],
+    },
+    {
+        nombre: "Matrículas",
+        icono: "📝",
+        descripcion: "Gestión completa del proceso de matriculación",
+        ruta: "/matricula",
+        caracteristicas: [
+            "Crear nueva matrícula (4 pasos)",
+            "Ver todas las matrículas activas",
+            "Validar documentos pendientes",
+            "Gestionar licencias profesionales",
+        ],
+    },
+    {
+        nombre: "Alumnos",
+        icono: "👥",
+        descripcion: "Administración de alumnos y su progreso",
+        ruta: "/alumnos",
+        caracteristicas: [
+            "Base de datos completa de alumnos",
+            "Seguimiento de progreso individual",
+            "Gestión de certificados",
+            "Exámenes psicotécnicos",
+        ],
+    },
+    {
+        nombre: "Usuarios",
+        icono: "🔐",
+        descripcion: "Control de acceso y roles del sistema",
+        ruta: "/usuarios",
+        caracteristicas: [
+            "Crear y editar usuarios",
+            "Asignar roles (admin, secretaria, instructor)",
+            "Registro de auditoría",
+            "Control de permisos",
+        ],
+    },
+    {
+        nombre: "Flota de Vehículos",
+        icono: "🚗",
+        descripcion: "Gestión de vehículos para clases prácticas",
+        ruta: "/flota/vehiculos",
+        caracteristicas: [
+            "Registro de vehículos",
+            "Control de mantenciones",
+            "Disponibilidad por instructor",
+            "Kilometraje y combustible",
+        ],
+    },
+    {
+        nombre: "Contabilidad",
+        icono: "💰",
+        descripcion: "Control financiero y cuadratura de caja",
+        ruta: "/contabilidad/cuadratura",
+        caracteristicas: [
+            "Cuadratura diaria de caja",
+            "Registro de ingresos/egresos",
+            "Reportes financieros",
+            "Estado de pagos de alumnos",
+        ],
+    },
+    {
+        nombre: "Agenda",
+        icono: "📅",
+        descripcion: "Programación de clases teóricas y prácticas",
+        ruta: "/agenda",
+        caracteristicas: [
+            "Calendario de clases",
+            "Asignación de instructores",
+            "Gestión de horarios",
+            "Reserva de vehículos",
+        ],
+    },
+    {
+        nombre: "Asistencia",
+        icono: "✅",
+        descripcion: "Control de asistencia de alumnos",
+        ruta: "/asistencia",
+        caracteristicas: [
+            "Registro diario de asistencia",
+            "Reportes por alumno",
+            "Alertas de inasistencias",
+            "Firmas digitales",
+        ],
+    },
+];
+---
+
+<DashboardLayout title="Ayuda - Administrador" userRole="admin">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-3">
+                Guía de Módulos - Administrador
+            </h1>
+            <p class="text-lg text-secondary">
+                Documentación completa de todas las funcionalidades disponibles
+                para administradores
+            </p>
+        </div>
+
+        <!-- Búsqueda -->
+        <Card class="mb-8 p-4">
+            <div class="relative">
+                <input
+                    type="text"
+                    placeholder="Buscar módulo o funcionalidad..."
+                    class="w-full px-6 py-3 pl-12 border-2 border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                />
+                <svg
+                    class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+            </div>
+        </Card>
+
+        <!-- Grid de Módulos -->
+        <div class="grid md:grid-cols-2 gap-6">
+            {
+                modulos.map((modulo) => (
+                    <Card class="p-6 hover:shadow-lg transition-shadow">
+                        <div class="flex items-start gap-4 mb-4">
+                            <div class="text-4xl flex-shrink-0">
+                                {modulo.icono}
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="text-xl font-semibold text-gray-900 mb-1">
+                                    {modulo.nombre}
+                                </h3>
+                                <p class="text-sm text-secondary">
+                                    {modulo.descripcion}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h4 class="text-sm font-semibold text-gray-700 mb-2">
+                                Funcionalidades:
+                            </h4>
+                            <ul class="space-y-1.5">
+                                {modulo.caracteristicas.map(
+                                    (caracteristica) => (
+                                        <li class="flex items-start gap-2 text-sm text-gray-600">
+                                            <svg
+                                                class="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M5 13l4 4L19 7"
+                                                />
+                                            </svg>
+                                            <span>{caracteristica}</span>
+                                        </li>
+                                    ),
+                                )}
+                            </ul>
+                        </div>
+
+                        <Button
+                            href={modulo.ruta}
+                            variant="primary"
+                            class="w-full justify-center"
+                        >
+                            Ir a {modulo.nombre}
+                        </Button>
+                    </Card>
+                ))
+            }
+        </div>
+
+        <!-- Accesos Rápidos -->
+        <div class="mt-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">
+                Accesos Rápidos
+            </h2>
+            <div class="grid md:grid-cols-4 gap-4">
+                <Button
+                    href="/matricula/nuevo"
+                    variant="primary"
+                    class="justify-center"
+                >
+                    + Nueva Matrícula
+                </Button>
+                <Button
+                    href="/usuarios/crear"
+                    variant="secondary"
+                    class="justify-center"
+                >
+                    + Nuevo Usuario
+                </Button>
+                <Button
+                    href="/flota/nuevo"
+                    variant="secondary"
+                    class="justify-center"
+                >
+                    + Nuevo Vehículo
+                </Button>
+                <Button
+                    href="/usuarios/auditoria"
+                    variant="ghost"
+                    class="justify-center"
+                >
+                    Ver Auditoría
+                </Button>
+            </div>
+        </div>
+
+        <!-- Soporte -->
+        <Card class="mt-8 p-6 bg-gray-50">
+            <div class="flex items-start gap-4">
+                <div
+                    class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0"
+                >
+                    <svg
+                        class="w-6 h-6 text-blue-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        ></path>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                        ¿Necesitas ayuda adicional?
+                    </h3>
+                    <p class="text-sm text-secondary mb-4">
+                        Si no encuentras la información que buscas o tienes
+                        alguna duda sobre el sistema, contacta al soporte
+                        técnico.
+                    </p>
+                    <div class="flex gap-3">
+                        <Button
+                            href="mailto:soporte@escuela .cl"
+                            variant="primary"
+                        >
+                            Contactar Soporte
+                        </Button>
+                        <Button href="/usuarios/auditoria" variant="ghost">
+                            Ver Registro de Actividad
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        </Card>
+    </div>
+</DashboardLayout>

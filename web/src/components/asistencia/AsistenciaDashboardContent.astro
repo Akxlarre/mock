@@ -1,0 +1,187 @@
+---
+/**
+ * Dashboard de Asistencia - Control diario, KPIs, alertas, tabla del día.
+ * Reutilizable para admin y secretaria con basePath.
+ */
+import Card from "../ui/Card.astro";
+import Button from "../ui/Button.astro";
+import AttendanceStatusBadge from "../attendance/AttendanceStatusBadge.astro";
+import AttendanceKPIs from "../attendance/AttendanceKPIs.astro";
+
+interface Props {
+  basePath?: string;
+}
+
+const { basePath = "" } = Astro.props;
+
+const kpisData = {
+  attendanceRate: 94.5,
+  todayAbsences: 12,
+  todayTotal: 48,
+  studentsAtRisk: 8,
+  schedulesRemoved: 3,
+};
+
+const alertsData = [
+  {
+    id: 1,
+    student: { id: 123, name: "María González", rut: "18.234.567-8" },
+    consecutiveAbsences: 2,
+    removedAt: "2026-02-03T18:45:00",
+    status: "removed",
+  },
+  {
+    id: 2,
+    student: { id: 124, name: "Pedro Rojas", rut: "19.456.789-0" },
+    consecutiveAbsences: 1,
+    status: "at_risk",
+  },
+];
+
+const todayClasses = [
+  { id: 1, time: "09:00", instructor: "Carlos Rojas", student: "Ana Martínez", studentId: 101, status: "present", duration: 60 },
+  { id: 2, time: "10:00", instructor: "Carlos Rojas", student: "Luis Pérez", studentId: 102, status: "absent", duration: 60 },
+  { id: 3, time: "11:00", instructor: "Juan Vidal", student: "María González", studentId: 123, status: "in_progress", duration: 60 },
+  { id: 4, time: "12:00", instructor: "Juan Vidal", student: null, studentId: null, status: "pending", duration: 60 },
+  { id: 5, time: "14:00", instructor: "Carlos Rojas", student: "Diego Torres", studentId: 104, status: "pending", duration: 60 },
+];
+
+const currentDate = new Date().toLocaleDateString("es-CL", {
+  weekday: "long",
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+});
+---
+
+<div class="max-w-7xl mx-auto">
+  <div class="mb-6 flex items-center gap-2 text-sm text-secondary">
+    <a href={`${basePath}/dashboard`} class="hover:text-gray-900">Inicio</a>
+    <span>/</span>
+    <span class="text-gray-900 font-medium">Asistencia</span>
+  </div>
+
+  <div class="mb-6">
+    <h1 class="text-4xl font-bold text-gray-900 mb-2">Control de Asistencia</h1>
+    <p class="text-lg text-gray-600">{currentDate}</p>
+  </div>
+
+  <AttendanceKPIs attendanceRate={kpisData.attendanceRate} todayAbsences={kpisData.todayAbsences} todayTotal={kpisData.todayTotal} studentsAtRisk={kpisData.studentsAtRisk} schedulesRemoved={kpisData.schedulesRemoved} />
+
+  {alertsData.length > 0 && (
+    <div class="mb-6">
+      <h2 class="text-xl font-semibold text-gray-900 mb-4">⚠️ Alertas y Acciones Urgentes</h2>
+      <div class="space-y-3">
+        {alertsData.map((alert) =>
+          alert.status === "removed" ? (
+            <Card class="border-l-4 border-red-500 bg-red-50 p-4">
+              <div class="flex items-start justify-between gap-4">
+                <div class="flex items-start gap-3 flex-1">
+                  <span class="text-2xl flex-shrink-0">🔴</span>
+                  <div class="min-w-0">
+                    <h3 class="font-semibold text-red-900 mb-1">{alert.student.name} - 2 faltas consecutivas</h3>
+                    <p class="text-sm text-red-700 mb-1">
+                      Horario eliminado automáticamente el {alert.removedAt ? new Date(alert.removedAt).toLocaleDateString("es-CL", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : ""}
+                    </p>
+                    <p class="text-xs text-red-600">Política: 2 inasistencias consecutivas resultan en eliminación automática del horario</p>
+                  </div>
+                </div>
+                <div class="flex gap-2 flex-shrink-0">
+                  <Button variant="primary">Reactivar Horario</Button>
+                  <Button variant="ghost" href={`${basePath}/alumnos/${alert.student.id}`}>Ver Historial</Button>
+                </div>
+              </div>
+            </Card>
+          ) : (
+            <Card class="border-l-4 border-yellow-500 bg-yellow-50 p-4">
+              <div class="flex items-start justify-between gap-4">
+                <div class="flex items-start gap-3 flex-1">
+                  <span class="text-2xl flex-shrink-0">🟡</span>
+                  <div class="min-w-0">
+                    <h3 class="font-semibold text-yellow-900 mb-1">{alert.student.name} - 1 falta consecutiva</h3>
+                    <p class="text-sm text-yellow-700">Próxima inasistencia eliminará su horario automáticamente</p>
+                  </div>
+                </div>
+                <div class="flex gap-2 flex-shrink-0">
+<Button variant="ghost">Enviar Recordatorio</Button>
+                    <Button variant="ghost" href={`${basePath}/alumnos/${alert.student.id}`}>Ver Detalles</Button>
+                </div>
+              </div>
+            </Card>
+          )
+        )}
+      </div>
+    </div>
+  )}
+
+  <Card class="p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-semibold text-gray-900">📅 Asistencia del Día</h2>
+      <div class="flex gap-2">
+        <Button variant="ghost">Exportar Excel</Button>
+        <Button variant="primary">Actualizar</Button>
+      </div>
+    </div>
+    <div class="mb-4 flex flex-wrap gap-3">
+      <div class="flex gap-2">
+        <button type="button" class="px-3 py-1.5 text-sm font-medium bg-gray-900 text-white rounded-lg">Todos</button>
+        <button type="button" class="px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">Presente</button>
+        <button type="button" class="px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">Ausente</button>
+        <button type="button" class="px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">Pendiente</button>
+      </div>
+      <select class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent" aria-label="Filtrar por instructor">
+        <option>Todos los instructores</option>
+        <option>Carlos Rojas</option>
+        <option>Juan Vidal</option>
+      </select>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead class="border-b border-gray-200 bg-gray-50">
+          <tr>
+            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">Hora</th>
+            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">Instructor</th>
+            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">Alumno</th>
+            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">Estado</th>
+            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          {todayClasses.map((clase) => (
+            <tr class="hover:bg-gray-50 transition-colors">
+              <td class="px-4 py-3 text-sm font-medium text-gray-900">{clase.time}</td>
+              <td class="px-4 py-3 text-sm text-gray-700">{clase.instructor}</td>
+              <td class="px-4 py-3 text-sm text-gray-700">{clase.student ?? <span class="text-gray-400 italic">Sin agendar</span>}</td>
+              <td class="px-4 py-3">
+                <AttendanceStatusBadge status={clase.status as "present" | "absent" | "in_progress" | "pending" | "justified"} size="sm" />
+              </td>
+              <td class="px-4 py-3">
+                {clase.student && clase.status === "absent" && <Button variant="ghost">Justificar</Button>}
+                {clase.student && clase.status === "pending" && (
+                  <div class="flex gap-2">
+                    <Button variant="ghost">✅</Button>
+                    <Button variant="ghost">❌</Button>
+                  </div>
+                )}
+                {!clase.student && <span class="text-gray-400 text-sm">-</span>}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </Card>
+
+  <div class="mt-6">
+    <Card class="p-6">
+      <h2 class="text-xl font-semibold text-gray-900 mb-4">📈 Análisis y Reportes</h2>
+      <div class="flex flex-wrap gap-3">
+        <Button variant="ghost">Ver Reporte Semanal</Button>
+        <Button variant="ghost">Exportar Excel</Button>
+        <Button variant="ghost">Gráfico Tendencias</Button>
+        <Button variant="ghost">Ranking Instructores</Button>
+        <Button variant="secondary" href={`${basePath}/asistencia/matriz`}>Ver matriz semanal</Button>
+      </div>
+    </Card>
+  </div>
+</div>

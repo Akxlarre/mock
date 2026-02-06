@@ -1,0 +1,83 @@
+---
+/**
+ * Página: Horario del Alumno
+ * Vista donde el alumno ve su horario recurrente y próximas clases
+ */
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import ScheduleDisplay from "../../components/schedules/ScheduleDisplay.astro";
+
+// Mock data del alumno logueado
+const assignedSchedule = {
+    id: 3,
+    dayOfWeek: [1, 4], // Lunes y Jueves
+    timeSlot: "16:00",
+    instructor: "Luis Torres",
+    vehicle: "DEF-456 (Suzuki Swift)",
+};
+
+const upcomingClasses = [
+    {
+        id: 1,
+        date: "2026-02-10",
+        time: "16:00",
+        classNumber: 1,
+        status: "completed" as const,
+    },
+    {
+        id: 2,
+        date: "2026-02-13",
+        time: "16:00",
+        classNumber: 2,
+        status: "completed" as const,
+    },
+    {
+        id: 3,
+        date: "2026-02-17",
+        time: "16:00",
+        classNumber: 3,
+        status: "completed" as const,
+    },
+    {
+        id: 4,
+        date: "2026-02-20",
+        time: "16:00",
+        classNumber: 4,
+        status: "scheduled" as const,
+    },
+    {
+        id: 5,
+        date: "2026-02-24",
+        time: "16:00",
+        classNumber: 5,
+        status: "scheduled" as const,
+    },
+    {
+        id: 6,
+        date: "2026-02-27",
+        time: "16:00",
+        classNumber: 6,
+        status: "scheduled" as const,
+    },
+];
+
+const completedClasses = 3;
+const totalClasses = 12;
+---
+
+<DashboardLayout title="Mi Horario - Alumno">
+    <div class="max-w-4xl mx-auto">
+        <div class="mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">Mi Horario</h1>
+            <p class="text-lg text-gray-600">
+                Revisa tu horario fijo y las próximas clases programadas
+            </p>
+        </div>
+
+        <ScheduleDisplay
+            schedule={assignedSchedule}
+            upcomingClasses={upcomingClasses}
+            completedClasses={completedClasses}
+            totalClasses={totalClasses}
+        />
+    </div>
+</DashboardLayout>

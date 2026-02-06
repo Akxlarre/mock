@@ -1,0 +1,158 @@
+---
+/**
+ * Agenda Semanal - Secretaria
+ * Vista calendario para agendar y gestionar clases
+ */
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import Card from "../../components/ui/Card.astro";
+import CalendarWeekView from "../../components/schedules/CalendarWeekView.astro";
+import BookingModal from "../../components/schedules/BookingModal.astro";
+import { INSTRUCTORES } from "../../lib/mockInstructors";
+import { BOOKINGS } from "../../lib/mockBookings";
+import { getAvailableBlocksForDay } from "../../lib/mockAvailability";
+
+// Generar semana actual
+const today = new Date();
+const currentDay = today.getDay();
+const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay;
+const monday = new Date(today);
+monday.setDate(today.getDate() + mondayOffset);
+
+const weekDays = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date(monday);
+    date.setDate(monday.getDate() + i);
+    const dayOfWeek = date.getDay();
+    const dateStr = date.toISOString().split("T")[0];
+
+    // Obtener bloques base
+    const availableBlocks = getAvailableBlocksForDay(dayOfWeek);
+
+    // Crear slots con bookings reales
+    const slots = availableBlocks.map((time) => {
+        // Buscar si hay un booking en esta fecha/hora
+        const booking = BOOKINGS.find(
+            (b) =>
+                b.bookingDate === dateStr &&
+                b.startTime === time &&
+                b.status === "scheduled",
+        );
+
+        return {
+            time,
+            available: !booking,
+            booking: booking
+                ? {
+                      id: booking.id,
+                      studentName: booking.studentName,
+                      instructorName: booking.instructorName,
+                      vehiclePatente: booking.vehiclePatente,
+                  }
+                : undefined,
+        };
+    });
+
+    return {
+        date: dateStr,
+        dayName: ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"][dayOfWeek],
+        dayNumber: date.getDate(),
+        isToday: date.toDateString() === today.toDateString(),
+        isClosed: dayOfWeek === 0,
+        slots,
+    };
+});
+
+// Estadísticas
+const scheduledThisWeek = BOOKINGS.filter((b) => {
+    const bookingDate = new Date(b.bookingDate);
+    return (
+        bookingDate >= monday &&
+        bookingDate < new Date(monday.getTime() + 7 * 24 * 60 * 60 * 1000) &&
+        b.status === "scheduled"
+    );
+}).length;
+
+const completedToday = BOOKINGS.filter((b) => {
+    const bookingDate = new Date(b.bookingDate);
+    const todayStr = today.toISOString().split("T")[0];
+    return b.bookingDate === todayStr && b.status === "completed";
+}).length;
+---
+
+<DashboardLayout title="Agenda Semanal" userRole="secretaria">
+    <div class="mb-6">
+        <h1 class="text-3xl font-semibold text-gray-900 mb-2">
+            Agenda Semanal
+        </h1>
+        <p class="text-gray-600">
+            Gestiona y agenda clases para todos los alumnos
+        </p>
+    </div>
+
+    <!-- Estadísticas Rápidas -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <Card class="p-4">
+            <p class="text-sm text-gray-600 mb-1">Clases Hoy</p>
+            <p class="text-2xl font-bold text-gray-900">{completedToday}</p>
+        </Card>
+        <Card class="p-4">
+            <p class="text-sm text-gray-600 mb-1">Esta Semana</p>
+            <p class="text-2xl font-bold text-blue-600">{scheduledThisWeek}</p>
+        </Card>
+        <Card class="p-4">
+            <p class="text-sm text-gray-600 mb-1">Instructores Activos</p>
+            <p class="text-2xl font-bold text-green-600">
+                {INSTRUCTORES.filter((i) => i.activo).length}
+            </p>
+        </Card>
+        <Card class="p-4">
+            <p class="text-sm text-gray-600 mb-1">Total Bookings</p>
+            <p class="text-2xl font-bold text-gray-900">{BOOKINGS.length}</p>
+        </Card>
+    </div>
+
+    <!-- Calendario Semanal -->
+    <CalendarWeekView weekDays={weekDays} instructors={INSTRUCTORES} />
+
+    <!-- Modal de Agendamiento -->
+    <BookingModal />
+
+    <!-- Instrucciones -->
+    <Card class="p-6 mt-6 bg-blue-50 border-blue-200">
+        <div class="flex gap-3">
+            <svg
+                class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path>
+            </svg>
+            <div class="text-sm text-blue-800">
+                <p class="font-medium mb-2">💡 Usar el calendario:</p>
+                <ul class="list-disc list-inside space-y-1">
+                    <li>
+                        Click en bloque <strong>verde</strong> para agendar nueva
+                        clase
+                    </li>
+                    <li>
+                        Click en bloque <strong>azul</strong> para ver detalles de
+                        clase existente
+                    </li>
+                    <li>
+                        Usa filtros para ver disponibilidad de instructor
+                        específico
+                    </li>
+                    <li>
+                        El sistema valida automáticamente todas las reglas de
+                        negocio
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </Card>
+</DashboardLayout>

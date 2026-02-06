@@ -1,0 +1,543 @@
+---
+/**
+ * Contenido del índice de Pagos. Reutilizable para admin y secretaria con basePath.
+ * RF-013: Registro de pagos (matrícula + mensualidades)
+ */
+import Card from "../ui/Card.astro";
+import Button from "../ui/Button.astro";
+import Input from "../ui/Input.astro";
+
+interface Props {
+  basePath?: string;
+}
+
+const { basePath = "" } = Astro.props;
+
+// Mock data
+const pagosRecientes = [
+  { id: 1, fecha: "2026-02-03", alumno: "María González", concepto: "Matrícula Clase B", monto: 280000, metodo: "Transferencia", estado: "completado", boleta: true },
+  { id: 2, fecha: "2026-02-03", alumno: "Juan Pérez", concepto: "Mensualidad 1/4", monto: 70000, metodo: "Efectivo", estado: "completado", boleta: false },
+  { id: 3, fecha: "2026-02-02", alumno: "Ana Martínez", concepto: "Matrícula + Mensualidad", monto: 350000, metodo: "Débito", estado: "completado", boleta: true },
+  { id: 4, fecha: "2026-02-01", alumno: "Carlos Fernández", concepto: "Mensualidad 2/4", monto: 70000, metodo: "Transferencia", estado: "pendiente", boleta: false },
+  { id: 5, fecha: "2026-02-01", alumno: "Sofía Vargas", concepto: "Matrícula Clase B", monto: 280000, metodo: "WebPay", estado: "completado", boleta: true },
+];
+
+const metodoPago: Record<string, string> = {
+  Efectivo: "💵",
+  Transferencia: "🏦",
+  Débito: "💳",
+  Crédito: "💳",
+  WebPay: "🌐",
+};
+
+const alumnosSaldoPendiente = [
+  { id: 1, nombre: "Carlos Fernández", rut: "12.345.678-9", totalAPagar: 560000, pagado: 140000, saldo: 420000 },
+  { id: 2, nombre: "Patricia Soto", rut: "18.234.567-1", totalAPagar: 560000, pagado: 280000, saldo: 280000 },
+  { id: 3, nombre: "Roberto Muñoz", rut: "19.876.543-2", totalAPagar: 560000, pagado: 0, saldo: 560000 },
+  { id: 4, nombre: "Daniela Rojas", rut: "20.111.222-3", totalAPagar: 560000, pagado: 420000, saldo: 140000 },
+];
+---
+
+<!-- Header -->
+<div class="mb-8">
+  <div class="flex items-center gap-2 text-sm text-secondary mb-2">
+    <a href={`${basePath}/dashboard`} class="hover:text-gray-900">Inicio</a>
+    <span>/</span>
+    <span class="text-gray-900 font-medium">Pagos</span>
+  </div>
+  <div
+    class="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+  >
+    <div>
+      <h1 class="text-3xl font-semibold text-gray-900">Gestión de Pagos</h1>
+      <p class="text-secondary mt-1">Registro y seguimiento de pagos</p>
+    </div>
+    <Button href={`${basePath}/pagos/nuevo`} variant="primary">
+      <svg
+        class="w-4 h-4 mr-2"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 4v16m8-8H4"></path>
+        </svg>
+      Registrar Pago
+    </Button>
+  </div>
+</div>
+
+<!-- Stats financieros -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+  <Card hoverable>
+    <div>
+      <p class="text-sm text-secondary">Ingresos Hoy</p>
+      <p class="text-2xl font-semibold text-gray-900 mt-1">$420.000</p>
+      <p class="text-xs text-green-600 mt-1 font-medium">+$70k vs ayer</p>
+    </div>
+  </Card>
+  <Card hoverable>
+    <div>
+      <p class="text-sm text-secondary">Ingresos Mes</p>
+      <p class="text-2xl font-semibold text-gray-900 mt-1">$12.450.000</p>
+      <p class="text-xs text-green-600 mt-1 font-medium">
+        ↗ +18% vs mes anterior
+      </p>
+    </div>
+  </Card>
+  <Card hoverable>
+    <div>
+      <p class="text-sm text-secondary">Pagos Pendientes</p>
+      <p class="text-2xl font-semibold text-orange-600 mt-1">$2.380.000</p>
+      <p class="text-xs text-secondary mt-1">34 alumnos</p>
+    </div>
+  </Card>
+  <Card hoverable>
+    <div>
+      <p class="text-sm text-secondary">Boletas Emitidas</p>
+      <p class="text-2xl font-semibold text-gray-900 mt-1">127</p>
+      <p class="text-xs text-secondary mt-1">Este mes</p>
+    </div>
+  </Card>
+</div>
+
+<!-- Alumnos con saldo pendiente -->
+<Card class="mb-6">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+    <h2 class="text-lg font-semibold text-gray-900">
+      Alumnos con saldo pendiente
+    </h2>
+    <a
+      href={`${basePath}/pagos/estado-cuenta`}
+      class="text-sm font-medium text-gray-900 hover:underline"
+    >
+      Ver estado de cuenta completo →
+    </a>
+  </div>
+  <p class="text-sm text-secondary mb-4">
+    Alumnos con saldo por pagar. Registrar abonos para actualizar el saldo y
+    habilitar clase 7 cuando corresponda.
+  </p>
+  {alumnosSaldoPendiente.length > 0 ? (
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead>
+          <tr class="border-b border-gray-200">
+            <th
+              class="text-left py-3 px-3 text-xs font-semibold text-gray-700 uppercase"
+            >
+              Alumno
+            </th>
+            <th
+              class="text-left py-3 px-3 text-xs font-semibold text-gray-700 uppercase"
+            >
+              RUT
+            </th>
+            <th
+              class="text-right py-3 px-3 text-xs font-semibold text-gray-700 uppercase"
+            >
+              Total a pagar
+            </th>
+            <th
+              class="text-right py-3 px-3 text-xs font-semibold text-gray-700 uppercase"
+            >
+              Pagado
+            </th>
+            <th
+              class="text-right py-3 px-3 text-xs font-semibold text-gray-700 uppercase"
+            >
+              Saldo
+            </th>
+            <th
+              class="text-right py-3 px-3 text-xs font-semibold text-gray-700 uppercase"
+            >
+              Acciones
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {alumnosSaldoPendiente.map((a) => (
+            <tr class="hover:bg-gray-50 transition-colors">
+              <td class="py-3 px-3">
+                <p class="text-sm font-medium text-gray-900">{a.nombre}</p>
+              </td>
+              <td class="py-3 px-3 text-sm text-secondary">{a.rut}</td>
+              <td class="py-3 px-3 text-sm text-gray-700 text-right">
+                ${a.totalAPagar.toLocaleString("es-CL")}
+              </td>
+              <td class="py-3 px-3 text-sm text-green-700 text-right">
+                ${a.pagado.toLocaleString("es-CL")}
+              </td>
+              <td class="py-3 px-3 text-sm font-semibold text-orange-600 text-right">
+                ${a.saldo.toLocaleString("es-CL")}
+              </td>
+              <td class="py-3 px-3 text-right">
+                <div class="flex items-center justify-end gap-2">
+                  <a
+                    href={`${basePath}/pagos/estado-cuenta?alumno=${a.id}`}
+                    class="text-sm font-medium text-gray-700 hover:text-gray-900"
+                  >
+                    Ver detalle
+                  </a>
+                  <Button
+                    href={`${basePath}/pagos/registrar?alumno=${a.id}`}
+                    variant="primary"
+                    class="text-sm py-1.5 px-3"
+                  >
+                    Registrar pago
+                  </Button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  ) : (
+    <p class="py-6 text-center text-sm text-secondary">
+      No hay alumnos con saldo pendiente.
+    </p>
+  )}
+</Card>
+
+<!-- Filtros -->
+<Card class="mb-6">
+  <div class="flex flex-col lg:flex-row gap-4">
+    <div class="flex-1">
+      <Input placeholder="Buscar por alumno o N° boleta..." type="search" />
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <select
+        class="h-11 px-4 text-sm bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-900"
+      >
+        <option>Todos los estados</option>
+        <option>Completado</option>
+        <option>Pendiente</option>
+        <option>Anulado</option>
+      </select>
+      <select
+        class="h-11 px-4 text-sm bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-900"
+      >
+        <option>Todos los métodos</option>
+        <option>Efectivo</option>
+        <option>Transferencia</option>
+        <option>Débito/Crédito</option>
+        <option>WebPay</option>
+      </select>
+      <input
+        type="date"
+        class="h-11 px-4 text-sm bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-900"
+      />
+    </div>
+  </div>
+</Card>
+
+<!-- Grid: Tabla + Resumen -->
+<div class="grid lg:grid-cols-3 gap-6">
+  <div class="lg:col-span-2">
+    <Card>
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">
+        Pagos Recientes
+      </h2>
+
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="border-b border-gray-200">
+              <th
+                class="text-left py-3 px-3 text-xs font-semibold text-gray-700 uppercase"
+                >Fecha</th
+              >
+              <th
+                class="text-left py-3 px-3 text-xs font-semibold text-gray-700 uppercase"
+                >Alumno</th
+              >
+              <th
+                class="text-left py-3 px-3 text-xs font-semibold text-gray-700 uppercase"
+                >Concepto</th
+              >
+              <th
+                class="text-right py-3 px-3 text-xs font-semibold text-gray-700 uppercase"
+                >Monto</th
+              >
+              <th
+                class="text-left py-3 px-3 text-xs font-semibold text-gray-700 uppercase"
+                >Método</th
+              >
+              <th
+                class="text-center py-3 px-3 text-xs font-semibold text-gray-700 uppercase"
+                >Estado</th
+              >
+              <th
+                class="text-right py-3 px-3 text-xs font-semibold text-gray-700 uppercase"
+                >Acciones</th
+              >
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            {
+              pagosRecientes.map((pago) => (
+                <tr class="hover:bg-gray-50 transition-colors">
+                  <td class="py-3 px-3 text-sm text-secondary">
+                    {pago.fecha}
+                  </td>
+                  <td class="py-3 px-3">
+                    <p class="text-sm font-medium text-gray-900">
+                      {pago.alumno}
+                    </p>
+                  </td>
+                  <td class="py-3 px-3 text-sm text-gray-700">
+                    {pago.concepto}
+                  </td>
+                  <td class="py-3 px-3 text-sm font-semibold text-gray-900 text-right">
+                    ${pago.monto.toLocaleString("es-CL")}
+                  </td>
+                  <td class="py-3 px-3">
+                    <span class="inline-flex items-center gap-1 text-sm text-gray-700">
+                      <span>{metodoPago[pago.metodo]}</span>
+                      <span>{pago.metodo}</span>
+                    </span>
+                  </td>
+                  <td class="py-3 px-3 text-center">
+                    <span
+                      class={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                        pago.estado === "completado"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-orange-100 text-orange-800"
+                      }`}
+                    >
+                      {pago.estado === "completado"
+                        ? "✓ Completado"
+                        : "⏳ Pendiente"}
+                    </span>
+                  </td>
+                  <td class="py-3 px-3 text-right">
+                    <div class="flex items-center justify-end gap-2">
+                      {pago.boleta && (
+                        <button
+                          class="p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
+                          title="Ver boleta"
+                        >
+                          <svg
+                            class="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                            />
+                          </svg>
+                        </button>
+                      )}
+                      <a
+                        href={`${basePath}/pagos/${pago.id}`}
+                        class="p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
+                        title="Ver detalle"
+                      >
+                        <svg
+                          class="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                          />
+                        </svg>
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div
+        class="flex items-center justify-between mt-6 pt-4 border-t border-gray-200"
+      >
+        <p class="text-sm text-secondary">Mostrando 1-5 de 156 pagos</p>
+        <div class="flex gap-2">
+          <Button variant="secondary" class="text-sm">Anterior</Button>
+          <Button variant="secondary" class="text-sm">Siguiente</Button>
+        </div>
+      </div>
+    </Card>
+  </div>
+
+  <div class="space-y-4">
+    <Card>
+      <h3 class="text-sm font-semibold text-gray-900 mb-4">
+        Métodos de Pago (Febrero)
+      </h3>
+      <div class="space-y-3">
+        <div>
+          <div class="flex justify-between text-sm mb-1">
+            <span class="text-secondary">Transferencia</span>
+            <span class="font-medium text-gray-900">45%</span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="bg-blue-600 h-2 rounded-full" style="width: 45%">
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="flex justify-between text-sm mb-1">
+            <span class="text-secondary">Efectivo</span>
+            <span class="font-medium text-gray-900">30%</span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="bg-green-600 h-2 rounded-full" style="width: 30%">
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="flex justify-between text-sm mb-1">
+            <span class="text-secondary">Débito/Crédito</span>
+            <span class="font-medium text-gray-900">15%</span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="bg-purple-600 h-2 rounded-full" style="width: 15%">
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="flex justify-between text-sm mb-1">
+            <span class="text-secondary">WebPay</span>
+            <span class="font-medium text-gray-900">10%</span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="bg-orange-600 h-2 rounded-full" style="width: 10%">
+            </div>
+          </div>
+        </div>
+      </div>
+    </Card>
+
+    <Card>
+      <h3 class="text-sm font-semibold text-gray-900 mb-3">
+        Accesos Rápidos
+      </h3>
+      <div class="space-y-2">
+        <Button
+          href={`${basePath}/pagos/nuevo`}
+          variant="secondary"
+          class="w-full justify-start text-sm"
+        >
+          <svg
+            class="w-4 h-4 mr-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 4v16m8-8H4"></path>
+            </svg>
+          Registrar Pago
+        </Button>
+        <Button
+          href={`${basePath}/pagos/pendientes`}
+          variant="secondary"
+          class="w-full justify-start text-sm"
+        >
+          <svg
+            class="w-4 h-4 mr-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          Ver Pendientes
+        </Button>
+        <Button
+          href={`${basePath}/pagos/reporte`}
+          variant="secondary"
+          class="w-full justify-start text-sm"
+        >
+          <svg
+            class="w-4 h-4 mr-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            ></path>
+          </svg>
+          Generar Reporte
+        </Button>
+      </div>
+    </Card>
+
+    <Card class="bg-blue-50 border-blue-200">
+      <div class="flex gap-3">
+        <svg
+          class="w-5 h-5 text-blue-600 flex-shrink-0"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          ></path>
+        </svg>
+        <div>
+          <p class="text-sm font-medium text-blue-900 mb-1">Recordatorio</p>
+          <p class="text-xs text-blue-800">
+            5 pagos sin boleta emitida esta semana
+          </p>
+          <Button
+            href={`${basePath}/pagos/sin-boleta`}
+            variant="ghost"
+            class="text-xs mt-2 p-0 h-auto text-blue-700"
+          >
+            Ver lista →
+          </Button>
+        </div>
+      </div>
+    </Card>
+  </div>
+</div>
+
+<style>
+  select,
+  input[type="date"] {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+  }
+</style>

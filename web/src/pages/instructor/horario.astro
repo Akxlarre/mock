@@ -1,0 +1,287 @@
+---
+/**
+ * Mi Horario - Vista de horario semanal del instructor
+ * RF-030: Módulo de instructores
+ */
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import Card from "../../components/ui/Card.astro";
+import Button from "../../components/ui/Button.astro";
+
+// Mock data - en producción vendría de API
+const instructor = {
+    nombre: "Carlos Rojas",
+    tipo: "ambos",
+};
+
+// Horario semanal (7 días, horas de 08:00 a 20:00)
+const diasSemana = [
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Jueves",
+    "Viernes",
+    "Sábado",
+    "Domingo",
+];
+const horas = [
+    "08:00",
+    "09:00",
+    "10:00",
+    "11:00",
+    "12:00",
+    "13:00",
+    "14:00",
+    "15:00",
+    "16:00",
+    "17:00",
+    "18:00",
+    "19:00",
+    "20:00",
+];
+
+// Clases programadas (mock)
+const clasesProgramadas = [
+    {
+        dia: "Lunes",
+        hora: "09:00",
+        tipo: "práctica",
+        alumno: "María González",
+        duracion: 90,
+    },
+    {
+        dia: "Lunes",
+        hora: "11:00",
+        tipo: "práctica",
+        alumno: "Juan Pérez",
+        duracion: 90,
+    },
+    {
+        dia: "Lunes",
+        hora: "15:00",
+        tipo: "teórica",
+        promocion: "Enero 2026 - Grupo A",
+        duracion: 120,
+    },
+    {
+        dia: "Martes",
+        hora: "10:00",
+        tipo: "práctica",
+        alumno: "Ana Martínez",
+        duracion: 90,
+    },
+    {
+        dia: "Miércoles",
+        hora: "09:00",
+        tipo: "práctica",
+        alumno: "Pedro Silva",
+        duracion: 90,
+    },
+    {
+        dia: "Miércoles",
+        hora: "14:00",
+        tipo: "teórica",
+        promocion: "Enero 2026 - Grupo B",
+        duracion: 120,
+    },
+    {
+        dia: "Jueves",
+        hora: "11:00",
+        tipo: "práctica",
+        alumno: "Sofía López",
+        duracion: 90,
+    },
+    {
+        dia: "Viernes",
+        hora: "09:00",
+        tipo: "práctica",
+        alumno: "Diego Torres",
+        duracion: 90,
+    },
+];
+
+// Calcular totales
+const totalPracticas = clasesProgramadas.filter(
+    (c) => c.tipo === "práctica",
+).length;
+const totalTeoricas = clasesProgramadas.filter(
+    (c) => c.tipo === "teórica",
+).length;
+const totalHoras = clasesProgramadas.reduce(
+    (sum, c) => sum + c.duracion / 60,
+    0,
+);
+---
+
+<DashboardLayout
+    title="Mi Horario - Instructor"
+    userRole="instructor"
+    userName={instructor.nombre}
+>
+    <!-- Header -->
+    <div class="mb-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-semibold text-gray-900">
+                    Mi Horario Semanal
+                </h1>
+                <p class="text-secondary mt-1">
+                    Semana del 3 al 9 de Febrero 2026
+                </p>
+            </div>
+            <Button href="/instructor/dashboard" variant="ghost">
+                ← Volver al Dashboard
+            </Button>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <Card class="p-4">
+            <p class="text-xs text-secondary">Total Clases</p>
+            <p class="text-2xl font-semibold text-gray-900 mt-1">
+                {clasesProgramadas.length}
+            </p>
+        </Card>
+        <Card class="p-4">
+            <p class="text-xs text-secondary">Prácticas</p>
+            <p class="text-2xl font-semibold text-green-600 mt-1">
+                🚗 {totalPracticas}
+            </p>
+        </Card>
+        <Card class="p-4">
+            <p class="text-xs text-secondary">Teóricas</p>
+            <p class="text-2xl font-semibold text-blue-600 mt-1">
+                📚 {totalTeoricas}
+            </p>
+        </Card>
+        <Card class="p-4">
+            <p class="text-xs text-secondary">Horas Totales</p>
+            <p class="text-2xl font-semibold text-purple-600 mt-1">
+                {totalHoras}h
+            </p>
+        </Card>
+    </div>
+
+    <!-- Calendario -->
+    <Card class="overflow-x-auto">
+        <div class="min-w-max">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-gray-200">
+                        <th
+                            class="text-left p-4 text-sm font-semibold text-gray-900 bg-gray-50 sticky left-0"
+                        >
+                            Hora
+                        </th>
+                        {
+                            diasSemana.map((dia) => (
+                                <th class="text-center p-4 text-sm font-semibold text-gray-900 bg-gray-50 min-w-[150px]">
+                                    {dia}
+                                </th>
+                            ))
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    {
+                        horas.map((hora) => (
+                            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                <td class="p-3 text-sm font-medium text-gray-900 bg-gray-50 sticky left-0">
+                                    {hora}
+                                </td>
+                                {diasSemana.map((dia) => {
+                                    const clase = clasesProgramadas.find(
+                                        (c) => c.dia === dia && c.hora === hora,
+                                    );
+
+                                    return (
+                                        <td class="p-2 align-top">
+                                            {clase ? (
+                                                <div
+                                                    class={`p-2 rounded-lg text-xs ${
+                                                        clase.tipo ===
+                                                        "práctica"
+                                                            ? "bg-green-100 border border-green-300"
+                                                            : "bg-blue-100 border border-blue-300"
+                                                    }`}
+                                                >
+                                                    <div class="flex items-center gap-1 mb-1">
+                                                        <span>
+                                                            {clase.tipo ===
+                                                            "práctica"
+                                                                ? "🚗"
+                                                                : "📚"}
+                                                        </span>
+                                                        <span class="font-semibold">
+                                                            {clase.tipo ===
+                                                            "práctica"
+                                                                ? "Práctica"
+                                                                : "Teórica"}
+                                                        </span>
+                                                    </div>
+                                                    <p
+                                                        class={`text-xs ${
+                                                            clase.tipo ===
+                                                            "práctica"
+                                                                ? "text-green-900"
+                                                                : "text-blue-900"
+                                                        }`}
+                                                    >
+                                                        {clase.alumno ||
+                                                            clase.promocion}
+                                                    </p>
+                                                    <p
+                                                        class={`text-xs mt-1 ${
+                                                            clase.tipo ===
+                                                            "práctica"
+                                                                ? "text-green-700"
+                                                                : "text-blue-700"
+                                                        }`}
+                                                    >
+                                                        {clase.duracion} min
+                                                    </p>
+                                                </div>
+                                            ) : (
+                                                <div class="text-center text-gray-300 text-xs">
+                                                    —
+                                                </div>
+                                            )}
+                                        </td>
+                                    );
+                                })}
+                            </tr>
+                        ))
+                    }
+                </tbody>
+            </table>
+        </div>
+    </Card>
+
+    <!-- Leyenda -->
+    <div class="mt-6 flex flex-wrap gap-4 items-center justify-center">
+        <div class="flex items-center gap-2">
+            <div class="w-4 h-4 bg-green-100 border border-green-300 rounded">
+            </div>
+            <span class="text-sm text-gray-700">Clase Práctica</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <div class="w-4 h-4 bg-blue-100 border border-blue-300 rounded">
+            </div>
+            <span class="text-sm text-gray-700">Clase Teórica</span>
+        </div>
+    </div>
+</DashboardLayout>
+
+<style>
+    /* Sticky header */
+    thead th {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    /* Smooth hover */
+    tbody tr:hover {
+        transition: background-color 0.15s ease;
+    }
+</style>

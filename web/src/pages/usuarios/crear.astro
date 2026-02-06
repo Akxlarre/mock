@@ -1,0 +1,31 @@
+---
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import Card from '../../components/ui/Card.astro';
+import Input from '../../components/ui/Input.astro';
+import Button from '../../components/ui/Button.astro';
+import { ESCUELA_ACTUAL } from '../../lib/mockData';
+---
+<DashboardLayout title="Crear usuario - Escuela de Conductores" escuela={ESCUELA_ACTUAL}>
+  <h1 class="text-2xl font-semibold text-base-content mb-6">Crear usuario</h1>
+  <Card class="max-w-xl">
+    <form class="space-y-4" action="/usuarios" method="get">
+      <Input label="Nombre completo" name="nombre" placeholder="María González" required />
+      <Input label="Email" name="email" type="email" placeholder="maria@escuela.cl" required />
+      <div class="form-control">
+        <label class="label" for="rol">
+          <span class="label-text font-medium">Rol</span>
+        </label>
+        <select id="rol" name="rol" class="select select-bordered w-full min-h-11" required>
+          <option value="">Seleccione rol</option>
+          <option value="Admin">Admin</option>
+          <option value="Secretaria">Secretaría</option>
+          <option value="Instructor">Instructor</option>
+        </select>
+      </div>
+      <div class="flex gap-3 pt-4">
+        <a href="/usuarios" class="btn btn-ghost min-h-11">Cancelar</a>
+        <Button type="submit" variant="primary">Crear usuario</Button>
+      </div>
+    </form>
+  </Card>
+</DashboardLayout>

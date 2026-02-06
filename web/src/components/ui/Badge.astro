@@ -1,0 +1,21 @@
+---
+/**
+ * Badge – Variantes según design-system-specs (Activo, Pendiente, Error, Neutral)
+ */
+interface Props {
+  variant?: 'success' | 'warning' | 'error' | 'neutral';
+  class?: string;
+}
+
+const { variant = 'neutral', class: className = '' } = Astro.props;
+
+const variantClasses: Record<NonNullable<Props['variant']>, string> = {
+  success: 'badge-success',
+  warning: 'badge-warning',
+  error: 'badge-error',
+  neutral: 'badge-ghost',
+};
+---
+<span class={`badge badge-sm font-medium ${variantClasses[variant]} ${className ?? ''}`}>
+  <slot />
+</span>

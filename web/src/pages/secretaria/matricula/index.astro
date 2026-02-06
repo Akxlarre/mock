@@ -1,0 +1,11 @@
+---
+/**
+ * Matrículas - Lista (secretaria). Mismo contenido que admin con basePath /secretaria.
+ */
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+import MatriculaListContent from "../../../components/matricula/MatriculaListContent.astro";
+---
+
+<DashboardLayout title="Matrículas - Escuela de Conductores" userRole="secretaria">
+  <MatriculaListContent basePath="/secretaria" />
+</DashboardLayout>

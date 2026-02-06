@@ -1,0 +1,418 @@
+---
+/**
+ * Ficha Técnica - Con Firma Digital
+ * Formulario de evaluación + canvas firma alumno
+ */
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+import Card from "../../../components/ui/Card.astro";
+import Button from "../../../components/ui/Button.astro";
+import Input from "../../../components/ui/Input.astro";
+
+// Static paths for demo
+export function getStaticPaths() {
+    return [
+        { params: { id: "1" } },
+        { params: { id: "2" } },
+        { params: { id: "3" } },
+    ];
+}
+
+const { id } = Astro.params;
+
+// Mock data
+const clase = {
+    id: parseInt(id || "1"),
+    alumno: "María González Pérez",
+    vehiculo: "ABC-123 (Suzuki Swift)",
+    fecha: "2026-02-03",
+    hora: "09:00",
+    numeroClase: 5,
+    totalClases: 18,
+};
+---
+
+<DashboardLayout
+    title="Ficha Técnica - Instructor"
+    userRole="instructor"
+    userName="Carlos Rojas"
+>
+    <div class="max-w-4xl mx-auto">
+        <!-- Breadcrumb -->
+        <div class="flex items-center gap-2 text-sm text-secondary mb-6">
+            <a href="/instructor/dashboard" class="hover:text-gray-900"
+                >Dashboard</a
+            >
+            <span>/</span>
+            <a
+                href={`/instructor/clase/${clase.id}`}
+                class="hover:text-gray-900">Clase {clase.id}</a
+            >
+            <span>/</span>
+            <span class="text-gray-900 font-medium">Ficha Técnica</span>
+        </div>
+
+        <!-- Header -->
+        <Card class="mb-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">
+                        {clase.alumno}
+                    </h1>
+                    <p class="text-sm text-secondary mt-1">
+                        Clase {clase.numeroClase}/{clase.totalClases} • {
+                            clase.fecha
+                        }
+                        {clase.hora} • {clase.vehiculo}
+                    </p>
+                </div>
+                <div class="text-right">
+                    <span
+                        class="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium"
+                    >
+                        🚗 Clase Práctica
+                    </span>
+                </div>
+            </div>
+        </Card>
+
+        <!-- Formulario -->
+        <form id="fichaForm" class="space-y-6">
+            <!-- Kilometraje -->
+            <Card>
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">
+                    Kilometraje
+                </h2>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <Input
+                        label="KM Inicial"
+                        id="km_inicial"
+                        name="km_inicial"
+                        type="number"
+                        placeholder="45320"
+                        required
+                    />
+                    <Input
+                        label="KM Final"
+                        id="km_final"
+                        name="km_final"
+                        type="number"
+                        placeholder="45350"
+                        required
+                    />
+                </div>
+                <p class="text-xs text-secondary mt-2">
+                    ℹ️ El kilometraje se usa para control de mantenimiento del
+                    vehículo
+                </p>
+            </Card>
+
+            <!-- Evaluación de Desempeño -->
+            <Card>
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">
+                    Evaluación de Desempeño
+                </h2>
+
+                <!-- Rating -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Calificación General (1-5)
+                    </label>
+                    <div class="flex gap-2">
+                        {
+                            [1, 2, 3, 4, 5].map((rating) => (
+                                <label class="flex-1 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="rating"
+                                        value={rating}
+                                        class="peer sr-only"
+                                        required
+                                    />
+                                    <div class="p-3 border-2 border-gray-300 rounded-lg text-center peer-checked:border-blue-600 peer-checked:bg-blue-50 hover:border-blue-400 transition-colors">
+                                        <p class="text-2xl">
+                                            {rating === 1
+                                                ? "😟"
+                                                : rating === 2
+                                                  ? "😐"
+                                                  : rating === 3
+                                                    ? "🙂"
+                                                    : rating === 4
+                                                      ? "😊"
+                                                      : "🤩"}
+                                        </p>
+                                        <p class="text-xs font-medium text-gray-700 mt-1">
+                                            {rating}
+                                        </p>
+                                    </div>
+                                </label>
+                            ))
+                        }
+                    </div>
+                </div>
+
+                <!-- Checklist -->
+                <div class="space-y-3">
+                    <h3 class="text-sm font-semibold text-gray-900">
+                        Aspectos Evaluados
+                    </h3>
+
+                    {
+                        [
+                            "Arranque y detención controlados",
+                            "Manejo del volante y dirección",
+                            "Uso correcto de espejos",
+                            "Cambio de velocidades suave",
+                            "Respeto señalización de tránsito",
+                            "Estacionamiento (paralelo/perpendicular)",
+                            "Giros y cambios de pista seguros",
+                        ].map((aspecto) => (
+                            <label class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
+                                <input
+                                    type="checkbox"
+                                    name="aspectos[]"
+                                    value={aspecto}
+                                    class="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-600"
+                                />
+                                <span class="text-sm text-gray-700">
+                                    {aspecto}
+                                </span>
+                            </label>
+                        ))
+                    }
+                </div>
+            </Card>
+
+            <!-- Notas y Observaciones -->
+            <Card>
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">
+                    Notas y Observaciones
+                </h2>
+                <textarea
+                    name="notas"
+                    rows="4"
+                    placeholder="Escribe aquí observaciones sobre el desempeño del alumno, áreas de mejora, o comentarios relevantes..."
+                    class="w-full px-4 py-3 text-sm bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                ></textarea>
+            </Card>
+
+            <!-- Firma Digital -->
+            <Card>
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">
+                    Firma Digital del Alumno
+                </h2>
+                <p class="text-sm text-secondary mb-4">
+                    Solicita al alumno que firme en el recuadro de abajo para
+                    confirmar su asistencia y aceptación de la evaluación
+                </p>
+
+                <!-- Canvas Container -->
+                <div
+                    class="border-2 border-gray-300 rounded-lg bg-white overflow-hidden"
+                >
+                    <canvas
+                        id="signatureCanvas"
+                        width="600"
+                        height="200"
+                        class="w-full touch-none cursor-crosshair"
+                        style="max-height: 200px;"></canvas>
+                </div>
+
+                <div class="flex items-center justify-between mt-3">
+                    <p class="text-xs text-secondary">
+                        ✍️ Firma aquí usando mouse/dedo
+                    </p>
+                    <button
+                        type="button"
+                        onclick="limpiarFirma()"
+                        class="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                    >
+                        Limpiar Firma
+                    </button>
+                </div>
+            </Card>
+
+            <!-- Botones -->
+            <div class="flex flex-col sm:flex-row gap-3">
+                <Button
+                    href="/instructor/dashboard"
+                    variant="ghost"
+                    class="flex-1"
+                >
+                    Cancelar
+                </Button>
+                <Button type="submit" variant="primary" class="flex-1">
+                    <svg
+                        class="w-5 h-5 mr-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        ></path>
+                    </svg>
+                    Guardar Ficha y Finalizar Clase
+                </Button>
+            </div>
+        </form>
+    </div>
+</DashboardLayout>
+
+<script>
+    // Canvas setup para firma digital
+    const canvas = document.getElementById(
+        "signatureCanvas",
+    ) as HTMLCanvasElement | null;
+    if (!canvas) {
+        throw new Error("No se encontró el canvas de firma");
+    }
+    const ctx = canvas.getContext("2d");
+
+    if (!ctx) {
+        throw new Error("No se pudo obtener contexto 2D del canvas");
+    }
+
+    let isDrawing = false;
+    let lastX = 0;
+    let lastY = 0;
+
+    // Ajustar tamaño interno del canvas al tamaño visual para evitar desalineo
+    function resizeCanvasToDisplaySize() {
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+
+        // Configurar estilo del trazo cada vez que se redimensiona
+        ctx.strokeStyle = "#000";
+        ctx.lineWidth = 2;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+    }
+
+    resizeCanvasToDisplaySize();
+    window.addEventListener("resize", resizeCanvasToDisplaySize);
+
+    // Mouse events
+    canvas.addEventListener("mousedown", (e) => {
+        isDrawing = true;
+        lastX = e.offsetX;
+        lastY = e.offsetY;
+    });
+
+    canvas.addEventListener("mousemove", (e) => {
+        if (!isDrawing) return;
+
+        const currentX = e.offsetX;
+        const currentY = e.offsetY;
+
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(currentX, currentY);
+        ctx.stroke();
+
+        lastX = currentX;
+        lastY = currentY;
+    });
+
+    canvas.addEventListener("mouseup", () => {
+        isDrawing = false;
+    });
+
+    canvas.addEventListener("mouseout", () => {
+        isDrawing = false;
+    });
+
+    // Touch events (mobile)
+    canvas.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        isDrawing = true;
+        const rect = canvas.getBoundingClientRect();
+        const touch = e.touches[0];
+        lastX = touch.clientX - rect.left;
+        lastY = touch.clientY - rect.top;
+    });
+
+    canvas.addEventListener("touchmove", (e) => {
+        e.preventDefault();
+        if (!isDrawing) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const touch = e.touches[0];
+        const currentX = touch.clientX - rect.left;
+        const currentY = touch.clientY - rect.top;
+
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(currentX, currentY);
+        ctx.stroke();
+
+        lastX = currentX;
+        lastY = currentY;
+    });
+
+    canvas.addEventListener("touchend", () => {
+        isDrawing = false;
+    });
+
+    // Limpiar firma
+    function limpiarFirma() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // Form submission
+    const form = document.getElementById("fichaForm");
+    form?.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        // Validar que haya firma
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const hasSignature = imageData.data.some((channel) => channel !== 0);
+
+        if (!hasSignature) {
+            alert(
+                "⚠️ Por favor, solicita la firma del alumno antes de guardar",
+            );
+            return;
+        }
+
+        // Obtener firma como base64
+        const signatureData = canvas.toDataURL("image/png");
+
+        alert(
+            "✓ Ficha técnica guardada correctamente.\n\nEn producción se guardaría:\n- Evaluación y notas\n- Imagen de firma (base64)\n- Timestamp\n- Se marcaría asistencia automática\n- Se finalizaría la clase",
+        );
+
+        // Aquí iría la llamada API para guardar todo
+        window.location.href = "/instructor/dashboard";
+    });
+
+    // Make functions global
+    (window as any).limpiarFirma = limpiarFirma;
+</script>
+
+<style>
+    /* Custom checkbox */
+    input[type="checkbox"] {
+        appearance: none;
+        border: 1px solid rgb(209, 213, 219);
+        border-radius: 0.25rem;
+        cursor: pointer;
+        position: relative;
+    }
+
+    input[type="checkbox"]:checked {
+        background-color: rgb(37, 99, 235);
+        border-color: rgb(37, 99, 235);
+    }
+
+    input[type="checkbox"]:checked::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3E%3C/svg%3E");
+        background-size: 100% 100%;
+    }
+</style>

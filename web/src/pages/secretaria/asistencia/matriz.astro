@@ -1,0 +1,12 @@
+---
+/**
+ * Matriz de asistencia - Secretaría
+ * RF-046: ✓ Asistió | F Falta | - Pendiente
+ */
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+import AsistenciaIndexContent from "../../../components/asistencia/AsistenciaIndexContent.astro";
+---
+
+<DashboardLayout title="Matriz asistencia - Escuela de Conductores" userRole="secretaria">
+  <AsistenciaIndexContent basePath="/secretaria" />
+</DashboardLayout>

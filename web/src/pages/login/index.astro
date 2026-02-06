@@ -1,0 +1,246 @@
+---
+/**
+ * Login - RF-003: Inicio de Sesión
+ * Diseño Geist-inspired con validación y estados
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Card from "../../components/ui/Card.astro";
+import Input from "../../components/ui/Input.astro";
+import Button from "../../components/ui/Button.astro";
+---
+
+<BaseLayout title="Iniciar Sesión - Escuela de Conductores">
+  <main
+    class="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12"
+  >
+    <!-- Logo y marca (con transition:name para persistencia) -->
+    <div class="w-full max-w-md">
+      <div class="text-center mb-8" transition:name="login-brand">
+        <div
+          class="inline-flex items-center justify-center w-16 h-16 bg-gray-900 rounded-xl mb-4"
+        >
+          <svg
+            class="w-8 h-8 text-white"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+            ></path>
+          </svg>
+        </div>
+        <h1 class="text-2xl font-semibold text-gray-900">
+          Escuela de Conductores
+        </h1>
+        <p class="text-sm text-secondary mt-1">Sistema de Gestión Integral</p>
+      </div>
+
+      <!-- Card de login -->
+      <Card class="shadow-lg">
+        <h2 class="text-lg font-semibold text-gray-900 mb-6">Iniciar Sesión</h2>
+
+        <form
+          id="loginForm"
+          class="space-y-4"
+          method="POST"
+          action="/api/auth/login"
+        >
+          <!-- Email -->
+          <div>
+            <Input
+              label="Correo electrónico"
+              id="email"
+              name="email"
+              type="email"
+              placeholder="tu.correo@ejemplo.cl"
+              required
+              class="w-full"
+            />
+          </div>
+
+          <!-- Password -->
+          <div>
+            <Input
+              label="Contraseña"
+              id="password"
+              name="password"
+              type="password"
+              placeholder="••••••••"
+              required
+              class="w-full"
+            />
+          </div>
+
+          <!-- Recordarme -->
+          <div class="flex items-center justify-between">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                name="remember"
+                class="w-4 h-4 rounded border-gray-300 text-gray-900 focus:ring-gray-900 focus:ring-offset-0"
+              />
+              <span class="text-sm text-secondary">Recordarme</span>
+            </label>
+
+            <a
+              href="/login/recuperar"
+              class="text-sm text-gray-700 hover:text-gray-900 hover:underline focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 rounded px-1"
+            >
+              ¿Olvidaste tu contraseña?
+            </a>
+          </div>
+
+          <!-- Botones -->
+          <div class="pt-2 space-y-3">
+            <Button type="submit" variant="primary" class="w-full">
+              Ingresar
+            </Button>
+
+            <!-- Demo quick access buttons -->
+            <div class="relative">
+              <div class="absolute inset-0 flex items-center">
+                <div class="w-full border-t border-gray-200"></div>
+              </div>
+              <div class="relative flex justify-center text-xs">
+                <span class="px-2 bg-white text-muted">Demo rápido</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                class="text-xs"
+                onclick="fillDemo('admin')"
+              >
+                Admin
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                class="text-xs"
+                onclick="fillDemo('secretaria')"
+              >
+                Secretaria
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                class="text-xs"
+                onclick="fillDemo('instructor')"
+              >
+                Instructor
+              </Button>
+            </div>
+          </div>
+        </form>
+
+        <!-- Footer info -->
+        <div class="mt-6 pt-6 border-t border-gray-200">
+          <p class="text-xs text-center text-muted">
+            Sistema protegido. Para soporte contacta a
+            <a
+              href="mailto:soporte@escuela.cl"
+              class="text-gray-700 hover:text-gray-900 underline"
+              >soporte@escuela.cl</a
+            >
+          </p>
+        </div>
+      </Card>
+
+      <!-- Credenciales de prueba (solo desarrollo) -->
+      <div class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <p class="text-xs font-medium text-blue-900 mb-2">
+          🔐 Credenciales de prueba
+        </p>
+        <div class="text-xs text-blue-800 space-y-1 font-mono">
+          <p><strong>Admin:</strong> admin@escuela.cl / admin123</p>
+          <p><strong>Secretaria:</strong> secretaria@escuela.cl / sec123</p>
+          <p><strong>Instructor:</strong> instructor@escuela.cl / inst123</p>
+        </div>
+      </div>
+    </div>
+  </main>
+</BaseLayout>
+
+<script>
+  // Demo quick fill
+  function fillDemo(role: "admin" | "secretaria" | "instructor") {
+    const credentials = {
+      admin: { email: "admin@escuela.cl", password: "admin123" },
+      secretaria: { email: "secretaria@escuela.cl", password: "sec123" },
+      instructor: { email: "instructor@escuela.cl", password: "inst123" },
+    };
+
+    const creds = credentials[role];
+    const emailInput = document.getElementById("email") as HTMLInputElement;
+    const passwordInput = document.getElementById(
+      "password",
+    ) as HTMLInputElement;
+
+    if (emailInput && passwordInput) {
+      emailInput.value = creds.email;
+      passwordInput.value = creds.password;
+    }
+  }
+
+  // Form validation
+  const form = document.getElementById("loginForm");
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(form as HTMLFormElement);
+    const email = formData.get("email");
+    const password = formData.get("password");
+
+    // Simulación de login (en producción sería API call real)
+    console.log("Login attempt:", { email });
+
+    // Demo: redirect based on email
+    if (email?.toString().includes("admin")) {
+      window.location.href = "/dashboard";
+    } else if (email?.toString().includes("secretaria")) {
+      window.location.href = "/dashboard";
+    } else if (email?.toString().includes("instructor")) {
+      window.location.href = "/dashboard/instructor";
+    } else {
+      // Show error
+      alert("Credenciales inválidas. Usa las credenciales de prueba.");
+    }
+  });
+</script>
+
+<style>
+  /* Custom checkbox styling */
+  input[type="checkbox"] {
+    appearance: none;
+    border: 1px solid rgb(209, 213, 219);
+    border-radius: 0.25rem;
+    width: 1rem;
+    height: 1rem;
+    cursor: pointer;
+    position: relative;
+  }
+
+  input[type="checkbox"]:checked {
+    background-color: rgb(17, 24, 39);
+    border-color: rgb(17, 24, 39);
+  }
+
+  input[type="checkbox"]:checked::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3E%3C/svg%3E");
+    background-size: 100% 100%;
+  }
+
+  input[type="checkbox"]:focus {
+    outline: 2px solid rgb(17, 24, 39);
+    outline-offset: 2px;
+  }
+</style>

@@ -1,0 +1,270 @@
+---
+/**
+ * Centro de Notificaciones - Secretaria
+ * Notific aciones relevantes para rol de secretaria
+ */
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import Card from "../../components/ui/Card.astro";
+import Button from "../../components/ui/Button.astro";
+
+// Notificaciones para SECRETARIA
+const notifications = [
+    // TAREAS DIARIAS
+    {
+        id: 1,
+        priority: "urgent",
+        title: "⚠️ Cuadratura diaria pendiente",
+        message:
+            "Debes generar la cuadratura del día 04/02/2026 antes de las 23:59",
+        time: "Hace 30 minutos",
+        unread: true,
+        icon: "🧮",
+        action: { label: "Generar ahora", href: "/contabilidad/cuadratura" },
+    },
+    {
+        id: 2,
+        priority: "high",
+        title: "Documentos por validar",
+        message: "3 alumnos esperan validación de documentos de matrícula",
+        time: "Hace 1 hora",
+        unread: true,
+        icon: "📄",
+        action: { label: "Validar", href: "/matricula" },
+    },
+
+    // MATRÍCULAS ONLINE
+    {
+        id: 3,
+        priority: "high",
+        title: "Nueva matrícula online",
+        message: "María González completó pago ($280.000) - Validar documentos",
+        time: "Hace 2 horas",
+        unread: true,
+        icon: "👤",
+        action: { label: "Procesar", href: "/matricula" },
+    },
+    {
+        id: 4,
+        priority: "medium",
+        title: "Matrícula de menor completada",
+        message: "Alumno 17 años - Autorización notarial generada y enviada",
+        time: "Hace 3 horas",
+        unread: false,
+        icon: "📋",
+        action: { label: "Ver", href: "/matricula" },
+    },
+
+    // PAGOS
+    {
+        id: 5,
+        priority: "medium",
+        title: "Pago recibido - Transferencia",
+        message: "Ana Martínez - $140.000 (cuota 2/2)",
+        time: "Hace 4 horas",
+        unread: true,
+        icon: "💰",
+        action: { label: "Confirmar", href: "/pagos" },
+    },
+    {
+        id: 6,
+        priority: "high",
+        title: "Pago rechazado",
+        message: "Carlos Muñoz - Tarjeta rechazada - Contactar urgente",
+        time: "Hace 5 horas",
+        unread: true,
+        icon: "❌",
+        action: { label: "Llamar alumno", href: "/alumnos" },
+    },
+    {
+        id: 7,
+        priority: "low",
+        title: "Pago en efectivo registrado",
+        message: "Clase Profesional A2 - Francisco Díaz - $450.000",
+        time: "Ayer",
+        unread: false,
+        icon: "💵",
+        action: { label: "Ver recibo", href: "/pagos" },
+    },
+
+    // AGENDA
+    {
+        id: 8,
+        priority: "medium",
+        title: "Clase cancelada < 24hrs",
+        message:
+            "Luis Pérez canceló 2hrs antes - Marcar como tomada (política)",
+        time: "Ayer",
+        unread: false,
+        icon: "📅",
+        action: { label: "Actualizar", href: "/agenda" },
+    },
+    {
+        id: 9,
+        priority: "low",
+        title: "Solicitud de reagendamiento",
+        message: "Diego Torres quiere reagendar clase de mañana 09:00",
+        time: "Ayer",
+        unread: false,
+        icon: "🔄",
+        action: { label: "Gestionar", href: "/agenda" },
+    },
+
+    // PSICOTÉCNICO
+    {
+        id: 10,
+        priority: "low",
+        title: "Evaluación psicotécnica completada",
+        message: "Cliente externo: Rosa Pérez - $40.000 - Resultado: Apto",
+        time: "Hace 2 días",
+        unread: false,
+        icon: "🧠",
+        action: { label: "Generar informe", href: "/psicotecnico" },
+    },
+    {
+        id: 11,
+        priority: "medium",
+        title: "Certificado psicotécnico por vencer",
+        message: "Recordar a Laura Soto renovar en 15 días",
+        time: "Hace 2 días",
+        unread: false,
+        icon: "📋",
+        action: { label: "Enviar WhatsApp", href: "/alumnos" },
+    },
+
+    // CERTIFICADOS
+    {
+        id: 12,
+        priority: "low",
+        title: "Certificado listo para entregar",
+        message: "Francisca Ramírez completó curso - Certificado generado",
+        time: "Hace 3 días",
+        unread: false,
+        icon: "🏆",
+        action: { label: "Imprimir", href: "/certificados" },
+    },
+
+    // RECORDATORIOS
+    {
+        id: 13,
+        priority: "medium",
+        title: "Recordatorio: Clases de mañana",
+        message: "5 clases programadas - Confirmar asistencia con alumnos",
+        time: "Hace 3 días",
+        unread: false,
+        icon: "📞",
+    },
+
+    // SISTEMA
+    {
+        id: 14,
+        priority: "low",
+        title: "Respaldo generado correctamente",
+        message: "Backup automático diario - Base de datos 05/02/2026",
+        time: "Hace 1 semana",
+        unread: false,
+        icon: "💾",
+    },
+];
+
+const urgent = notifications.filter((n) => n.priority === "urgent" && n.unread);
+const unreadCount = notifications.filter((n) => n.unread).length;
+---
+
+<DashboardLayout
+    title="Notificaciones"
+    userRole="secretaria"
+    userName="Patricia Secretaria"
+>
+    <div class="max-w-5xl mx-auto">
+        <!-- Header -->
+        <div class="mb-6">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">
+                🔔 Mis Notificaciones
+            </h1>
+            <p class="text-secondary">
+                {unreadCount} sin leer • {notifications.length} totales
+            </p>
+        </div>
+
+        <!-- Alerta de cuadratura -->
+        {
+            urgent.length > 0 && (
+                <Card class="mb-6 p-4 bg-red-50 border-l-4 border-red-500">
+                    <div class="flex items-center gap-3">
+                        <svg
+                            class="w-6 h-6 text-red-600 flex-shrink-0"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                            />
+                        </svg>
+                        <div class="flex-1">
+                            <p class="font-semibold text-red-900">
+                                Tareas urgentes pendientes
+                            </p>
+                            <p class="text-sm text-red-700">
+                                Tienes {urgent.length} tarea(s) que requieren
+                                atención inmediata
+                            </p>
+                        </div>
+                    </div>
+                </Card>
+            )
+        }
+
+        <!-- Lista de notificaciones -->
+        <div class="space-y-3">
+            {
+                notifications.map((notif) => (
+                    <Card
+                        class={`p-4 ${notif.unread ? "bg-blue-50 border-l-4 border-blue-500" : ""} ${notif.priority === "urgent" ? "border-l-4 border-red-500 bg-red-50" : ""} ${notif.priority === "high" && notif.unread ? "border-l-4 border-orange-500 bg-orange-50" : ""}`}
+                    >
+                        <div class="flex items-start justify-between gap-4">
+                            <div class="flex items-start gap-3 flex-1">
+                                <span class="text-2xl flex-shrink-0">
+                                    {notif.icon}
+                                </span>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        {notif.unread && (
+                                            <span class="w-2 h-2 bg-blue-600 rounded-full" />
+                                        )}
+                                        <h3 class="font-semibold text-gray-900">
+                                            {notif.title}
+                                        </h3>
+                                    </div>
+                                    <p class="text-sm text-gray-700 mb-2">
+                                        {notif.message}
+                                    </p>
+                                    <p class="text-xs text-gray-500">
+                                        {notif.time}
+                                    </p>
+                                </div>
+                            </div>
+                            {notif.action && (
+                                <Button
+                                    href={notif.action.href}
+                                    variant={
+                                        notif.priority === "urgent" ||
+                                        notif.priority === "high"
+                                            ? "primary"
+                                            : "secondary"
+                                    }
+                                    class="flex-shrink-0"
+                                >
+                                    {notif.action.label}
+                                </Button>
+                            )}
+                        </div>
+                    </Card>
+                ))
+            }
+        </div>
+    </div>
+</DashboardLayout>

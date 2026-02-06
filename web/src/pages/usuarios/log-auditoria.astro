@@ -1,0 +1,43 @@
+---
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import Card from '../../components/ui/Card.astro';
+import Input from '../../components/ui/Input.astro';
+import Button from '../../components/ui/Button.astro';
+import { logAuditoria, ESCUELA_ACTUAL } from '../../lib/mockData';
+---
+<DashboardLayout title="Log de auditoría - Escuela de Conductores" escuela={ESCUELA_ACTUAL}>
+  <h1 class="text-2xl font-semibold text-base-content mb-6">Log de auditoría</h1>
+  <p class="text-base-content/70 mb-6">RF-005: Historial de acciones en el sistema.</p>
+  <Card class="mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+      <Input label="Usuario" name="usuario" placeholder="Filtrar por usuario" />
+      <Input label="Fecha" name="fecha" type="date" />
+      <Input label="Acción" name="accion" placeholder="Filtrar por acción" />
+    </div>
+    <Button variant="primary">Buscar</Button>
+  </Card>
+  <Card class="overflow-hidden p-0">
+    <div class="overflow-x-auto">
+      <table class="table">
+        <thead>
+          <tr class="bg-base-200 text-base-content">
+            <th class="font-semibold text-sm py-3 px-4">Fecha / Hora</th>
+            <th class="font-semibold text-sm py-3 px-4">Usuario</th>
+            <th class="font-semibold text-sm py-3 px-4">Acción</th>
+            <th class="font-semibold text-sm py-3 px-4">Detalle</th>
+          </tr>
+        </thead>
+        <tbody>
+          {logAuditoria.map((l) => (
+            <tr class="hover:bg-base-200/80 border-b border-base-300/50">
+              <td class="py-4 px-4">{l.fechaHora}</td>
+              <td class="py-4 px-4">{l.usuario}</td>
+              <td class="py-4 px-4">{l.accion}</td>
+              <td class="py-4 px-4">{l.detalle}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </Card>
+</DashboardLayout>

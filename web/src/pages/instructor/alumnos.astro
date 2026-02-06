@@ -1,0 +1,257 @@
+---
+/**
+ * Mis Alumnos - Lista de alumnos asignados al instructor
+ * RF-030: Módulo de instructores
+ */
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import Card from '../../components/ui/Card.astro';
+import Button from '../../components/ui/Button.astro';
+
+// Mock data - en producción vendría de API
+const instructor = {
+  nombre: 'Carlos Rojas',
+  tipo: 'ambos'
+};
+
+// Alumnos asignados (mock)
+const alumnos = [
+  {
+    id: 1,
+    nombre: 'María González Pérez',
+    rut: '12.345.678-9',
+    email: 'maria.gonzalez@email.cl',
+    telefono: '+56 9 1234 5678',
+    curso: 'Clase B',
+    clasesCompletadas: 8,
+    clasesTotal: 12,
+    progreso: 67,
+    proximaClase: '2026-02-05 14:00',
+    estado: 'activo',
+    tipo: 'práctica'
+  },
+  {
+    id: 2,
+    nombre: 'Juan Pablo Rojas',
+    rut: '23.456.789-0',
+    email: 'juan.rojas@email.cl',
+    telefono: '+56 9 8765 4321',
+    curso: 'Clase B',
+    clasesCompletadas: 4,
+    clasesTotal: 12,
+    progreso: 33,
+    proximaClase: '2026-02-06 10:00',
+    estado: 'activo',
+    tipo: 'práctica'
+  },
+  {
+    id: 3,
+    nombre: 'Ana Martínez Silva',
+    rut: '34.567.890-1',
+    email: 'ana.martinez@email.cl',
+    telefono: '+56 9 2345 6789',
+    curso: 'Clase B',
+    clasesCompletadas: 10,
+    clasesTotal: 12,
+    progreso: 83,
+    proximaClase: '2026-02-07 16:00',
+    estado: 'activo',
+    tipo: 'práctica'
+  },
+  {
+    id: 4,
+    nombre: 'Pedro Silva Muñoz',
+    rut: '45.678.901-2',
+    email: 'pedro.silva@email.cl',
+    telefono: '+56 9 3456 7890',
+    curso: 'Clase B',
+    clasesCompletadas: 6,
+    clasesTotal: 12,
+    progreso: 50,
+    proximaClase: '2026-02-08 09:00',
+    estado: 'activo',
+    tipo: 'práctica'
+  },
+  {
+    id: 5,
+    nombre: 'Sofía López Torres',
+    rut: '56.789.012-3',
+    email: 'sofia.lopez@email.cl',
+    telefono: '+56 9 4567 8901',
+    curso: 'Clase B',
+    clasesCompletadas: 2,
+    clasesTotal: 12,
+    progreso: 17,
+    proximaClase: '2026-02-09 11:00',
+    estado: 'activo',
+    tipo: 'práctica'
+  },
+  {
+    id: 6,
+    nombre: 'Diego Torres Vega',
+    rut: '67.890.123-4',
+    email: 'diego.torres@email.cl',
+    telefono: '+56 9 5678 9012',
+    curso: 'Clase B',
+    clasesCompletadas: 11,
+    clasesTotal: 12,
+    progreso: 92,
+    proximaClase: '2026-02-10 15:00',
+    estado: 'activo',
+    tipo: 'práctica'
+  }
+];
+
+// Calcular estadísticas
+const totalAlumnos = alumnos.length;
+const progresoPromedio = Math.round(alumnos.reduce((sum, a) => sum + a.progreso, 0) / totalAlumnos);
+const alumnosPorCertificar = alumnos.filter(a => a.progreso >= 100).length;
+const alumnosActivos = alumnos.filter(a => a.estado === 'activo').length;
+---
+
+<DashboardLayout title="Mis Alumnos - Instructor" userRole="instructor" userName={instructor.nombre}>
+  <!-- Header -->
+  <div class="mb-6">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-semibold text-gray-900">Mis Alumnos</h1>
+        <p class="text-secondary mt-1">Alumnos asignados para clases prácticas</p>
+      </div>
+      <Button href="/instructor/dashboard" variant="ghost">
+        ← Volver al Dashboard
+      </Button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <Card class="p-4">
+      <p class="text-xs text-secondary">Total Alumnos</p>
+      <p class="text-2xl font-semibold text-gray-900 mt-1">{totalAlumnos}</p>
+    </Card>
+    <Card class="p-4">
+      <p class="text-xs text-secondary">Activos</p>
+      <p class="text-2xl font-semibold text-green-600 mt-1">{alumnosActivos}</p>
+    </Card>
+    <Card class="p-4">
+      <p class="text-xs text-secondary">Progreso Promedio</p>
+      <p class="text-2xl font-semibold text-blue-600 mt-1">{progresoPromedio}%</p>
+    </Card>
+    <Card class="p-4">
+      <p class="text-xs text-secondary">Por Certificar</p>
+      <p class="text-2xl font-semibold text-purple-600 mt-1">{alumnosPorCertificar}</p>
+    </Card>
+  </div>
+
+  <!-- Filtros -->
+  <Card class="mb-6 p-4">
+    <div class="flex flex-wrap gap-4">
+      <div class="flex-1 min-w-[200px]">
+        <input
+          type="text"
+          placeholder="Buscar por nombre o RUT..."
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+        />
+      </div>
+      <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900">
+        <option>Todos los estados</option>
+        <option>Activos</option>
+        <option>Completado</option>
+        <option>Suspendido</option>
+      </select>
+      <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900">
+        <option>Ordenar por nombre</option>
+        <option>Ordenar por progreso</option>
+        <option>Ordenar por próxima clase</option>
+      </select>
+    </div>
+  </Card>
+
+  <!-- Lista de alumnos -->
+  <div class="grid gap-4">
+    {alumnos.map((alumno) => (
+      <Card class="p-6 hover:shadow-md transition-shadow">
+        <div class="flex flex-col lg:flex-row lg:items-center gap-6">
+          <!-- Avatar e info básica -->
+          <div class="flex items-center gap-4 flex-1">
+            <div class="w-16 h-16 bg-gray-900 rounded-full flex items-center justify-center text-white font-semibold text-xl flex-shrink-0">
+              {alumno.nombre.split(' ').map(n => n[0]).join('').substring(0, 2)}
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="text-lg font-semibold text-gray-900">{alumno.nombre}</h3>
+              <div class="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-sm text-secondary">
+                <span>{alumno.rut}</span>
+                <span>{alumno.email}</span>
+                <span>{alumno.telefono}</span>
+              </div>
+              <div class="mt-2">
+                <span class="inline-block px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">
+                  {alumno.curso}
+                </span>
+                <span class={`inline-block px-2 py-1 text-xs font-medium rounded ml-2 ${
+                  alumno.estado === 'activo' 
+                    ? 'bg-green-100 text-green-800' 
+                    : 'bg-gray-100 text-gray-800'
+                }`}>
+                  {alumno.estado === 'activo' ? 'Activo' : alumno.estado}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Progreso -->
+          <div class="lg:w-64">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm text-secondary">Progreso</span>
+              <span class="text-sm font-semibold text-gray-900">{alumno.progreso}%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+              <div 
+                class="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-500"
+                style={`width: ${alumno.progreso}%`}
+              ></div>
+            </div>
+            <p class="text-xs text-secondary mt-1">
+              {alumno.clasesCompletadas} / {alumno.clasesTotal} clases completadas
+            </p>
+            <p class="text-xs text-gray-900 font-medium mt-2">
+              Próxima clase: {new Date(alumno.proximaClase).toLocaleDateString('es-CL', { 
+                day: 'numeric', 
+                month: 'short',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
+            </p>
+          </div>
+
+          <!-- Acciones -->
+          <div class="flex flex-col gap-2 lg:w-40">
+            <Button href={`/alumnos/${alumno.id}`} variant="primary" class="w-full text-sm justify-center">
+              Ver Perfil
+            </Button>
+            <Button href={`/instructor/ficha/${alumno.id}`} variant="secondary" class="w-full text-sm justify-center">
+              Ver Ficha
+            </Button>
+          </div>
+        </div>
+      </Card>
+    ))}
+  </div>
+
+  <!-- Paginación -->
+  <div class="mt-6 flex items-center justify-between">
+    <p class="text-sm text-secondary">
+      Mostrando {alumnos.length} de {totalAlumnos} alumnos
+    </p>
+    <div class="flex gap-2">
+      <button class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50" disabled>
+        Anterior
+      </button>
+      <button class="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800">
+        1
+      </button>
+      <button class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50" disabled>
+        Siguiente
+      </button>
+    </div>
+  </div>
+</DashboardLayout>

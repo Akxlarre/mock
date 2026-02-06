@@ -1,0 +1,30 @@
+---
+/**
+ * Card – Contenedor estándar Geist-style
+ * Border sutil 1px, shadow ultra suave, hover state opcional
+ * Padding consistente 24px (p-6)
+ */
+interface Props {
+  title?: string;
+  hoverable?: boolean;
+  class?: string;
+}
+
+const { title, hoverable = false, class: className = "" } = Astro.props;
+const hoverClass = hoverable
+  ? "hover:border-gray-300 hover:shadow-md transition-all duration-200"
+  : "";
+---
+
+<div
+  class={`bg-white border border-gray-200 rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.05)] p-6 ${hoverClass} ${className}`}
+>
+  {
+    title && (
+      <h2 class="text-lg font-semibold text-gray-900 tracking-tight mb-4">
+        {title}
+      </h2>
+    )
+  }
+  <slot />
+</div>

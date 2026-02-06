@@ -1,0 +1,447 @@
+---
+/**
+ * Log de Auditoría
+ * RF-005: Registro inmutable de acciones del sistema
+ */
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import Card from "../../components/ui/Card.astro";
+import Button from "../../components/ui/Button.astro";
+import Input from "../../components/ui/Input.astro";
+
+const logs = [
+    {
+        id: 1,
+        timestamp: "2026-02-03 14:32:15",
+        user: "admin@escuela.cl",
+        action: "create",
+        module: "Usuarios",
+        entity: "Usuario",
+        details: "Creó usuario: secretaria@escuela.cl",
+        ip: "192.168.1.100",
+    },
+    {
+        id: 2,
+        timestamp: "2026-02-03 14:25:08",
+        user: "secretaria@escuela.cl",
+        action: "update",
+        module: "Matrículas",
+        entity: "Matrícula #45",
+        details: "Aplicó descuento $50.000 - Motivo: Promoción febrero",
+        ip: "192.168.1.105",
+    },
+    {
+        id: 3,
+        timestamp: "2026-02-03 13:15:42",
+        user: "admin@escuela.cl",
+        action: "delete",
+        module: "Pagos",
+        entity: "Pago #234",
+        details: "Eliminó registro de pago duplicado",
+        ip: "192.168.1.100",
+    },
+    {
+        id: 4,
+        timestamp: "2026-02-03 12:08:19",
+        user: "secretaria@escuela.cl",
+        action: "force_override",
+        module: "Agenda",
+        entity: "Clase #789",
+        details:
+            "Canceló clase con menos de 24hrs - Motivo: Emergencia vehículo",
+        ip: "192.168.1.105",
+    },
+    {
+        id: 5,
+        timestamp: "2026-02-03 11:45:33",
+        user: "admin@escuela.cl",
+        action: "create",
+        module: "Flota",
+        entity: "Vehículo",
+        details: "Registró nuevo vehículo: Patente GHI-789",
+        ip: "192.168.1.100",
+    },
+    {
+        id: 6,
+        timestamp: "2026-02-03 10:22:55",
+        user: "secretaria@escuela.cl",
+        action: "update",
+        module: "Alumnos",
+        entity: "Alumno #123",
+        details: "Actualizó teléfono de contacto",
+        ip: "192.168.1.105",
+    },
+    {
+        id: 7,
+        timestamp: "2026-02-03 09:15:08",
+        user: "admin@escuela.cl",
+        action: "update",
+        module: "Usuarios",
+        entity: "Usuario #5",
+        details: "Cambió rol de instructor a secretaria",
+        ip: "192.168.1.100",
+    },
+    {
+        id: 8,
+        timestamp: "2026-02-02 16:45:22",
+        user: "secretaria@escuela.cl",
+        action: "create",
+        module: "Matrículas",
+        entity: "Matrícula",
+        details: "Nueva matrícula: Juan Pérez (12.345.678-9)",
+        ip: "192.168.1.105",
+    },
+    {
+        id: 9,
+        timestamp: "2026-02-02 15:30:11",
+        user: "admin@escuela.cl",
+        action: "force_override",
+        module: "Certificación",
+        entity: "Certificado #456",
+        details:
+            "Generó certificado con 11 clases - Motivo: Alumno con excelente desempeño",
+        ip: "192.168.1.100",
+    },
+    {
+        id: 10,
+        timestamp: "2026-02-02 14:12:44",
+        user: "secretaria@escuela.cl",
+        action: "update",
+        module: "Agenda",
+        entity: "Clase #567",
+        details: "Reagendó clase del 05/02 al 07/02",
+        ip: "192.168.1.105",
+    },
+];
+
+const actionColors: Record<string, string> = {
+    create: "bg-green-100 text-green-800",
+    update: "bg-blue-100 text-blue-800",
+    delete: "bg-red-100 text-red-800",
+    force_override: "bg-orange-100 text-orange-800",
+};
+
+const actionIcons: Record<string, string> = {
+    create: "➕",
+    update: "✏️",
+    delete: "🗑️",
+    force_override: "⚠️",
+};
+---
+
+<DashboardLayout title="Log de Auditoría - Escuela de Conductores">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-semibold text-gray-900">Log de Auditoría</h1>
+        <p class="text-secondary mt-1">
+            Registro inmutable de todas las acciones del sistema
+        </p>
+    </div>
+
+    <!-- Filtros -->
+    <Card class="mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+                <label class="label">
+                    <span class="label-text font-medium text-sm"
+                        >Fecha desde</span
+                    >
+                </label>
+                <input
+                    type="date"
+                    class="input input-bordered w-full min-h-11"
+                    value="2026-02-01"
+                />
+            </div>
+
+            <div>
+                <label class="label">
+                    <span class="label-text font-medium text-sm"
+                        >Fecha hasta</span
+                    >
+                </label>
+                <input
+                    type="date"
+                    class="input input-bordered w-full min-h-11"
+                    value="2026-02-03"
+                />
+            </div>
+
+            <div>
+                <label class="label">
+                    <span class="label-text font-medium text-sm">Usuario</span>
+                </label>
+                <select class="select select-bordered w-full min-h-11">
+                    <option value="">Todos los usuarios</option>
+                    <option value="admin@escuela.cl">admin@escuela.cl</option>
+                    <option value="secretaria@escuela.cl"
+                        >secretaria@escuela.cl</option
+                    >
+                </select>
+            </div>
+
+            <div>
+                <label class="label">
+                    <span class="label-text font-medium text-sm">Acción</span>
+                </label>
+                <select class="select select-bordered w-full min-h-11">
+                    <option value="">Todas las acciones</option>
+                    <option value="create">Crear</option>
+                    <option value="update">Modificar</option>
+                    <option value="delete">Eliminar</option>
+                    <option value="force_override">Override</option>
+                </select>
+            </div>
+        </div>
+
+        <div
+            class="flex justify-between items-center mt-4 pt-4 border-t border-gray-200"
+        >
+            <Button variant="ghost" onclick="resetFilters()">
+                <svg
+                    class="w-4 h-4 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    ></path>
+                </svg>
+                Limpiar Filtros
+            </Button>
+            <div class="flex gap-2">
+                <Button variant="secondary" onclick="exportLogs('excel')">
+                    <svg
+                        class="w-4 h-4 mr-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        ></path>
+                    </svg>
+                    Exportar Excel
+                </Button>
+                <Button variant="primary" onclick="exportLogs('pdf')">
+                    <svg
+                        class="w-4 h-4 mr-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                        ></path>
+                    </svg>
+                    Exportar PDF
+                </Button>
+            </div>
+        </div>
+    </Card>
+
+    <!-- Tabla logs -->
+    <Card>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-gray-200">
+                        <th
+                            class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                        >
+                            Fecha/Hora
+                        </th>
+                        <th
+                            class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                        >
+                            Usuario
+                        </th>
+                        <th
+                            class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                        >
+                            Acción
+                        </th>
+                        <th
+                            class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                        >
+                            Módulo
+                        </th>
+                        <th
+                            class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                        >
+                            Detalles
+                        </th>
+                        <th
+                            class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                        >
+                            IP
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    {
+                        logs.map((log) => (
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="py-3 px-4 text-sm text-gray-700 whitespace-nowrap">
+                                    {log.timestamp}
+                                </td>
+                                <td class="py-3 px-4 text-sm text-gray-900 font-medium">
+                                    {log.user}
+                                </td>
+                                <td class="py-3 px-4">
+                                    <span
+                                        class={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${actionColors[log.action]}`}
+                                    >
+                                        <span>{actionIcons[log.action]}</span>
+                                        <span class="capitalize">
+                                            {log.action.replace("_", " ")}
+                                        </span>
+                                    </span>
+                                </td>
+                                <td class="py-3 px-4 text-sm text-gray-700">
+                                    {log.module}
+                                </td>
+                                <td class="py-3 px-4 text-sm text-secondary max-w-md">
+                                    <div class="truncate" title={log.details}>
+                                        {log.details}
+                                    </div>
+                                </td>
+                                <td class="py-3 px-4 text-xs text-muted whitespace-nowrap">
+                                    {log.ip}
+                                </td>
+                            </tr>
+                        ))
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div
+            class="flex items-center justify-between mt-6 pt-4 border-t border-gray-200"
+        >
+            <p class="text-sm text-secondary">
+                Mostrando <span class="font-medium">1-10</span> de <span
+                    class="font-medium">1,247</span
+                > registros
+            </p>
+            <div class="flex gap-2">
+                <Button variant="secondary" class="text-sm" disabled>
+                    ← Anterior
+                </Button>
+                <div class="flex items-center gap-1">
+                    <button
+                        class="px-3 py-1.5 text-sm bg-gray-900 text-white rounded"
+                        >1</button
+                    >
+                    <button
+                        class="px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 rounded"
+                        >2</button
+                    >
+                    <button
+                        class="px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 rounded"
+                        >3</button
+                    >
+                    <span class="px-2 text-gray-400">...</span>
+                    <button
+                        class="px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 rounded"
+                        >125</button
+                    >
+                </div>
+                <Button variant="secondary" class="text-sm">
+                    Siguiente →
+                </Button>
+            </div>
+        </div>
+    </Card>
+
+    <!-- Información adicional -->
+    <div class="grid md:grid-cols-2 gap-4 mt-6">
+        <Card class="border-l-4 border-blue-600 bg-blue-50">
+            <div class="flex gap-3">
+                <svg
+                    class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    ></path>
+                </svg>
+                <div>
+                    <p class="text-sm font-medium text-blue-900 mb-1">
+                        ℹ️ Registros Inmutables
+                    </p>
+                    <p class="text-xs text-blue-800">
+                        Los registros de auditoría no pueden ser editados ni
+                        eliminados por ningún usuario del sistema, incluido el
+                        administrador.
+                    </p>
+                </div>
+            </div>
+        </Card>
+
+        <Card class="border-l-4 border-green-600 bg-green-50">
+            <div class="flex gap-3">
+                <svg
+                    class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    ></path>
+                </svg>
+                <div>
+                    <p class="text-sm font-medium text-green-900 mb-1">
+                        ✓ Compliance
+                    </p>
+                    <p class="text-xs text-green-800">
+                        El sistema cumple con los requisitos de trazabilidad
+                        requeridos para auditorías externas.
+                    </p>
+                </div>
+            </div>
+        </Card>
+    </div>
+</DashboardLayout>
+
+<script>
+    function resetFilters() {
+        alert("✓ Filtros restablecidos");
+        window.location.reload();
+    }
+
+    function exportLogs(format: string) {
+        const message =
+            format === "pdf"
+                ? "✓ Generando PDF con 1,247 registros...\n\nSe descargará automáticamente en unos segundos."
+                : "✓ Generando archivo Excel con 1,247 registros...\n\nSe descargará automáticamente en unos segundos.";
+
+        alert(message);
+
+        // Simular descarga
+        setTimeout(() => {
+            alert(
+                `✓ Descarga completada: auditoria_2026-02-01_2026-02-03.${format === "pdf" ? "pdf" : "xlsx"}`,
+            );
+        }, 1500);
+    }
+</script>

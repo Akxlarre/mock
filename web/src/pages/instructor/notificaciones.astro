@@ -1,0 +1,257 @@
+---
+/**
+ * Centro de Notificaciones - Instructor
+ * Notificaciones relevantes para instructores
+ */
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import Card from "../../components/ui/Card.astro";
+import Button from "../../components/ui/Button.astro";
+
+// Notificaciones para INSTRUCTOR
+const notifications = [
+    // CLASES DEL DÍA
+    {
+        id: 1,
+        priority: "urgent",
+        title: "⏰ Clase en 15 minutos",
+        message:
+            "Clase práctica con María González - Vehículo ABCD-12 - Plaza Central",
+        time: "Ahora",
+        unread: true,
+        icon: "🚗",
+        action: { label: "Iniciar clase", href: "/instructor/clase/iniciar" },
+    },
+    {
+        id: 2,
+        priority: "high",
+        title: "Próxima clase en 2 horas",
+        message:
+            "Clase práctica con Pedro Rojas - 15:00 hrs - Vehículo HJKL-34",
+        time: "Hace 10 minutos",
+        unread: true,
+        icon: "📅",
+    },
+    {
+        id: 3,
+        priority: "medium",
+        title: "Recordatorio: 3 clases mañana",
+        message: "05/02 - Clases a las 09:00, 11:00 y 15:00",
+        time: "Hace 2 horas",
+        unread: true,
+        icon: "📋",
+        action: { label: "Ver horario", href: "/instructor/horario" },
+    },
+
+    // CAMBIOS DE HORARIO
+    {
+        id: 4,
+        priority: "high",
+        title: "Cambio de horario",
+        message: "Diego Torres reagendó clase de 09:00 a 15:00 (mañana)",
+        time: "Hace 3 horas",
+        unread: true,
+        icon: "🔄",
+        action: { label: "Ver agenda", href: "/instructor/horario" },
+    },
+    {
+        id: 5,
+        priority: "medium",
+        title: "Clase cancelada",
+        message: "Luis Pérez canceló clase de mañana 11:00 (cupo liberado)",
+        time: "Ayer",
+        unread: false,
+        icon: "❌",
+    },
+
+    // FICHAS TÉCNICAS PENDIENTES
+    {
+        id: 6,
+        priority: "urgent",
+        title: "⚠️ Ficha técnica pendiente",
+        message: "Clase de ayer 16:00 con Ana Martínez - Completar ficha",
+        time: "Ayer",
+        unread: true,
+        icon: "📝",
+        action: { label: "Completar ahora", href: "/instructor/fichas" },
+    },
+    {
+        id: 7,
+        priority: "high",
+        title: "Firma digital faltante",
+        message: "Clase con Roberto Silva - Falta firma del alumno en ficha",
+        time: "Hace 2 días",
+        unread: false,
+        icon: "✍️",
+        action: { label: "Solicitar firma", href: "/instructor/fichas" },
+    },
+
+    // VEHÍCULO
+    {
+        id: 8,
+        priority: "urgent",
+        title: "🚨 Vehículo en mantención",
+        message:
+            "ABCD-12 bloqueado por revisión técnica vencida - Usar otro vehículo",
+        time: "Hace 5 horas",
+        unread: true,
+        icon: "🔧",
+    },
+    {
+        id: 9,
+        priority: "medium",
+        title: "Combustible bajo",
+        message:
+            "Vehículo HJKL-34 tiene menos de 1/4 de tanque - Cargar antes de clase",
+        time: "Ayer",
+        unread: false,
+        icon: "⛽",
+    },
+
+    // ALUMNOS
+    {
+        id: 10,
+        priority: "low",
+        title: "Nuevo alumno asignado",
+        message:
+            "Sofía Vargas - Primera clase programada para 06/02 a las 10:00",
+        time: "Hace 2 días",
+        unread: false,
+        icon: "👤",
+        action: { label: "Ver perfil", href: "/instructor/alumnos" },
+    },
+    {
+        id: 11,
+        priority: "medium",
+        title: "Alumno con progreso lento",
+        message:
+            "Francisco Díaz lleva 8 clases y aún tiene dificultades con estacionamiento",
+        time: "Hace 3 días",
+        unread: false,
+        icon: "📊",
+        action: { label: "Ver historial", href: "/instructor/alumnos" },
+    },
+
+    // EVALUACIONES
+    {
+        id: 12,
+        priority: "low",
+        title: "Excelente evaluación recibida",
+        message: "Laura Soto te calificó con 5★ - 'Muy profesional y paciente'",
+        time: "Hace 3 días",
+        unread: false,
+        icon: "⭐",
+    },
+
+    // LIQUIDACIÓN
+    {
+        id: 13,
+        priority: "low",
+        title: "Resumen mensual disponible",
+        message: "Enero 2026: 156 horas trabajadas - 42 clases completadas",
+        time: "Hace 1 semana",
+        unread: false,
+        icon: "📈",
+        action: { label: "Ver detalle", href: "/instructor/liquidacion" },
+    },
+
+    // SISTEMA
+    {
+        id: 14,
+        priority: "low",
+        title: "Actualización de app móvil",
+        message: "Nueva versión disponible con mejoras en firma digital",
+        time: "Hace 1 semana",
+        unread: false,
+        icon: "📱",
+    },
+];
+
+const urgent = notifications.filter((n) => n.priority === "urgent");
+const unreadCount = notifications.filter((n) => n.unread).length;
+---
+
+<DashboardLayout
+    title="Notificaciones"
+    userRole="instructor"
+    userName="Carlos Rojas"
+>
+    <div class="max-w-5xl mx-auto">
+        <!-- Header -->
+        <div class="mb-6">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">
+                🔔 Mis Notificaciones
+            </h1>
+            <p class="text-secondary">
+                {unreadCount} sin leer • {notifications.length} totales
+            </p>
+        </div>
+
+        <!-- Urgente: Clases próximas -->
+        {
+            urgent.length > 0 && (
+                <Card class="mb-6 p-4 bg-blue-50 border-l-4 border-blue-500">
+                    <div class="flex items-center gap-3">
+                        <span class="text-3xl">⏰</span>
+                        <div class="flex-1">
+                            <p class="font-semibold text-blue-900">
+                                Clases próximas
+                            </p>
+                            <p class="text-sm text-blue-700">
+                                Tienes {urgent.length} clase(s) que requieren
+                                atención
+                            </p>
+                        </div>
+                    </div>
+                </Card>
+            )
+        }
+
+        <!-- Lista de notificaciones -->
+        <div class="space-y-3">
+            {
+                notifications.map((notif) => (
+                    <Card
+                        class={`p-4 ${notif.unread ? "bg-blue-50 border-l-4 border-blue-500" : ""} ${notif.priority === "urgent" ? "border-l-4 border-red-500 bg-red-50" : ""}`}
+                    >
+                        <div class="flex items-start justify-between gap-4">
+                            <div class="flex items-start gap-3 flex-1">
+                                <span class="text-2xl flex-shrink-0">
+                                    {notif.icon}
+                                </span>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        {notif.unread && (
+                                            <span class="w-2 h-2 bg-blue-600 rounded-full" />
+                                        )}
+                                        <h3 class="font-semibold text-gray-900">
+                                            {notif.title}
+                                        </h3>
+                                    </div>
+                                    <p class="text-sm text-gray-700 mb-2">
+                                        {notif.message}
+                                    </p>
+                                    <p class="text-xs text-gray-500">
+                                        {notif.time}
+                                    </p>
+                                </div>
+                            </div>
+                            {notif.action && (
+                                <Button
+                                    href={notif.action.href}
+                                    variant={
+                                        notif.priority === "urgent"
+                                            ? "primary"
+                                            : "secondary"
+                                    }
+                                    class="flex-shrink-0"
+                                >
+                                    {notif.action.label}
+                                </Button>
+                            )}
+                        </div>
+                    </Card>
+                ))
+            }
+        </div>
+    </div>
+</DashboardLayout>

@@ -1,0 +1,27 @@
+---
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import Card from '../../components/ui/Card.astro';
+import Button from '../../components/ui/Button.astro';
+import { reservaAlumno, ESCUELA_ACTUAL } from '../../lib/mockData';
+---
+<DashboardLayout title="Reservar mi clase - Escuela de Conductores" escuela={ESCUELA_ACTUAL}>
+  <h1 class="text-2xl font-semibold text-base-content mb-6">Reservar mi clase - {reservaAlumno.alumno}</h1>
+  <p class="text-base-content/70 mb-6">RF-015: Seleccione día y hora para confirmar su clase práctica.</p>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
+    <Card>
+      <h2 class="text-lg font-semibold text-base-content mb-4">Febrero 2026</h2>
+      <div class="grid grid-cols-7 gap-1 text-center text-sm">
+        <span class="text-base-content/50 font-medium">L</span><span class="text-base-content/50 font-medium">M</span><span class="text-base-content/50 font-medium">M</span><span class="text-base-content/50 font-medium">J</span><span class="text-base-content/50 font-medium">V</span><span class="text-base-content/50 font-medium">S</span><span class="text-base-content/50 font-medium">D</span>
+        <span class="p-2">1</span><span class="p-2">2</span><span class="p-2">3</span><span class="p-2">4</span><span class="p-2 bg-primary text-primary-content rounded">5</span><span class="p-2">6</span><span class="p-2">7</span>
+        <span class="p-2">8</span><span class="p-2">9</span><span class="p-2">10</span><span class="p-2">11</span><span class="p-2">12</span><span class="p-2">13</span><span class="p-2">14</span>
+      </div>
+    </Card>
+    <Card>
+      <h2 class="text-lg font-semibold text-base-content mb-4">Confirmar reserva</h2>
+      <p class="text-base-content/90 mb-2">{reservaAlumno.fecha}</p>
+      <p class="text-xl font-semibold text-base-content mb-4">{reservaAlumno.hora}</p>
+      <Button variant="primary" class="w-full">Confirmar reserva</Button>
+    </Card>
+  </div>
+</DashboardLayout>

@@ -1,0 +1,23 @@
+---
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import Card from '../../components/ui/Card.astro';
+import Button from '../../components/ui/Button.astro';
+import { documentosAlumno, listaDocumentos, ESCUELA_ACTUAL } from '../../lib/mockData';
+---
+<DashboardLayout title="Documentos del alumno - Escuela de Conductores" escuela={ESCUELA_ACTUAL}>
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+    <h1 class="text-2xl font-semibold text-base-content">Documentos del alumno</h1>
+    <Button variant="primary">Subir documento</Button>
+  </div>
+  <p class="text-base-content/70 mb-6">{documentosAlumno.nombre} - {documentosAlumno.rut}</p>
+  <Card class="max-w-2xl">
+    <ul class="divide-y divide-base-300">
+      {listaDocumentos.map((doc) => (
+        <li class="flex items-center justify-between py-4">
+          <span class="font-medium">{doc.nombre}</span>
+          <span class="text-sm text-base-content/70">{doc.fechaSubida}</span>
+        </li>
+      ))}
+    </ul>
+  </Card>
+</DashboardLayout>

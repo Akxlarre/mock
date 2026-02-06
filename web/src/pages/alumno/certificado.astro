@@ -1,0 +1,237 @@
+---
+/**
+ * Mi Certificado - Portal Alumno
+ * Descarga de certificado cuando esté disponible
+ */
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import Card from '../../components/ui/Card.astro';
+import Button from '../../components/ui/Button.astro';
+
+const alumnoData = {
+  nombre: 'Juan Pérez García',
+  rut: '18.765.432-1',
+  curso: 'Clase B',
+  clasesCompletadas: 8,
+  clasesTotales: 12,
+  certificadoDisponible: false
+};
+
+const progreso = Math.round((alumnoData.clasesCompletadas / alumnoData.clasesTotales) * 100);
+const clasesRestantes = alumnoData.clasesTotales - alumnoData.clasesCompletadas;
+---
+
+<DashboardLayout title="Mi Certificado" userRole="alumno">
+  <div class="mb-8">
+    <h1 class="text-3xl font-semibold text-gray-900 mb-2">Mi Certificado</h1>
+    <p class="text-secondary">Estado y descarga de certificado de finalización</p>
+  </div>
+
+  <!-- Datos Alumno -->
+  <Card class="mb-6 bg-gradient-to-r from-blue-50 to-blue-100 border-l-4 border-blue-500">
+    <div class="flex items-start justify-between">
+      <div>
+        <p class="text-sm text-blue-900 font-semibold mb-1">👤 Alumno</p>
+        <p class="text-lg font-bold text-blue-900">{alumnoData.nombre}</p>
+        <p class="text-sm text-blue-800">RUT: {alumnoData.rut} • Curso: {alumnoData.curso}</p>
+      </div>
+    </div>
+  </Card>
+
+  {!alumnoData.certificadoDisponible ? (
+    <>
+      <!-- Progreso -->
+      <Card class="mb-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">📚 Progreso del Curso</h2>
+        
+        <div class="mb-6">
+          <div class="flex items-center justify-between text-sm mb-2">
+            <span class="font-medium text-gray-700">Clases completadas</span>
+            <span class="font-bold text-gray-900">{alumnoData.clasesCompletadas} / {alumnoData.clasesTotales}</span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+            <div 
+              class="bg-gradient-to-r from-blue-500 to-blue-600 h-full rounded-full transition-all duration-300 flex items-center justify-end pr-2"
+              style={`width: ${progreso}%`}
+            >
+              <span class="text-xs font-bold text-white">{progreso}%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div class="p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+            <p class="text-sm text-blue-900 font-semibold mb-1">Completadas</p>
+            <p class="text-3xl font-bold text-blue-600">{alumnoData.clasesCompletadas}</p>
+            <p class="text-xs text-blue-700 mt-1">clases prácticas</p>
+          </div>
+
+          <div class="p-4 bg-orange-50 rounded-lg border-l-4 border-orange-500">
+            <p class="text-sm text-orange-900 font-semibold mb-1">Restantes</p>
+            <p class="text-3xl font-bold text-orange-600">{clasesRestantes}</p>
+            <p class="text-xs text-orange-700 mt-1">para completar</p>
+          </div>
+        </div>
+      </Card>
+
+      <!-- Requisitos -->
+      <Card class="mb-6 bg-yellow-50 border-l-4 border-yellow-500">
+        <div class="flex items-start gap-3">
+          <svg class="w-6 h-6 text-yellow-600 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <div>
+            <p class="font-semibold text-yellow-900 mb-2">📋 Requisitos para Certificado</p>
+            <ul class="space-y-2 text-sm text-yellow-800">
+              <li class="flex items-start gap-2">
+                <span class={alumnoData.clasesCompletadas >= alumnoData.clasesTotales ? 'text-green-600' : 'text-yellow-600'}>
+                  {alumnoData.clasesCompletadas >= alumnoData.clasesTotales ? '✓' : '○'}
+                </span>
+                <span>Completar las {alumnoData.clasesTotales} clases prácticas obligatorias</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-yellow-600">○</span>
+                <span>No tener pagos pendientes</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-yellow-600">○</span>
+                <span>Documentación completa (cédula, certificado médico vigente)</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-yellow-600">○</span>
+                <span>Aprobar examen teórico interno (si aplica)</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </Card>
+
+      <!-- Info Certificado -->
+      <Card>
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">📜 Sobre el Certificado</h2>
+        <div class="prose prose-sm max-w-none text-gray-700">
+          <p class="mb-3">
+            Una vez completados todos los requisitos, tu certificado será <strong>generado automáticamente</strong> 
+            y estará disponible para descarga en esta página.
+          </p>
+          
+          <p class="mb-3">
+            El certificado incluye:
+          </p>
+          <ul class="list-disc list-inside space-y-1 mb-3">
+            <li>Nombre completo y RUT del alumno</li>
+            <li>Curso completado (Clase B)</li>
+            <li>Fechas de inicio y término</li>
+            <li>Número único de certificado</li>
+            <li>Código QR de validación</li>
+            <li>Firma digital de la directora</li>
+          </ul>
+
+          <p class="mb-3">
+            Además recibirás una <strong>notificación por email y WhatsApp</strong> cuando esté listo.
+          </p>
+
+          <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+            <p class="text-sm text-blue-900">
+              <strong>💡 Próximos pasos:</strong> Completa las {clasesRestantes} clases restantes y 
+              el certificado estará disponible en 24 horas después de tu última clase.
+            </p>
+          </div>
+        </div>
+      </Card>
+    </>
+  ) : (
+    <>
+      <!-- Certificado Disponible -->
+      <Card class="mb-6 bg-gradient-to-r from-green-50 to-green-100 border-l-4 border-green-500">
+        <div class="flex items-start gap-4">
+          <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div class="flex-1">
+            <p class="text-lg font-bold text-green-900 mb-1">🎉 ¡Felicitaciones!</p>
+            <p class="text-sm text-green-800 mb-4">
+              Has completado exitosamente el curso de <strong>{alumnoData.curso}</strong>. 
+              Tu certificado está listo para descargar.
+            </p>
+            <div class="flex gap-3">
+              <Button variant="primary" onclick="descargarCertificado()">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Descargar Certificado PDF
+              </Button>
+              <Button variant="secondary" onclick="verQR()">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
+                </svg>
+                Ver QR Validación
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      <!-- Detalles Certificado -->
+      <Card>
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">📄 Detalles del Certificado</h2>
+        <dl class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <dt class="text-sm text-secondary mb-1">Número de Certificado</dt>
+            <dd class="text-base font-mono font-bold text-gray-900">CERT-2026-0123</dd>
+          </div>
+          <div>
+            <dt class="text-sm text-secondary mb-1">Fecha de Emisión</dt>
+            <dd class="text-base font-semibold text-gray-900">03 de Febrero 2026</dd>
+          </div>
+          <div>
+            <dt class="text-sm text-secondary mb-1">Curso Completado</dt>
+            <dd class="text-base font-semibold text-gray-900">{alumnoData.curso}</dd>
+          </div>
+          <div>
+            <dt class="text-sm text-secondary mb-1">Total Clases</dt>
+            <dd class="text-base font-semibold text-gray-900">{alumnoData.clasesTotales} clases prácticas</dd>
+          </div>
+        </dl>
+      </Card>
+    </>
+  )}
+</DashboardLayout>
+
+<script>
+  function descargarCertificado() {
+    alert(`📄 Descargando Certificado
+
+Archivo: certificado_CERT-2026-0123.pdf
+
+Contenido:
+• Datos alumno completos
+• Curso: Clase B
+• Fecha inicio: 15/01/2026
+• Fecha término: 03/02/2026
+• Total clases: 12/12 ✓
+• Número certificado único
+• QR código validación
+• Firma digital directora
+
+Descarga iniciada...`);
+  }
+
+  function verQR() {
+    alert(`📱 Código QR de Validación
+
+Escanea este código para verificar la autenticidad del certificado.
+
+URL: https://escuela.cl/validar/CERT-2026-0123
+
+Al escanear muestra:
+• Nombre alumno
+• Curso completado
+• Fecha certificación
+• Escuela emisora
+• ✓ Certificado válido
+
+[QR Code aparecería aquí]`);
+  }
+</script>

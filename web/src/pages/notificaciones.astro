@@ -1,0 +1,553 @@
+---
+/**
+ * Centro de Notificaciones - Admin
+ * Todas las notificaciones posibles del sistema para demostración
+ */
+import DashboardLayout from "../layouts/DashboardLayout.astro";
+import Card from "../components/ui/Card.astro";
+import Button from "../components/ui/Button.astro";
+
+// Notificaciones organizadas por tipo para ADMIN
+const notifications = [
+  // MATRÍCULAS ONLINE (RF-009, RF-025)
+  {
+    id: 1,
+    type: "matricula_online",
+    priority: "high",
+    title: "Nueva matrícula online",
+    message: "María González completó el pago de matrícula Clase B ($280.000)",
+    time: "Hace 5 minutos",
+    unread: true,
+    icon: "👤",
+    color: "blue",
+    action: { label: "Ver matrícula", href: "/matricula" },
+  },
+  {
+    id: 2,
+    type: "matricula_pendiente",
+    priority: "medium",
+    title: "Matrícula pendiente de validación",
+    message: "Pedro Rojas (18.234.567-8) requiere validación de documentos",
+    time: "Hace 15 minutos",
+    unread: true,
+    icon: "⚠️",
+    color: "orange",
+    action: { label: "Validar", href: "/matricula" },
+  },
+  {
+    id: 3,
+    type: "matricula_menor",
+    priority: "high",
+    title: "Matrícula de menor de edad",
+    message: "Alumno de 17 años - Requiere autorización notarial (Ya generada)",
+    time: "Hace 30 minutos",
+    unread: true,
+    icon: "📄",
+    color: "purple",
+    action: { label: "Ver documentos", href: "/matricula" },
+  },
+
+  // PAGOS (RF-009, RF-028, RF-029)
+  {
+    id: 4,
+    type: "pago_recibido",
+    priority: "low",
+    title: "Pago recibido - Transferencia",
+    message: "Ana Martínez - $140.000 (cuota 2/2) Clase B",
+    time: "Hace 1 hora",
+    unread: true,
+    icon: "💰",
+    color: "green",
+    action: { label: "Ver pago", href: "/pagos" },
+  },
+  {
+    id: 5,
+    type: "pago_efectivo",
+    priority: "medium",
+    title: "Pago en efectivo registrado",
+    message: "Secretaria Patricia - $280.000 matrícula Clase A2",
+    time: "Hace 2 horas",
+    unread: false,
+    icon: "💵",
+    color: "green",
+    action: { label: "Ver caja", href: "/contabilidad/cuadratura" },
+  },
+  {
+    id: 6,
+    type: "pago_rechazado",
+    priority: "urgent",
+    title: "🚨 Pago rechazado - Tarjeta",
+    message: "Carlos Muñoz - Fondos insuficientes - Matrícula Clase B",
+    time: "Hace 3 horas",
+    unread: true,
+    icon: "❌",
+    color: "red",
+    action: { label: "Contactar", href: "/alumnos" },
+  },
+
+  // DOCUMENTOS VEHÍCULOS (RF-027 - CRÍTICO)
+  {
+    id: 7,
+    type: "documento_vencimiento",
+    priority: "urgent",
+    title: "⚠️ Documento vence en 7 días",
+    message: "Revisión técnica ABCD-12 vence 11/02/2026 - URGENTE",
+    time: "Hace 3 horas",
+    unread: true,
+    icon: "🚗",
+    color: "red",
+    action: { label: "Renovar ahora", href: "/flota/vehiculos" },
+  },
+  {
+    id: 8,
+    type: "documento_vencimiento",
+    priority: "high",
+    title: "Permiso circulación por vencer (15 días)",
+    message: "Vehículo HJKL-34 - Renovar antes del 19/02/2026",
+    time: "Hace 5 horas",
+    unread: true,
+    icon: "📋",
+    color: "orange",
+    action: { label: "Programar", href: "/flota/vehiculos" },
+  },
+  {
+    id: 9,
+    type: "documento_vencido",
+    priority: "urgent",
+    title: "🔴 VEHÍCULO BLOQUEADO",
+    message: "Seguro obligatorio vencido - WXYZ-56 fuera de servicio",
+    time: "Ayer",
+    unread: true,
+    icon: "🛑",
+    color: "red",
+    action: { label: "Resolver URGENTE", href: "/flota/vehiculos" },
+  },
+  {
+    id: 10,
+    type: "documento_renovado",
+    priority: "low",
+    title: "✅ Documento renovado",
+    message: "Revisión técnica PQRS-78 renovada hasta 05/08/2026",
+    time: "Ayer",
+    unread: false,
+    icon: "✅",
+    color: "green",
+  },
+
+  // INASISTENCIAS (RF-019)
+  {
+    id: 11,
+    type: "inasistencia_critica",
+    priority: "high",
+    title: "Alumno eliminado por inasistencias",
+    message:
+      "Roberto Silva - 2 faltas consecutivas - Horario eliminado automáticamente",
+    time: "Hace 6 horas",
+    unread: true,
+    icon: "👤",
+    color: "red",
+    action: { label: "Ver alumno", href: "/alumnos" },
+  },
+  {
+    id: 12,
+    type: "inasistencia",
+    priority: "medium",
+    title: "Primera inasistencia",
+    message: "Laura Soto no asistió a clase 14:00 - Aviso enviado",
+    time: "Hace 8 horas",
+    unread: false,
+    icon: "⚠️",
+    color: "yellow",
+    action: { label: "Ver detalle", href: "/asistencia" },
+  },
+
+  // ENCUESTAS Y FEEDBACK (RF-026)
+  {
+    id: 13,
+    type: "encuesta_baja",
+    priority: "urgent",
+    title: "🔴 Evaluación crítica recibida",
+    message: "Alumno reportó 2★ - Instructor usó celular durante clase",
+    time: "Hace 10 horas",
+    unread: true,
+    icon: "⭐",
+    color: "red",
+    action: { label: "Revisar encuesta", href: "/encuestas" },
+  },
+  {
+    id: 14,
+    type: "encuesta_positiva",
+    priority: "low",
+    title: "Encuesta excelente",
+    message: "Sofía Vargas - 5★ instructor Carlos Rojas - 'Muy profesional'",
+    time: "Hace 12 horas",
+    unread: false,
+    icon: "⭐",
+    color: "gold",
+    action: { label: "Ver feedback", href: "/encuestas" },
+  },
+
+  // AGENDA Y CLASES (RF-015, RF-019)
+  {
+    id: 15,
+    type: "clase_cancelada",
+    priority: "medium",
+    title: "Clase cancelada < 24hrs",
+    message: "Luis Pérez canceló 2hrs antes - Clase cuenta como tomada",
+    time: "Hace 14 horas",
+    unread: false,
+    icon: "📅",
+    color: "orange",
+    action: { label: "Ver agenda", href: "/agenda" },
+  },
+  {
+    id: 16,
+    type: "clase_no_cerrada",
+    priority: "high",
+    title: "Clase sin cerrar (2hrs después)",
+    message: "Instructor Juan Vidal - Clase 14:00 no finalizada",
+    time: "Ayer",
+    unread: false,
+    icon: "⏰",
+    color: "orange",
+    action: { label: "Contactar instructor", href: "/agenda" },
+  },
+  {
+    id: 17,
+    type: "reagendamiento",
+    priority: "low",
+    title: "Clase reagendada",
+    message: "Diego Torres movió clase de 09:00 a 15:00 (mismo día)",
+    time: "Hace 1 día",
+    unread: false,
+    icon: "🔄",
+    color: "blue",
+  },
+
+  // CUADRATURA (RF-036 - CRÍTICO)
+  {
+    id: 18,
+    type: "cuadratura_pendiente",
+    priority: "urgent",
+    title: "⚠️ Cuadratura diaria pendiente",
+    message: "Secretaria Patricia - No generó cuadratura del 03/02/2026",
+    time: "Hace 1 día",
+    unread: true,
+    icon: "🧮",
+    color: "red",
+    action: { label: "Generar ahora", href: "/contabilidad/cuadratura" },
+  },
+  {
+    id: 19,
+    type: "cuadratura_diferencia",
+    priority: "urgent",
+    title: "🚨 Diferencia en cuadratura",
+    message: "Diferencia $15.000 entre sistema y caja (02/02) - Verificar",
+    time: "Hace 2 días",
+    unread: false,
+    icon: "⚠️",
+    color: "red",
+    action: { label: "Auditar", href: "/contabilidad/cuadratura" },
+  },
+  {
+    id: 20,
+    type: "cuadratura_ok",
+    priority: "low",
+    title: "✅ Cuadratura generada correctamente",
+    message: "CUA-2026-0045 - Total $1.240.000 - Sin diferencias",
+    time: "Hace 3 días",
+    unread: false,
+    icon: "✔️",
+    color: "green",
+    action: { label: "Ver PDF", href: "/contabilidad/cuadratura" },
+  },
+
+  // USUARIOS Y SEGURIDAD (RF-001, RF-005)
+  {
+    id: 21,
+    type: "usuario_nuevo",
+    priority: "low",
+    title: "Nuevo usuario creado",
+    message: "Instructor Marcos Luna - Credenciales enviadas por email",
+    time: "Hace 3 días",
+    unread: false,
+    icon: "👤",
+    color: "blue",
+    action: { label: "Ver usuario", href: "/usuarios" },
+  },
+  {
+    id: 22,
+    type: "intento_acceso_fallido",
+    priority: "high",
+    title: "⚠️ Múltiples intentos de acceso fallidos",
+    message: "secretaria@escuela.cl - 5 intentos incorrectos en 10 min",
+    time: "Hace 4 días",
+    unread: false,
+    icon: "🔒",
+    color: "red",
+    action: { label: "Ver auditoría", href: "/usuarios/auditoria" },
+  },
+
+  // PSICOTÉCNICO (RF-037)
+  {
+    id: 23,
+    type: "psicotecnico_externo",
+    priority: "low",
+    title: "Evaluación psicotécnica externa",
+    message: "Cliente externo: Diego Torres - $40.000 pagado - Resultado: Apto",
+    time: "Hace 4 días",
+    unread: false,
+    icon: "🧠",
+    color: "purple",
+    action: { label: "Generar informe", href: "/psicotecnico" },
+  },
+  {
+    id: 24,
+    type: "psicotecnico_vencimiento",
+    priority: "medium",
+    title: "Certificado psicotécnico por vencer",
+    message:
+      "Alumna Laura Soto - Vence en 15 días (puede renovar con nosotros)",
+    time: "Hace 5 días",
+    unread: false,
+    icon: "📋",
+    color: "yellow",
+    action: { label: "Contactar", href: "/alumnos" },
+  },
+
+  // CERTIFICADOS (RF-011)
+  {
+    id: 25,
+    type: "certificado_generado",
+    priority: "low",
+    title: "Certificado generado automáticamente",
+    message: "Francisca Ramírez - 12/12 clases completadas - Certificado listo",
+    time: "Hace 1 semana",
+    unread: false,
+    icon: "🏆",
+    color: "gold",
+    action: { label: "Descargar", href: "/certificados" },
+  },
+
+  // MANTENCIONES VEHÍCULOS (RF-039)
+  {
+    id: 26,
+    type: "mantencion_programada",
+    priority: "medium",
+    title: "Mantención programada próxima",
+    message: "ABCD-12 - Cambio aceite en 500km (próxima semana aprox.)",
+    time: "Hace 1 semana",
+    unread: false,
+    icon: "🔧",
+    color: "blue",
+    action: { label: "Programar", href: "/flota/vehiculos" },
+  },
+
+  // PROMOCIONES CLASE PROFESIONAL
+  {
+    id: 27,
+    type: "promocion_llena",
+    priority: "medium",
+    title: "Promoción A2 llena",
+    message:
+      "Promoción PROM-2026-02 alcanzó 25 alumnos - Cerrada a nuevas matrículas",
+    time: "Hace 1 semana",
+    unread: false,
+    icon: "👥",
+    color: "blue",
+  },
+];
+
+// Agrupar por prioridad
+const urgent = notifications.filter((n) => n.priority === "urgent" && n.unread);
+const high = notifications.filter((n) => n.priority === "high");
+const medium = notifications.filter((n) => n.priority === "medium");
+const low = notifications.filter((n) => n.priority === "low");
+
+const unreadCount = notifications.filter((n) => n.unread).length;
+---
+
+<DashboardLayout title="Notificaciones" userRole="admin">
+  <div class="max-w-5xl mx-auto">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">
+          🔔 Centro de Notificaciones
+        </h1>
+        <p class="text-secondary">
+          {unreadCount} sin leer • {notifications.length} totales
+        </p>
+      </div>
+      <Button variant="ghost" onclick="window.location.reload()">
+        Marcar todas como leídas
+      </Button>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid sm:grid-cols-4 gap-4 mb-6">
+      <Card class="border-l-4 border-red-500 p-4">
+        <p class="text-sm text-gray-600 mb-1">Urgentes</p>
+        <p class="text-3xl font-bold text-red-600">{urgent.length}</p>
+      </Card>
+      <Card class="border-l-4 border-orange-500 p-4">
+        <p class="text-sm text-gray-600 mb-1">Prioritarias</p>
+        <p class="text-3xl font-bold text-orange-600">{high.length}</p>
+      </Card>
+      <Card class="border-l-4 border-blue-500 p-4">
+        <p class="text-sm text-gray-600 mb-1">Sin leer</p>
+        <p class="text-3xl font-bold text-blue-600">{unreadCount}</p>
+      </Card>
+      <Card class="border-l-4 border-gray-300 p-4">
+        <p class="text-sm text-gray-600 mb-1">Total</p>
+        <p class="text-3xl font-bold text-gray-900">{notifications.length}</p>
+      </Card>
+    </div>
+
+    <!-- Notificaciones urgentes -->
+    {
+      urgent.length > 0 && (
+        <div class="mb-6">
+          <h2 class="text-lg font-semibold text-red-600 mb-3 flex items-center gap-2">
+            ⚠️ Requieren atención inmediata
+          </h2>
+          <div class="space-y-3">
+            {urgent.map((notif) => (
+              <Card class="p-4 border-l-4 border-red-500 bg-red-50">
+                <div class="flex items-start justify-between gap-4">
+                  <div class="flex items-start gap-3 flex-1">
+                    <span class="text-2xl flex-shrink-0">{notif.icon}</span>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-2 mb-1">
+                        <span class="w-2 h-2 bg-red-600 rounded-full" />
+                        <h3 class="font-semibold text-gray-900">
+                          {notif.title}
+                        </h3>
+                      </div>
+                      <p class="text-sm text-gray-700 mb-2">{notif.message}</p>
+                      <p class="text-xs text-gray-500">{notif.time}</p>
+                    </div>
+                  </div>
+                  {notif.action && (
+                    <Button
+                      href={notif.action.href}
+                      variant="primary"
+                      class="flex-shrink-0"
+                    >
+                      {notif.action.label}
+                    </Button>
+                  )}
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )
+    }
+
+    <!-- Notificaciones prioritarias -->
+    {
+      high.length > 0 && (
+        <div class="mb-6">
+          <h2 class="text-lg font-semibold text-orange-600 mb-3">
+            Prioritarias
+          </h2>
+          <div class="space-y-3">
+            {high.map((notif) => (
+              <Card
+                class={`p-4 border-l-4 border-orange-500 ${notif.unread ? "bg-orange-50" : ""}`}
+              >
+                <div class="flex items-start justify-between gap-4">
+                  <div class="flex items-start gap-3 flex-1">
+                    <span class="text-2xl flex-shrink-0">{notif.icon}</span>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-2 mb-1">
+                        {notif.unread && (
+                          <span class="w-2 h-2 bg-orange-600 rounded-full" />
+                        )}
+                        <h3 class="font-semibold text-gray-900">
+                          {notif.title}
+                        </h3>
+                      </div>
+                      <p class="text-sm text-gray-700 mb-2">{notif.message}</p>
+                      <p class="text-xs text-gray-500">{notif.time}</p>
+                    </div>
+                  </div>
+                  {notif.action && (
+                    <Button
+                      href={notif.action.href}
+                      variant="secondary"
+                      class="flex-shrink-0"
+                    >
+                      {notif.action.label}
+                    </Button>
+                  )}
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )
+    }
+
+    <!-- Notificaciones normales -->
+    {
+      medium.length > 0 && (
+        <div class="mb-6">
+          <h2 class="text-lg font-semibold text-gray-700 mb-3">Recientes</h2>
+          <div class="space-y-2">
+            {medium.map((notif) => (
+              <Card class={`p-3 ${notif.unread ? "bg-blue-50" : ""}`}>
+                <div class="flex items-start justify-between gap-3">
+                  <div class="flex items-start gap-2 flex-1 min-w-0">
+                    <span class="text-xl flex-shrink-0">{notif.icon}</span>
+                    <div class="flex-1 min-w-0">
+                      <h3 class="font-medium text-gray-900 text-sm mb-1">
+                        {notif.title}
+                      </h3>
+                      <p class="text-xs text-gray-600 mb-1">{notif.message}</p>
+                      <p class="text-xs text-gray-400">{notif.time}</p>
+                    </div>
+                  </div>
+                  {notif.action && (
+                    <Button
+                      href={notif.action.href}
+                      class="flex-shrink-0 text-xs"
+                    >
+                      Ver
+                    </Button>
+                  )}
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )
+    }
+
+    <!-- Notificaciones informativas -->
+    {
+      low.length > 0 && (
+        <div>
+          <h2 class="text-lg font-semibold text-gray-600 mb-3">Informativas</h2>
+          <div class="space-y-2">
+            {low.map((notif) => (
+              <Card class="p-3 bg-gray-50">
+                <div class="flex items-start gap-2">
+                  <span class="text-lg">{notif.icon}</span>
+                  <div class="flex-1 min-w-0">
+                    <h3 class="font-medium text-gray-800 text-sm mb-1">
+                      {notif.title}
+                    </h3>
+                    <p class="text-xs text-gray-600 mb-1">{notif.message}</p>
+                    <p class="text-xs text-gray-400">{notif.time}</p>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )
+    }
+  </div>
+</DashboardLayout>

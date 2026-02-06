@@ -1,0 +1,12 @@
+---
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import Card from '../../components/ui/Card.astro';
+import { estadoCuentaAlumno, ESCUELA_ACTUAL } from '../../lib/mockData';
+---
+<DashboardLayout title="Estado de cuenta - Escuela de Conductores" escuela={ESCUELA_ACTUAL}>
+  <h1 class="text-2xl font-semibold text-base-content mb-6">Estado de cuenta - {estadoCuentaAlumno.nombre}</h1>
+  <Card class="max-w-md bg-success/10 border-success">
+    <p class="text-sm font-medium text-base-content/70 mb-1">Saldo pendiente</p>
+    <p class="text-3xl font-bold text-success">$0</p>
+  </Card>
+</DashboardLayout>

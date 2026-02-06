@@ -1,0 +1,297 @@
+---
+/**
+ * Matrícula Online - Paso 2: Pago
+ * RF-009: Pasarela Mercado Pago + Activación Automática
+ */
+import PublicLayout from "../../layouts/PublicLayout.astro";
+import PublicNavbar from "../../components/layout/PublicNavbar.astro";
+import Card from "../../components/ui/Card.astro";
+import Button from "../../components/ui/Button.astro";
+
+const pasoActual = 2;
+const url = Astro.url;
+const cursoId = url.searchParams.get("curso") || "clase-b";
+
+const cursos: Record<string, { nombre: string; precio: number }> = {
+  "clase-b": { nombre: "Clase B", precio: 280000 },
+  "clase-b-sence": { nombre: "Clase B + SENCE", precio: 280000 },
+  "a2": { nombre: "Clase A2 - Transporte Público", precio: 450000 },
+  "a4": { nombre: "Clase A4 - Transporte Remunerado", precio: 450000 },
+  "a3": { nombre: "Clase A3 - Vehículos Pesados", precio: 500000 },
+  "a5": { nombre: "Clase A5 - Vehículos Articulados", precio: 500000 },
+};
+
+const curso = cursos[cursoId] || cursos["clase-b"];
+
+// En producción, estos datos vendrían del backend según session/token
+let datosAlumno: any = {};
+if (typeof window !== "undefined") {
+  const datosGuardados = sessionStorage.getItem("matriculaDatos");
+  if (datosGuardados) {
+    datosAlumno = JSON.parse(datosGuardados);
+  }
+}
+---
+
+<PublicLayout
+  title="Pago - Matrícula Online"
+  description="Completa tu pago de forma segura con Mercado Pago."
+>
+  <PublicNavbar />
+
+  <main class="min-h-screen bg-gray-50 py-8 lg:py-12">
+    <div class="container mx-auto px-4 max-w-6xl">
+      <!-- Progress indicator -->
+      <div class="mb-8">
+        <div class="flex items-center justify-center gap-2 lg:gap-4 mb-6">
+          <div class="flex items-center gap-2">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold bg-blue-600 text-white shadow-md">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+            </div>
+            <span class="text-sm font-medium text-gray-900 hidden sm:block">Datos Personales</span>
+          </div>
+          <div class="h-1 flex-1 max-w-24 bg-blue-600"></div>
+          <div class="flex items-center gap-2">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold bg-blue-600 text-white shadow-md">
+              2
+            </div>
+            <span class="text-sm font-medium text-gray-900 hidden sm:block">Pago Seguro</span>
+          </div>
+          <div class="h-1 flex-1 max-w-24 bg-gray-300"></div>
+          <div class="flex items-center gap-2">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold bg-gray-200 text-gray-600">
+              3
+            </div>
+            <span class="text-sm font-medium text-gray-500 hidden sm:block">Confirmación</span>
+          </div>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2 max-w-md mx-auto">
+          <div class="bg-blue-600 h-2 rounded-full transition-all duration-500" style="width: 66%"></div>
+        </div>
+      </div>
+
+      <!-- Main content -->
+      <div class="grid lg:grid-cols-3 gap-6 lg:gap-8">
+        <!-- Form de pago -->
+        <div class="lg:col-span-2">
+          <Card class="p-6 lg:p-8">
+            <div class="mb-6">
+              <h1 class="text-3xl font-bold text-gray-900 mb-2">Pago Seguro</h1>
+              <p class="text-gray-600">Selecciona tu método de pago preferido</p>
+            </div>
+
+            <div class="space-y-6">
+              <!-- Pasarelas de pago -->
+              <div>
+                <label class="block text-sm font-semibold text-gray-900 mb-4">
+                  Selecciona tu pasarela de pago
+                </label>
+                <div class="grid gap-4">
+                  <!-- Mercado Pago -->
+                  <button
+                    type="button"
+                    id="btn-mercadopago"
+                    class="group relative flex items-center gap-4 p-6 border-2 rounded-lg transition-all hover:shadow-lg border-blue-600 bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 text-left w-full"
+                  >
+                    <div class="flex-shrink-0">
+                      <div class="w-16 h-16 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                        <svg class="w-10 h-10 text-blue-600" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                        </svg>
+                      </div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center justify-between mb-2">
+                        <p class="text-lg font-semibold text-gray-900">Mercado Pago</p>
+                        <span class="text-xs px-2.5 py-1 bg-green-100 text-green-800 rounded-full font-medium">Recomendado</span>
+                      </div>
+                      <p class="text-sm text-gray-600 mb-2">
+                        Paga con tarjeta de crédito, débito o efectivo. Proceso rápido y seguro.
+                      </p>
+                      <div class="flex flex-wrap gap-2 mt-3">
+                        <span class="text-xs px-2 py-1 bg-white rounded border border-gray-300">Visa</span>
+                        <span class="text-xs px-2 py-1 bg-white rounded border border-gray-300">Mastercard</span>
+                        <span class="text-xs px-2 py-1 bg-white rounded border border-gray-300">American Express</span>
+                        <span class="text-xs px-2 py-1 bg-white rounded border border-gray-300">Diners</span>
+                        <span class="text-xs px-2 py-1 bg-white rounded border border-gray-300">Efectivo</span>
+                      </div>
+                    </div>
+                    <svg class="w-6 h-6 text-gray-400 group-hover:text-gray-600 transition-colors flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </button>
+
+                  <!-- Webpay -->
+                  <button
+                    type="button"
+                    id="btn-webpay"
+                    class="group relative flex items-center gap-4 p-6 border-2 rounded-lg transition-all hover:shadow-lg border-gray-300 hover:border-blue-400 bg-white hover:bg-gray-50 text-left w-full"
+                  >
+                    <div class="flex-shrink-0">
+                      <div class="w-16 h-16 bg-white rounded-lg flex items-center justify-center shadow-sm border border-gray-200">
+                        <svg class="w-10 h-10 text-blue-800" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                        </svg>
+                      </div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center justify-between mb-2">
+                        <p class="text-lg font-semibold text-gray-900">Webpay Plus</p>
+                        <span class="text-xs px-2.5 py-1 bg-blue-100 text-blue-800 rounded-full font-medium">Transbank</span>
+                      </div>
+                      <p class="text-sm text-gray-600 mb-2">
+                        Pasarela oficial de Transbank. Acepta todas las tarjetas bancarias chilenas.
+                      </p>
+                      <div class="flex flex-wrap gap-2 mt-3">
+                        <span class="text-xs px-2 py-1 bg-gray-100 rounded border border-gray-300">Redcompra</span>
+                        <span class="text-xs px-2 py-1 bg-gray-100 rounded border border-gray-300">Redbanc</span>
+                        <span class="text-xs px-2 py-1 bg-gray-100 rounded border border-gray-300">Multicaja</span>
+                      </div>
+                    </div>
+                    <svg class="w-6 h-6 text-gray-400 group-hover:text-gray-600 transition-colors flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Información de seguridad -->
+              <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <div class="flex items-start gap-3">
+                  <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                  </svg>
+                  <div>
+                    <p class="text-sm font-medium text-gray-900 mb-1">Pago 100% Seguro</p>
+                    <p class="text-xs text-gray-600">
+                      Serás redirigido a la plataforma de pago seleccionada. Tus datos bancarios nunca son almacenados en nuestros servidores.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Botones -->
+              <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200">
+                <button
+                  type="button"
+                  class="inline-flex items-center justify-center h-11 px-4 text-sm font-medium rounded-md transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 focus-visible:ring-offset-2 bg-transparent text-gray-700 hover:bg-gray-100 border-0 flex-1"
+                  onclick="window.history.back()"
+                >
+                  ← Volver
+                </button>
+              </div>
+            </div>
+
+            <!-- Seguridad -->
+            <div class="mt-6 pt-6 border-t border-gray-200">
+              <div class="flex items-center gap-2 text-sm text-gray-600">
+                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                </svg>
+                <span>Procesado de forma segura por <strong>Mercado Pago</strong>. Tus datos están protegidos.</span>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        <!-- Sidebar resumen -->
+        <div class="space-y-6">
+          <Card class="sticky top-4">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Resumen</h3>
+            <div class="space-y-3 text-sm">
+              <div class="flex justify-between">
+                <span class="text-gray-600">Curso:</span>
+                <span class="font-medium text-gray-900">{curso.nombre}</span>
+              </div>
+              <hr class="border-gray-200 my-3" />
+              <div class="flex justify-between items-baseline pt-2">
+                <span class="font-semibold text-gray-900">Total a pagar:</span>
+                <span class="text-2xl font-bold text-gray-900">${curso.precio.toLocaleString("es-CL")}</span>
+              </div>
+            </div>
+          </Card>
+
+          <Card class="bg-blue-50 border-blue-200">
+            <div class="flex gap-3">
+              <svg class="w-6 h-6 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <div>
+                <p class="text-sm font-semibold text-blue-900 mb-1">Pago Seguro</p>
+                <p class="text-xs text-blue-800">
+                  En producción, este pago se procesaría mediante Mercado Pago. Recibirás confirmación inmediata por email.
+                </p>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </div>
+    </div>
+  </main>
+</PublicLayout>
+
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const cursoIdParam = urlParams.get("curso") || "clase-b";
+  
+  const cursos: Record<string, { nombre: string; precio: number }> = {
+    "clase-b": { nombre: "Clase B", precio: 280000 },
+    "clase-b-sence": { nombre: "Clase B + SENCE", precio: 280000 },
+    "profesional": { nombre: "Licencia Profesional", precio: 450000 },
+  };
+  const cursoActual = cursos[cursoIdParam] || cursos["clase-b"];
+
+  // Handler para Mercado Pago
+  const btnMercadoPago = document.getElementById("btn-mercadopago");
+  btnMercadoPago?.addEventListener("click", () => {
+    // En producción: aquí se haría POST a /api/payments/mercadopago para crear preferencia
+    // y luego redirigir a la URL de checkout de Mercado Pago
+    alert(`🔄 Redirigiendo a Mercado Pago...\n\nEn producción serías redirigido a:\nhttps://www.mercadopago.cl/checkout/v1/redirect?pref_id=...\n\nPor ahora, simulando pago exitoso...`);
+    
+    setTimeout(() => {
+      // Simular webhook de pago exitoso y redirigir a confirmación
+      window.location.href = `/matricula-online/confirmacion?curso=${cursoIdParam}&metodo=mercadopago`;
+    }, 1500);
+  });
+
+  // Handler para Webpay
+  const btnWebpay = document.getElementById("btn-webpay");
+  btnWebpay?.addEventListener("click", () => {
+    // En producción: aquí se haría POST a /api/payments/webpay para crear transacción
+    // y luego redirigir al formulario de Webpay
+    alert(`🔄 Redirigiendo a Webpay Plus...\n\nEn producción serías redirigido a:\nhttps://webpay3g.transbank.cl/webpayserver/initTransaction\n\nPor ahora, simulando pago exitoso...`);
+    
+    setTimeout(() => {
+      // Simular respuesta de Webpay y redirigir a confirmación
+      window.location.href = `/matricula-online/confirmacion?curso=${cursoIdParam}&metodo=webpay`;
+    }, 1500);
+  });
+</script>
+
+<style>
+  input[type="radio"] {
+    appearance: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid rgb(209, 213, 219);
+    border-radius: 50%;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  input[type="radio"]:checked {
+    border-color: rgb(37, 99, 235);
+    background-color: rgb(37, 99, 235);
+  }
+
+  input[type="radio"]:checked::before {
+    content: "";
+    position: absolute;
+    inset: 3px;
+    background-color: white;
+    border-radius: 50%;
+  }
+</style>

@@ -1,0 +1,19 @@
+---
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import Card from '../../components/ui/Card.astro';
+import Button from '../../components/ui/Button.astro';
+import { cierreCaja, ESCUELA_ACTUAL } from '../../lib/mockData';
+
+const formatear = (n: number) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(n);
+---
+<DashboardLayout title="Cierre de caja - Escuela de Conductores" escuela={ESCUELA_ACTUAL}>
+  <h1 class="text-2xl font-semibold text-base-content mb-6">Cierre de caja - {cierreCaja.fecha}</h1>
+  <Card class="max-w-md">
+    <ul class="space-y-3 text-base-content">
+      <li class="flex justify-between"><span>Efectivo</span><strong>{formatear(cierreCaja.efectivo)}</strong></li>
+      <li class="flex justify-between"><span>Transferencias</span><strong>{formatear(cierreCaja.transferencias)}</strong></li>
+      <li class="flex justify-between pt-3 border-t border-base-300"><span>Total</span><strong>{formatear(cierreCaja.total)}</strong></li>
+    </ul>
+    <Button variant="primary" class="w-full mt-6">Confirmar cierre</Button>
+  </Card>
+</DashboardLayout>

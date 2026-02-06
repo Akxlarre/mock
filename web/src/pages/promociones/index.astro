@@ -1,0 +1,36 @@
+---
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import Card from '../../components/ui/Card.astro';
+import Button from '../../components/ui/Button.astro';
+import { promociones, ESCUELA_ACTUAL } from '../../lib/mockData';
+---
+<DashboardLayout title="Promociones y descuentos - Escuela de Conductores" escuela={ESCUELA_ACTUAL}>
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+    <h1 class="text-2xl font-semibold text-base-content">Promociones y descuentos</h1>
+    <Button variant="primary">Nueva promoción</Button>
+  </div>
+  <Card class="overflow-hidden p-0">
+    <div class="overflow-x-auto">
+      <table class="table">
+        <thead>
+          <tr class="bg-base-200 text-base-content">
+            <th class="font-semibold text-sm py-3 px-4">Nombre</th>
+            <th class="font-semibold text-sm py-3 px-4">Descuento</th>
+            <th class="font-semibold text-sm py-3 px-4">Vigencia</th>
+            <th class="font-semibold text-sm py-3 px-4">Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {promociones.map((p) => (
+            <tr class="hover:bg-base-200/80 border-b border-base-300/50">
+              <td class="py-4 px-4">{p.nombre}</td>
+              <td class="py-4 px-4">{p.descuento}</td>
+              <td class="py-4 px-4">{p.vigencia}</td>
+              <td class="py-4 px-4"><span class="badge badge-sm badge-success">{p.estado}</span></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </Card>
+</DashboardLayout>

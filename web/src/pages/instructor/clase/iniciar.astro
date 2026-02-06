@@ -1,0 +1,125 @@
+---
+/**
+ * Iniciar Clase - Panel rápido para instructores
+ * RF-018 / RF-019: Acción "Iniciar clase" desde vista de instructor.
+ * Demo: usa datos mock, no persiste cambios reales.
+ */
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+import Card from "../../../components/ui/Card.astro";
+import Button from "../../../components/ui/Button.astro";
+
+const instructor = {
+  nombre: "Carlos Rojas",
+};
+
+// Mock de clases del día para este instructor
+const clasesHoy = [
+  {
+    id: 1,
+    hora: "09:00",
+    alumno: "María González",
+    vehiculo: "ABC-123 (Suzuki Swift)",
+    numeroClase: 9,
+    estado: "pending",
+  },
+  {
+    id: 2,
+    hora: "11:00",
+    alumno: "Juan Pablo Rojas",
+    vehiculo: "ABC-123 (Suzuki Swift)",
+    numeroClase: 10,
+    estado: "pending",
+  },
+  {
+    id: 3,
+    hora: "17:00",
+    alumno: "Ana Martínez",
+    vehiculo: "XYZ-789 (Nissan March)",
+    numeroClase: 11,
+    estado: "pending",
+  },
+];
+
+const estadoBadge: Record<string, { label: string; class: string }> = {
+  pending: { label: "Pendiente", class: "bg-gray-100 text-gray-800" },
+  started: { label: "En curso", class: "bg-blue-100 text-blue-800" },
+  completed: { label: "Completada", class: "bg-green-100 text-green-800" },
+};
+---
+
+<DashboardLayout title="Iniciar Clase - Instructor" userRole="instructor" userName={instructor.nombre}>
+  <div class="max-w-5xl mx-auto">
+    <!-- Header + contexto -->
+    <div class="mb-6">
+      <div class="flex items-center gap-2 text-sm text-secondary mb-2">
+        <a href="/instructor/dashboard" class="hover:text-gray-900">Inicio</a>
+        <span>/</span>
+        <span class="text-gray-900 font-medium">Iniciar Clase</span>
+      </div>
+      <h1 class="text-2xl font-semibold text-gray-900">Iniciar clase práctica</h1>
+      <p class="text-secondary mt-1">
+        Selecciona una clase del listado para marcarla como <strong>“En curso”</strong> y abrir la ficha técnica.
+      </p>
+    </div>
+
+    <Card class="p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold text-gray-900">Clases de hoy</h2>
+        <p class="text-sm text-secondary">
+          {clasesHoy.length} clases agendadas para hoy
+        </p>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="border-b border-gray-200 bg-gray-50">
+            <tr>
+              <th class="px-4 py-3 text-left font-semibold text-gray-900">Hora</th>
+              <th class="px-4 py-3 text-left font-semibold text-gray-900">Alumno</th>
+              <th class="px-4 py-3 text-left font-semibold text-gray-900">Vehículo</th>
+              <th class="px-4 py-3 text-left font-semibold text-gray-900">N° Clase</th>
+              <th class="px-4 py-3 text-left font-semibold text-gray-900">Estado</th>
+              <th class="px-4 py-3 text-right font-semibold text-gray-900">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            {clasesHoy.map((clase) => (
+              <tr>
+                <td class="px-4 py-3 font-medium text-gray-900">{clase.hora}</td>
+                <td class="px-4 py-3 text-gray-800">{clase.alumno}</td>
+                <td class="px-4 py-3 text-gray-700">{clase.vehiculo}</td>
+                <td class="px-4 py-3 text-gray-700">#{clase.numeroClase}</td>
+                <td class="px-4 py-3">
+                  <span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${estadoBadge[clase.estado].class}`}>
+                    {estadoBadge[clase.estado].label}
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-right">
+                  <div class="flex justify-end gap-2">
+                    <Button
+                      variant="primary"
+                      class="text-xs"
+                      href={`/instructor/ficha/${clase.id}`}
+                    >
+                      Iniciar clase
+                    </Button>
+                    <Button variant="ghost" class="text-xs text-gray-700">
+                      Ver detalle
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <p class="text-xs text-secondary mt-4">
+        En producción, al hacer clic en <strong>“Iniciar clase”</strong> se marcará el estado como
+        <code class="px-1 py-0.5 bg-gray-100 rounded text-[11px]">started</code>, se abrirá la ficha técnica
+        correspondiente (RF-053) y se registrará la asistencia del alumno.
+      </p>
+    </Card>
+  </div>
+</DashboardLayout>
+

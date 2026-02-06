@@ -1,0 +1,26 @@
+---
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import Card from '../../components/ui/Card.astro';
+import Button from '../../components/ui/Button.astro';
+import { docsClaseProfesional, ESCUELA_ACTUAL } from '../../lib/mockData';
+---
+<DashboardLayout title="Pre-requisitos Clase Profesional - Escuela de Conductores" escuela={ESCUELA_ACTUAL}>
+  <h1 class="text-2xl font-semibold text-base-content mb-6">Pre-requisitos Clase Profesional</h1>
+  <p class="text-base-content/70 mb-6">RF-042: Suba los documentos requeridos. El sistema validará mediante OCR cuando corresponda.</p>
+  <Card class="max-w-2xl mb-6">
+    <div class="border-2 border-dashed border-base-300 rounded-lg p-8 text-center text-base-content/70 mb-6">
+      <p class="font-medium mb-2">Arrastra archivos o haz clic para subir</p>
+      <p class="text-sm">PDF, JPG o PNG. Máx. 5 MB por archivo.</p>
+    </div>
+    <h2 class="text-lg font-semibold text-base-content mb-4">Documentos subidos</h2>
+    <ul class="space-y-3">
+      {docsClaseProfesional.map((doc) => (
+        <li class="flex items-center justify-between py-2 border-b border-base-300/50">
+          <span class="font-medium">{doc.nombre}</span>
+          <span class={`badge badge-sm ${doc.estado === 'Validado' ? 'badge-success' : 'badge-warning'}`}>{doc.estado}</span>
+        </li>
+      ))}
+    </ul>
+    <Button variant="primary" class="w-full mt-6">Continuar</Button>
+  </Card>
+</DashboardLayout>

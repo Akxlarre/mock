@@ -1,0 +1,11 @@
+---
+/**
+ * Asistencia - Secretaría (mismo dashboard que admin con basePath /secretaria)
+ */
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+import AsistenciaDashboardContent from "../../../components/asistencia/AsistenciaDashboardContent.astro";
+---
+
+<DashboardLayout title="Asistencia - Dashboard" userRole="secretaria">
+  <AsistenciaDashboardContent basePath="/secretaria" />
+</DashboardLayout>

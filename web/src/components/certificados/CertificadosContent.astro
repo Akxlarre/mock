@@ -1,0 +1,174 @@
+---
+/**
+ * Contenido de Gestión de Certificados. Reutilizable para admin y secretaria con basePath.
+ * RF-050-052: Certificación automática al completar clases
+ */
+import Card from "../ui/Card.astro";
+import Button from "../ui/Button.astro";
+
+interface Props {
+  basePath?: string;
+}
+
+const { basePath = "" } = Astro.props;
+const alumnoIdParam = Astro.url.searchParams.get("alumno");
+
+const alumnosCertificados = [
+  { id: 1, nombre: "Carlos Rojas Muñoz", rut: "15.234.567-8", curso: "Clase B", clasesCompletadas: 12, fechaInicio: "2025-11-15", fechaTermino: "2026-01-28", certificadoGenerado: true, fechaCertificado: "2026-01-29", nroCertificado: "CERT-2026-0001", enviado: true },
+  { id: 2, nombre: "Pedro Sánchez Díaz", rut: "16.789.123-5", curso: "Clase B", clasesCompletadas: 12, fechaInicio: "2025-10-20", fechaTermino: "2026-01-15", certificadoGenerado: true, fechaCertificado: "2026-01-16", nroCertificado: "CERT-2026-0002", enviado: true },
+  { id: 3, nombre: "Ana García Torres", rut: "17.456.789-2", curso: "Clase B", clasesCompletadas: 12, fechaInicio: "2025-12-01", fechaTermino: "2026-02-03", certificadoGenerado: false, fechaCertificado: null, nroCertificado: null, enviado: false },
+  { id: 4, nombre: "Luis Torres Vargas", rut: "18.123.456-7", curso: "Clase Profesional", clasesCompletadas: 15, fechaInicio: "2025-11-01", fechaTermino: "2026-01-20", certificadoGenerado: true, fechaCertificado: "2026-01-21", nroCertificado: "CERT-2026-0003", enviado: true },
+];
+
+const pendientesGeneracion = alumnosCertificados.filter((a) => !a.certificadoGenerado).length;
+const generados = alumnosCertificados.filter((a) => a.certificadoGenerado).length;
+const pendientesEnvio = alumnosCertificados.filter((a) => a.certificadoGenerado && !a.enviado).length;
+
+const alumnoId = alumnoIdParam ? parseInt(alumnoIdParam, 10) : null;
+const alumnoSeleccionado = alumnoId != null && !Number.isNaN(alumnoId) ? alumnosCertificados.find((a) => a.id === alumnoId) : null;
+const listadoParaMostrar = alumnoSeleccionado != null ? [alumnoSeleccionado] : alumnosCertificados;
+
+const certificadosHref = basePath ? `${basePath}/certificados` : "/certificados";
+---
+
+<div class="mb-8">
+  <div class="flex items-center gap-2 text-sm text-secondary mb-2">
+    <a href={`${basePath}/dashboard`} class="hover:text-gray-900">Inicio</a>
+    <span>/</span>
+    <span class="text-gray-900 font-medium">Certificados</span>
+  </div>
+  <h1 class="text-3xl font-semibold text-gray-900 mb-2">Gestión de Certificados</h1>
+  <p class="text-secondary">Certificación automática de finalización de curso</p>
+  {alumnoSeleccionado != null && (
+    <div class="mt-4 flex items-center justify-between gap-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+      <p class="text-sm text-blue-900"><span class="font-medium">Vista del alumno:</span> {alumnoSeleccionado.nombre}</p>
+      <a href={certificadosHref} class="text-sm font-medium text-blue-700 hover:text-blue-900 underline">Ver todos los certificados</a>
+    </div>
+  )}
+</div>
+
+<div class="grid sm:grid-cols-4 gap-4 mb-6">
+  <Card class="border-l-4 border-blue-500">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm text-secondary mb-1">Total Alumnos</p>
+        <p class="text-3xl font-bold text-blue-600">{alumnosCertificados.length}</p>
+      </div>
+      <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center"><span class="text-2xl">🎓</span></div>
+    </div>
+  </Card>
+  <Card class="border-l-4 border-green-500">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm text-secondary mb-1">Certificados Generados</p>
+        <p class="text-3xl font-bold text-green-600">{generados}</p>
+      </div>
+      <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      </div>
+    </div>
+  </Card>
+  <Card class="border-l-4 border-yellow-500">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm text-secondary mb-1">Pendientes Generación</p>
+        <p class="text-3xl font-bold text-yellow-600">{pendientesGeneracion}</p>
+      </div>
+      <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      </div>
+    </div>
+  </Card>
+  <Card class="border-l-4 border-purple-500">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm text-secondary mb-1">Pendientes Envío</p>
+        <p class="text-3xl font-bold text-purple-600">{pendientesEnvio}</p>
+      </div>
+      <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+      </div>
+    </div>
+  </Card>
+</div>
+
+<div class="flex flex-wrap gap-3 mb-6">
+  <Button variant="primary" onClick="generarPendientes()"><span class="mr-2">📄</span>Generar Pendientes ({pendientesGeneracion})</Button>
+  <Button variant="secondary" onClick="enviarMasivo()"><span class="mr-2">📧</span>Enviar Emails Masivo</Button>
+  <select id="filtro-estado" class="h-11 px-4 text-sm border border-gray-300 rounded-md">
+    <option value="todos">Todos</option>
+    <option value="generados">Solo generados</option>
+    <option value="pendientes">Solo pendientes</option>
+  </select>
+  <Button variant="secondary" onClick="exportarListado()"><span class="mr-2">📥</span>Exportar</Button>
+</div>
+
+<div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+  <p class="text-sm font-medium text-blue-900 mb-1">🤖 Generación Automática</p>
+  <p class="text-xs text-blue-800">Los certificados se generan al completar todas las clases. Incluyen QR de validación y número único.</p>
+</div>
+
+<Card>
+  <div class="overflow-x-auto">
+    <table class="w-full" id="tabla-certificados">
+      <thead>
+        <tr class="border-b border-gray-200">
+          <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase">Alumno</th>
+          <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase">RUT</th>
+          <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase">Curso</th>
+          <th class="text-center py-3 px-4 text-xs font-semibold text-gray-700 uppercase">Clases</th>
+          <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase">Fecha Término</th>
+          <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase">N° Certificado</th>
+          <th class="text-center py-3 px-4 text-xs font-semibold text-gray-700 uppercase">Estado</th>
+          <th class="text-center py-3 px-4 text-xs font-semibold text-gray-700 uppercase">Acciones</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {listadoParaMostrar.map((a) => (
+          <tr class="hover:bg-gray-50 transition-colors" data-estado={a.certificadoGenerado ? "generado" : "pendiente"}>
+            <td class="py-3 px-4 text-sm font-medium text-gray-900">{a.nombre}</td>
+            <td class="py-3 px-4 text-sm text-secondary">{a.rut}</td>
+            <td class="py-3 px-4"><span class={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${a.curso === "Clase Profesional" ? "bg-purple-100 text-purple-800" : "bg-blue-100 text-blue-800"}`}>{a.curso}</span></td>
+            <td class="py-3 px-4 text-center"><span class="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-bold">{a.clasesCompletadas}/{a.curso === "Clase B" ? "12" : "15"}</span></td>
+            <td class="py-3 px-4 text-sm text-secondary">{a.fechaTermino}</td>
+            <td class="py-3 px-4">{a.nroCertificado ? <span class="text-xs font-mono font-bold text-blue-600">{a.nroCertificado}</span> : <span class="text-xs text-gray-400">-</span>}</td>
+            <td class="py-3 px-4 text-center">
+              {a.certificadoGenerado ? (<span class="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">✓ Generado</span>) : (<span class="inline-flex items-center gap-1 px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">Pendiente</span>)}
+            </td>
+            <td class="py-3 px-4 text-center">
+              {a.certificadoGenerado ? (
+                <div class="flex items-center justify-center gap-2">
+                  <button type="button" class="px-3 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded" onclick={`descargarPDF(${a.id})`}>PDF</button>
+                  <button type="button" class="px-3 py-1 text-xs bg-green-600 hover:bg-green-700 text-white rounded" onclick={`enviarEmail(${a.id})`}>Email</button>
+                </div>
+              ) : (
+                <button type="button" class="px-3 py-1 text-xs bg-yellow-600 hover:bg-yellow-700 text-white rounded" onclick={`generarCertificado(${a.id})`}>Generar</button>
+              )}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</Card>
+
+<script is:inline>
+  const filtroEstado = document.getElementById("filtro-estado");
+  const tabla = document.getElementById("tabla-certificados");
+  filtroEstado?.addEventListener("change", function(e) {
+    const valor = e.target.value;
+    tabla?.querySelectorAll("tbody tr").forEach(function(fila) {
+      const estado = fila.getAttribute("data-estado");
+      if (valor === "todos") fila.style.display = "";
+      else if (valor === "generados" && estado === "generado") fila.style.display = "";
+      else if (valor === "pendientes" && estado === "pendiente") fila.style.display = "";
+      else fila.style.display = "none";
+    });
+  });
+  window.generarPendientes = function() { alert("Generación masiva en curso..."); setTimeout(function() { location.reload(); }, 1500); };
+  window.enviarMasivo = function() { alert("Envío masivo de emails."); };
+  window.exportarListado = function() { alert("Exportando listado..."); };
+  window.generarCertificado = function(id) { if (confirm("¿Generar certificado?")) { alert("Certificado generado."); setTimeout(function() { location.reload(); }, 1000); } };
+  window.descargarPDF = function(id) { alert("Descargando PDF..."); };
+  window.enviarEmail = function(id) { alert("Enviando email..."); };
+</script>

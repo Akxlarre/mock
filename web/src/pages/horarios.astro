@@ -1,0 +1,197 @@
+---
+/**
+ * Página: Sistema de Agendamiento Individual
+ * El sistema cambió de horarios recurrentes a agendamiento clase por clase
+ * Esta página informa sobre el cambio y redirige a la agenda
+ */
+import DashboardLayout from "../layouts/DashboardLayout.astro";
+import Card from "../components/ui/Card.astro";
+import Button from "../components/ui/Button.astro";
+---
+
+<DashboardLayout title="Sistema de Horarios">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">
+                Sistema de Agendamiento
+            </h1>
+            <p class="text-lg text-gray-600">
+                El sistema ha evolucionado a agendamiento individual clase por
+                clase
+            </p>
+        </div>
+
+        <!-- Información del Cambio -->
+        <Card class="p-8 mb-6">
+            <div class="flex gap-4 mb-6">
+                <svg
+                    class="w-12 h-12 text-blue-600 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    ></path>
+                </svg>
+                <div>
+                    <h2 class="text-2xl font-semibold text-gray-900 mb-2">
+                        Nuevo Sistema de Agendamiento Individual
+                    </h2>
+                    <p class="text-gray-700 mb-4">
+                        Hemos actualizado el sistema para cumplir con los
+                        requerimientos RF-014. Ahora los alumnos pueden agendar
+                        cada clase individualmente según su disponibilidad.
+                    </p>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <h3 class="font-semibold text-gray-900 mb-3">
+                        ❌ Sistema Anterior
+                    </h3>
+                    <ul class="text-sm text-gray-600 space-y-2">
+                        <li class="flex items-start gap-2">
+                            <span>•</span>
+                            <span>Horarios recurrentes fijos semanales</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span>•</span>
+                            <span>El alumno seleccionaba UN horario</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span>•</span>
+                            <span
+                                >Las 12 clases se generaban automáticamente</span
+                            >
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span>•</span>
+                            <span>Mismo día y hora cada semana</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="font-semibold text-gray-900 mb-3">
+                        ✅ Sistema Actual
+                    </h3>
+                    <ul class="text-sm text-gray-600 space-y-2">
+                        <li class="flex items-start gap-2">
+                            <span>•</span>
+                            <span>Agendamiento individual por clase</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span>•</span>
+                            <span>Flexibilidad de horario para cada sesión</span
+                            >
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span>•</span>
+                            <span>Secuencia obligatoria (1→2→3...→12)</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span>•</span>
+                            <span>Validaciones de negocio automáticas</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <p class="text-sm font-medium text-blue-900 mb-2">
+                    📋 Nuevas Reglas de Agendamiento:
+                </p>
+                <ul class="text-sm text-blue-800 space-y-1">
+                    <li>✓ Mínimo 24 horas de anticipación</li>
+                    <li>✓ Máximo 3 clases pendientes simultáneas</li>
+                    <li>✓ No se pueden agendar 2 clases el mismo día</li>
+                    <li>✓ Deben completarse en orden secuencial</li>
+                    <li>
+                        ✓ Cancelación con {"<"}24hrs cuenta como clase tomada
+                    </li>
+                </ul>
+            </div>
+        </Card>
+
+        <!-- Acciones -->
+        <div class="grid md:grid-cols-2 gap-4">
+            <Card class="p-6">
+                <h3 class="font-semibold text-gray-900 mb-2">
+                    👨‍💼 Para Secretaria/Admin
+                </h3>
+                <p class="text-sm text-gray-600 mb-4">
+                    Accede a la agenda para ver el calendario semanal y agendar
+                    clases
+                </p>
+                <Button
+                    variant="primary"
+                    href="/secretaria/agenda"
+                    class="w-full"
+                >
+                    Ir a Agenda
+                </Button>
+            </Card>
+
+            <Card class="p-6">
+                <h3 class="font-semibold text-gray-900 mb-2">
+                    🎓 Para Alumnos
+                </h3>
+                <p class="text-sm text-gray-600 mb-4">
+                    Los alumnos pueden agendar sus clases desde el portal
+                </p>
+                <Button
+                    variant="primary"
+                    href="/alumno/dashboard"
+                    class="w-full"
+                >
+                    Portal Alumno
+                </Button>
+            </Card>
+        </div>
+
+        <!-- Documentación Técnica -->
+        <Card class="p-6 mt-6 bg-gray-50">
+            <h3 class="font-semibold text-gray-900 mb-3">
+                📄 Documentación Técnica
+            </h3>
+            <div class="text-sm text-gray-700 space-y-2">
+                <p>
+                    <strong>Archivos Nuevos:</strong>
+                </p>
+                <ul class="list-disc list-inside ml-4 text-gray-600">
+                    <li><code>mockBookings.ts</code> - Clases individuales</li>
+                    <li>
+                        <code>mockInstructors.ts</code> - Instructores con disponibilidad
+                    </li>
+                    <li><code>mockVehicles.ts</code> - Vehículos asignados</li>
+                    <li>
+                        <code>mockAvailability.ts</code> - Sistema de disponibilidad
+                    </li>
+                    <li>
+                        <code>ClassSequenceValidator.ts</code> - Validaciones
+                    </li>
+                </ul>
+                <p class="mt-3">
+                    <strong>Componentes:</strong>
+                </p>
+                <ul class="list-disc list-inside ml-4 text-gray-600">
+                    <li>
+                        <code>CalendarWeekView.astro</code> - Vista calendario semanal
+                    </li>
+                    <li>
+                        <code>BookingModal.astro</code> - Modal de agendamiento
+                    </li>
+                    <li>
+                        <code>ScheduleDisplay.astro</code> - Listado de clases
+                    </li>
+                </ul>
+            </div>
+        </Card>
+    </div>
+</DashboardLayout>

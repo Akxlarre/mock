@@ -1,0 +1,13 @@
+---
+/**
+ * Psicotécnico - Secretaría (mismo contenido que admin con basePath /secretaria)
+ * RF-037: Control de evaluaciones psicosensométricas externas
+ */
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import PsicotecnicoContent from "../../components/psicotecnico/PsicotecnicoContent.astro";
+import { ESCUELA_ACTUAL } from "../../lib/mockData";
+---
+
+<DashboardLayout title="Gestión Psicotécnico" escuela={ESCUELA_ACTUAL} userRole="secretaria">
+  <PsicotecnicoContent basePath="/secretaria" />
+</DashboardLayout>

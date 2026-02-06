@@ -1,0 +1,61 @@
+---
+/**
+ * Mis Clases - Portal Alumno
+ * Muestra clases individuales con ScheduleDisplay
+ */
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import ScheduleDisplay from "../../components/schedules/ScheduleDisplay.astro";
+import {
+    BOOKINGS,
+    getBookingsByStudent,
+    getCompletedClassCount,
+    getPendingBookings,
+    getNextClassNumber,
+} from "../../lib/mockBookings";
+
+// Mock: Alumno actual (ID = 1 María González)
+const currentStudentId = 1;
+const studentBookings = getBookingsByStudent(currentStudentId);
+const completedClasses = getCompletedClassCount(currentStudentId);
+const pendingBookings = getPendingBookings(currentStudentId);
+const nextClassNumber = getNextClassNumber(currentStudentId);
+const totalClasses = 12;
+
+// Convertir bookings a formato del componente
+const classBookings = studentBookings.map((booking) => {
+    const bookingDate = new Date(booking.bookingDate);
+    const now = new Date();
+    const hoursUntil =
+        (bookingDate.getTime() - now.getTime()) / (1000 * 60 * 60);
+    const canModify = hoursUntil > 24 && booking.status === "scheduled";
+
+    return {
+        id: booking.id,
+        classNumber: booking.classNumber,
+        date: booking.bookingDate,
+        time: booking.startTime,
+        instructor: booking.instructorName,
+        vehicle: booking.vehiclePatente,
+        status: booking.status,
+        canCancel: canModify,
+        canReschedule: canModify,
+    };
+});
+---
+
+<DashboardLayout title="Mis Clases" userRole="alumno">
+    <div class="mb-8">
+        <h1 class="text-3xl font-semibold text-gray-900 mb-2">Mis Clases</h1>
+        <p class="text-gray-600">
+            Gestiona tus clases individuales - sistema de agendamiento flexible
+        </p>
+    </div>
+
+    <!-- Componente de Display de Clases -->
+    <ScheduleDisplay
+        bookings={classBookings}
+        completedClasses={completedClasses}
+        totalClasses={totalClasses}
+        nextClassNumber={nextClassNumber}
+    />
+</DashboardLayout>

@@ -1,0 +1,11 @@
+---
+/**
+ * Alumnos - Secretaría (mismo contenido que admin con basePath /secretaria)
+ */
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+import AlumnosListContent from "../../../components/alumnos/AlumnosListContent.astro";
+---
+
+<DashboardLayout title="Alumnos - Escuela de Conductores" userRole="secretaria">
+  <AlumnosListContent basePath="/secretaria" />
+</DashboardLayout>

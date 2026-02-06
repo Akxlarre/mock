@@ -1,0 +1,62 @@
+---
+/**
+ * Dashboard Layout - Layout base para área admin/secretaria/instructor
+ * Rol derivado de la URL: /secretaria/* → secretaria; el resto según session.
+ */
+import { ViewTransitions } from "astro:transitions";
+import Sidebar from "../components/layout/Sidebar.astro";
+import Topbar from "../components/layout/Topbar.astro";
+import { ESCUELA_ACTUAL } from "../lib/mockData";
+import {
+  getCurrentSession,
+  getCurrentUserName,
+  type UserRole,
+} from "../lib/session";
+
+interface Props {
+  title?: string;
+  userRole?: UserRole;
+  userName?: string;
+  escuela?: string;
+}
+
+const currentPath = Astro.url.pathname;
+const session = getCurrentSession(currentPath);
+
+const {
+  title = "Dashboard",
+  userRole = session.role,
+  userName = session.name,
+  escuela = ESCUELA_ACTUAL,
+} = Astro.props;
+
+import "../assets/app.css";
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title} - Escuela de Conductores</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <ViewTransitions />
+  </head>
+  <body class="min-h-screen bg-gray-50">
+    <Sidebar currentPath={currentPath} userRole={userRole} />
+
+    <div class="lg:pl-64 min-h-screen">
+      <Topbar
+        userName={userName || getCurrentUserName(userRole)}
+        userRole={userRole}
+        escuela={escuela}
+      />
+
+      <main class="p-4 lg:p-6">
+        <slot />
+      </main>
+    </div>
+
+    <script src="../scripts/dropdown.ts"></script>
+  </body>
+</html>

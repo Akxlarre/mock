@@ -1,0 +1,33 @@
+---
+/**
+ * Table – Header + filas según design-system-specs
+ * Header: bg base-200, font-semibold 14px. Filas: padding 16px, hover base-200.
+ */
+interface Props {
+  headers: string[];
+  rows: (string | number)[][];
+  class?: string;
+}
+
+const { headers, rows, class: className = '' } = Astro.props;
+---
+<div class={`overflow-x-auto rounded-lg border border-base-300 ${className}`}>
+  <table class="table">
+    <thead>
+      <tr class="bg-base-200 text-base-content">
+        {headers.map((h) => (
+          <th class="font-semibold text-sm py-3 px-4">{h}</th>
+        ))}
+      </tr>
+    </thead>
+    <tbody>
+      {rows.map((row, i) => (
+        <tr class="hover:bg-base-200/80 border-b border-base-300/50">
+          {row.map((cell) => (
+            <td class="py-4 px-4">{cell}</td>
+          ))}
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>

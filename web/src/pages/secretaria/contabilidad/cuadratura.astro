@@ -1,0 +1,13 @@
+---
+/**
+ * Cuadratura de Caja - Secretaría (mismo contenido que admin con basePath /secretaria)
+ * RF-036: Control de ingresos y cierre diario
+ */
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+import CuadraturaContent from "../../../components/contabilidad/CuadraturaContent.astro";
+import { ESCUELA_ACTUAL } from "../../../lib/mockData";
+---
+
+<DashboardLayout title="Cuadratura de Caja" escuela={ESCUELA_ACTUAL} userRole="secretaria">
+  <CuadraturaContent basePath="/secretaria" />
+</DashboardLayout>

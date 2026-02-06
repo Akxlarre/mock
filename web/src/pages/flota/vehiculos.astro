@@ -1,0 +1,415 @@
+---
+/**
+ * Gestión de Flota Vehicular
+ * RF-043: CRUD vehículos, mantenimientos, asignación instructores
+ */
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import Card from "../../components/ui/Card.astro";
+import Button from "../../components/ui/Button.astro";
+import { ESCUELA_ACTUAL } from "../../lib/mockData";
+
+const vehiculos = [
+    {
+        id: 1,
+        patente: "ABC-123",
+        marca: "Nissan",
+        modelo: "Versa",
+        año: 2022,
+        tipo: "Clase B",
+        estado: "Disponible",
+        kmActual: 45000,
+        proximoMant: "2026-02-15",
+        instructor: "Carlos Rojas",
+    },
+    {
+        id: 2,
+        patente: "XYZ-789",
+        marca: "Chevrolet",
+        modelo: "Sail",
+        año: 2021,
+        tipo: "Clase B",
+        estado: "En Clase",
+        kmActual: 78000,
+        proximoMant: "2026-02-20",
+        instructor: "Ana Martínez",
+    },
+    {
+        id: 3,
+        patente: "DEF-456",
+        marca: "Suzuki",
+        modelo: "Swift",
+        año: 2023,
+        tipo: "Clase B",
+        estado: "Disponible",
+        kmActual: 12000,
+        proximoMant: "2026-03-01",
+        instructor: "Luis Torres",
+    },
+    {
+        id: 4,
+        patente: "GHI-789",
+        marca: "Mercedes-Benz",
+        modelo: "Atego",
+        año: 2020,
+        tipo: "Profesional",
+        estado: "Mantenimiento",
+        kmActual: 120000,
+        proximoMant: "2026-02-10",
+        instructor: "-",
+    },
+    {
+        id: 5,
+        patente: "JKL-012",
+        marca: "Hyundai",
+        modelo: "Accent",
+        año: 2022,
+        tipo: "Clase B",
+        estado: "Disponible",
+        kmActual: 35000,
+        proximoMant: "2026-02-25",
+        instructor: "María Silva",
+    },
+];
+
+const disponibles = vehiculos.filter((v) => v.estado === "Disponible").length;
+const enClase = vehiculos.filter((v) => v.estado === "En Clase").length;
+const mantenimiento = vehiculos.filter(
+    (v) => v.estado === "Mantenimiento",
+).length;
+---
+
+<DashboardLayout title="Gestión de Flota" escuela={ESCUELA_ACTUAL}>
+    <div class="mb-8 flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-semibold text-gray-900 mb-2">
+                Gestión de Flota
+            </h1>
+            <p class="text-secondary">Control de vehículos y mantenimientos</p>
+        </div>
+        <Button variant="primary" onclick="nuevoVehiculo()">
+            <svg
+                class="w-4 h-4 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 4v16m8-8H4"></path>
+            </svg>
+            Nuevo Vehículo
+        </Button>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid sm:grid-cols-4 gap-4 mb-6">
+        <Card class="border-l-4 border-blue-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-secondary mb-1">Total Vehículos</p>
+                    <p class="text-3xl font-bold text-blue-600">
+                        {vehiculos.length}
+                    </p>
+                </div>
+                <div
+                    class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center"
+                >
+                    <svg
+                        class="w-6 h-6 text-blue-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        ></path>
+                    </svg>
+                </div>
+            </div>
+        </Card>
+
+        <Card class="border-l-4 border-green-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-secondary mb-1">Disponibles</p>
+                    <p class="text-3xl font-bold text-green-600">
+                        {disponibles}
+                    </p>
+                </div>
+                <div
+                    class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center"
+                >
+                    <span class="text-2xl">🚗</span>
+                </div>
+            </div>
+        </Card>
+
+        <Card class="border-l-4 border-yellow-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-secondary mb-1">En Clase</p>
+                    <p class="text-3xl font-bold text-yellow-600">{enClase}</p>
+                </div>
+                <div
+                    class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center"
+                >
+                    <span class="text-2xl">🏁</span>
+                </div>
+            </div>
+        </Card>
+
+        <Card class="border-l-4 border-red-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-secondary mb-1">Mantenimiento</p>
+                    <p class="text-3xl font-bold text-red-600">
+                        {mantenimiento}
+                    </p>
+                </div>
+                <div
+                    class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center"
+                >
+                    <span class="text-2xl">🔧</span>
+                </div>
+            </div>
+        </Card>
+    </div>
+
+    <!-- Filtros -->
+    <div class="flex flex-wrap gap-3 mb-6">
+        <select id="filtro-tipo" class="select select-bordered min-h-11">
+            <option value="todos">Todos los tipos</option>
+            <option value="Clase B">Solo Clase B</option>
+            <option value="Profesional">Solo Profesional</option>
+        </select>
+
+        <select id="filtro-estado" class="select select-bordered min-h-11">
+            <option value="todos">Todos los estados</option>
+            <option value="Disponible">Solo disponibles</option>
+            <option value="En Clase">Solo en clase</option>
+            <option value="Mantenimiento">Solo en mantenimiento</option>
+        </select>
+
+        <Button variant="secondary" onclick="exportarFlota()">
+            <svg
+                class="w-4 h-4 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                ></path>
+            </svg>
+            Exportar
+        </Button>
+    </div>
+
+    <!-- Tabla vehículos -->
+    <Card>
+        <div class="overflow-x-auto">
+            <table class="w-full" id="tabla-vehiculos">
+                <thead>
+                    <tr class="border-b border-gray-200">
+                        <th
+                            class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase"
+                            >Patente</th
+                        >
+                        <th
+                            class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase"
+                            >Vehículo</th
+                        >
+                        <th
+                            class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase"
+                            >Tipo</th
+                        >
+                        <th
+                            class="text-center py-3 px-4 text-xs font-semibold text-gray-700 uppercase"
+                            >Estado</th
+                        >
+                        <th
+                            class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase"
+                            >Kilometraje</th
+                        >
+                        <th
+                            class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase"
+                            >Próximo Mant.</th
+                        >
+                        <th
+                            class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase"
+                            >Instructor</th
+                        >
+                        <th
+                            class="text-center py-3 px-4 text-xs font-semibold text-gray-700 uppercase"
+                            >Acciones</th
+                        >
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    {
+                        vehiculos.map((v) => (
+                            <tr
+                                class="hover:bg-gray-50 transition-colors"
+                                data-tipo={v.tipo}
+                                data-estado={v.estado}
+                            >
+                                <td class="py-3 px-4 text-sm font-bold text-gray-900">
+                                    {v.patente}
+                                </td>
+                                <td class="py-3 px-4">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">
+                                            {v.marca} {v.modelo}
+                                        </p>
+                                        <p class="text-xs text-secondary">
+                                            Año {v.año}
+                                        </p>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-4">
+                                    <span
+                                        class={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
+                                            v.tipo === "Profesional"
+                                                ? "bg-purple-100 text-purple-800"
+                                                : "bg-blue-100 text-blue-800"
+                                        }`}
+                                    >
+                                        {v.tipo}
+                                    </span>
+                                </td>
+                                <td class="py-3 px-4 text-center">
+                                    <span
+                                        class={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${
+                                            v.estado === "Disponible"
+                                                ? "bg-green-100 text-green-800"
+                                                : v.estado === "En Clase"
+                                                  ? "bg-yellow-100 text-yellow-800"
+                                                  : "bg-red-100 text-red-800"
+                                        }`}
+                                    >
+                                        {v.estado === "Disponible" && "✓"}
+                                        {v.estado === "En Clase" && "🏁"}
+                                        {v.estado === "Mantenimiento" && "🔧"}
+                                        <span>{v.estado}</span>
+                                    </span>
+                                </td>
+                                <td class="py-3 px-4 text-sm text-gray-700">
+                                    {v.kmActual.toLocaleString("es-CL")} km
+                                </td>
+                                <td class="py-3 px-4 text-sm text-secondary">
+                                    {v.proximoMant}
+                                </td>
+                                <td class="py-3 px-4 text-sm text-gray-700">
+                                    {v.instructor}
+                                </td>
+                                <td class="py-3 px-4">
+                                    <div class="flex items-center justify-center gap-2">
+                                        <button
+                                            class="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                                            onclick={`editarVehiculo(${v.id})`}
+                                            title="Editar"
+                                        >
+                                            <svg
+                                                class="w-4 h-4"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                                />
+                                            </svg>
+                                        </button>
+                                        <button
+                                            class="p-2 text-green-600 hover:bg-green-50 rounded transition-colors"
+                                            onclick={`verMantenimientos(${v.id})`}
+                                            title="Mantenimientos"
+                                        >
+                                            <svg
+                                                class="w-4 h-4"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                                                />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))
+                    }
+                </tbody>
+            </table>
+        </div>
+    </Card>
+</DashboardLayout>
+
+<script>
+    const filtroTipo = document.getElementById(
+        "filtro-tipo",
+    ) as HTMLSelectElement;
+    const filtroEstado = document.getElementById(
+        "filtro-estado",
+    ) as HTMLSelectElement;
+    const tabla = document.getElementById("tabla-vehiculos");
+
+    function aplicarFiltros() {
+        const tipo = filtroTipo?.value || "todos";
+        const estado = filtroEstado?.value || "todos";
+        const filas = tabla?.querySelectorAll("tbody tr");
+
+        filas?.forEach((fila) => {
+            const tipoVehiculo = fila.getAttribute("data-tipo");
+            const estadoVehiculo = fila.getAttribute("data-estado");
+
+            const cumpleTipo = tipo === "todos" || tipoVehiculo === tipo;
+            const cumpleEstado =
+                estado === "todos" || estadoVehiculo === estado;
+
+            (fila as HTMLElement).style.display =
+                cumpleTipo && cumpleEstado ? "" : "none";
+        });
+    }
+
+    filtroTipo?.addEventListener("change", aplicarFiltros);
+    filtroEstado?.addEventListener("change", aplicarFiltros);
+
+    function nuevoVehiculo() {
+        alert(
+            '📝 Formulario Nuevo Vehículo\n\nCampos requeridos:\n• Patente (única)\n• Marca y modelo\n• Año\n• Tipo (Clase B / Profesional)\n• Kilometraje inicial\n• Instructor asignado\n• Fecha próximo mantenimiento\n\n✓ El vehículo quedará en estado "Disponible"',
+        );
+    }
+
+    (window as any).editarVehiculo = function (id: number) {
+        alert(
+            `✏️ Editar Vehículo #${id}\n\nPuedes modificar:\n• Estado (Disponible/En Clase/Mantenimiento)\n• Kilometraje actual\n• Instructor asignado\n• Fecha próximo mantenimiento\n\n💾 Los cambios se guardan inmediatamente`,
+        );
+    };
+
+    (window as any).verMantenimientos = function (id: number) {
+        window.location.href = `/flota/vehiculos/${id}`;
+    };
+
+    function exportarFlota() {
+        alert(
+            "✓ Generando Excel...\n\nContenido:\n• Listado completo de vehículos\n• Estado actual\n• Kilometrajes\n• Mantenimientos programados\n\nDescarga iniciada.",
+        );
+    }
+</script>

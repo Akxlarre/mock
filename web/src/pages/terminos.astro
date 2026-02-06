@@ -1,0 +1,360 @@
+---
+/**
+ * Términos y Condiciones
+ * Información legal del sistema
+ */
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Card from "../components/ui/Card.astro";
+import Button from "../components/ui/Button.astro";
+---
+
+<BaseLayout title="Términos y Condiciones - Escuela de Conductores">
+    <div class="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Header -->
+            <div class="text-center mb-10">
+                <h1 class="text-4xl font-bold text-gray-900 mb-3">
+                    Términos y Condiciones
+                </h1>
+                <p class="text-lg text-secondary">
+                    Sistema de Gestión Escuela de Conductores
+                </p>
+                <p class="text-sm text-secondary mt-2">
+                    Última actualización: 3 de Febrero de 2026
+                </p>
+            </div>
+
+            <Card class="mb-8">
+                <div class="prose max-w-none">
+                    <!-- Introducción -->
+                    <section class="mb-8">
+                        <h2 class="text-2xl font-semibold text-gray-900 mb-4">
+                            1. Aceptación de Términos
+                        </h2>
+                        <p class="text-gray-700 mb-3">
+                            Al acceder y utilizar el Sistema de Gestión de
+                            Escuela de Conductores (en adelante, "el Sistema"),
+                            usted acepta estar sujeto a estos términos y
+                            condiciones. Si no está de acuerdo con alguna parte
+                            de estos términos, no debe utilizar el Sistema.
+                        </p>
+                        <p class="text-gray-700">
+                            Estos términos aplican para todos los usuarios:
+                            alumnos, instructores, personal administrativo y
+                            cualquier otra persona que acceda al Sistema.
+                        </p>
+                    </section>
+
+                    <!-- Servicios -->
+                    <section class="mb-8">
+                        <h2 class="text-2xl font-semibold text-gray-900 mb-4">
+                            2. Descripción del Servicio
+                        </h2>
+                        <p class="text-gray-700 mb-3">
+                            El Sistema proporciona las siguientes
+                            funcionalidades:
+                        </p>
+                        <ul class="list-disc pl-6 text-gray-700 space-y-2">
+                            <li>Gestión de matrículas y registro de alumnos</li>
+                            <li>
+                                Programación y seguimiento de clases teóricas y
+                                prácticas
+                            </li>
+                            <li>Registro de pagos y control financiero</li>
+                            <li>Generación de certificados de finalización</li>
+                            <li>Gestión de flota vehicular y mantenimientos</li>
+                            <li>Portal de auto-servicio para alumnos</li>
+                            <li>Sistema de notificaciones y recordatorios</li>
+                        </ul>
+                    </section>
+
+                    <!-- Cuentas de Usuario -->
+                    <section class="mb-8">
+                        <h2 class="text-2xl font-semibold text-gray-900 mb-4">
+                            3. Cuentas de Usuario
+                        </h2>
+                        <p class="text-gray-700 mb-3">
+                            <strong>3.1 Registro:</strong> Para acceder a ciertas
+                            funciones del Sistema, debe crear una cuenta proporcionando
+                            información precisa y completa.
+                        </p>
+                        <p class="text-gray-700 mb-3">
+                            <strong>3.2 Seguridad:</strong> Es responsable de mantener
+                            la confidencialidad de su nombre de usuario y contraseña.
+                            Todas las actividades realizadas bajo su cuenta son su
+                            responsabilidad.
+                        </p>
+                        <p class="text-gray-700">
+                            <strong>3.3 Notificación:</strong> Debe notificar inmediatamente
+                            a la administración sobre cualquier uso no autorizado
+                            de su cuenta.
+                        </p>
+                    </section>
+
+                    <!-- Protección de Datos -->
+                    <section class="mb-8">
+                        <h2 class="text-2xl font-semibold text-gray-900 mb-4">
+                            4. Protección de Datos Personales
+                        </h2>
+                        <p class="text-gray-700 mb-3">
+                            <strong>4.1 Recopilación:</strong> El Sistema recopila
+                            y almacena datos personales necesarios para la prestación
+                            del servicio educativo, cumpliendo con la Ley 19.628 de
+                            Protección de Datos Personales de Chile.
+                        </p>
+                        <p class="text-gray-700 mb-3">
+                            <strong>4.2 Uso:</strong> Los datos personales se utilizan
+                            exclusivamente para:
+                        </p>
+                        <ul class="list-disc pl-6 text-gray-700 space-y-1 mb-3">
+                            <li>Gestión administrativa de la escuela</li>
+                            <li>Comunicación con alumnos e instructores</li>
+                            <li>Cumplimiento de obligaciones legales</li>
+                            <li>Mejora de los servicios educativos</li>
+                        </ul>
+                        <p class="text-gray-700">
+                            <strong>4.3 Compartir:</strong> No compartimos sus datos
+                            personales con terceros, excepto cuando sea requerido
+                            por ley o autoridad competente.
+                        </p>
+                    </section>
+
+                    <!-- Pagos y Cancelaciones -->
+                    <section class="mb-8">
+                        <h2 class="text-2xl font-semibold text-gray-900 mb-4">
+                            5. Pagos y Política de Cancelación
+                        </h2>
+                        <p class="text-gray-700 mb-3">
+                            <strong>5.1 Matrícula:</strong> El pago de matrícula es
+                            obligatorio y no reembolsable.
+                        </p>
+                        <p class="text-gray-700 mb-3">
+                            <strong>5.2 Cuotas:</strong> Los pagos de cuotas deben
+                            realizarse en las fechas acordadas. El retraso puede resultar
+                            en suspensión temporal del servicio.
+                        </p>
+                        <p class="text-gray-700 mb-3">
+                            <strong>5.3 Cancelación de Clases:</strong> Las clases
+                            pueden cancelarse con al menos 24 horas de anticipación
+                            sin penalización. Cancelaciones con menos tiempo no permiten
+                            reprogramación.
+                        </p>
+                        <p class="text-gray-700">
+                            <strong>5.4 Retiro:</strong> En caso de retiro voluntario,
+                            no se reembolsan pagos realizados, salvo casos excepcionales
+                            evaluados por la dirección.
+                        </p>
+                    </section>
+
+                    <!-- Certificados -->
+                    <section class="mb-8">
+                        <h2 class="text-2xl font-semibold text-gray-900 mb-4">
+                            6. Certificados y Documentos
+                        </h2>
+                        <p class="text-gray-700 mb-3">
+                            <strong>6.1 Requisitos:</strong> Para obtener el certificado
+                            de finalización, el alumno debe:
+                        </p>
+                        <ul class="list-disc pl-6 text-gray-700 space-y-1 mb-3">
+                            <li>
+                                Completar todas las clases teóricas y prácticas
+                                requeridas
+                            </li>
+                            <li>Estar al día con los pagos</li>
+                            <li>Aprobar las evaluaciones internas</li>
+                            <li>Presentar documentación completa y vigente</li>
+                        </ul>
+                        <p class="text-gray-700">
+                            <strong>6.2 Validez:</strong> Los certificados emitidos
+                            tienen la validez establecida por la normativa vigente
+                            de tránsito en Chile.
+                        </p>
+                    </section>
+
+                    <!-- Conducta -->
+                    <section class="mb-8">
+                        <h2 class="text-2xl font-semibold text-gray-900 mb-4">
+                            7. Conducta del Usuario
+                        </h2>
+                        <p class="text-gray-700 mb-3">
+                            Los usuarios del Sistema se comprometen a:
+                        </p>
+                        <ul class="list-disc pl-6 text-gray-700 space-y-1">
+                            <li>
+                                No utilizar el Sistema para fines ilegales o no
+                                autorizados
+                            </li>
+                            <li>
+                                No interferir con el funcionamiento del Sistema
+                            </li>
+                            <li>
+                                Respetar los derechos de propiedad intelectual
+                            </li>
+                            <li>
+                                Mantener una conducta respetuosa con
+                                instructores y personal
+                            </li>
+                            <li>No compartir credenciales de acceso</li>
+                        </ul>
+                    </section>
+
+                    <!-- Responsabilidad -->
+                    <section class="mb-8">
+                        <h2 class="text-2xl font-semibold text-gray-900 mb-4">
+                            8. Limitación de Responsabilidad
+                        </h2>
+                        <p class="text-gray-700 mb-3">
+                            <strong>8.1 Disponibilidad:</strong> No garantizamos que
+                            el Sistema esté disponible de forma ininterrumpida o libre
+                            de errores.
+                        </p>
+                        <p class="text-gray-700 mb-3">
+                            <strong>8.2 Contenido:</strong> El contenido educativo
+                            se proporciona "tal cual" y puede estar sujeto a actualizaciones
+                            según cambios normativos.
+                        </p>
+                        <p class="text-gray-700">
+                            <strong>8.3 Daños:</strong> No somos responsables por
+                            daños indirectos, incidentales o consecuentes derivados
+                            del uso del Sistema.
+                        </p>
+                    </section>
+
+                    <!-- Modificaciones -->
+                    <section class="mb-8">
+                        <h2 class="text-2xl font-semibold text-gray-900 mb-4">
+                            9. Modificaciones
+                        </h2>
+                        <p class="text-gray-700">
+                            Nos reservamos el derecho de modificar estos
+                            términos en cualquier momento. Los cambios
+                            significativos serán notificados a través del
+                            Sistema con al menos 15 días de anticipación. El uso
+                            continuado del Sistema después de las modificaciones
+                            constituye la aceptación de los nuevos términos.
+                        </p>
+                    </section>
+
+                    <!-- Ley Aplicable -->
+                    <section class="mb-8">
+                        <h2 class="text-2xl font-semibold text-gray-900 mb-4">
+                            10. Ley Aplicable y Jurisdicción
+                        </h2>
+                        <p class="text-gray-700">
+                            Estos términos se rigen por las leyes de la
+                            República de Chile. Cualquier disputa se resolverá
+                            en los tribunales competentes de Chillán, Región de
+                            Ñuble, Chile.
+                        </p>
+                    </section>
+
+                    <!-- Contacto -->
+                    <section>
+                        <h2 class="text-2xl font-semibold text-gray-900 mb-4">
+                            11. Contacto
+                        </h2>
+                        <p class="text-gray-700 mb-3">
+                            Para preguntas sobre estos términos y condiciones,
+                            puede contactarnos:
+                        </p>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <p class="text-gray-700">
+                                <strong>Email:</strong> contacto@escuela.cl
+                            </p>
+                            <p class="text-gray-700">
+                                <strong>Teléfono:</strong> +56 9 8765 4321
+                            </p>
+                            <p class="text-gray-700">
+                                <strong>Dirección:</strong> Av. Libertador O'Higgins
+                                456, Chillán
+                            </p>
+                            <p class="text-gray-700">
+                                <strong>Horario:</strong> Lunes a Viernes, 9:00 -
+                                18:00
+                            </p>
+                        </div>
+                    </section>
+                </div>
+            </Card>
+
+            <!-- Aceptación -->
+            <Card class="bg-blue-50 border-blue-200 mb-6">
+                <div class="flex items-start gap-3">
+                    <svg
+                        class="w-6 h-6 text-blue-600 flex-shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        ></path>
+                    </svg>
+                    <div>
+                        <p class="font-semibold text-blue-900 mb-1">
+                            Información Importante
+                        </p>
+                        <p class="text-sm text-blue-800">
+                            Al utilizar nuestro sistema, confirmas que has leído
+                            y aceptado estos términos y condiciones. Si tienes
+                            dudas, por favor contacta con nuestro equipo antes
+                            de continuar.
+                        </p>
+                    </div>
+                </div>
+            </Card>
+
+            <!-- Botones -->
+            <div class="flex gap-3 justify-center">
+                <Button variant="secondary" onclick="window.print()">
+                    <svg
+                        class="w-4 h-4 mr-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                        ></path>
+                    </svg>
+                    Imprimir
+                </Button>
+                <Button variant="primary" href="/login">
+                    Volver al Inicio
+                </Button>
+            </div>
+
+            <!-- Footer -->
+            <div class="text-center mt-8 text-sm text-secondary">
+                <p>
+                    © 2026 Escuela de Conductores Chillán. Todos los derechos
+                    reservados.
+                </p>
+                <p class="mt-1">
+                    <a href="/privacidad" class="text-blue-600 hover:underline"
+                        >Política de Privacidad</a
+                    > •
+                    <a
+                        href="/contacto"
+                        class="text-blue-600 hover:underline ml-2">Contacto</a
+                    >
+                </p>
+            </div>
+        </div>
+    </div>
+</BaseLayout>
+
+<style>
+    @media print {
+        button,
+        .no-print {
+            display: none;
+        }
+    }
+</style>

@@ -1,0 +1,12 @@
+---
+/**
+ * Pagos - Secretaría (mismo contenido que admin con basePath /secretaria)
+ * RF-013: Registro de pagos (matrícula + mensualidades)
+ */
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+import PagosIndexContent from "../../../components/pagos/PagosIndexContent.astro";
+---
+
+<DashboardLayout title="Pagos - Escuela de Conductores" userRole="secretaria">
+  <PagosIndexContent basePath="/secretaria" />
+</DashboardLayout>

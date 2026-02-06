@@ -1,0 +1,239 @@
+---
+/**
+ * Componente de Upload de Documentos
+ * Usado en wizard de matrícula paso 2
+ */
+
+interface Props {
+    label: string;
+    required?: boolean;
+    acceptedFormats?: string;
+    maxSize?: string;
+    helperText?: string;
+    id?: string;
+}
+
+const {
+    label,
+    required = false,
+    acceptedFormats = ".jpg,.png,.pdf",
+    maxSize = "5MB",
+    helperText = "",
+    id = "",
+} = Astro.props;
+
+const inputId = id || `upload-${label.toLowerCase().replace(/\s+/g, "-")}`;
+---
+
+<div class="relative">
+    <label class="block">
+        <span class="text-sm font-medium text-gray-900 mb-2 block">
+            {label}
+            {required && <span class="text-red-600">*</span>}
+        </span>
+
+        <div
+            class="upload-container border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition-colors cursor-pointer"
+            id={`container-${inputId}`}
+        >
+            <input
+                type="file"
+                id={inputId}
+                class="hidden"
+                accept={acceptedFormats}
+                required={required}
+                data-upload="true"
+            />
+
+            <div class="upload-icon mb-3">
+                <svg
+                    class="w-12 h-12 mx-auto text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                    ></path>
+                </svg>
+            </div>
+
+            <div class="upload-text">
+                <p class="text-sm font-medium text-gray-900 mb-1">
+                    <span class="text-blue-600 hover:underline"
+                        >Click para elegir archivo</span
+                    > o arrastra aquí
+                </p>
+                <p class="text-xs text-secondary">
+                    Formatos: {acceptedFormats.replace(/\./g, "").toUpperCase()} •
+                    Máx: {maxSize}
+                </p>
+            </div>
+
+            <!-- Preview después de upload -->
+            <div id={`preview-${inputId}`} class="hidden mt-4">
+                <div
+                    class="flex items-center justify-between bg-gray-50 rounded-lg p-3"
+                >
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center"
+                        >
+                            <svg
+                                class="w-5 h-5 text-green-600"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <div class="text-left">
+                            <p
+                                class="text-sm font-medium text-gray-900"
+                                id={`filename-${inputId}`}
+                            >
+                                archivo.pdf
+                            </p>
+                            <p
+                                class="text-xs text-secondary"
+                                id={`filesize-${inputId}`}
+                            >
+                                2.4 MB
+                            </p>
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        onclick={`removeFile('${inputId}')`}
+                        class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    >
+                        <svg
+                            class="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            ></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </label>
+
+    {helperText && <p class="text-xs text-secondary mt-2">{helperText}</p>}
+</div>
+
+<script define:vars={{ inputId, maxSize, acceptedFormats }}>
+    const container = document.getElementById(`container-${inputId}`);
+    const input = document.getElementById(inputId);
+    const preview = document.getElementById(`preview-${inputId}`);
+    const filenameSpan = document.getElementById(`filename-${inputId}`);
+    const filesizeSpan = document.getElementById(`filesize-${inputId}`);
+
+    // Click container to trigger file input
+    container?.addEventListener("click", () => {
+        input?.click();
+    });
+
+    // Drag and drop
+    container?.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        container.classList.add("border-blue-500", "bg-blue-50");
+    });
+
+    container?.addEventListener("dragleave", () => {
+        container.classList.remove("border-blue-500", "bg-blue-50");
+    });
+
+    container?.addEventListener("drop", (e) => {
+        e.preventDefault();
+        container.classList.remove("border-blue-500", "bg-blue-50");
+
+        const files = e.dataTransfer?.files;
+        if (files && files.length > 0) {
+            handleFile(files[0]);
+        }
+    });
+
+    // File input change
+    input?.addEventListener("change", (e) => {
+        const files = e.target.files;
+        if (files && files.length > 0) {
+            handleFile(files[0]);
+        }
+    });
+
+    function handleFile(file) {
+        // Validate size
+        const maxSizeBytes = parseFloat(maxSize) * 1024 * 1024;
+        if (file.size > maxSizeBytes) {
+            alert(
+                `❌ El archivo es muy grande\n\nTamaño máximo: ${maxSize}\nTamaño actual: ${(file.size / 1024 / 1024).toFixed(2)} MB`,
+            );
+            return;
+        }
+
+        // Validate format
+        const ext = "." + file.name.split(".").pop().toLowerCase();
+        if (!acceptedFormats.includes(ext)) {
+            alert(
+                `❌ Formato no permitido\n\nFormatos aceptados: ${acceptedFormats}\nFormato actual: ${ext}`,
+            );
+            return;
+        }
+
+        // Show preview
+        if (filenameSpan) filenameSpan.textContent = file.name;
+        if (filesizeSpan) filesizeSpan.textContent = formatFileSize(file.size);
+
+        preview?.classList.remove("hidden");
+        container?.querySelector(".upload-icon")?.classList.add("hidden");
+        container?.querySelector(".upload-text")?.classList.add("hidden");
+
+        // Trigger validation check
+        const event = new Event("change", { bubbles: true });
+        input?.dispatchEvent(event);
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes < 1024) return bytes + " B";
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+        return (bytes / 1024 / 1024).toFixed(1) + " MB";
+    }
+
+    // Remove file function (global scope)
+    window.removeFile = function (id) {
+        const input = document.getElementById(id);
+        const preview = document.getElementById(`preview-${id}`);
+        const container = document.getElementById(`container-${id}`);
+
+        if (input) input.value = "";
+        preview?.classList.add("hidden");
+        container?.querySelector(".upload-icon")?.classList.remove("hidden");
+        container?.querySelector(".upload-text")?.classList.remove("hidden");
+    };
+</script>
+
+<style>
+    .upload-container {
+        position: relative;
+    }
+
+    .upload-container:hover {
+        background-color: rgba(59, 130, 246, 0.02);
+    }
+</style>

@@ -1,0 +1,217 @@
+---
+/**
+ * Wizard Matrícula - Paso 1 (secretaria)
+ */
+import DashboardLayout from "../../../../layouts/DashboardLayout.astro";
+import Card from "../../../../components/ui/Card.astro";
+import Input from "../../../../components/ui/Input.astro";
+import Button from "../../../../components/ui/Button.astro";
+import MatriculaWizardSteps from "../../../../components/matricula/MatriculaWizardSteps.astro";
+import ModalMenores17 from "../../../../components/matricula/ModalMenores17.astro";
+import { ESCUELA_ACTUAL } from "../../../../lib/mockData";
+
+const basePath = "/secretaria";
+---
+
+<DashboardLayout title="Matrícula - Datos personales" escuela={ESCUELA_ACTUAL} userRole="secretaria">
+  <MatriculaWizardSteps pasoActual={1} basePath={basePath} />
+
+  <div class="grid lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2">
+      <Card>
+        <h2 class="text-lg font-semibold text-gray-900 mb-6">
+          Paso 1: Datos personales
+        </h2>
+
+        <form id="matriculaForm" class="space-y-6">
+          <div>
+            <Input
+              label="RUT del alumno"
+              id="rut"
+              name="rut"
+              type="text"
+              placeholder="12.345.678-9"
+              required
+            />
+            <p class="text-xs text-secondary mt-1.5">
+              ✓ Validación automática de RUT chileno (RF-008)
+            </p>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-4">
+            <Input label="Nombres" id="nombres" name="nombres" type="text" placeholder="Juan Pablo" required />
+            <Input label="Apellidos" id="apellidos" name="apellidos" type="text" placeholder="González Pérez" required />
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-4">
+            <Input label="Email" id="email" name="email" type="email" placeholder="alumno@ejemplo.cl" required />
+            <Input label="Teléfono / WhatsApp" id="telefono" name="telefono" type="tel" placeholder="+56 9 1234 5678" required />
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-4">
+            <Input label="Fecha de nacimiento" id="fecha_nacimiento" name="fecha_nacimiento" type="date" required />
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1.5">Sexo</label>
+              <select name="sexo" class="h-11 px-4 w-full text-sm bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-1">
+                <option value="M">Masculino</option>
+                <option value="F">Femenino</option>
+              </select>
+            </div>
+          </div>
+
+          <p class="text-sm text-secondary">
+            <a href="#modal-menores17" class="text-blue-600 hover:underline">¿Menor de 17 años? Ver requisitos (RF-007)</a>
+          </p>
+
+          <div>
+            <Input label="Dirección" id="direccion" name="direccion" type="text" placeholder="Calle Ejemplo 123, Depto 45" required />
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1.5">Región</label>
+              <select name="region" class="h-11 px-4 w-full text-sm bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-1">
+                <option value="16">Ñuble</option>
+                <option value="08">Biobío</option>
+                <option value="13">Metropolitana</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1.5">Comuna</label>
+              <select name="comuna" class="h-11 px-4 w-full text-sm bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-1">
+                <option value="chillan">Chillán</option>
+                <option value="chillan-viejo">Chillán Viejo</option>
+                <option value="barris">Barris</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1.5">Curso</label>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <label class="flex items-center gap-3 p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors has-[:checked]:border-gray-900 has-[:checked]:bg-gray-50">
+                <input type="radio" name="tipo_curso" value="clase_b" class="w-4 h-4 curso-radio" checked />
+                <div><p class="text-sm font-medium text-gray-900">Clase B</p><p class="text-xs text-secondary">Standard</p></div>
+              </label>
+              <label class="flex items-center gap-3 p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors has-[:checked]:border-gray-900 has-[:checked]:bg-gray-50">
+                <input type="radio" name="tipo_curso" value="clase_b_sence" class="w-4 h-4 curso-radio" />
+                <div><p class="text-sm font-medium text-gray-900">Clase B</p><p class="text-xs text-purple-600 font-medium">+ SENCE</p></div>
+              </label>
+              <label class="flex items-center gap-3 p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors has-[:checked]:border-gray-900 has-[:checked]:bg-gray-50">
+                <input type="radio" name="tipo_curso" value="profesional_a2" class="w-4 h-4 curso-radio" />
+                <div><p class="text-sm font-medium text-gray-900">Profesional A2</p><p class="text-xs text-secondary">Transporte público</p></div>
+              </label>
+              <label class="flex items-center gap-3 p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors has-[:checked]:border-gray-900 has-[:checked]:bg-gray-50">
+                <input type="radio" name="tipo_curso" value="profesional_a3" class="w-4 h-4 curso-radio" />
+                <div><p class="text-sm font-medium text-gray-900">Profesional A3</p><p class="text-xs text-secondary">Vehículos pesados</p></div>
+              </label>
+              <label class="flex items-center gap-3 p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors has-[:checked]:border-gray-900 has-[:checked]:bg-gray-50">
+                <input type="radio" name="tipo_curso" value="profesional_a4" class="w-4 h-4 curso-radio" />
+                <div><p class="text-sm font-medium text-gray-900">Profesional A4</p><p class="text-xs text-secondary">Transporte remunerado</p></div>
+              </label>
+              <label class="flex items-center gap-3 p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors has-[:checked]:border-gray-900 has-[:checked]:bg-gray-50">
+                <input type="radio" name="tipo_curso" value="profesional_a5" class="w-4 h-4 curso-radio" />
+                <div><p class="text-sm font-medium text-gray-900">Profesional A5</p><p class="text-xs text-secondary">Vehículos articulados</p></div>
+              </label>
+            </div>
+          </div>
+
+          <div id="sence-codigo-wrap" class="hidden">
+            <label class="block text-sm font-medium text-gray-700 mb-1.5" for="codigo_sence">Código SENCE</label>
+            <select id="codigo_sence" name="codigo_sence" class="h-11 px-4 w-full text-sm bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-1">
+              <option value="">Seleccione código vigente</option>
+              <option value="12345678-9">12345678-9 — Conducción Clase B</option>
+              <option value="87654321-0">87654321-0 — Conducción defensiva</option>
+              <option value="11223344-5">11223344-5 — Clase B inicial</option>
+              <option value="55443322-1">55443322-1 — Formación conductores</option>
+            </select>
+            <p class="text-xs text-secondary mt-1.5">Códigos vigentes en registro SENCE</p>
+          </div>
+
+          <div class="flex items-center justify-between pt-6 border-t border-gray-200">
+            <Button href={`${basePath}/matricula`} variant="ghost">Cancelar</Button>
+            <Button type="button" variant="primary" onClick="nextStep()">Siguiente paso →</Button>
+          </div>
+        </form>
+      </Card>
+    </div>
+
+    <div class="space-y-4">
+      <Card>
+        <h3 class="text-sm font-semibold text-gray-900 mb-4">Resumen del curso</h3>
+        <div class="space-y-3 text-sm">
+          <div class="flex justify-between"><span class="text-secondary">Tipo:</span><span class="font-medium text-gray-900">Clase B</span></div>
+          <div class="flex justify-between"><span class="text-secondary">Duración:</span><span class="font-medium text-gray-900">8 semanas</span></div>
+          <div class="flex justify-between"><span class="text-secondary">Clases prácticas:</span><span class="font-medium text-gray-900">18 horas</span></div>
+          <div class="flex justify-between"><span class="text-secondary">Clases teóricas:</span><span class="font-medium text-gray-900">12 horas</span></div>
+          <hr class="border-gray-200" />
+          <div class="flex justify-between items-baseline"><span class="text-secondary">Valor total:</span><span class="text-lg font-semibold text-gray-900">$280.000</span></div>
+        </div>
+      </Card>
+      <Card class="bg-blue-50 border-blue-200">
+        <div class="flex gap-3">
+          <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div>
+            <p class="text-sm font-medium text-blue-900 mb-1">Requisitos</p>
+            <ul class="text-xs text-blue-800 space-y-1">
+              <li>• Mayor de 17 años</li>
+              <li>• Cédula de identidad vigente</li>
+              <li>• Certificado médico</li>
+              <li>• Foto carnet</li>
+            </ul>
+          </div>
+        </div>
+      </Card>
+    </div>
+  </div>
+
+  <ModalMenores17 />
+</DashboardLayout>
+
+<script define:vars={{ basePath }}>
+  document.addEventListener('DOMContentLoaded', () => {
+    const senceWrap = document.getElementById('sence-codigo-wrap');
+    const radios = document.querySelectorAll('input[name="tipo_curso"].curso-radio');
+    function toggleSence() {
+      const checked = document.querySelector('input[name="tipo_curso"]:checked');
+      if (senceWrap) senceWrap.classList.toggle('hidden', checked?.getAttribute('value') !== 'clase_b_sence');
+    }
+    radios.forEach((r) => r.addEventListener('change', toggleSence));
+    toggleSence();
+  });
+  function nextStep() {
+    const form = document.getElementById('matriculaForm');
+    if (!form) return;
+    const tipoCursoEl = document.querySelector('input[name="tipo_curso"]:checked');
+    const tipoCurso = (tipoCursoEl && 'value' in tipoCursoEl ? tipoCursoEl.value : null) ?? 'clase_b';
+    const codigoSenceEl = document.querySelector('select[name="codigo_sence"]');
+    const codigoSence = (codigoSenceEl && 'value' in codigoSenceEl ? codigoSenceEl.value : '') ?? '';
+    const formData = {
+      nombres: (document.getElementById('nombres') as HTMLInputElement | null)?.value ?? '',
+      apellidos: (document.getElementById('apellidos') as HTMLInputElement | null)?.value ?? '',
+      rut: (document.getElementById('rut') as HTMLInputElement | null)?.value ?? '',
+      fechaNacimiento: (document.getElementById('fecha_nacimiento') as HTMLInputElement | null)?.value ?? '',
+      email: (document.getElementById('email') as HTMLInputElement | null)?.value ?? '',
+      telefono: (document.getElementById('telefono') as HTMLInputElement | null)?.value ?? '',
+      direccion: (document.getElementById('direccion') as HTMLInputElement | null)?.value ?? '',
+      region: (document.querySelector('select[name="region"]') as HTMLSelectElement | null)?.value ?? '',
+      comuna: (document.querySelector('select[name="comuna"]') as HTMLSelectElement | null)?.value ?? '',
+      tipo_curso: tipoCurso,
+      codigo_sence: tipoCurso === 'clase_b_sence' ? codigoSence : '',
+      sexo: (document.querySelector('select[name="sexo"]') as HTMLSelectElement | null)?.value ?? '',
+      timestamp: new Date().toISOString(),
+    };
+    sessionStorage.setItem('matricula_paso1', JSON.stringify(formData));
+    window.location.href = (typeof basePath !== 'undefined' ? basePath : '') + '/matricula/nueva/paso-2';
+  }
+  (window as unknown as { nextStep: () => void }).nextStep = nextStep;
+</script>
+
+<style>
+  select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.5rem center; background-size: 1.5em 1.5em; padding-right: 2.5rem; }
+  input[type="radio"] { appearance: none; width: 1rem; height: 1rem; border: 2px solid rgb(209, 213, 219); border-radius: 50%; position: relative; cursor: pointer; flex-shrink: 0; }
+  input[type="radio"]:checked { border-color: rgb(17, 24, 39); background-color: rgb(17, 24, 39); }
+  input[type="radio"]:checked::before { content: ""; position: absolute; inset: 2px; background-color: white; border-radius: 50%; }
+</style>

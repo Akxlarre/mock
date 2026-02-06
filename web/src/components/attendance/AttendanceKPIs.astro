@@ -1,0 +1,78 @@
+---
+/**
+ * KPIs de Asistencia
+ * Muestra métricas clave de asistencia en tarjetas visuales
+ */
+import Card from "../ui/Card.astro";
+
+export interface Props {
+    attendanceRate: number; // Porcentaje 0-100
+    todayAbsences: number;
+    todayTotal: number;
+    studentsAtRisk: number; // Con 1 falta consecutiva
+    schedulesRemoved: number; // Esta semana
+}
+
+const {
+    attendanceRate,
+    todayAbsences,
+    todayTotal,
+    studentsAtRisk,
+    schedulesRemoved,
+} = Astro.props;
+
+// Calcular cambio vs mes anterior (mock por ahora)
+const rateChange = "+2.3%";
+const rateChangeTrend = "up";
+---
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <!-- Tasa de Asistencia -->
+    <Card class="p-6 hover:shadow-lg transition-shadow">
+        <p class="text-sm text-gray-600 mb-1 font-medium">Tasa de Asistencia</p>
+        <p class="text-4xl font-bold text-green-600 mb-1">
+            {attendanceRate.toFixed(1)}%
+        </p>
+        <div class="flex items-center gap-1 text-xs text-gray-500">
+            {
+                rateChangeTrend === "up" ? (
+                    <span class="text-green-600">↑</span>
+                ) : (
+                    <span class="text-red-600">↓</span>
+                )
+            }
+            <span>{rateChange} vs mes anterior</span>
+        </div>
+    </Card>
+
+    <!-- Inasistencias Hoy -->
+    <Card class="p-6 hover:shadow-lg transition-shadow">
+        <p class="text-sm text-gray-600 mb-1 font-medium">Inasistencias Hoy</p>
+        <p class="text-4xl font-bold text-red-600 mb-1">
+            {todayAbsences}
+        </p>
+        <p class="text-xs text-gray-500">
+            de {todayTotal} clases programadas
+        </p>
+    </Card>
+
+    <!-- Alumnos en Riesgo -->
+    <Card class="p-6 hover:shadow-lg transition-shadow">
+        <p class="text-sm text-gray-600 mb-1 font-medium">Alumnos en Riesgo</p>
+        <p class="text-4xl font-bold text-yellow-600 mb-1">
+            {studentsAtRisk}
+        </p>
+        <p class="text-xs text-gray-500">1 falta consecutiva</p>
+    </Card>
+
+    <!-- Horarios Eliminados -->
+    <Card class="p-6 hover:shadow-lg transition-shadow">
+        <p class="text-sm text-gray-600 mb-1 font-medium">
+            Horarios Eliminados
+        </p>
+        <p class="text-4xl font-bold text-gray-900 mb-1">
+            {schedulesRemoved}
+        </p>
+        <p class="text-xs text-gray-500">Esta semana</p>
+    </Card>
+</div>

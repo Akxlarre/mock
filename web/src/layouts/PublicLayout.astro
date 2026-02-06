@@ -1,0 +1,47 @@
+---
+/**
+ * Layout Público - Para páginas de marketing
+ * Sin sidebar/topbar, optimizado para conversión
+ */
+import { ViewTransitions } from "astro:transitions";
+
+interface Props {
+    title?: string;
+    description?: string;
+}
+
+const {
+    title = "Escuela de Conductores - Obtén tu Licencia",
+    description = "Aprende a conducir con los mejores instructores. Cursos Clase B, SENCE, y profesionales. Matrícula online 24/7.",
+} = Astro.props;
+
+import "../assets/app.css";
+---
+
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="description" content={description} />
+
+        <!-- SEO -->
+        <meta
+            name="keywords"
+            content="escuela de conductores, curso conducción, licencia clase b, clases de manejo, chillán"
+        />
+        <meta name="author" content="Escuela de Conductores Chillán" />
+
+        <!-- Open Graph -->
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+        <meta property="og:type" content="website" />
+
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <title>{title}</title>
+        <ViewTransitions />
+    </head>
+    <body class="min-h-screen bg-white">
+        <slot />
+    </body>
+</html>

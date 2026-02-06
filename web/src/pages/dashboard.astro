@@ -1,0 +1,298 @@
+---
+/**
+ * Dashboard Admin - Vista principal
+ * KPIs, actividad reciente, alertas
+ */
+import DashboardLayout from "../layouts/DashboardLayout.astro";
+import Card from "../components/ui/Card.astro";
+import Button from "../components/ui/Button.astro";
+---
+
+<DashboardLayout
+    title="Dashboard"
+    userRole="admin"
+    userName="Jorge Administrador"
+>
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-semibold text-gray-900">Dashboard</h1>
+        <p class="text-secondary mt-1">Bienvenido de vuelta, Jorge</p>
+    </div>
+
+    <!-- KPIs -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <Card class="p-6">
+            <div class="flex items-center justify-between mb-2">
+                <p class="text-sm text-secondary">Alumnos Activos</p>
+                <div
+                    class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"
+                >
+                    <svg
+                        class="w-5 h-5 text-blue-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                        ></path>
+                    </svg>
+                </div>
+            </div>
+            <p class="text-3xl font-bold text-gray-900">234</p>
+            <p class="text-xs text-green-600 mt-1">↗ +12% vs mes anterior</p>
+        </Card>
+
+        <Card class="p-6">
+            <div class="flex items-center justify-between mb-2">
+                <p class="text-sm text-secondary">Clases Hoy</p>
+                <div
+                    class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center"
+                >
+                    <svg
+                        class="w-5 h-5 text-green-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+                        ></path>
+                    </svg>
+                </div>
+            </div>
+            <p class="text-3xl font-bold text-gray-900">18</p>
+            <p class="text-xs text-secondary mt-1">12 prácticas, 6 teóricas</p>
+        </Card>
+
+        <Card class="p-6">
+            <div class="flex items-center justify-between mb-2">
+                <p class="text-sm text-secondary">Ingresos Mes</p>
+                <div
+                    class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center"
+                >
+                    <svg
+                        class="w-5 h-5 text-purple-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        ></path>
+                    </svg>
+                </div>
+            </div>
+            <p class="text-3xl font-bold text-gray-900">$8.2M</p>
+            <p class="text-xs text-green-600 mt-1">↗ +8% vs mes anterior</p>
+        </Card>
+
+        <Card class="p-6">
+            <div class="flex items-center justify-between mb-2">
+                <p class="text-sm text-secondary">Vehículos</p>
+                <div
+                    class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center"
+                >
+                    <svg
+                        class="w-5 h-5 text-orange-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"
+                        ></path>
+                    </svg>
+                </div>
+            </div>
+            <p class="text-3xl font-bold text-gray-900">8 / 12</p>
+            <p class="text-xs text-secondary mt-1">En uso / Total</p>
+        </Card>
+    </div>
+
+    <!-- Main content grid -->
+    <div class="grid lg:grid-cols-3 gap-6">
+        <!-- Actividad reciente -->
+        <div class="lg:col-span-2">
+            <Card>
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">
+                    Actividad Reciente
+                </h2>
+                <div class="space-y-4">
+                    {
+                        [
+                            {
+                                tipo: "matricula",
+                                texto: "Nueva matrícula: María González - Clase B",
+                                tiempo: "Hace 5 min",
+                                icon: "user-add",
+                            },
+                            {
+                                tipo: "pago",
+                                texto: "Pago recibido: $280.000 - Juan Pérez",
+                                tiempo: "Hace 12 min",
+                                icon: "cash",
+                            },
+                            {
+                                tipo: "clase",
+                                texto: "Clase completada: Instructor Carlos - Ana Martínez",
+                                tiempo: "Hace 28 min",
+                                icon: "check",
+                            },
+                            {
+                                tipo: "alerta",
+                                texto: "Documento vencido: Vehículo ABC-123 - Revisión técnica",
+                                tiempo: "Hace 1 hora",
+                                icon: "alert",
+                            },
+                        ].map((actividad) => (
+                            <div class="flex items-start gap-3 pb-4 border-b border-gray-100 last:border-0">
+                                <div
+                                    class={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                                        actividad.tipo === "matricula"
+                                            ? "bg-blue-100"
+                                            : actividad.tipo === "pago"
+                                              ? "bg-green-100"
+                                              : actividad.tipo === "clase"
+                                                ? "bg-purple-100"
+                                                : "bg-red-100"
+                                    }`}
+                                >
+                                    <div
+                                        class={`w-2 h-2 rounded-full ${
+                                            actividad.tipo === "matricula"
+                                                ? "bg-blue-600"
+                                                : actividad.tipo === "pago"
+                                                  ? "bg-green-600"
+                                                  : actividad.tipo === "clase"
+                                                    ? "bg-purple-600"
+                                                    : "bg-red-600"
+                                        }`}
+                                    />
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm text-gray-900">
+                                        {actividad.texto}
+                                    </p>
+                                    <p class="text-xs text-secondary mt-0.5">
+                                        {actividad.tiempo}
+                                    </p>
+                                </div>
+                            </div>
+                        ))
+                    }
+                </div>
+            </Card>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- Alertas -->
+            <Card>
+                <h3 class="text-sm font-semibold text-gray-900 mb-3">
+                    Alertas Importantes
+                </h3>
+                <div class="space-y-3">
+                    <div class="p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <p class="text-sm font-medium text-red-900 mb-1">
+                            3 Documentos vencidos
+                        </p>
+                        <p class="text-xs text-red-700">
+                            Vehículos requieren atención
+                        </p>
+                    </div>
+                    <div
+                        class="p-3 bg-orange-50 border border-orange-200 rounded-lg"
+                    >
+                        <p class="text-sm font-medium text-orange-900 mb-1">
+                            12 Pagos pendientes
+                        </p>
+                        <p class="text-xs text-orange-700">
+                            Revisar cuentas por cobrar
+                        </p>
+                    </div>
+                </div>
+            </Card>
+
+            <!-- Accesos rápidos -->
+            <Card>
+                <h3 class="text-sm font-semibold text-gray-900 mb-3">
+                    Accesos Rápidos
+                </h3>
+                <div class="space-y-2">
+                    <Button
+                        href="/matricula/nuevo"
+                        variant="primary"
+                        class="w-full text-sm justify-start"
+                    >
+                        <svg
+                            class="w-4 h-4 mr-2"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        Nueva Matrícula
+                    </Button>
+                    <Button
+                        href="/agenda"
+                        variant="secondary"
+                        class="w-full text-sm justify-start"
+                    >
+                        <svg
+                            class="w-4 h-4 mr-2"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                            ></path>
+                        </svg>
+                        Ver Agenda
+                    </Button>
+                    <Button
+                        href="/pagos"
+                        variant="secondary"
+                        class="w-full text-sm justify-start"
+                    >
+                        <svg
+                            class="w-4 h-4 mr-2"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                            ></path>
+                        </svg>
+                        Registrar Pago
+                    </Button>
+                </div>
+            </Card>
+        </div>
+    </div>
+</DashboardLayout>

@@ -1,0 +1,138 @@
+---
+/**
+ * Contenido de Gestión de Psicotécnico. Reutilizable para admin y secretaria con basePath.
+ * RF-037: Control de evaluaciones psicosensométricas externas
+ */
+import Card from "../ui/Card.astro";
+import Button from "../ui/Button.astro";
+
+interface Props {
+  basePath?: string;
+}
+
+const { basePath = "" } = Astro.props;
+
+const alumnosPendientes = [
+  { id: 1, nombre: "Juan Pérez González", rut: "12.345.678-9", curso: "Clase B", fechaMatricula: "2026-02-01", realizado: false, fechaEvaluacion: null },
+  { id: 2, nombre: "María López Silva", rut: "18.765.432-1", curso: "Clase B", fechaMatricula: "2026-02-02", realizado: false, fechaEvaluacion: null },
+  { id: 3, nombre: "Carlos Rojas Muñoz", rut: "15.234.567-8", curso: "Clase Profesional", fechaMatricula: "2026-01-28", realizado: true, fechaEvaluacion: "2026-01-30" },
+  { id: 4, nombre: "Ana García Torres", rut: "17.456.789-2", curso: "Clase B", fechaMatricula: "2026-02-03", realizado: false, fechaEvaluacion: null },
+  { id: 5, nombre: "Pedro Sánchez Díaz", rut: "16.789.123-5", curso: "Clase B", fechaMatricula: "2026-01-25", realizado: true, fechaEvaluacion: "2026-01-27" },
+];
+
+const pendientes = alumnosPendientes.filter((a) => !a.realizado).length;
+const realizados = alumnosPendientes.filter((a) => a.realizado).length;
+---
+
+<div class="mb-8">
+  <div class="flex items-center gap-2 text-sm text-secondary mb-2">
+    <a href={`${basePath}/dashboard`} class="hover:text-gray-900">Inicio</a>
+    <span>/</span>
+    <span class="text-gray-900 font-medium">Psicotécnico</span>
+  </div>
+  <h1 class="text-3xl font-semibold text-gray-900 mb-2">Gestión de Psicotécnico</h1>
+  <p class="text-secondary">Control de evaluaciones psicosensométricas externas</p>
+</div>
+
+<div class="grid sm:grid-cols-3 gap-4 mb-6">
+  <Card class="border-l-4 border-yellow-500">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm text-secondary mb-1">Pendientes</p>
+        <p class="text-3xl font-bold text-yellow-600">{pendientes}</p>
+      </div>
+    </div>
+  </Card>
+  <Card class="border-l-4 border-green-500">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm text-secondary mb-1">Realizados</p>
+        <p class="text-3xl font-bold text-green-600">{realizados}</p>
+      </div>
+    </div>
+  </Card>
+  <Card class="border-l-4 border-blue-500">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-sm text-secondary mb-1">Total Alumnos</p>
+        <p class="text-3xl font-bold text-blue-600">{alumnosPendientes.length}</p>
+      </div>
+    </div>
+  </Card>
+</div>
+
+<div class="flex flex-wrap gap-3 mb-6">
+  <Button variant="primary" onClick="cargaMasiva()">Cargar Excel Masivo</Button>
+  <select id="filtro-estado" class="h-11 px-4 text-sm border border-gray-300 rounded-md">
+    <option value="todos">Todos los alumnos</option>
+    <option value="pendientes">Solo pendientes</option>
+    <option value="realizados">Solo realizados</option>
+  </select>
+  <Button variant="secondary" onClick="exportarExcel()">Exportar</Button>
+</div>
+
+<Card>
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-xl font-semibold text-gray-900">Listado de Alumnos</h2>
+    <span class="text-sm text-secondary">{alumnosPendientes.length} registros</span>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="w-full" id="tabla-alumnos">
+      <thead>
+        <tr class="border-b border-gray-200">
+          <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase">Alumno</th>
+          <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase">RUT</th>
+          <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase">Curso</th>
+          <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase">Fecha Matrícula</th>
+          <th class="text-center py-3 px-4 text-xs font-semibold text-gray-700 uppercase">Estado</th>
+          <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase">Fecha Evaluación</th>
+          <th class="text-center py-3 px-4 text-xs font-semibold text-gray-700 uppercase">Acción</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {alumnosPendientes.map((alumno) => (
+          <tr class={`hover:bg-gray-50 transition-colors ${alumno.realizado ? "opacity-60" : ""}`} data-estado={alumno.realizado ? "realizado" : "pendiente"}>
+            <td class="py-3 px-4 text-sm font-medium text-gray-900">{alumno.nombre}</td>
+            <td class="py-3 px-4 text-sm text-secondary">{alumno.rut}</td>
+            <td class="py-3 px-4 text-sm text-gray-700">{alumno.curso}</td>
+            <td class="py-3 px-4 text-sm text-secondary">{alumno.fechaMatricula}</td>
+            <td class="py-3 px-4 text-center">
+              {alumno.realizado ? <span class="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">Realizado</span> : <span class="inline-flex items-center gap-1 px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">Pendiente</span>}
+            </td>
+            <td class="py-3 px-4">{alumno.realizado ? <span class="text-sm text-gray-700">{alumno.fechaEvaluacion}</span> : <input type="date" class="w-full max-w-xs px-2 py-1 text-sm border border-gray-300 rounded" data-alumno-id={alumno.id} onchange={`registrarFecha(${alumno.id})`} />}</td>
+            <td class="py-3 px-4 text-center">
+              {alumno.realizado ? <button type="button" class="text-sm text-blue-600 hover:text-blue-700 font-medium" onclick={`verCertificado(${alumno.id})`}>Ver Certificado</button> : <label class="flex items-center justify-center gap-2 cursor-pointer"><input type="checkbox" class="rounded border-gray-300" onchange={`marcarRealizado(${alumno.id})`} /><span class="text-sm text-gray-700">Marcar realizado</span></label>}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+    <p class="text-sm font-medium text-blue-900 mb-1">📋 Información del Proceso</p>
+    <ul class="text-xs text-blue-800 space-y-1">
+      <li>• Los alumnos pueden realizar el psicotécnico en centros autorizados.</li>
+      <li>• El certificado debe ser subido al sistema dentro de 30 días.</li>
+    </ul>
+  </div>
+</Card>
+
+<script is:inline>
+  const filtroEstado = document.getElementById("filtro-estado");
+  const tabla = document.getElementById("tabla-alumnos");
+  filtroEstado?.addEventListener("change", function(e) {
+    const valor = e.target.value;
+    tabla?.querySelectorAll("tbody tr").forEach(function(fila) {
+      const estado = fila.getAttribute("data-estado");
+      if (valor === "todos") fila.style.display = "";
+      else if (valor === "pendientes" && estado === "pendiente") fila.style.display = "";
+      else if (valor === "realizados" && estado === "realizado") fila.style.display = "";
+      else fila.style.display = "none";
+    });
+  });
+  window.cargaMasiva = function() { alert("Carga masiva de evaluaciones."); };
+  window.exportarExcel = function() { alert("Exportando Excel..."); };
+  window.marcarRealizado = function(alumnoId) { if (confirm("¿Confirmar psicotécnico realizado?")) { alert("Registrado."); setTimeout(function() { location.reload(); }, 1000); } };
+  window.registrarFecha = function(alumnoId) { console.log("Fecha alumno " + alumnoId); };
+  window.verCertificado = function(alumnoId) { alert("Ver certificado psicotécnico."); };
+</script>

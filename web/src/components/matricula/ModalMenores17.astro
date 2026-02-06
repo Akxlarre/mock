@@ -1,0 +1,19 @@
+---
+/**
+ * Modal RF-007: Edad insuficiente – menores de 17 años.
+ * Mensaje sobre requisito 17 años + autorización notarial. Cerrar y "Descargar PDF autorización".
+ */
+import Modal from '../ui/Modal.astro';
+---
+<Modal id="modal-menores17" title="Edad insuficiente">
+  <p class="text-base-content/90 mb-4">
+    Para matricularse en la clase B se requiere tener al menos <strong>17 años</strong> cumplidos.
+  </p>
+  <p class="text-base-content/90 mb-4">
+    Los menores de 18 años deben presentar <strong>autorización notarial</strong> de su representante legal. Puede descargar el formulario en PDF para llevarlo a notaría.
+  </p>
+  <div slot="footer" class="flex flex-wrap gap-3">
+    <a href="#" class="btn btn-ghost min-h-11">Cerrar</a>
+    <a href="#" class="btn btn-primary min-h-11" download>Descargar PDF autorización</a>
+  </div>
+</Modal>

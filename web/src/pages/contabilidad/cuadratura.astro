@@ -1,0 +1,13 @@
+---
+/**
+ * Cuadratura Diaria de Caja
+ * RF-036: Control de ingresos y cierre diario
+ */
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import CuadraturaContent from "../../components/contabilidad/CuadraturaContent.astro";
+import { ESCUELA_ACTUAL } from "../../lib/mockData";
+---
+
+<DashboardLayout title="Cuadratura de Caja" escuela={ESCUELA_ACTUAL}>
+  <CuadraturaContent basePath="" />
+</DashboardLayout>

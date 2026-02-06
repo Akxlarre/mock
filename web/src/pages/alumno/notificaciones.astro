@@ -1,0 +1,267 @@
+---
+/**
+ * Centro de Notificaciones - Alumno
+ * Notificaciones relevantes para alumnos
+ */
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import Card from "../../components/ui/Card.astro";
+import Button from "../../components/ui/Button.astro";
+
+// Notificaciones para ALUMNO
+const notifications = [
+    // CLASES PRÓXIMAS
+    {
+        id: 1,
+        priority: "urgent",
+        title: "⏰ Clase mañana a las 09:00",
+        message:
+            "Clase práctica con instructor Carlos Rojas - Vehículo ABCD-12 - Plaza Central",
+        time: "Hace 2 horas",
+        unread: true,
+        icon: "🚗",
+        action: { label: "Ver detalles", href: "/alumno/clases" },
+    },
+    {
+        id: 2,
+        priority: "high",
+        title: "Recordatorio: Clase en 2 días",
+        message: "Clase teórica - 06/02 a las 15:00 - Sala 2",
+        time: "Hace 5 horas",
+        unread: true,
+        icon: "📚",
+        action: { label: "Confirmar asistencia", href: "/alumno/clases" },
+    },
+
+    // PAGOS
+    {
+        id: 3,
+        priority: "urgent",
+        title: "🚨 Cuota vencida",
+        message: "Cuota #2 vencida el 01/02/2026 - Total pendiente: $150.000",
+        time: "Hace 1 día",
+        unread: true,
+        icon: "💰",
+        action: { label: "Pagar ahora", href: "/alumno/pagos" },
+    },
+    {
+        id: 4,
+        priority: "medium",
+        title: "Recordatorio de pago",
+        message: "Última cuota vence en 7 días (11/02/2026)",
+        time: "Hace 2 días",
+        unread: false,
+        icon: "📅",
+        action: { label: "Ver estado cuenta", href: "/alumno/pagos" },
+    },
+
+    // PROGRESO
+    {
+        id: 5,
+        priority: "low",
+        title: "✅ Clase completada",
+        message:
+            "Clase práctica #8 de 12 - Excelente progreso en estacionamiento",
+        time: "Hace 2 días",
+        unread: false,
+        icon: "🎯",
+        action: { label: "Ver progreso", href: "/alumno/dashboard" },
+    },
+    {
+        id: 6,
+        priority: "low",
+        title: "¡50% completado!",
+        message: "Has completado 6 de 12 clases - Vas muy bien, sigue así",
+        time: "Hace 3 días",
+        unread: false,
+        icon: "🎉",
+    },
+
+    // CERTIFICADOS
+    {
+        id: 7,
+        priority: "high",
+        title: "🏆 ¡Certificado disponible!",
+        message:
+            "Completaste todas las clases - Tu certificado está listo para descargar",
+        time: "Hace 4 días",
+        unread: true,
+        icon: "🎓",
+        action: { label: "Descargar", href: "/alumno/certificado" },
+    },
+
+    // DOCUMENTOS
+    {
+        id: 8,
+        priority: "medium",
+        title: "Certificado psicotécnico por vencer",
+        message: "Tu certificado vence en 15 días - Recuerda renovarlo",
+        time: "Hace 5 días",
+        unread: false,
+        icon: "🧠",
+        action: { label: "Agendar evaluación", href: "/alumno/ayuda" },
+    },
+    {
+        id: 9,
+        priority: "low",
+        title: "Documento aprobado",
+        message: "Tu certificado de salud fue aprobado por secretaría",
+        time: "Hace 1 semana",
+        unread: false,
+        icon: "✅",
+    },
+
+    // CANCELACIONES
+    {
+        id: 10,
+        priority: "medium",
+        title: "Clase cancelada por instructor",
+        message: "Tu clase del 03/02 fue cancelada - No cuenta como tomada",
+        time: "Hace 1 semana",
+        unread: false,
+        icon: "❌",
+        action: { label: "Ver Horario", href: "/alumno/horario" },
+    },
+
+    // ENCUESTAS
+    {
+        id: 11,
+        priority: "low",
+        title: "Cuéntanos tu experiencia",
+        message: "¿Cómo fue tu clase con el instructor Carlos Rojas?",
+        time: "Hace 1 semana",
+        unread: false,
+        icon: "⭐",
+        action: { label: "Evaluar", href: "/alumno/encuesta" },
+    },
+
+    // PROMOCIONES
+    {
+        id: 12,
+        priority: "low",
+        title: "¡Recomienda y gana!",
+        message:
+            "Por cada amigo que se matricule, obtén 10% descuento en tu próximo curso",
+        time: "Hace 2 semanas",
+        unread: false,
+        icon: "🎁",
+    },
+
+    // CONSEJOS
+    {
+        id: 13,
+        priority: "low",
+        title: "Consejo de conducción",
+        message:
+            "Recuerda siempre revisar los espejos antes de cambiar de pista",
+        time: "Hace 2 semanas",
+        unread: false,
+        icon: "💡",
+    },
+];
+
+const urgent = notifications.filter((n) => n.priority === "urgent");
+const unreadCount = notifications.filter((n) => n.unread).length;
+---
+
+<DashboardLayout
+    title="Notificaciones"
+    userRole="alumno"
+    userName="María González"
+>
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="mb-6">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">
+                🔔 Mis Notificaciones
+            </h1>
+            <p class="text-secondary">
+                {unreadCount} sin leer • {notifications.length} totales
+            </p>
+        </div>
+
+        <!-- Urgente -->
+        {
+            urgent.length > 0 && (
+                <Card class="mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-500">
+                    <div class="flex items-center gap-3">
+                        <span class="text-3xl">⚠️</span>
+                        <div class="flex-1">
+                            <p class="font-semibold text-yellow-900">
+                                Atención requerida
+                            </p>
+                            <p class="text-sm text-yellow-700">
+                                Tienes {urgent.length} notificación(es)
+                                importante(s)
+                            </p>
+                        </div>
+                    </div>
+                </Card>
+            )
+        }
+
+        <!-- Lista de notificaciones -->
+        <div class="space-y-3">
+            {
+                notifications.map((notif) => (
+                    <Card
+                        class={`p-4 ${notif.unread ? "bg-blue-50 border-l-4 border-blue-500" : ""} ${notif.priority === "urgent" ? "border-l-4 border-red-500 bg-red-50" : ""} ${notif.priority === "high" && notif.unread ? "border-l-4 border-orange-500 bg-orange-50" : ""}`}
+                    >
+                        <div class="flex items-start justify-between gap-4">
+                            <div class="flex items-start gap-3 flex-1">
+                                <span class="text-2xl flex-shrink-0">
+                                    {notif.icon}
+                                </span>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        {notif.unread && (
+                                            <span class="w-2 h-2 bg-blue-600 rounded-full" />
+                                        )}
+                                        <h3 class="font-semibold text-gray-900">
+                                            {notif.title}
+                                        </h3>
+                                    </div>
+                                    <p class="text-sm text-gray-700 mb-2">
+                                        {notif.message}
+                                    </p>
+                                    <p class="text-xs text-gray-500">
+                                        {notif.time}
+                                    </p>
+                                </div>
+                            </div>
+                            {notif.action && (
+                                <Button
+                                    href={notif.action.href}
+                                    variant={
+                                        notif.priority === "urgent" ||
+                                        notif.priority === "high"
+                                            ? "primary"
+                                            : "secondary"
+                                    }
+                                    class="flex-shrink-0"
+                                >
+                                    {notif.action.label}
+                                </Button>
+                            )}
+                        </div>
+                    </Card>
+                ))
+            }
+        </div>
+
+        <!-- Tip -->
+        <Card class="mt-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50">
+            <div class="flex items-start gap-3">
+                <span class="text-2xl">💡</span>
+                <div>
+                    <p class="font-semibold text-gray-900 mb-1">
+                        ¿Sabías que...?
+                    </p>
+                    <p class="text-sm text-gray-700">
+                        Puedes activar notificaciones push en tu navegador para
+                        recibir recordatorios de tus clases en tiempo real
+                    </p>
+                </div>
+            </div>
+        </Card>
+    </div>
+</DashboardLayout>

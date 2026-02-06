@@ -1,0 +1,13 @@
+---
+/**
+ * Asistencia - Matriz de asistencia
+ * RF-046: ✓ Asistió | F Falta | - Pendiente
+ */
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import AsistenciaIndexContent from "../../components/asistencia/AsistenciaIndexContent.astro";
+import { ESCUELA_ACTUAL } from "../../lib/mockData";
+---
+
+<DashboardLayout title="Matriz asistencia - Escuela de Conductores" escuela={ESCUELA_ACTUAL}>
+  <AsistenciaIndexContent basePath="" />
+</DashboardLayout>

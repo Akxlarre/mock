@@ -1,0 +1,75 @@
+---
+/**
+ * Wizard Matrícula - Paso 2: Documentos (secretaria)
+ */
+import DashboardLayout from "../../../../layouts/DashboardLayout.astro";
+import Card from "../../../../components/ui/Card.astro";
+import Button from "../../../../components/ui/Button.astro";
+import MatriculaWizardSteps from "../../../../components/matricula/MatriculaWizardSteps.astro";
+import UploadDocumento from "../../../../components/matricula/UploadDocumento.astro";
+import { ESCUELA_ACTUAL } from "../../../../lib/mockData";
+
+const basePath = "/secretaria";
+const alumnoData = { nombre: "María González Pérez", rut: "18.234.567-8", curso: "Clase B" };
+---
+
+<DashboardLayout title="Matrícula - Documentación" escuela={ESCUELA_ACTUAL} userRole="secretaria">
+  <MatriculaWizardSteps pasoActual={2} basePath={basePath} />
+
+  <Card class="max-w-4xl mx-auto">
+    <div id="alumno-info" class="bg-blue-50 rounded-lg p-4 mb-6 flex items-center gap-3">
+      <div id="alumno-inicial" class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">{alumnoData.nombre.charAt(0)}</div>
+      <div>
+        <p id="alumno-nombre" class="text-sm font-semibold text-gray-900">{alumnoData.nombre}</p>
+        <p id="alumno-rut-curso" class="text-xs text-secondary">{alumnoData.rut} • {alumnoData.curso}</p>
+      </div>
+    </div>
+    <h2 class="text-xl font-semibold text-base-content mb-6">Documentos Requeridos</h2>
+    <form id="documentos-form" class="space-y-6">
+      <UploadDocumento label="Foto Carnet de Identidad (anverso y reverso)" required={true} acceptedFormats=".jpg,.png,.pdf" maxSize="5" id="carnet" helperText="Asegúrate de que se vean todos los datos claramente" />
+      <UploadDocumento label="Foto del Alumno (frontal, fondo blanco)" required={true} acceptedFormats=".jpg,.png" maxSize="2" id="foto-alumno" helperText="⚠️ Evitar pixelación, rostro debe estar completamente visible" />
+      <UploadDocumento label="Certificado Médico (opcional)" required={false} acceptedFormats=".pdf" maxSize="5" id="certificado-medico" helperText="Opcional - Puedes presentarlo en la escuela" />
+      <div class="bg-gray-50 rounded-lg p-4">
+        <div class="flex gap-3">
+          <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          <div>
+            <p class="text-sm font-medium text-gray-900 mb-1">💡 Consejos</p>
+            <ul class="text-xs text-gray-700 space-y-1"><li>• Usa buena iluminación</li><li>• Asegúrate de que el texto sea legible</li><li>• Formato JPEG o PNG para fotos</li></ul>
+          </div>
+        </div>
+      </div>
+    </form>
+    <div class="flex gap-3 pt-6 mt-6 border-t border-gray-200">
+      <a href={`${basePath}/matricula/nueva/paso-1`} class="btn btn-ghost min-h-11">← Anterior</a>
+      <Button id="btn-siguiente" variant="primary" onClick="continuarPaso3()">Siguiente</Button>
+    </div>
+  </Card>
+</DashboardLayout>
+
+<script define:vars={{ basePath }}>
+  document.addEventListener('DOMContentLoaded', () => {
+    try {
+      const raw = sessionStorage.getItem('matricula_paso1');
+      if (raw) {
+        const data = JSON.parse(raw);
+        const nombreCompleto = [data.nombres, data.apellidos].filter(Boolean).join(' ') || 'Alumno';
+        const cursoLabels = { clase_b: 'Clase B', clase_b_sence: 'Clase B + SENCE', profesional_a2: 'Profesional A2', profesional_a3: 'Profesional A3', profesional_a4: 'Profesional A4', profesional_a5: 'Profesional A5' };
+        const cursoLabel = cursoLabels[String(data.tipo_curso ?? '')] || data.tipo_curso || 'Clase B';
+        const inicial = document.getElementById('alumno-inicial');
+        const nombreEl = document.getElementById('alumno-nombre');
+        const rutCursoEl = document.getElementById('alumno-rut-curso');
+        if (inicial) inicial.textContent = nombreCompleto.charAt(0).toUpperCase();
+        if (nombreEl) nombreEl.textContent = nombreCompleto;
+        if (rutCursoEl) rutCursoEl.textContent = `${data.rut || ''} • ${cursoLabel}`;
+      }
+    } catch (_) {}
+  });
+  let uploaded = { carnet: false, fotoAlumno: false };
+  function checkCanContinue() {
+    const btn = document.getElementById("btn-siguiente");
+    if (btn) { btn.disabled = !(uploaded.carnet && uploaded.fotoAlumno); btn.classList.toggle("opacity-50", !(uploaded.carnet && uploaded.fotoAlumno)); }
+  }
+  document.getElementById("carnet")?.addEventListener("change", (e) => { uploaded.carnet = ((e.target as HTMLInputElement).files?.length ?? 0) > 0; checkCanContinue(); });
+  document.getElementById("foto-alumno")?.addEventListener("change", (e) => { uploaded.fotoAlumno = ((e.target as HTMLInputElement).files?.length ?? 0) > 0; checkCanContinue(); });
+  (window as any).continuarPaso3 = function () { sessionStorage.setItem('matricula_paso2', 'ok'); window.location.href = (typeof basePath !== 'undefined' ? basePath : '') + "/matricula/nueva/paso-3"; };
+</script>

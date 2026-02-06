@@ -1,0 +1,13 @@
+---
+/**
+ * Certificados - Secretaría (mismo contenido que admin con basePath /secretaria)
+ * RF-050-052: Certificación automática al completar clases
+ */
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import CertificadosContent from "../../components/certificados/CertificadosContent.astro";
+import { ESCUELA_ACTUAL } from "../../lib/mockData";
+---
+
+<DashboardLayout title="Certificados" escuela={ESCUELA_ACTUAL} userRole="secretaria">
+  <CertificadosContent basePath="/secretaria" />
+</DashboardLayout>

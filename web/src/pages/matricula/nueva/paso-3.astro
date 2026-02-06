@@ -1,0 +1,319 @@
+---
+/**
+ * Wizard Matrícula - Paso 3: Pago y Descuentos
+ * RF-010: Matrícula manual con descuentos
+ */
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+import Card from "../../../components/ui/Card.astro";
+import Button from "../../../components/ui/Button.astro";
+import MatriculaWizardSteps from "../../../components/matricula/MatriculaWizardSteps.astro";
+import { ESCUELA_ACTUAL } from "../../../lib/mockData";
+
+const alumnoData = {
+  nombre: "María González Pérez",
+  rut: "18.234.567-8",
+  curso: "Clase B",
+};
+
+const PRECIO_BASE = 280000;
+const basePath = "";
+---
+
+<DashboardLayout title="Matrícula - Pago" escuela={ESCUELA_ACTUAL}>
+  <MatriculaWizardSteps pasoActual={3} basePath={basePath} />
+
+  <Card class="max-w-4xl mx-auto">
+    <!-- Alumno info (se actualiza desde sessionStorage si viene del flujo) -->
+    <div id="alumno-info-paso3" class="bg-blue-50 rounded-lg p-4 mb-6 flex items-center gap-3">
+      <div id="alumno-inicial-paso3" class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+        {alumnoData.nombre.charAt(0)}
+      </div>
+      <div>
+        <p id="alumno-nombre-paso3" class="text-sm font-semibold text-gray-900">{alumnoData.nombre}</p>
+        <p id="alumno-rut-curso-paso3" class="text-xs text-secondary">{alumnoData.rut} • {alumnoData.curso}</p>
+      </div>
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-900 mb-6">
+      Método de Pago y Descuentos
+    </h2>
+
+    <!-- Resumen según requerimientos (RF-009, RF-010) -->
+    <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+      <p class="text-sm font-medium text-amber-900 mb-1">Opciones de pago según requisitos</p>
+      <ul class="text-xs text-amber-800 space-y-1">
+        <li><strong>Todo de una:</strong> pagar matrícula completa ahora (efectivo, transferencia o tarjeta).</li>
+        <li><strong>Pagos parciales (RF-010):</strong> pagar solo una parte ahora; el saldo se calcula y queda pendiente.</li>
+        <li><strong>Pago pendiente:</strong> omitir pago inmediato y registrar la matrícula para cobrar después.</li>
+      </ul>
+      <p class="text-xs text-amber-700 mt-2">En contabilidad se distingue "Matrícula Clase B" y "Clases Clase B (pagos adicionales)" para el cierre diario.</p>
+    </div>
+
+    <!-- Precio base -->
+    <div class="bg-gray-50 rounded-lg p-6 mb-6">
+      <div class="flex justify-between items-center">
+        <div>
+          <p class="text-sm text-secondary mb-1">
+            Matrícula <span id="curso-label-paso3">{alumnoData.curso}</span>
+          </p>
+          <p class="text-xs text-muted">12 clases prácticas incluidas</p>
+        </div>
+        <p class="text-3xl font-bold text-gray-900">
+          ${PRECIO_BASE.toLocaleString("es-CL")}
+        </p>
+      </div>
+    </div>
+
+    <!-- Descuento -->
+    <Card class="mb-6 border-2 border-dashed border-gray-300">
+      <label class="flex items-center gap-2 mb-4 cursor-pointer">
+        <input
+          type="checkbox"
+          id="tiene-descuento"
+          class="checkbox checkbox-primary"
+        />
+        <span class="font-medium text-gray-900">Aplicar descuento</span>
+      </label>
+
+      <div id="descuento-fields" class="space-y-4 hidden">
+        <div>
+          <label class="label">
+            <span class="label-text font-medium">Monto descuento (CLP) *</span>
+          </label>
+          <input
+            type="number"
+            id="monto-descuento"
+            class="input input-bordered w-full min-h-11"
+            placeholder="50000"
+            min="0"
+            max={PRECIO_BASE}
+          />
+        </div>
+
+        <div>
+          <label class="label">
+            <span class="label-text font-medium">Motivo del descuento *</span>
+          </label>
+          <textarea
+            id="motivo-descuento"
+            class="textarea textarea-bordered w-full h-24"
+            placeholder="Ej: Promoción febrero 2026, Cliente referido..."
+          ></textarea>
+          <p class="text-xs text-secondary mt-1">
+            ⚠️ Quedará registrado en log de auditoría
+          </p>
+        </div>
+      </div>
+    </Card>
+
+    <!-- Total -->
+    <div
+      class="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-6 mb-6 border-2 border-blue-200"
+    >
+      <div class="flex justify-between items-center">
+        <div>
+          <p class="text-sm text-blue-900 font-medium">Total a Pagar</p>
+          <p id="descuento-aplicado" class="text-xs text-blue-700 hidden">
+            Descuento: <span id="descuento-monto-label">$0</span>
+          </p>
+        </div>
+        <p id="total-pagar" class="text-4xl font-bold text-blue-600">
+          ${PRECIO_BASE.toLocaleString("es-CL")}
+        </p>
+      </div>
+    </div>
+
+    <!-- Método pago -->
+    <div class="space-y-3">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Método de Pago</h3>
+
+      <label
+        class="flex items-start gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 cursor-pointer transition-all"
+      >
+        <input
+          type="radio"
+          name="metodo-pago"
+          value="efectivo"
+          class="radio radio-primary mt-1"
+          checked
+        />
+        <div>
+          <p class="font-semibold text-gray-900">💵 Efectivo</p>
+          <p class="text-sm text-secondary">Pago en caja</p>
+        </div>
+      </label>
+
+      <label
+        class="flex items-start gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 cursor-pointer transition-all"
+      >
+        <input
+          type="radio"
+          name="metodo-pago"
+          value="transferencia"
+          class="radio radio-primary mt-1"
+        />
+        <div>
+          <p class="font-semibold text-gray-900">🏦 Transferencia</p>
+          <p class="text-sm text-secondary">Upload comprobante</p>
+        </div>
+      </label>
+
+      <label
+        class="flex items-start gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 cursor-pointer transition-all"
+      >
+        <input
+          type="radio"
+          name="metodo-pago"
+          value="tarjeta"
+          class="radio radio-primary mt-1"
+        />
+        <div>
+          <p class="font-semibold text-gray-900">💳 Débito/Crédito</p>
+          <p class="text-sm text-secondary">Terminal POS</p>
+        </div>
+      </label>
+
+      <label
+        class="flex items-start gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-amber-300 hover:border-amber-400 cursor-pointer transition-all"
+      >
+        <input
+          type="radio"
+          name="metodo-pago"
+          value="pendiente"
+          class="radio radio-primary mt-1"
+        />
+        <div>
+          <p class="font-semibold text-gray-900">⏳ Dejar pago pendiente</p>
+          <p class="text-sm text-secondary">Cobrar después (RF-010: payment_status = pending)</p>
+        </div>
+      </label>
+    </div>
+
+    <div class="flex gap-3 pt-6 mt-6 border-t">
+      <a href={`${basePath}/matricula/nueva/paso-2`} class="btn btn-ghost min-h-11"
+        >← Anterior</a
+      >
+      <Button
+        id="btn-confirmar"
+        variant="primary"
+        onClick="confirmarMatricula()"
+      >
+        Confirmar Matrícula
+      </Button>
+    </div>
+  </Card>
+</DashboardLayout>
+
+<script define:vars={{ PRECIO_BASE, basePath }}>
+  document.addEventListener('DOMContentLoaded', () => {
+    try {
+      const raw = sessionStorage.getItem('matricula_paso1');
+      if (raw) {
+        const data = JSON.parse(raw);
+        const nombreCompleto = [data.nombres, data.apellidos].filter(Boolean).join(' ') || 'Alumno';
+        const cursoLabels = { clase_b: 'Clase B', clase_b_sence: 'Clase B + SENCE', profesional_a2: 'Profesional A2', profesional_a3: 'Profesional A3', profesional_a4: 'Profesional A4', profesional_a5: 'Profesional A5' };
+        const cursoLabel = cursoLabels[data.tipo_curso] || data.tipo_curso || 'Clase B';
+        const inicial = document.getElementById('alumno-inicial-paso3');
+        const nombreEl = document.getElementById('alumno-nombre-paso3');
+        const rutCursoEl = document.getElementById('alumno-rut-curso-paso3');
+        const cursoLabelEl = document.getElementById('curso-label-paso3');
+        if (inicial) inicial.textContent = nombreCompleto.charAt(0).toUpperCase();
+        if (nombreEl) nombreEl.textContent = nombreCompleto;
+        if (rutCursoEl) rutCursoEl.textContent = `${data.rut || ''} • ${cursoLabel}`;
+        if (cursoLabelEl) cursoLabelEl.textContent = cursoLabel;
+      }
+    } catch (_) {}
+  });
+
+  const checkboxDescuento = document.getElementById("tiene-descuento");
+  const descuentoFields = document.getElementById("descuento-fields");
+  const montoDescuento = document.getElementById("monto-descuento");
+  const motivoDescuento = document.getElementById("motivo-descuento");
+  const totalPagar = document.getElementById("total-pagar");
+  const descuentoAplicado = document.getElementById("descuento-aplicado");
+  const descuentoMontoLabel = document.getElementById("descuento-monto-label");
+
+  checkboxDescuento?.addEventListener("change", (e) => {
+    const checked = e.target?.checked ?? false;
+    descuentoFields?.classList.toggle("hidden", !checked);
+    if (!checked) {
+      if (montoDescuento) montoDescuento.value = "";
+      if (motivoDescuento) motivoDescuento.value = "";
+      updateTotal(0);
+    }
+  });
+
+  montoDescuento?.addEventListener("input", (e) => {
+    const descuento = parseInt(e.target?.value || "0") || 0;
+    updateTotal(descuento);
+  });
+
+  function updateTotal(descuento) {
+    const total = Math.max(PRECIO_BASE - descuento, 0);
+    if (totalPagar)
+      totalPagar.textContent = `$${total.toLocaleString("es-CL")}`;
+
+    if (descuento > 0) {
+      descuentoAplicado?.classList.remove("hidden");
+      if (descuentoMontoLabel)
+        descuentoMontoLabel.textContent = `$${descuento.toLocaleString("es-CL")}`;
+    } else {
+      descuentoAplicado?.classList.add("hidden");
+    }
+  }
+
+  window.confirmarMatricula = function () {
+    if (checkboxDescuento?.checked) {
+      const monto = parseInt(montoDescuento?.value || "0");
+      const motivo = motivoDescuento?.value.trim();
+
+      if (!monto || monto <= 0 || !motivo) {
+        alert("⚠️ Completa monto y motivo del descuento");
+        return;
+      }
+    }
+
+    const metodoPagoEl = document.querySelector('input[name="metodo-pago"]:checked');
+    const metodoPago = metodoPagoEl?.value;
+    const descuento = checkboxDescuento?.checked
+      ? parseInt(montoDescuento?.value || "0")
+      : 0;
+    const total = PRECIO_BASE - descuento;
+
+    let alumno = { nombre: "María González Pérez", rut: "18.234.567-8", curso: "Clase B", email: "", telefono: "" };
+    try {
+      const raw = sessionStorage.getItem("matricula_paso1");
+      if (raw) {
+        const d = JSON.parse(raw);
+        alumno = {
+          nombre: [d.nombres, d.apellidos].filter(Boolean).join(" ") || "Alumno",
+          rut: d.rut || "",
+          curso: { clase_b: "Clase B", clase_b_sence: "Clase B + SENCE", profesional_a2: "Profesional A2", profesional_a3: "Profesional A3", profesional_a4: "Profesional A4", profesional_a5: "Profesional A5" }[d.tipo_curso] || d.tipo_curso || "Clase B",
+          email: d.email || "",
+          telefono: d.telefono || "",
+        };
+      }
+    } catch (_) {}
+
+    sessionStorage.setItem(
+      "matricula_data",
+      JSON.stringify({
+        alumno,
+        pago: {
+          precioBase: PRECIO_BASE,
+          descuento,
+          motivo: motivoDescuento?.value || "",
+          total,
+          metodo: metodoPago,
+        },
+      }),
+    );
+
+    alert(
+      `✓ Matrícula confirmada\n\nTotal: $${total.toLocaleString("es-CL")}\n\nGenerando confirmación...`,
+    );
+    setTimeout(() => {
+      window.location.href = (typeof basePath !== 'undefined' ? basePath : '') + "/matricula/nueva/paso-4";
+    }, 1000);
+  };
+</script>

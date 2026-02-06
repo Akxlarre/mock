@@ -1,0 +1,130 @@
+---
+/**
+ * Página: Agendar Clase (Alumno)
+ * Permite al alumno agendar su próxima clase individual
+ */
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import Card from "../../components/ui/Card.astro";
+import Button from "../../components/ui/Button.astro";
+import CalendarWeekView from "../../components/schedules/CalendarWeekView.astro";
+import BookingModal from "../../components/schedules/BookingModal.astro";
+import { INSTRUCTORES } from "../../lib/mockInstructors";
+import { BOOKINGS, getPendingBookings, getNextClassNumber } from "../../lib/mockBookings";
+import { getAvailableBlocksForDay } from "../../lib/mockAvailability";
+
+// Mock: Alumno actual (ID = 1 María González)
+const currentStudentId = 1;
+const pendingBookings = getPendingBookings(currentStudentId);
+const nextClassNumber = getNextClassNumber(currentStudentId);
+const canBook = pendingBookings.length < 3 && nextClassNumber <= 12;
+
+// Generar semana actual
+const today = new Date();
+const currentDay = today.getDay();
+const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay;
+const monday = new Date(today);
+monday.setDate(today.getDate() + mondayOffset);
+
+const weekDays = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date(monday);
+    date.setDate(monday.getDate() + i);
+    const dayOfWeek = date.getDay();
+    
+    const slots = getAvailableBlocksForDay(dayOfWeek).map(time => ({
+        time,
+        available: true, // Simplificado para demo
+        booking: undefined
+    }));
+
+    return {
+        date: date.toISOString().split('T')[0],
+        dayName: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'][dayOfWeek],
+        dayNumber: date.getDate(),
+        isToday: date.toDateString() === today.toDateString(),
+        isClosed: dayOfWeek === 0,
+        slots
+    };
+});
+---
+
+<DashboardLayout title="Agendar Clase">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="mb-6">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">
+                Agendar Nueva Clase
+            </h1>
+            <p class="text-gray-600">
+                Selecciona el día y hora para tu Clase {nextClassNumber} de 12
+            </p>
+        </div>
+
+        <!-- Información del Alumno -->
+        <div class="grid md:grid-cols-3 gap-4 mb-6">
+            <Card class="p-4">
+                <p class="text-sm text-gray-600 mb-1">Próxima Clase</p>
+                <p class="text-2xl font-bold text-gray-900">{nextClassNumber}/12</p>
+            </Card>
+            <Card class="p-4">
+                <p class="text-sm text-gray-600 mb-1">Clases Pendientes</p>
+                <p class="text-2xl font-bold text-blue-600">{pendingBookings.length}/3</p>
+            </Card>
+            <Card class="p-4">
+                <p class="text-sm text-gray-600 mb-1">Estado</p>
+                <p class="text-sm font-medium text-green-700">
+                    {canBook ? "✅ Puedes agendar" : "⚠️ Máximo alcanzado"}
+                </p>
+            </Card>
+        </div>
+
+        {canBook ? (
+            <>
+                <!-- Calendario -->
+                <CalendarWeekView 
+                    weekDays={weekDays} 
+                    instructors={INSTRUCTORES}
+                />
+
+                <!-- Modal de Agendamiento -->
+                <BookingModal />
+            </>
+        ) : (
+            <Card class="p-8">
+                <div class="text-center max-w-md mx-auto">
+                    <svg class="w-16 h-16 text-orange-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                    <h2 class="text-xl font-semibold text-gray-900 mb-2">
+                        No puedes agendar más clases en este momento
+                    </h2>
+                    <p class="text-gray-600 mb-6">
+                        Ya tienes 3 clases agendadas (máximo permitido según RF-014).
+                        Debes completar o cancelar una clase antes de agendar otra.
+                    </p>
+                    <Button href="/alumno/clases" variant="primary">
+                        Ver Mis Clases
+                    </Button>
+                </div>
+            </Card>
+        )}
+
+        <!-- Instrucciones -->
+        <Card class="p-6 mt-6 bg-blue-50 border-blue-200">
+            <div class="flex gap-3">
+                <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div class="text-sm text-blue-800">
+                    <p class="font-medium mb-2">💡 Cómo agendar tu clase:</p>
+                    <ol class="list-decimal list-inside space-y-1">
+                        <li>Selecciona un bloque disponible (verde) en el calendario</li>
+                        <li>El sistema validará automáticamente todas las reglas</li>
+                        <li>Confirma el instructor, vehículo y horario</li>
+                        <li>Recibirás una confirmación por email/SMS</li>
+                        <li>Recuerda: puedes cancelar hasta 24 hrs antes sin penalización</li>
+                    </ol>
+                </div>
+            </div>
+        </Card>
+    </div>
+</DashboardLayout>

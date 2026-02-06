@@ -1,0 +1,180 @@
+---
+/**
+ * Agenda Semanal - Admin
+ * Vista completa del calendario con estadísticas
+ */
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import Card from "../../components/ui/Card.astro";
+import CalendarWeekView from "../../components/schedules/CalendarWeekView.astro";
+import BookingModal from "../../components/schedules/BookingModal.astro";
+import { INSTRUCTORES } from "../../lib/mockInstructors";
+import { VEHICULOS } from "../../lib/mockVehicles";
+import { BOOKINGS } from "../../lib/mockBookings";
+import { getAvailableBlocksForDay } from "../../lib/mockAvailability";
+
+// Generar semana actual
+const today = new Date();
+const currentDay = today.getDay();
+const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay;
+const monday = new Date(today);
+monday.setDate(today.getDate() + mondayOffset);
+
+const weekDays = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date(monday);
+    date.setDate(monday.getDate() + i);
+    const dayOfWeek = date.getDay();
+    const dateStr = date.toISOString().split("T")[0];
+
+    const availableBlocks = getAvailableBlocksForDay(dayOfWeek);
+
+    const slots = availableBlocks.map((time) => {
+        const booking = BOOKINGS.find(
+            (b) =>
+                b.bookingDate === dateStr &&
+                b.startTime === time &&
+                b.status === "scheduled",
+        );
+
+        return {
+            time,
+            available: !booking,
+            booking: booking
+                ? {
+                      id: booking.id,
+                      studentName: booking.studentName,
+                      instructorName: booking.instructorName,
+                      vehiclePatente: booking.vehiclePatente,
+                  }
+                : undefined,
+        };
+    });
+
+    return {
+        date: dateStr,
+        dayName: ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"][dayOfWeek],
+        dayNumber: date.getDate(),
+        isToday: date.toDateString() === today.toDateString(),
+        isClosed: dayOfWeek === 0,
+        slots,
+    };
+});
+
+// Estadísticas mejoradas
+const totalScheduled = BOOKINGS.filter((b) => b.status === "scheduled").length;
+const totalCompleted = BOOKINGS.filter((b) => b.status === "completed").length;
+const totalCancelled = BOOKINGS.filter((b) => b.status === "cancelled").length;
+const totalNoShow = BOOKINGS.filter((b) => b.status === "no_show").length;
+const activeInstructors = INSTRUCTORES.filter((i) => i.activo).length;
+const availableVehicles = VEHICULOS.filter(
+    (v) => v.status === "disponible",
+).length;
+---
+
+<DashboardLayout title="Agenda Semanal" userRole="admin">
+    <div class="mb-6">
+        <h1 class="text-3xl font-semibold text-gray-900 mb-2">
+            Agenda Semanal
+        </h1>
+        <p class="text-gray-600">
+            Panel de control completo para gestión de clases
+        </p>
+    </div>
+
+    <!-- Estadísticas Detalladas -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+        <Card class="p-4">
+            <p class="text-xs text-gray-600 mb-1">Agendadas</p>
+            <p class="text-2xl font-bold text-blue-600">{totalScheduled}</p>
+        </Card>
+        <Card class="p-4">
+            <p class="text-xs text-gray-600 mb-1">Completadas</p>
+            <p class="text-2xl font-bold text-green-600">{totalCompleted}</p>
+        </Card>
+        <Card class="p-4">
+            <p class="text-xs text-gray-600 mb-1">Canceladas</p>
+            <p class="text-2xl font-bold text-orange-600">{totalCancelled}</p>
+        </Card>
+        <Card class="p-4">
+            <p class="text-xs text-gray-600 mb-1">Inasistencias</p>
+            <p class="text-2xl font-bold text-red-600">{totalNoShow}</p>
+        </Card>
+        <Card class="p-4">
+            <p class="text-xs text-gray-600 mb-1">Instructores</p>
+            <p class="text-2xl font-bold text-gray-900">{activeInstructors}</p>
+        </Card>
+        <Card class="p-4">
+            <p class="text-xs text-gray-600 mb-1">Vehículos</p>
+            <p class="text-2xl font-bold text-gray-900">{availableVehicles}</p>
+        </Card>
+    </div>
+
+    <!-- Calendario -->
+    <CalendarWeekView weekDays={weekDays} instructors={INSTRUCTORES} />
+
+    <!-- Modal -->
+    <BookingModal />
+
+    <!-- Recursos Rápidos -->
+    <div class="grid md:grid-cols-2 gap-4 mt-6">
+        <Card class="p-6">
+            <h3 class="font-semibold text-gray-900 mb-3">
+                📊 Estadísticas del Sistema
+            </h3>
+            <div class="space-y-2 text-sm text-gray-700">
+                <p>
+                    • <strong>Tasa de finalización:</strong>
+                    {
+                        Math.round(
+                            (totalCompleted /
+                                (totalCompleted +
+                                    totalCancelled +
+                                    totalNoShow)) *
+                                100,
+                        )
+                    }%
+                </p>
+                <p>
+                    • <strong>Tasa de cancelación:</strong>
+                    {Math.round((totalCancelled / BOOKINGS.length) * 100)}%
+                </p>
+                <p>
+                    • <strong>Tasa de inasistencia:</strong>
+                    {Math.round((totalNoShow / BOOKINGS.length) * 100)}%
+                </p>
+                <p>
+                    • <strong>Total de bookings:</strong>
+                    {BOOKINGS.length} clases
+                </p>
+            </div>
+        </Card>
+
+        <Card class="p-6">
+            <h3 class="font-semibold text-gray-900 mb-3">
+                🚗 Estado de Recursos
+            </h3>
+            <div class="space-y-2 text-sm">
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-700">Instructores activos</span>
+                    <span class="font-semibold text-green-600"
+                        >{activeInstructors}/{INSTRUCTORES.length}</span
+                    >
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-700">Vehículos disponibles</span>
+                    <span class="font-semibold text-green-600"
+                        >{availableVehicles}/{VEHICULOS.length}</span
+                    >
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-700">En mantenimiento</span>
+                    <span class="font-semibold text-orange-600"
+                        >{
+                            VEHICULOS.filter((v) => v.status === "mantencion")
+                                .length
+                        }</span
+                    >
+                </div>
+            </div>
+        </Card>
+    </div>
+</DashboardLayout>

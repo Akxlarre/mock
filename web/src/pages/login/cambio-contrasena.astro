@@ -1,0 +1,35 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Card from '../../components/ui/Card.astro';
+import Input from '../../components/ui/Input.astro';
+import Button from '../../components/ui/Button.astro';
+---
+<BaseLayout title="Cambio de contraseña obligatorio - Escuela de Conductores">
+  <main class="min-h-screen flex items-center justify-center bg-base-200 p-4">
+    <Card class="w-full max-w-md shadow-xl">
+      <h1 class="text-2xl font-semibold text-center text-base-content">Cambio de contraseña obligatorio</h1>
+      <p class="text-center text-base-content/70 mt-2 text-sm">
+        Por seguridad, debes establecer una nueva contraseña para continuar.
+      </p>
+      <form class="mt-6 space-y-4" action="#" method="post">
+        <Input
+          label="Nueva contraseña"
+          name="password"
+          type="password"
+          placeholder="Mínimo 8 caracteres"
+          required
+        />
+        <Input
+          label="Confirmar contraseña"
+          name="password_confirm"
+          type="password"
+          placeholder="Repite la contraseña"
+          required
+        />
+        <Button type="submit" variant="primary" class="w-full mt-2">
+          Guardar y continuar
+        </Button>
+      </form>
+    </Card>
+  </main>
+</BaseLayout>

@@ -1,0 +1,43 @@
+---
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import Card from '../../components/ui/Card.astro';
+import Button from '../../components/ui/Button.astro';
+import { inventarioCertificados, filasCertificados, ESCUELA_ACTUAL } from '../../lib/mockData';
+---
+<DashboardLayout title="Inventario certificados - Escuela de Conductores" escuela={ESCUELA_ACTUAL}>
+  <h1 class="text-2xl font-semibold text-base-content mb-6">Inventario certificados</h1>
+  <p class="text-base-content/70 mb-6">RF-050: Gestión de folios y lotes de certificados.</p>
+  <div class="flex flex-col sm:flex-row gap-4 mb-6">
+    <Card class="flex-1 p-6">
+      <p class="text-sm text-base-content/70 mb-1">Folios disponibles</p>
+      <p class="text-2xl font-bold text-base-content">{inventarioCertificados.foliosDisponibles}</p>
+    </Card>
+    <Card class="flex-1 p-6">
+      <p class="text-sm text-base-content/70 mb-1">Último lote</p>
+      <p class="text-2xl font-bold text-base-content">{inventarioCertificados.ultimoLote}</p>
+    </Card>
+  </div>
+  <Button variant="primary" class="mb-6">Registrar lote</Button>
+  <Card class="overflow-hidden p-0">
+    <div class="overflow-x-auto">
+      <table class="table">
+        <thead>
+          <tr class="bg-base-200 text-base-content">
+            <th class="font-semibold text-sm py-3 px-4">Folio</th>
+            <th class="font-semibold text-sm py-3 px-4">Lote</th>
+            <th class="font-semibold text-sm py-3 px-4">Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filasCertificados.map((f) => (
+            <tr class="hover:bg-base-200/80 border-b border-base-300/50">
+              <td class="py-4 px-4">{f.folio}</td>
+              <td class="py-4 px-4">{f.lote}</td>
+              <td class="py-4 px-4"><span class="badge badge-sm badge-success">{f.estado}</span></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </Card>
+</DashboardLayout>

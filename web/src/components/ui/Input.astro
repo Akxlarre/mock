@@ -1,0 +1,103 @@
+---
+/**
+ * Input – Geist-style form input
+ * Focus ring doble (ring-2 + ring-offset), estados error/success
+ * Altura mínima 44px para accesibilidad táctil
+ */
+interface Props {
+  type?:
+    | "text"
+    | "email"
+    | "password"
+    | "number"
+    | "tel"
+    | "url"
+    | "search"
+    | "date";
+  placeholder?: string;
+  value?: string;
+  name?: string;
+  id?: string;
+  label?: string;
+  error?: boolean | string;
+  success?: boolean;
+  disabled?: boolean;
+  required?: boolean;
+  class?: string;
+}
+
+const {
+  type = "text",
+  placeholder,
+  value,
+  name,
+  id,
+  label,
+  error,
+  success,
+  disabled,
+  required,
+  class: className = "",
+} = Astro.props;
+
+const stateClasses = error
+  ? "border-red-300 focus:ring-red-500"
+  : success
+    ? "border-green-300 focus:ring-green-500"
+    : "border-gray-300 focus:ring-gray-900";
+
+const baseClasses =
+  "h-11 px-4 w-full text-sm bg-white rounded-md border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed placeholder:text-gray-400";
+
+const inputId =
+  id || name || `input-${Math.random().toString(36).substr(2, 9)}`;
+const hasError = typeof error === "string" ? true : error;
+const errorMessage = typeof error === "string" ? error : "";
+---
+
+{
+  label ? (
+    <div class="w-full">
+      <label
+        class="block text-sm font-medium text-gray-700 mb-1.5"
+        for={inputId}
+      >
+        {label}
+        {required ? " *" : ""}
+      </label>
+      <input
+        type={type}
+        placeholder={placeholder}
+        value={value}
+        name={name}
+        id={inputId}
+        disabled={disabled}
+        required={required}
+        aria-invalid={hasError ? "true" : undefined}
+        aria-describedby={hasError ? `${inputId}-error` : undefined}
+        class={`${baseClasses} ${stateClasses} ${className}`}
+      />
+      {errorMessage && (
+        <p
+          id={`${inputId}-error`}
+          class="text-red-600 text-sm mt-1.5"
+          role="alert"
+        >
+          {errorMessage}
+        </p>
+      )}
+    </div>
+  ) : (
+    <input
+      type={type}
+      placeholder={placeholder}
+      value={value}
+      name={name}
+      id={inputId}
+      disabled={disabled}
+      required={required}
+      aria-invalid={hasError ? "true" : undefined}
+      class={`${baseClasses} ${stateClasses} ${className}`}
+    />
+  )
+}

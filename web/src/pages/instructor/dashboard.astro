@@ -1,0 +1,258 @@
+---
+/**
+ * Dashboard Instructor - Vista principal
+ * Horario de hoy, clases asignadas, acciones rápidas
+ */
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import Card from '../../components/ui/Card.astro';
+import Button from '../../components/ui/Button.astro';
+
+// Mock data - en producción vendría de API según instructor logueado
+const instructor = {
+  nombre: 'Carlos Rojas',
+  tipo: 'ambos', // 'teórico' | 'práctico' | 'ambos'
+  email: 'crojas@escuela.cl'
+};
+
+const clasesHoy = [
+  { 
+    id: 1, 
+    tipo: 'práctica',
+    hora: '09:00', 
+    alumno: 'María González Pérez', 
+    vehiculo: 'ABC-123 (Suzuki Swift)',
+    estado: 'pending',
+    duracion: 90
+  },
+  { 
+    id: 2, 
+    tipo: 'práctica',
+    hora: '11:00', 
+    alumno: 'Juan Pablo Rojas', 
+    vehiculo: 'ABC-123 (Suzuki Swift)',
+    estado: 'pending',
+    duracion: 90
+  },
+  { 
+    id: 3, 
+    tipo: 'teórica',
+    hora: '15:00', 
+    promocion: 'Enero 2026 - Grupo A',
+    sala: 'Sala 1',
+    estado: 'pending',
+    duracion: 120,
+    alumnos: 18
+  },
+  { 
+    id: 4, 
+    tipo: 'práctica',
+    hora: '17:00', 
+    alumno: 'Ana Martínez Silva', 
+    vehiculo: 'XYZ-789 (Nissan March)',
+    estado: 'pending',
+    duracion: 90
+  },
+];
+
+const proximasClases = [
+  { fecha: '2026-02-04', cantidad: 5, practicas: 3, teoricas: 2 },
+  { fecha: '2026-02-05', cantidad: 6, practicas: 4, teoricas: 2 },
+  { fecha: '2026-02-06', cantidad: 4, practicas: 2, teoricas: 2 },
+];
+
+const estadoClase: Record<string, { label: string; class: string }> = {
+  'pending': { label: 'Pendiente', class: 'bg-gray-100 text-gray-800' },
+  'started': { label: 'En Curso', class: 'bg-blue-100 text-blue-800' },
+  'completed': { label: 'Completada', class: 'bg-green-100 text-green-800' },
+  'cancelled': { label: 'Cancelada', class: 'bg-red-100 text-red-800' },
+  'no_show': { label: 'No Asistió', class: 'bg-orange-100 text-orange-800' },
+};
+---
+
+<DashboardLayout title="Mi Dashboard - Instructor" userRole="instructor" userName={instructor.nombre}>
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-semibold text-gray-900">Bienvenido, {instructor.nombre}</h1>
+    <div class="flex items-center gap-2 mt-2">
+      <span class="text-secondary">Instructor</span>
+      <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-xs font-medium">
+        {instructor.tipo === 'teórico' ? '📚 Teórico' : 
+         instructor.tipo === 'práctico' ? '🚗 Práctico' : 
+         '📚🚗 Teórico y Práctico'}
+      </span>
+    </div>
+  </div>
+
+  <!-- Stats rápidos -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <Card class="p-4">
+      <p class="text-xs text-secondary">Clases Hoy</p>
+      <p class="text-2xl font-semibold text-gray-900 mt-1">{clasesHoy.length}</p>
+    </Card>
+    <Card class="p-4">
+      <p class="text-xs text-secondary">Próxima</p>
+      <p class="text-xl font-semibold text-blue-600 mt-1">{clasesHoy[0].hora}</p>
+    </Card>
+    <Card class="p-4">
+      <p class="text-xs text-secondary">Completadas (Mes)</p>
+      <p class="text-2xl font-semibold text-green-600 mt-1">87</p>
+    </Card>
+    <Card class="p-4">
+      <p class="text-xs text-secondary">Horas Este Mes</p>
+      <p class="text-2xl font-semibold text-purple-600 mt-1">124</p>
+    </Card>
+  </div>
+
+  <!-- Main content -->
+  <div class="grid lg:grid-cols-3 gap-6">
+    <!-- Clases de hoy -->
+    <div class="lg:col-span-2 space-y-4">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-semibold text-gray-900">Mis Clases de Hoy</h2>
+        <p class="text-sm text-secondary">Miércoles, 3 de Febrero 2026</p>
+      </div>
+
+      {clasesHoy.map((clase) => (
+        <Card class="p-6 hover:shadow-md transition-shadow">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <!-- Info clase -->
+            <div class="flex-1">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="flex items-center justify-center w-12 h-12 bg-gray-900 text-white rounded-lg font-bold text-lg">
+                  {clase.hora}
+                </div>
+                <div class="flex-1">
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                      clase.tipo === 'práctica' 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-blue-100 text-blue-800'
+                    }`}>
+                      {clase.tipo === 'práctica' ? '🚗 Práctica' : '📚 Teórica'}
+                    </span>
+                    <span class={`text-xs px-2 py-0.5 rounded-full font-medium ${estadoClase[clase.estado].class}`}>
+                      {estadoClase[clase.estado].label}
+                    </span>
+                  </div>
+                  
+                  {clase.tipo === 'práctica' ? (
+                    <>
+                      <p class="text-base font-semibold text-gray-900">{clase.alumno}</p>
+                      <div class="flex items-center gap-4 mt-1 text-sm text-secondary">
+                        <span>🚗 {clase.vehiculo}</span>
+                        <span>⏱️ {clase.duracion} min</span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <p class="text-base font-semibold text-gray-900">{clase.promocion}</p>
+                      <div class="flex items-center gap-4 mt-1 text-sm text-secondary">
+                        <span>🏫 {clase.sala}</span>
+                        <span>👥 {clase.alumnos} alumnos</span>
+                        <span>⏱️ {clase.duracion} min</span>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <!-- Acciones -->
+            <div class="flex flex-col gap-2 md:w-40">
+              {clase.estado === 'pending' && (
+                <Button 
+                  href={`/instructor/clase/iniciar`}
+                  variant="primary" 
+                  class="w-full text-sm"
+                >
+                  Iniciar Clase
+                </Button>
+              )}
+              {clase.estado === 'started' && (
+                <Button 
+                  href={`/instructor/clase/${clase.id}`}
+                  variant="primary" 
+                  class="w-full text-sm"
+                >
+                  Finalizar Clase
+                </Button>
+              )}
+              {clase.estado === 'completed' && clase.tipo === 'práctica' && (
+                <Button 
+                  href={`/instructor/ficha/${clase.id}`}
+                  variant="secondary" 
+                  class="w-full text-sm"
+                >
+                  Ver Ficha
+                </Button>
+              )}
+            </div>
+          </div>
+        </Card>
+      ))}
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-4">
+      <!-- Próximas clases -->
+      <Card>
+        <h3 class="text-sm font-semibold text-gray-900 mb-4">Próximas Clases</h3>
+        <div class="space-y-3">
+          {proximasClases.map((dia) => (
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div>
+                <p class="text-sm font-medium text-gray-900">
+                  {new Date(dia.fecha).toLocaleDateString('es-CL', { weekday: 'short', day: 'numeric', month: 'short' })}
+                </p>
+                <p class="text-xs text-secondary">
+                  {dia.practicas}P + {dia.teoricas}T
+                </p>
+              </div>
+              <span class="text-lg font-bold text-gray-900">{dia.cantidad}</span>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      <!-- Accesos rápidos -->
+      <Card>
+        <h3 class="text-sm font-semibold text-gray-900 mb-3">Accesos Rápidos</h3>
+        <div class="space-y-2">
+          <Button href="/instructor/horario" variant="secondary" class="w-full justify-start text-sm">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            Mi Horario Completo
+          </Button>
+          <Button href="/instructor/liquidacion" variant="secondary" class="w-full justify-start text-sm">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            Mis Horas del Mes
+          </Button>
+          <Button href="/instructor/alumnos" variant="secondary" class="w-full justify-start text-sm">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+            Mis Alumnos
+          </Button>
+        </div>
+      </Card>
+
+      <!-- Recordatorio -->
+      <Card class="bg-blue-50 border-blue-200">
+        <div class="flex gap-3">
+          <svg class="w-5 h-5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <div>
+            <p class="text-sm font-medium text-blue-900 mb-1">Recordatorio</p>
+            <p class="text-xs text-blue-800">
+              Recuerda completar las fichas técnicas después de cada clase práctica
+            </p>
+          </div>
+        </div>
+      </Card>
+    </div>
+  </div>
+</DashboardLayout>

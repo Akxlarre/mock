@@ -1,0 +1,66 @@
+---
+/**
+ * Badge de Estado de Asistencia
+ * Componente visual para mostrar estados de asistencia con código de colores
+ */
+
+export interface Props {
+    status: "present" | "absent" | "justified" | "in_progress" | "pending";
+    size?: "sm" | "md" | "lg";
+}
+
+const { status, size = "md" } = Astro.props;
+
+const statusConfig = {
+    present: {
+        icon: "✅",
+        label: "Presente",
+        bgClass: "bg-green-100",
+        textClass: "text-green-700",
+        borderClass: "border-green-300",
+    },
+    absent: {
+        icon: "❌",
+        label: "Ausente",
+        bgClass: "bg-red-100",
+        textClass: "text-red-700",
+        borderClass: "border-red-300",
+    },
+    justified: {
+        icon: "⚠️",
+        label: "Justificado",
+        bgClass: "bg-yellow-100",
+        textClass: "text-yellow-700",
+        borderClass: "border-yellow-300",
+    },
+    in_progress: {
+        icon: "⏱️",
+        label: "En curso",
+        bgClass: "bg-blue-100",
+        textClass: "text-blue-700",
+        borderClass: "border-blue-300",
+    },
+    pending: {
+        icon: "🕐",
+        label: "Pendiente",
+        bgClass: "bg-gray-100",
+        textClass: "text-gray-600",
+        borderClass: "border-gray-300",
+    },
+};
+
+const current = statusConfig[status];
+
+const sizeClasses = {
+    sm: "px-2 py-0.5 text-xs gap-1",
+    md: "px-3 py-1 text-sm gap-1.5",
+    lg: "px-4 py-1.5 text-base gap-2",
+};
+---
+
+<span
+    class={`inline-flex items-center rounded-full font-medium border ${current.bgClass} ${current.textClass} ${current.borderClass} ${sizeClasses[size]}`}
+>
+    <span>{current.icon}</span>
+    <span>{current.label}</span>
+</span>

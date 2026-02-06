@@ -1,0 +1,275 @@
+---
+/**
+ * Flota - Gestión de vehículos
+ * RF-023: Alertas de documentos vencidos y mantenimiento
+ */
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import Card from '../../components/ui/Card.astro';
+import Button from '../../components/ui/Button.astro';
+
+// Mock data
+const vehiculos = [
+  { 
+    id: 1, 
+    patente: 'ABC-123', 
+    marca: 'Suzuki', 
+    modelo: 'Swift GL', 
+    año: 2020, 
+    estado: 'operativo',
+    revTecnica: '2026-02-08',
+    soap: '2026-05-15',
+    permiso: '2026-12-31',
+    seguro: '2026-08-20',
+    km: 45320,
+    ultimoMantenimiento: '2026-01-15'
+  },
+  { 
+    id: 2, 
+    patente: 'XYZ-789', 
+    marca: 'Nissan', 
+    modelo: 'March Advance', 
+    año: 2021, 
+    estado: 'operativo',
+    revTecnica: '2026-06-10',
+    soap: '2026-07-20',
+    permiso: '2026-12-31',
+    seguro: '2026-09-15',
+    km: 32150,
+    ultimoMantenimiento: '2026-02-01'
+  },
+  { 
+    id: 3, 
+    patente: 'DEF-456', 
+    marca: 'Hyundai', 
+    modelo: 'i10 Active', 
+    año: 2019, 
+    estado: 'mantenimiento',
+    revTecnica: '2026-03-15',
+    soap: '2026-04-10',
+    permiso: '2026-12-31',
+    seguro: '2026-07-25',
+    km: 58740,
+    ultimoMantenimiento: '2026-02-02'
+  },
+];
+
+// Función para calcular días restantes
+function diasRestantes(fecha: string): number {
+  const hoy = new Date('2026-02-03');
+  const fechaVenc = new Date(fecha);
+  const diff = fechaVenc.getTime() - hoy.getTime();
+  return Math.ceil(diff / (1000 * 3600 * 24));
+}
+
+// Función para determinar urgencia
+function getUrgencia(dias: number): { color: string; label: string } {
+  if (dias < 0) return { color: 'red', label: 'Vencido' };
+  if (dias <= 5) return { color: 'red', label: 'Urgente' };
+  if (dias <= 15) return { color: 'orange', label: 'Próximo' };
+  return { color: 'green', label: 'OK' };
+}
+---
+
+<DashboardLayout title="Flota - Escuela de Conductores">
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex items-center gap-2 text-sm text-secondary mb-2">
+      <a href="/dashboard" class="hover:text-gray-900">Inicio</a>
+      <span>/</span>
+      <span class="text-gray-900 font-medium">Flota</span>
+    </div>
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-semibold text-gray-900">Gestión de Flota</h1>
+        <p class="text-secondary mt-1">Vehículos y documentos</p>
+      </div>
+      <Button href="/flota/nuevo" variant="primary">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        Agregar Vehículo
+      </Button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <Card class="p-4">
+      <p class="text-xs text-secondary">Total Flota</p>
+      <p class="text-2xl font-semibold text-gray-900 mt-1">12</p>
+    </Card>
+    <Card class="p-4">
+      <p class="text-xs text-secondary">Operativos</p>
+      <p class="text-2xl font-semibold text-green-600 mt-1">10</p>
+    </Card>
+    <Card class="p-4">
+      <p class="text-xs text-secondary">En Mantenimiento</p>
+      <p class="text-2xl font-semibold text-orange-600 mt-1">1</p>
+    </Card>
+    <Card class="p-4">
+      <p class="text-xs text-secondary">Docs Venciendo</p>
+      <p class="text-2xl font-semibold text-red-600 mt-1">3</p>
+    </Card>
+  </div>
+
+  <!-- Alertas críticas -->
+  <div class="space-y-3 mb-6">
+    {vehiculos.map((v) => {
+      const alertas = [
+        { tipo: 'Rev. Técnica', fecha: v.revTecnica },
+        { tipo: 'SOAP', fecha: v.soap },
+        { tipo: 'Seguro', fecha: v.seguro },
+      ].filter(a => diasRestantes(a.fecha) <= 15);
+
+      return alertas.length > 0 && (
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+            <div class="flex-1">
+              <p class="text-sm font-semibold text-red-900">
+                Vehículo {v.patente}: {alertas.length} documento(s) próximo(s) a vencer
+              </p>
+              <div class="mt-2 space-y-1">
+                {alertas.map((alerta) => {
+                  const dias = diasRestantes(alerta.fecha);
+                  return (
+                    <p class="text-xs text-red-800">
+                      • {alerta.tipo} vence en {dias} días ({alerta.fecha})
+                    </p>
+                  );
+                })}
+              </div>
+            </div>
+            <Button href={`/flota/${v.id}/renovar`} variant="ghost" class="text-xs flex-shrink-0">
+              Renovar →
+            </Button>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+
+  <!-- Lista de vehículos -->
+  <div class="grid gap-4">
+    {vehiculos.map((v) => (
+      <Card hoverable>
+        <div class="flex flex-col lg:flex-row lg:items-center gap-6">
+          <!-- Info principal vehículo -->
+          <div class="flex items-start gap-4 lg:flex-1">
+            <div class="w-16 h-16 bg-gray-900 rounded-lg flex items-center justify-center flex-shrink-0">
+              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"></path>
+              </svg>
+            </div>
+            <div>
+              <div class="flex items-center gap-3 mb-1">
+                <h3 class="text-lg font-semibold text-gray-900">{v.patente}</h3>
+                <span class={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                  v.estado === 'operativo' 
+                    ? 'bg-green-100 text-green-800' 
+                    : 'bg-orange-100 text-orange-800'
+                }`}>
+                  {v.estado === 'operativo' ? '✓ Operativo' : '🔧 Mantenimiento'}
+                </span>
+              </div>
+              <p class="text-sm text-gray-700">{v.marca} {v.modelo} ({v.año})</p>
+              <div class="flex items-center gap-4 mt-2 text-xs text-secondary">
+                <span>📍 {v.km.toLocaleString('es-CL')} km</span>
+                <span>🔧 Último mantenimiento: {v.ultimoMantenimiento}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Documentos -->
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:flex-1">
+            {[
+              { label: 'Rev. Técnica', fecha: v.revTecnica },
+              { label: 'SOAP', fecha: v.soap },
+              { label: 'Permiso Circ.', fecha: v.permiso },
+              { label: 'Seguro', fecha: v.seguro },
+            ].map((doc) => {
+              const dias = diasRestantes(doc.fecha);
+              const urgencia = getUrgencia(dias);
+              
+              return (
+                <div class={`p-2 rounded border ${
+                  urgencia.color === 'red' ? 'bg-red-50 border-red-200' :
+                  urgencia.color === 'orange' ? 'bg-orange-50 border-orange-200' :
+                  'bg-green-50 border-green-200'
+                }`}>
+                  <p class={`text-xs font-medium ${
+                    urgencia.color === 'red' ? 'text-red-900' :
+                    urgencia.color === 'orange' ? 'text-orange-900' :
+                    'text-green-900'
+                  }`}>
+                    {doc.label}
+                  </p>
+                  <p class={`text-xs mt-0.5 ${
+                    urgencia.color === 'red' ? 'text-red-700' :
+                    urgencia.color === 'orange' ? 'text-orange-700' :
+                    'text-green-700'
+                  }`}>
+                    {dias < 0 ? 'Vencido' : `${dias}d`}
+                  </p>
+                  <p class="text-xs text-gray-600 mt-0.5">{doc.fecha}</p>
+                </div>
+              );
+            })}
+          </div>
+
+          <!-- Acciones -->
+          <div class="flex lg:flex-col gap-2 lg:flex-shrink-0">
+            <Button href={`/flota/${v.id}`} variant="secondary" class="text-sm flex-1 lg:flex-initial">
+              Ver Detalle
+            </Button>
+            <Button href={`/flota/${v.id}/mantenimiento`} variant="ghost" class="text-sm flex-1 lg:flex-initial">
+              Mantenimiento
+            </Button>
+          </div>
+        </div>
+      </Card>
+    ))}
+  </div>
+
+  <!-- Próximos mantenimientos programados -->
+  <div class="mt-8">
+    <Card>
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">Mantenimientos Programados</h2>
+      <div class="space-y-3">
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-gray-900">XYZ-789 - Cambio de aceite y filtros</p>
+              <p class="text-xs text-secondary">Programado: 2026-02-10 · Taller ABC</p>
+            </div>
+          </div>
+          <Button variant="ghost" class="text-sm">Ver</Button>
+        </div>
+
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+              </svg>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-gray-900">ABC-123 - Revisión general 50.000 km</p>
+              <p class="text-xs text-secondary">Programado: 2026-02-15 · Taller ABC</p>
+            </div>
+          </div>
+          <Button variant="ghost" class="text-sm">Ver</Button>
+        </div>
+      </div>
+    </Card>
+  </div>
+</DashboardLayout>

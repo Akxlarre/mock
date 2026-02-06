@@ -1,0 +1,378 @@
+---
+/**
+ * Ayuda para Instructor - Guía de Módulos
+ * Documentación de módulos disponibles para instructores
+ */
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import Card from "../../components/ui/Card.astro";
+import Button from "../../components/ui/Button.astro";
+
+// Módulos disponibles para instructor
+const modulos = [
+    {
+        nombre: "Mi Dashboard",
+        icono: "📊",
+        descripcion: "Vista general de tus clases y estadísticas",
+        ruta: "/instructor/dashboard",
+        caracteristicas: [
+            "Clases del día en tiempo real",
+            "Próximas clases programadas",
+            "Resumen mensual de horas",
+            "Estadísticas de clases completadas",
+        ],
+    },
+    {
+        nombre: "Mi Horario",
+        icono: "📅",
+        descripcion: "Calendario semanal con todas tus clases",
+        ruta: "/instructor/horario",
+        caracteristicas: [
+            "Vista semanal de clases prácticas y teóricas",
+            "Información de alumnos asignados",
+            "Vehículos asignados por clase",
+            "Totales de horas por semana",
+        ],
+    },
+    {
+        nombre: "Mis Alumnos",
+        icono: "👥",
+        descripcion: "Lista de alumnos que tienes asignados",
+        ruta: "/instructor/alumnos",
+        caracteristicas: [
+            "Progreso individual de cada alumno",
+            "Próximas clases agendadas",
+            "Información de contacto",
+            "Filtros y búsqueda rápida",
+        ],
+    },
+    {
+        nombre: "Iniciar/Finalizar Clase",
+        icono: "🚗",
+        descripcion: "Control de clases en tiempo real",
+        ruta: "/instructor/clase",
+        caracteristicas: [
+            "Marcar inicio de clase práctica o teórica",
+            "Registrar asistencia del alumno",
+            "Finalizar clase y guardar observaciones",
+            "Generar reporte automático",
+        ],
+    },
+    {
+        nombre: "Ficha Técnica Digital",
+        icono: "📋",
+        descripcion: "Completar ficha de clase práctica con firma digital",
+        ruta: "/instructor/ficha",
+        caracteristicas: [
+            "Evaluar desempeño del alumno",
+            "Firma digital del alumno",
+            "Registro de maniobras realizadas",
+            "Observaciones y recomendaciones",
+        ],
+    },
+    {
+        nombre: "Mis Horas",
+        icono: "⏱️",
+        descripcion: "Resumen mensual de horas trabajadas",
+        ruta: "/instructor/liquidacion",
+        caracteristicas: [
+            "Total de horas del mes",
+            "Desglose por prácticas y teóricas",
+            "Cantidad total de clases",
+            "Exportar para liquidación",
+        ],
+    },
+];
+
+// Mejores prácticas
+const mejoresPracticas = [
+    {
+        titulo: "Antes de la Clase",
+        tips: [
+            "Verifica el estado del vehículo (combustible, neumáticos, documentos)",
+            "Revisa el nivel del alumno y objetivos de la clase",
+            "Llega 10 minutos antes al punto de encuentro",
+        ],
+        icono: "🔍",
+    },
+    {
+        titulo: "Durante la Clase",
+        tips: [
+            "Mantén calma y paciencia en todo momento",
+            "Da instrucciones claras y anticipadas",
+            "Refuerza lo positivo y corrige constructivamente",
+            "Asegúrate que el alumno practique maniobras variadas",
+        ],
+        icono: "✅",
+    },
+    {
+        titulo: "Después de la Clase",
+        tips: [
+            "Completa la ficha técnica inmediatamente",
+            "Revisa que la firma digital esté registrada",
+            "Da feedback constructivo al alumno",
+            "Reporta cualquier novedad del vehículo",
+        ],
+        icono: "📝",
+    },
+];
+---
+
+<DashboardLayout
+    title="Ayuda - Instructor"
+    userRole="instructor"
+    userName="Carlos Rojas"
+>
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-3">
+                Guía de Módulos - Instructor
+            </h1>
+            <p class="text-lg text-secondary">
+                Todo lo que necesitas saber para usar el sistema eficientemente
+            </p>
+        </div>
+
+        <!-- Búsqueda -->
+        <Card class="mb-8 p-4">
+            <div class="relative">
+                <input
+                    type="text"
+                    placeholder="Buscar módulo o funcionalidad..."
+                    class="w-full px-6 py-3 pl-12 border-2 border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                />
+                <svg
+                    class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+            </div>
+        </Card>
+
+        <!-- Grid de Módulos -->
+        <div class="grid md:grid-cols-2 gap-6 mb-8">
+            {
+                modulos.map((modulo) => (
+                    <Card class="p-6 hover:shadow-lg transition-shadow">
+                        <div class="flex items-start gap-4 mb-4">
+                            <div class="text-4xl flex-shrink-0">
+                                {modulo.icono}
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="text-xl font-semibold text-gray-900 mb-1">
+                                    {modulo.nombre}
+                                </h3>
+                                <p class="text-sm text-secondary">
+                                    {modulo.descripcion}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h4 class="text-sm font-semibold text-gray-700 mb-2">
+                                Funcionalidades:
+                            </h4>
+                            <ul class="space-y-1.5">
+                                {modulo.caracteristicas.map(
+                                    (caracteristica) => (
+                                        <li class="flex items-start gap-2 text-sm text-gray-600">
+                                            <svg
+                                                class="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M5 13l4 4L19 7"
+                                                />
+                                            </svg>
+                                            <span>{caracteristica}</span>
+                                        </li>
+                                    ),
+                                )}
+                            </ul>
+                        </div>
+
+                        <Button
+                            href={
+                                modulo.ruta.includes("[")
+                                    ? "/instructor/dashboard"
+                                    : modulo.ruta
+                            }
+                            variant="primary"
+                            class="w-full justify-center"
+                        >
+                            Ir a {modulo.nombre}
+                        </Button>
+                    </Card>
+                ))
+            }
+        </div>
+
+        <!-- Mejores Prácticas -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">
+                Mejores Prácticas
+            </h2>
+            <div class="grid md:grid-cols-3 gap-6">
+                {
+                    mejoresPracticas.map((practica) => (
+                        <Card class="p-6 bg-green-50 border-green-200">
+                            <div class="text-4xl mb-3">{practica.icono}</div>
+                            <h4 class="font-semibold text-gray-900 mb-3">
+                                {practica.titulo}
+                            </h4>
+                            <ul class="space-y-2">
+                                {practica.tips.map((tip) => (
+                                    <li class="flex items-start gap-2 text-sm text-gray-700">
+                                        <span class="text-green-600 mt-0.5">
+                                            •
+                                        </span>
+                                        <span>{tip}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </Card>
+                    ))
+                }
+            </div>
+        </div>
+
+        <!-- Accesos Rápidos -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">
+                Accesos Rápidos
+            </h2>
+            <div class="grid md:grid-cols-3 gap-4">
+                <Button
+                    href="/instructor/dashboard"
+                    variant="primary"
+                    class="justify-center"
+                >
+                    Ver Mis Clases de Hoy
+                </Button>
+                <Button
+                    href="/instructor/horario"
+                    variant="secondary"
+                    class="justify-center"
+                >
+                    Ver Mi Horario Semanal
+                </Button>
+                <Button
+                    href="/instructor/liquidacion"
+                    variant="secondary"
+                    class="justify-center"
+                >
+                    Ver Mis Horas del Mes
+                </Button>
+            </div>
+        </div>
+
+        <!-- Recordatorios Importantes -->
+        <Card class="p-6 bg-yellow-50 border-yellow-200 mb-8">
+            <div class="flex items-start gap-4">
+                <div
+                    class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0"
+                >
+                    <svg
+                        class="w-6 h-6 text-yellow-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                        ></path>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                        Recordatorios Importantes
+                    </h3>
+                    <ul class="space-y-2 text-sm text-gray-700">
+                        <li class="flex items-start gap-2">
+                            <span class="text-yellow-600 mt-0.5">⚠️</span>
+                            <span
+                                ><strong>Ficha Técnica:</strong> Debes completarla
+                                inmediatamente después de cada clase práctica. La
+                                firma digital del alumno es obligatoria.</span
+                            >
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-yellow-600 mt-0.5">⚠️</span>
+                            <span
+                                ><strong>Puntualidad:</strong> Llega siempre a tiempo.
+                                Las inasistencias o retrasos deben ser notificados
+                                a secretaría con anticipación.</span
+                            >
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-yellow-600 mt-0.5">⚠️</span>
+                            <span
+                                ><strong>Seguridad:</strong> Verifica siempre el estado
+                                del vehículo antes de iniciar. Reporta cualquier falla
+                                inmediatamente.</span
+                            >
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </Card>
+
+        <!-- Soporte -->
+        <Card class="p-6 bg-gray-50">
+            <div class="flex items-start gap-4">
+                <div
+                    class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0"
+                >
+                    <svg
+                        class="w-6 h-6 text-blue-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        ></path>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                        ¿Necesitas ayuda?
+                    </h3>
+                    <p class="text-sm text-secondary mb-4">
+                        Si tienes dudas sobre el uso del sistema o problemas
+                        técnicos, contacta al administrador.
+                    </p>
+                    <div class="flex gap-3">
+                        <Button
+                            href="mailto:admin@escuela.cl"
+                            variant="primary"
+                        >
+                            Contactar Administración
+                        </Button>
+                        <Button href="/instructor/dashboard" variant="ghost">
+                            Volver al Dashboard
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        </Card>
+    </div>
+</DashboardLayout>
