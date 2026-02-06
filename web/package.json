@@ -9,7 +9,6 @@
     "preview": "astro preview"
   },
   "dependencies": {
-    "@astrojs/node": "^9.5.2",
     "alpinejs": "^3.15.8",
     "astro": "^4.16.0"
   },
