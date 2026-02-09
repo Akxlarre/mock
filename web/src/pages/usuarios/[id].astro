@@ -1,0 +1,240 @@
+---
+/**
+ * Ver Perfil de Usuario - RF-003
+ * Vista detallada con historial de cambios
+ */
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import Card from '../../components/ui/Card.astro';
+import Button from '../../components/ui/Button.astro';
+import { ESCUELA_ACTUAL } from '../../lib/mockData';
+
+export function getStaticPaths() {
+  return [
+    { params: { id: "1" } },
+    { params: { id: "2" } },
+    { params: { id: "3" } },
+    { params: { id: "4" } },
+    { params: { id: "5" } },
+  ];
+}
+
+const { id } = Astro.params;
+
+// Mock data por usuario
+const usuarios: Record<string, any> = {
+  '1': { id: 1, nombre: 'Jorge Administrador', rut: '10.234.567-8', email: 'admin@escuela.cl', telefono: '+56 9 8765 4321', rol: 'admin', estado: 'activo', sede: 'Ambas sedes', fechaCreacion: '2025-01-15', ultimoAcceso: '2026-02-03 09:30', primerLogin: false },
+  '2': { id: 2, nombre: 'Patricia Secretaria', rut: '12.456.789-0', email: 'secretaria@escuela.cl', telefono: '+56 9 1234 5678', rol: 'secretaria', estado: 'activo', sede: 'Autoescuela Chillán', fechaCreacion: '2025-03-20', ultimoAcceso: '2026-02-03 08:15', primerLogin: false },
+  '3': { id: 3, nombre: 'Carlos Rojas', rut: '14.567.890-1', email: 'crojas@escuela.cl', telefono: '+56 9 5555 1234', rol: 'instructor', estado: 'activo', sede: 'Autoescuela Chillán', fechaCreacion: '2025-06-01', ultimoAcceso: '2026-02-02 17:45', primerLogin: false },
+  '4': { id: 4, nombre: 'Ana Martínez', rut: '15.678.901-2', email: 'amartinez@escuela.cl', telefono: '+56 9 6666 7890', rol: 'instructor', estado: 'activo', sede: 'Conductores Chillán', fechaCreacion: '2025-07-15', ultimoAcceso: '2026-02-03 07:00', primerLogin: false },
+  '5': { id: 5, nombre: 'Luis Torres', rut: '16.789.012-3', email: 'ltorres@escuela.cl', telefono: '+56 9 7777 8901', rol: 'instructor', estado: 'inactivo', sede: 'Autoescuela Chillán', fechaCreacion: '2025-04-10', ultimoAcceso: '2026-01-28 14:20', primerLogin: false },
+};
+
+const user = usuarios[id!] || usuarios['1'];
+
+const rolConfig: Record<string, { label: string; icon: string; colorBg: string; colorText: string }> = {
+  'admin': { label: 'Administrador', icon: '👑', colorBg: 'bg-purple-100', colorText: 'text-purple-800' },
+  'secretaria': { label: 'Secretaria', icon: '📋', colorBg: 'bg-blue-100', colorText: 'text-blue-800' },
+  'instructor': { label: 'Instructor', icon: '🚗', colorBg: 'bg-green-100', colorText: 'text-green-800' },
+};
+
+const rolInfo = rolConfig[user.rol];
+
+// Mock historial de cambios - RF-003
+const historialCambios = [
+  { fecha: '2026-02-01 14:22', campo: 'Teléfono', valorAnterior: '+56 9 1111 2222', valorNuevo: user.telefono, usuario: 'admin@escuela.cl' },
+  { fecha: '2026-01-15 10:05', campo: 'Email', valorAnterior: `${user.nombre.split(' ')[0].toLowerCase()}@gmail.com`, valorNuevo: user.email, usuario: 'admin@escuela.cl' },
+  { fecha: '2025-12-20 09:30', campo: 'Estado', valorAnterior: 'pendiente', valorNuevo: 'activo', usuario: 'admin@escuela.cl' },
+  { fecha: user.fechaCreacion + ' 08:00', campo: 'Cuenta creada', valorAnterior: '—', valorNuevo: 'Registro inicial', usuario: 'admin@escuela.cl' },
+];
+---
+<DashboardLayout title={`${user.nombre} - Usuarios`} escuela={ESCUELA_ACTUAL}>
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex items-center gap-2 text-sm text-secondary mb-2">
+      <a href="/dashboard" class="hover:text-gray-900">Inicio</a>
+      <span>/</span>
+      <a href="/usuarios" class="hover:text-gray-900">Usuarios</a>
+      <span>/</span>
+      <span class="text-gray-900 font-medium">{user.nombre}</span>
+    </div>
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <div class={`w-16 h-16 rounded-full flex items-center justify-center text-white font-semibold text-lg ${
+          user.rol === 'admin' ? 'bg-purple-600' :
+          user.rol === 'secretaria' ? 'bg-blue-600' :
+          'bg-green-600'
+        }`}>
+          {user.nombre.split(' ').map((n: string) => n[0]).join('').substring(0, 2)}
+        </div>
+        <div>
+          <h1 class="text-3xl font-semibold text-gray-900">{user.nombre}</h1>
+          <div class="flex items-center gap-3 mt-1">
+            <span class={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${rolInfo.colorBg} ${rolInfo.colorText}`}>
+              {rolInfo.icon} {rolInfo.label}
+            </span>
+            <span class={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${
+              user.estado === 'activo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
+            }`}>
+              {user.estado === 'activo' ? '✓ Activo' : '○ Inactivo'}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <Button href={`/usuarios/${user.id}/editar`} variant="secondary">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+          </svg>
+          Editar
+        </Button>
+        <Button href="/usuarios" variant="ghost">
+          ← Volver
+        </Button>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid lg:grid-cols-3 gap-6">
+    <!-- Info principal -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Datos personales -->
+      <Card>
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Información personal</h2>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="space-y-1">
+            <p class="text-xs font-medium text-secondary uppercase tracking-wider">Nombre completo</p>
+            <p class="text-sm text-gray-900">{user.nombre}</p>
+          </div>
+          <div class="space-y-1">
+            <p class="text-xs font-medium text-secondary uppercase tracking-wider">RUT</p>
+            <p class="text-sm text-gray-900 font-mono">{user.rut}</p>
+          </div>
+          <div class="space-y-1">
+            <p class="text-xs font-medium text-secondary uppercase tracking-wider">Correo electrónico</p>
+            <p class="text-sm text-gray-900">{user.email}</p>
+          </div>
+          <div class="space-y-1">
+            <p class="text-xs font-medium text-secondary uppercase tracking-wider">Teléfono</p>
+            <p class="text-sm text-gray-900">{user.telefono}</p>
+          </div>
+          <div class="space-y-1">
+            <p class="text-xs font-medium text-secondary uppercase tracking-wider">Rol</p>
+            <span class={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${rolInfo.colorBg} ${rolInfo.colorText}`}>
+              {rolInfo.icon} {rolInfo.label}
+            </span>
+          </div>
+          <div class="space-y-1">
+            <p class="text-xs font-medium text-secondary uppercase tracking-wider">Sede asignada</p>
+            <p class="text-sm text-gray-900">{user.sede}</p>
+          </div>
+        </div>
+      </Card>
+
+      <!-- Historial de cambios - RF-003 -->
+      <Card>
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold text-gray-900">Historial de cambios</h2>
+          <span class="text-xs text-secondary">{historialCambios.length} registros</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="border-b border-gray-200">
+                <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase tracking-wider">Fecha</th>
+                <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase tracking-wider">Campo</th>
+                <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase tracking-wider">Valor anterior</th>
+                <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase tracking-wider">Valor nuevo</th>
+                <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase tracking-wider">Modificado por</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              {historialCambios.map((cambio) => (
+                <tr class="hover:bg-gray-50 transition-colors">
+                  <td class="py-3 px-4 text-sm text-gray-700 whitespace-nowrap">{cambio.fecha}</td>
+                  <td class="py-3 px-4">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                      {cambio.campo}
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 text-sm text-red-600 line-through">{cambio.valorAnterior}</td>
+                  <td class="py-3 px-4 text-sm text-green-700 font-medium">{cambio.valorNuevo}</td>
+                  <td class="py-3 px-4 text-sm text-secondary">{cambio.usuario}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-4">
+      <!-- Acceso -->
+      <Card>
+        <h3 class="text-sm font-semibold text-gray-900 mb-3">Acceso al sistema</h3>
+        <div class="space-y-3">
+          <div class="space-y-1">
+            <p class="text-xs text-secondary">Fecha de creación</p>
+            <p class="text-sm text-gray-900">{user.fechaCreacion}</p>
+          </div>
+          <div class="space-y-1">
+            <p class="text-xs text-secondary">Último acceso</p>
+            <p class="text-sm text-gray-900">{user.ultimoAcceso}</p>
+          </div>
+          <div class="space-y-1">
+            <p class="text-xs text-secondary">Primer login completado</p>
+            <p class="text-sm text-gray-900">{user.primerLogin ? 'Pendiente' : 'Sí'}</p>
+          </div>
+        </div>
+      </Card>
+
+      <!-- Acciones -->
+      <Card>
+        <h3 class="text-sm font-semibold text-gray-900 mb-3">Acciones</h3>
+        <div class="space-y-2">
+          <Button href={`/usuarios/${user.id}/editar`} variant="secondary" class="w-full justify-start text-sm">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+            </svg>
+            Editar perfil
+          </Button>
+          {user.rol !== 'admin' && (
+            user.estado === 'activo' ? (
+              <Button variant="ghost" class="w-full justify-start text-sm text-red-600 hover:text-red-700 hover:bg-red-50">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                </svg>
+                Desactivar cuenta
+              </Button>
+            ) : (
+              <Button variant="ghost" class="w-full justify-start text-sm text-green-600 hover:text-green-700 hover:bg-green-50">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Reactivar cuenta
+              </Button>
+            )
+          )}
+        </div>
+      </Card>
+
+      <!-- Auditoría (solo para secretarias) -->
+      {user.rol === 'secretaria' && (
+        <Card class="bg-gray-50 border-gray-200">
+          <div class="flex gap-3">
+            <svg class="w-5 h-5 text-gray-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+            </svg>
+            <div>
+              <p class="text-sm font-medium text-gray-900 mb-1">Auditoría</p>
+              <p class="text-xs text-gray-700">Todos los cambios quedan registrados en el log de auditoría del sistema.</p>
+              <Button href="/usuarios/auditoria" variant="ghost" class="text-xs mt-2 p-0 h-auto text-gray-700">
+                Ver auditoría →
+              </Button>
+            </div>
+          </div>
+        </Card>
+      )}
+    </div>
+  </div>
+</DashboardLayout>

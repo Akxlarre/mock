@@ -87,11 +87,30 @@ import Button from "../../components/ui/Button.astro";
             </label>
 
             <a
-              href="/login/recuperar"
+              href="/login/recuperar-contrasena"
               class="text-sm text-gray-700 hover:text-gray-900 hover:underline focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 rounded px-1"
             >
               ¿Olvidaste tu contraseña?
             </a>
+          </div>
+
+          <!-- RF-014: Error message / lockout UI -->
+          <div id="loginError" class="hidden p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p id="loginErrorText" class="text-sm text-red-800 font-medium"></p>
+            <p id="loginErrorDetail" class="text-xs text-red-600 mt-1"></p>
+          </div>
+
+          <div id="lockoutMessage" class="hidden p-4 bg-orange-50 border border-orange-200 rounded-lg">
+            <div class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-orange-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+              </svg>
+              <div>
+                <p class="text-sm font-semibold text-orange-900">Cuenta bloqueada temporalmente</p>
+                <p class="text-xs text-orange-800 mt-1">Demasiados intentos fallidos. Espera <span id="lockoutTimer" class="font-mono font-bold">5:00</span> minutos antes de volver a intentar.</p>
+                <p class="text-xs text-orange-700 mt-2">Si necesitas acceso inmediato, contacta al administrador.</p>
+              </div>
+            </div>
           </div>
 
           <!-- Botones -->
@@ -115,7 +134,7 @@ import Button from "../../components/ui/Button.astro";
                 type="button"
                 variant="ghost"
                 class="text-xs"
-                onclick="fillDemo('admin')"
+                onClick="fillDemo('admin')"
               >
                 Admin
               </Button>
@@ -123,7 +142,7 @@ import Button from "../../components/ui/Button.astro";
                 type="button"
                 variant="ghost"
                 class="text-xs"
-                onclick="fillDemo('secretaria')"
+                onClick="fillDemo('secretaria')"
               >
                 Secretaria
               </Button>
@@ -131,7 +150,7 @@ import Button from "../../components/ui/Button.astro";
                 type="button"
                 variant="ghost"
                 class="text-xs"
-                onclick="fillDemo('instructor')"
+                onClick="fillDemo('instructor')"
               >
                 Instructor
               </Button>
@@ -169,7 +188,7 @@ import Button from "../../components/ui/Button.astro";
 
 <script>
   // Demo quick fill
-  function fillDemo(role: "admin" | "secretaria" | "instructor") {
+  (window as any).fillDemo = function(role: "admin" | "secretaria" | "instructor") {
     const credentials = {
       admin: { email: "admin@escuela.cl", password: "admin123" },
       secretaria: { email: "secretaria@escuela.cl", password: "sec123" },
@@ -178,9 +197,7 @@ import Button from "../../components/ui/Button.astro";
 
     const creds = credentials[role];
     const emailInput = document.getElementById("email") as HTMLInputElement;
-    const passwordInput = document.getElementById(
-      "password",
-    ) as HTMLInputElement;
+    const passwordInput = document.getElementById("password") as HTMLInputElement;
 
     if (emailInput && passwordInput) {
       emailInput.value = creds.email;
@@ -188,19 +205,66 @@ import Button from "../../components/ui/Button.astro";
     }
   }
 
+  // RF-014: Brute force tracking
+  let failedAttempts = 0;
+  const MAX_ATTEMPTS = 3;
+  let isLockedOut = false;
+
+  const loginError = document.getElementById("loginError");
+  const loginErrorText = document.getElementById("loginErrorText");
+  const loginErrorDetail = document.getElementById("loginErrorDetail");
+  const lockoutMessage = document.getElementById("lockoutMessage");
+  const lockoutTimer = document.getElementById("lockoutTimer");
+
+  function showError(message: string, detail: string) {
+    if (loginError && loginErrorText && loginErrorDetail) {
+      loginErrorText.textContent = message;
+      loginErrorDetail.textContent = detail;
+      loginError.classList.remove("hidden");
+    }
+  }
+
+  function hideError() {
+    loginError?.classList.add("hidden");
+  }
+
+  function startLockout() {
+    isLockedOut = true;
+    lockoutMessage?.classList.remove("hidden");
+    hideError();
+
+    let seconds = 300; // 5 minutos
+    const submitBtn = document.querySelector('#loginForm button[type="submit"]') as HTMLButtonElement;
+    if (submitBtn) submitBtn.disabled = true;
+
+    const interval = setInterval(() => {
+      seconds--;
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      if (lockoutTimer) {
+        lockoutTimer.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+      }
+      if (seconds <= 0) {
+        clearInterval(interval);
+        isLockedOut = false;
+        failedAttempts = 0;
+        lockoutMessage?.classList.add("hidden");
+        if (submitBtn) submitBtn.disabled = false;
+      }
+    }, 1000);
+  }
+
   // Form validation
   const form = document.getElementById("loginForm");
   form?.addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    if (isLockedOut) return;
+
     const formData = new FormData(form as HTMLFormElement);
     const email = formData.get("email");
-    const password = formData.get("password");
 
-    // Simulación de login (en producción sería API call real)
-    console.log("Login attempt:", { email });
-
-    // Demo: redirect based on email
+    // Demo: redirect based on email (valid credentials)
     if (email?.toString().includes("admin")) {
       window.location.href = "/dashboard";
     } else if (email?.toString().includes("secretaria")) {
@@ -208,8 +272,18 @@ import Button from "../../components/ui/Button.astro";
     } else if (email?.toString().includes("instructor")) {
       window.location.href = "/dashboard/instructor";
     } else {
-      // Show error
-      alert("Credenciales inválidas. Usa las credenciales de prueba.");
+      // RF-014: Track failed attempt
+      failedAttempts++;
+      const remaining = MAX_ATTEMPTS - failedAttempts;
+
+      if (failedAttempts >= MAX_ATTEMPTS) {
+        startLockout();
+      } else {
+        showError(
+          "Credenciales inválidas",
+          `Intento ${failedAttempts} de ${MAX_ATTEMPTS}. Tras ${remaining} intento${remaining !== 1 ? 's' : ''} más la cuenta se bloqueará temporalmente.`
+        );
+      }
     }
   });
 </script>

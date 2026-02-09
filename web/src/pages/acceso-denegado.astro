@@ -1,0 +1,67 @@
+---
+/**
+ * Acceso Denegado - RF-008
+ * Página mostrada cuando un usuario intenta acceder a un módulo sin permisos
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/ui/Button.astro';
+---
+<BaseLayout title="Acceso Denegado - Escuela de Conductores">
+  <main class="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div class="w-full max-w-md text-center">
+      <!-- Icono -->
+      <div class="inline-flex items-center justify-center w-20 h-20 bg-red-100 rounded-full mb-6">
+        <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+        </svg>
+      </div>
+
+      <!-- Mensaje -->
+      <h1 class="text-3xl font-semibold text-gray-900 mb-2">Acceso Denegado</h1>
+      <p class="text-secondary mb-8">
+        No tienes permisos para acceder a esta sección del sistema.
+        Si crees que esto es un error, contacta al administrador.
+      </p>
+
+      <!-- Info de permisos -->
+      <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-6 mb-6 text-left">
+        <h2 class="text-sm font-semibold text-gray-900 mb-3">Posibles causas</h2>
+        <ul class="space-y-2 text-xs text-gray-700">
+          <li class="flex items-start gap-2">
+            <span class="w-1.5 h-1.5 bg-gray-400 rounded-full shrink-0 mt-1.5"></span>
+            Tu rol actual no tiene acceso a este módulo
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="w-1.5 h-1.5 bg-gray-400 rounded-full shrink-0 mt-1.5"></span>
+            Tu sesión ha expirado y necesitas volver a iniciar sesión
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="w-1.5 h-1.5 bg-gray-400 rounded-full shrink-0 mt-1.5"></span>
+            El administrador ha modificado tus permisos recientemente
+          </li>
+        </ul>
+      </div>
+
+      <!-- Acciones -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center">
+        <Button href="/dashboard" variant="primary">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+          </svg>
+          Volver al inicio
+        </Button>
+        <Button href="/login" variant="secondary">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+          </svg>
+          Iniciar sesión
+        </Button>
+      </div>
+
+      <!-- Footer -->
+      <p class="mt-8 text-xs text-muted">
+        Este intento de acceso ha sido registrado en el log de auditoría del sistema.
+      </p>
+    </div>
+  </main>
+</BaseLayout>

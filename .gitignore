@@ -101,6 +101,9 @@ $RECYCLE.BIN/
 .cursor/
 .cursor-*
 
+# Claude
+CLAUDE.md
+
 # JetBrains IDEs (WebStorm, IntelliJ, etc.)
 .idea/
 *.iml

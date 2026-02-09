@@ -1,0 +1,188 @@
+---
+/**
+ * Gestión de Roles y Permisos - RF-005
+ * Tabla de permisos por rol: Admin (Total), Secretaria (Ventas/Pagos), Instructor B
+ */
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import Card from '../../components/ui/Card.astro';
+import { ESCUELA_ACTUAL } from '../../lib/mockData';
+
+const modulos = [
+  { nombre: 'Dashboard', admin: 'total', secretaria: 'lectura', instructor: 'lectura' },
+  { nombre: 'Usuarios y Roles', admin: 'total', secretaria: 'ninguno', instructor: 'ninguno' },
+  { nombre: 'Matrículas', admin: 'total', secretaria: 'total', instructor: 'ninguno' },
+  { nombre: 'Alumnos', admin: 'total', secretaria: 'total', instructor: 'lectura' },
+  { nombre: 'Agenda / Clases', admin: 'total', secretaria: 'total', instructor: 'parcial' },
+  { nombre: 'Asistencia', admin: 'total', secretaria: 'total', instructor: 'parcial' },
+  { nombre: 'Pagos / Ventas', admin: 'total', secretaria: 'total', instructor: 'ninguno' },
+  { nombre: 'Cuadratura Caja', admin: 'total', secretaria: 'total', instructor: 'ninguno' },
+  { nombre: 'Certificados', admin: 'total', secretaria: 'lectura', instructor: 'ninguno' },
+  { nombre: 'Psicotécnico', admin: 'total', secretaria: 'total', instructor: 'ninguno' },
+  { nombre: 'Flota / Vehículos', admin: 'total', secretaria: 'lectura', instructor: 'ninguno' },
+  { nombre: 'Auditoría / Logs', admin: 'total', secretaria: 'ninguno', instructor: 'ninguno' },
+  { nombre: 'Reportes / KPIs', admin: 'total', secretaria: 'lectura', instructor: 'ninguno' },
+  { nombre: 'Configuración Global', admin: 'total', secretaria: 'ninguno', instructor: 'ninguno' },
+  { nombre: 'Notificaciones', admin: 'total', secretaria: 'total', instructor: 'lectura' },
+];
+
+const permisoConfig: Record<string, { label: string; bg: string; text: string }> = {
+  'total': { label: 'Total', bg: 'bg-green-100', text: 'text-green-800' },
+  'parcial': { label: 'Parcial', bg: 'bg-yellow-100', text: 'text-yellow-800' },
+  'lectura': { label: 'Lectura', bg: 'bg-blue-100', text: 'text-blue-800' },
+  'ninguno': { label: '—', bg: 'bg-gray-50', text: 'text-gray-400' },
+};
+---
+<DashboardLayout title="Roles y Permisos - Escuela de Conductores" escuela={ESCUELA_ACTUAL}>
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex items-center gap-2 text-sm text-secondary mb-2">
+      <a href="/dashboard" class="hover:text-gray-900">Inicio</a>
+      <span>/</span>
+      <a href="/usuarios" class="hover:text-gray-900">Usuarios</a>
+      <span>/</span>
+      <span class="text-gray-900 font-medium">Roles y Permisos</span>
+    </div>
+    <h1 class="text-3xl font-semibold text-gray-900">Roles y Permisos</h1>
+    <p class="text-secondary mt-1">Definición de accesos por rol del sistema</p>
+  </div>
+
+  <!-- Roles overview -->
+  <div class="grid md:grid-cols-3 gap-4 mb-6">
+    <Card class="border-l-4 border-purple-600">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="text-2xl">👑</span>
+        <div>
+          <p class="text-sm font-semibold text-gray-900">Administrador</p>
+          <p class="text-xs text-secondary">2 usuarios activos</p>
+        </div>
+      </div>
+      <p class="text-xs text-gray-700">
+        Control total del sistema. Gestión de usuarios, configuración global, auditoría y acceso a todos los módulos sin restricción.
+      </p>
+    </Card>
+
+    <Card class="border-l-4 border-blue-600">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="text-2xl">📋</span>
+        <div>
+          <p class="text-sm font-semibold text-gray-900">Secretaria</p>
+          <p class="text-xs text-secondary">3 usuarios activos</p>
+        </div>
+      </div>
+      <p class="text-xs text-gray-700">
+        Gestión de ventas, pagos, matrículas, agenda y alumnos. Acceso a cuadratura de caja. Sin acceso a usuarios, auditoría ni configuración.
+      </p>
+    </Card>
+
+    <Card class="border-l-4 border-green-600">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="text-2xl">🚗</span>
+        <div>
+          <p class="text-sm font-semibold text-gray-900">Instructor B</p>
+          <p class="text-xs text-secondary">8 usuarios activos</p>
+        </div>
+      </div>
+      <p class="text-xs text-gray-700">
+        Vista de su agenda personal, registro de clases y asistencia. Solo puede ver sus alumnos asignados. Sin acceso a pagos ni administración.
+      </p>
+    </Card>
+  </div>
+
+  <!-- Tabla de permisos -->
+  <Card>
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold text-gray-900">Matriz de permisos por módulo</h2>
+      <div class="flex items-center gap-4 text-xs">
+        <span class="flex items-center gap-1.5">
+          <span class="inline-block w-3 h-3 rounded bg-green-100 border border-green-300"></span>
+          Total
+        </span>
+        <span class="flex items-center gap-1.5">
+          <span class="inline-block w-3 h-3 rounded bg-yellow-100 border border-yellow-300"></span>
+          Parcial
+        </span>
+        <span class="flex items-center gap-1.5">
+          <span class="inline-block w-3 h-3 rounded bg-blue-100 border border-blue-300"></span>
+          Lectura
+        </span>
+        <span class="flex items-center gap-1.5">
+          <span class="inline-block w-3 h-3 rounded bg-gray-50 border border-gray-200"></span>
+          Sin acceso
+        </span>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead>
+          <tr class="border-b border-gray-200">
+            <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase tracking-wider w-1/3">Módulo</th>
+            <th class="text-center py-3 px-4 text-xs font-semibold text-purple-700 uppercase tracking-wider">
+              👑 Admin
+            </th>
+            <th class="text-center py-3 px-4 text-xs font-semibold text-blue-700 uppercase tracking-wider">
+              📋 Secretaria
+            </th>
+            <th class="text-center py-3 px-4 text-xs font-semibold text-green-700 uppercase tracking-wider">
+              🚗 Instructor B
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {modulos.map((modulo) => (
+            <tr class="hover:bg-gray-50 transition-colors">
+              <td class="py-3 px-4 text-sm font-medium text-gray-900">{modulo.nombre}</td>
+              <td class="py-3 px-4 text-center">
+                <span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${permisoConfig[modulo.admin].bg} ${permisoConfig[modulo.admin].text}`}>
+                  {permisoConfig[modulo.admin].label}
+                </span>
+              </td>
+              <td class="py-3 px-4 text-center">
+                <span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${permisoConfig[modulo.secretaria].bg} ${permisoConfig[modulo.secretaria].text}`}>
+                  {permisoConfig[modulo.secretaria].label}
+                </span>
+              </td>
+              <td class="py-3 px-4 text-center">
+                <span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${permisoConfig[modulo.instructor].bg} ${permisoConfig[modulo.instructor].text}`}>
+                  {permisoConfig[modulo.instructor].label}
+                </span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </Card>
+
+  <!-- Notas -->
+  <div class="grid md:grid-cols-2 gap-4 mt-6">
+    <Card class="bg-yellow-50 border-yellow-200">
+      <div class="flex gap-3">
+        <svg class="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+        </svg>
+        <div>
+          <p class="text-sm font-medium text-yellow-900 mb-1">Acceso parcial</p>
+          <p class="text-xs text-yellow-800">
+            <strong>Instructor - Agenda/Clases:</strong> Solo puede ver y gestionar sus propias clases asignadas. No puede modificar clases de otros instructores.<br>
+            <strong>Instructor - Asistencia:</strong> Solo puede registrar asistencia de sus clases. No puede ver registros históricos de otros.
+          </p>
+        </div>
+      </div>
+    </Card>
+
+    <Card class="bg-blue-50 border-blue-200">
+      <div class="flex gap-3">
+        <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <div>
+          <p class="text-sm font-medium text-blue-900 mb-1">Middleware de validación (RF-008)</p>
+          <p class="text-xs text-blue-800">
+            Cada carga de página valida los permisos del usuario autenticado. Si un usuario intenta acceder a un módulo no autorizado, es redirigido a la página de "Acceso Denegado".
+          </p>
+        </div>
+      </div>
+    </Card>
+  </div>
+</DashboardLayout>

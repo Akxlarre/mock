@@ -1,7 +1,7 @@
 ---
 /**
  * Selector de Escuela
- * RF-004: Multi-Escuela (Conductores Chillán y Barris)
+ * RF-012: Multi-Escuela (Autoescuela Chillán y Conductores Chillán)
  */
 
 interface Props {
@@ -19,9 +19,9 @@ const { class: className = "" } = Astro.props;
         id="school-selector"
         class="h-10 px-3 text-sm bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-colors"
     >
-        <option value="chillan">Conductores Chillán</option>
-        <option value="barris">Barris</option>
-        <option value="all">Todas las Escuelas</option>
+        <option value="autoescuela-chillan">Autoescuela Chillán</option>
+        <option value="conductores-chillan">Conductores Chillán</option>
+        <option value="all">Todas las Sedes</option>
     </select>
 </div>
 
