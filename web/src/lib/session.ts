@@ -100,7 +100,7 @@ export function getCurrentUserEmail(role: UserRole): string {
  * En producción con multi-tenancy, esto vendría de la sesión/contexto
  */
 export function getCurrentSchoolName(): string {
-  return 'Conductores Chillán';
+  return 'Autoescuela Chillán';
 }
 
 /**

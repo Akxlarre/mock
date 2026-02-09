@@ -3,7 +3,7 @@
  * Coherentes con PLAN-TRABAJO-HOY y mockups; reemplazar por API cuando exista backend.
  */
 
-export const ESCUELA_ACTUAL = 'Conductores Chillán';
+export const ESCUELA_ACTUAL = 'Autoescuela Chillán';
 
 export const statsAdmin = {
   alumnosActivos: 124,

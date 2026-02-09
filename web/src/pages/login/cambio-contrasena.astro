@@ -1,35 +1,218 @@
 ---
+/**
+ * Cambio de Contraseña Obligatorio - RF-015
+ * Primer inicio de sesión: validación inline y fortaleza de contraseña
+ */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Card from '../../components/ui/Card.astro';
-import Input from '../../components/ui/Input.astro';
 import Button from '../../components/ui/Button.astro';
 ---
 <BaseLayout title="Cambio de contraseña obligatorio - Escuela de Conductores">
-  <main class="min-h-screen flex items-center justify-center bg-base-200 p-4">
-    <Card class="w-full max-w-md shadow-xl">
-      <h1 class="text-2xl font-semibold text-center text-base-content">Cambio de contraseña obligatorio</h1>
-      <p class="text-center text-base-content/70 mt-2 text-sm">
-        Por seguridad, debes establecer una nueva contraseña para continuar.
+  <main class="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
+    <div class="w-full max-w-md">
+      <!-- Logo -->
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-gray-900 rounded-xl mb-4">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+          </svg>
+        </div>
+        <h1 class="text-2xl font-semibold text-gray-900">Cambio de contraseña obligatorio</h1>
+        <p class="text-sm text-secondary mt-1">
+          Por seguridad, debes establecer una nueva contraseña para continuar.
+        </p>
+      </div>
+
+      <Card class="shadow-lg">
+        <form id="passwordForm" class="space-y-5">
+          <!-- Nueva contraseña -->
+          <div class="w-full">
+            <label class="block text-sm font-medium text-gray-700 mb-1.5" for="password">
+              Nueva contraseña *
+            </label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Mínimo 8 caracteres"
+              required
+              minlength="8"
+              class="h-11 px-4 w-full text-sm bg-white rounded-md border border-gray-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-900 placeholder:text-gray-400"
+            />
+
+            <!-- Barra de fortaleza -->
+            <div class="mt-2">
+              <div class="flex gap-1">
+                <div id="str1" class="h-1 flex-1 rounded-full bg-gray-200 transition-colors duration-300"></div>
+                <div id="str2" class="h-1 flex-1 rounded-full bg-gray-200 transition-colors duration-300"></div>
+                <div id="str3" class="h-1 flex-1 rounded-full bg-gray-200 transition-colors duration-300"></div>
+                <div id="str4" class="h-1 flex-1 rounded-full bg-gray-200 transition-colors duration-300"></div>
+              </div>
+              <p id="strengthLabel" class="text-xs mt-1 text-gray-400">Ingresa una contraseña</p>
+            </div>
+          </div>
+
+          <!-- Requisitos -->
+          <div class="space-y-1.5">
+            <p class="text-xs font-medium text-gray-700">Requisitos:</p>
+            <div class="grid grid-cols-2 gap-1.5">
+              <div id="req-length" class="flex items-center gap-1.5 text-xs text-gray-400">
+                <span class="req-icon w-4 h-4 flex items-center justify-center rounded-full border border-gray-300 text-[10px]">○</span>
+                Mínimo 8 caracteres
+              </div>
+              <div id="req-upper" class="flex items-center gap-1.5 text-xs text-gray-400">
+                <span class="req-icon w-4 h-4 flex items-center justify-center rounded-full border border-gray-300 text-[10px]">○</span>
+                Una mayúscula
+              </div>
+              <div id="req-number" class="flex items-center gap-1.5 text-xs text-gray-400">
+                <span class="req-icon w-4 h-4 flex items-center justify-center rounded-full border border-gray-300 text-[10px]">○</span>
+                Un número
+              </div>
+              <div id="req-special" class="flex items-center gap-1.5 text-xs text-gray-400">
+                <span class="req-icon w-4 h-4 flex items-center justify-center rounded-full border border-gray-300 text-[10px]">○</span>
+                Un carácter especial
+              </div>
+            </div>
+          </div>
+
+          <!-- Confirmar contraseña -->
+          <div class="w-full">
+            <label class="block text-sm font-medium text-gray-700 mb-1.5" for="password_confirm">
+              Confirmar contraseña *
+            </label>
+            <input
+              type="password"
+              id="password_confirm"
+              name="password_confirm"
+              placeholder="Repite la contraseña"
+              required
+              class="h-11 px-4 w-full text-sm bg-white rounded-md border border-gray-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-900 placeholder:text-gray-400"
+            />
+            <p id="matchError" class="text-sm mt-1.5 hidden"></p>
+          </div>
+
+          <!-- Submit -->
+          <Button type="submit" variant="primary" class="w-full" id="submitBtn" disabled>
+            Guardar y continuar
+          </Button>
+        </form>
+      </Card>
+
+      <!-- Footer -->
+      <p class="mt-4 text-xs text-center text-muted">
+        Esta contraseña se almacena de forma encriptada. No podrás reutilizar contraseñas anteriores.
       </p>
-      <form class="mt-6 space-y-4" action="#" method="post">
-        <Input
-          label="Nueva contraseña"
-          name="password"
-          type="password"
-          placeholder="Mínimo 8 caracteres"
-          required
-        />
-        <Input
-          label="Confirmar contraseña"
-          name="password_confirm"
-          type="password"
-          placeholder="Repite la contraseña"
-          required
-        />
-        <Button type="submit" variant="primary" class="w-full mt-2">
-          Guardar y continuar
-        </Button>
-      </form>
-    </Card>
+    </div>
   </main>
 </BaseLayout>
+
+<script>
+  const password = document.getElementById('password') as HTMLInputElement;
+  const confirm = document.getElementById('password_confirm') as HTMLInputElement;
+  const matchError = document.getElementById('matchError');
+  const strengthLabel = document.getElementById('strengthLabel');
+  const submitBtn = document.getElementById('submitBtn') as HTMLButtonElement;
+  const bars = [
+    document.getElementById('str1'),
+    document.getElementById('str2'),
+    document.getElementById('str3'),
+    document.getElementById('str4'),
+  ];
+
+  const reqs = {
+    length: document.getElementById('req-length'),
+    upper: document.getElementById('req-upper'),
+    number: document.getElementById('req-number'),
+    special: document.getElementById('req-special'),
+  };
+
+  function setReq(el: HTMLElement | null, met: boolean) {
+    if (!el) return;
+    const icon = el.querySelector('.req-icon');
+    if (met) {
+      el.className = 'flex items-center gap-1.5 text-xs text-green-700';
+      if (icon) { icon.textContent = '✓'; icon.className = 'req-icon w-4 h-4 flex items-center justify-center rounded-full bg-green-100 text-green-700 text-[10px] font-bold'; }
+    } else {
+      el.className = 'flex items-center gap-1.5 text-xs text-gray-400';
+      if (icon) { icon.textContent = '○'; icon.className = 'req-icon w-4 h-4 flex items-center justify-center rounded-full border border-gray-300 text-[10px]'; }
+    }
+  }
+
+  function checkStrength(val: string) {
+    const hasLength = val.length >= 8;
+    const hasUpper = /[A-Z]/.test(val);
+    const hasNumber = /[0-9]/.test(val);
+    const hasSpecial = /[^A-Za-z0-9]/.test(val);
+
+    setReq(reqs.length, hasLength);
+    setReq(reqs.upper, hasUpper);
+    setReq(reqs.number, hasNumber);
+    setReq(reqs.special, hasSpecial);
+
+    const score = [hasLength, hasUpper, hasNumber, hasSpecial].filter(Boolean).length;
+
+    const colors = ['bg-gray-200', 'bg-red-500', 'bg-orange-400', 'bg-yellow-400', 'bg-green-500'];
+    const labels = ['Ingresa una contraseña', 'Débil', 'Regular', 'Buena', 'Fuerte'];
+    const labelColors = ['text-gray-400', 'text-red-600', 'text-orange-600', 'text-yellow-600', 'text-green-600'];
+
+    bars.forEach((bar, i) => {
+      if (bar) {
+        bar.className = `h-1 flex-1 rounded-full transition-colors duration-300 ${i < score ? colors[score] : 'bg-gray-200'}`;
+      }
+    });
+
+    if (strengthLabel) {
+      strengthLabel.textContent = val.length === 0 ? labels[0] : labels[score];
+      strengthLabel.className = `text-xs mt-1 ${val.length === 0 ? labelColors[0] : labelColors[score]}`;
+    }
+
+    return score;
+  }
+
+  function checkMatch() {
+    const val = confirm?.value || '';
+    const passVal = password?.value || '';
+
+    if (val.length === 0) {
+      matchError?.classList.add('hidden');
+      return false;
+    }
+
+    if (val !== passVal) {
+      if (matchError) {
+        matchError.textContent = 'Las contraseñas no coinciden';
+        matchError.className = 'text-red-600 text-sm mt-1.5';
+        matchError.classList.remove('hidden');
+      }
+      confirm?.classList.add('border-red-300');
+      confirm?.classList.remove('border-green-300', 'border-gray-300');
+      return false;
+    } else {
+      if (matchError) {
+        matchError.textContent = '✓ Las contraseñas coinciden';
+        matchError.className = 'text-green-600 text-sm mt-1.5';
+        matchError.classList.remove('hidden');
+      }
+      confirm?.classList.add('border-green-300');
+      confirm?.classList.remove('border-red-300', 'border-gray-300');
+      return true;
+    }
+  }
+
+  function updateSubmit() {
+    const score = checkStrength(password?.value || '');
+    const matching = checkMatch();
+    if (submitBtn) {
+      submitBtn.disabled = !(score === 4 && matching);
+    }
+  }
+
+  password?.addEventListener('input', updateSubmit);
+  confirm?.addEventListener('input', updateSubmit);
+
+  // Form submit simulation
+  document.getElementById('passwordForm')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    window.location.href = '/dashboard';
+  });
+</script>

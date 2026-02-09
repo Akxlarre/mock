@@ -241,7 +241,7 @@ const ayudaHref =
   <!-- Brand -->
   <div class="h-16 flex items-center gap-3 px-6 border-b border-gray-200">
     <div
-      class="w-9 h-9 bg-gray-900 rounded-lg flex items-center justify-center flex-shrink-0"
+      class="w-9 h-9 bg-gray-900 rounded-lg flex items-center justify-center shrink-0"
       transition:name="brand-logo"
     >
       <svg
@@ -260,7 +260,7 @@ const ayudaHref =
     </div>
     <div class="flex-1 min-w-0">
       {
-        userRole === "admin" || userRole === "secretaria" ? (
+        userRole === "admin" ? (
           <div class="relative" data-school-selector>
             <button
               id="schoolMenuButton"
@@ -278,12 +278,12 @@ const ayudaHref =
                   id="schoolMenuLabel"
                   class="text-sm font-medium text-gray-900 truncate"
                 >
-                  Conductores Chillán
+                  Autoescuela Chillán
                 </p>
               </div>
               <svg
                 id="schoolMenuChevron"
-                class="w-4 h-4 text-gray-500 flex-shrink-0 transition-transform duration-200"
+                class="w-4 h-4 text-gray-500 shrink-0 transition-transform duration-200"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -301,8 +301,16 @@ const ayudaHref =
             <div
               id="schoolMenuDropdown"
               role="listbox"
-              class="school-menu-dropdown hidden absolute left-0 right-0 mt-1.5 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-[100] min-w-[180px]"
+              class="school-menu-dropdown hidden absolute left-0 right-0 top-full mt-1.5 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-50 min-w-full"
             >
+              <button
+                type="button"
+                role="option"
+                class="school-option block w-full text-left px-3 py-2.5 text-sm text-gray-900 hover:bg-gray-100 first:rounded-t-lg last:rounded-b-lg transition-colors"
+                data-school-name="Autoescuela Chillán"
+              >
+                Autoescuela Chillán
+              </button>
               <button
                 type="button"
                 role="option"
@@ -310,14 +318,6 @@ const ayudaHref =
                 data-school-name="Conductores Chillán"
               >
                 Conductores Chillán
-              </button>
-              <button
-                type="button"
-                role="option"
-                class="school-option block w-full text-left px-3 py-2.5 text-sm text-gray-900 hover:bg-gray-100 first:rounded-t-lg last:rounded-b-lg transition-colors"
-                data-school-name="Conductores Concepción"
-              >
-                Conductores Concepción
               </button>
             </div>
           </div>
@@ -356,7 +356,7 @@ const ayudaHref =
                   }`}
                 >
                   <svg
-                    class="w-5 h-5 flex-shrink-0"
+                    class="w-5 h-5 shrink-0"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -434,99 +434,102 @@ const ayudaHref =
 >
 </div>
 
-<script>
-  // Sidebar toggle functionality
-  const sidebar = document.querySelector("[data-sidebar]");
-  const overlay = document.querySelector("[data-sidebar-overlay]");
+<script is:inline>
+  (function() {
+    // Sidebar toggle functionality
+    const sidebar = document.querySelector("[data-sidebar]");
+    const overlay = document.querySelector("[data-sidebar-overlay]");
 
-  // Toggle function
-  function toggleSidebar() {
-    sidebar?.classList.toggle("-translate-x-full");
-    overlay?.classList.toggle("hidden");
-  }
-
-  // Close on overlay click
-  overlay?.addEventListener("click", toggleSidebar);
-
-  // Make globally accessible
-  (window as any).toggleSidebar = toggleSidebar;
-
-  // Close on route change (for client-side navigation)
-  document.addEventListener("astro:after-swap", () => {
-    if (window.innerWidth < 1024) {
-      sidebar?.classList.add("-translate-x-full");
-      overlay?.classList.add("hidden");
+    // Toggle function
+    function toggleSidebar() {
+      sidebar?.classList.toggle("-translate-x-full");
+      overlay?.classList.toggle("hidden");
     }
-  });
 
-  // Selector de escuela: delegación de eventos para que siempre funcione (DOM listo + View Transitions)
-  function setupSchoolSelector() {
-    const sidebarEl = document.getElementById("sidebar");
-    if (!sidebarEl) return;
+    // Close on overlay click
+    overlay?.addEventListener("click", toggleSidebar);
 
-    const getDropdown = () => document.getElementById("schoolMenuDropdown");
-    const getLabel = () => document.getElementById("schoolMenuLabel");
-    const getChevron = () => document.getElementById("schoolMenuChevron");
-    const getButton = () => document.getElementById("schoolMenuButton");
+    // Make globally accessible
+    window.toggleSidebar = toggleSidebar;
 
-    const close = () => {
-      const dropdown = getDropdown();
-      const btn = getButton();
-      const chevron = getChevron();
-      dropdown?.classList.add("hidden");
-      btn?.setAttribute("aria-expanded", "false");
-      chevron?.classList.remove("rotate-180");
-    };
-
-    const open = () => {
-      const dropdown = getDropdown();
-      const btn = getButton();
-      const chevron = getChevron();
-      dropdown?.classList.remove("hidden");
-      btn?.setAttribute("aria-expanded", "true");
-      chevron?.classList.add("rotate-180");
-    };
-
-    // Un solo listener en el sidebar por delegación
-    sidebarEl.addEventListener("click", (e) => {
-      const target = e.target as HTMLElement;
-      const dropdown = getDropdown();
-      if (!dropdown) return;
-
-      if (target.closest("#schoolMenuButton")) {
-        e.stopPropagation();
-        if (dropdown.classList.contains("hidden")) open();
-        else close();
-        return;
-      }
-      const option = target.closest(".school-option");
-      if (option) {
-        e.stopPropagation();
-        const name = option.getAttribute("data-school-name");
-        const label = getLabel();
-        if (name && label) label.textContent = name;
-        close();
+    // Close on route change (for client-side navigation)
+    document.addEventListener("astro:after-swap", () => {
+      if (window.innerWidth < 1024) {
+        sidebar?.classList.add("-translate-x-full");
+        overlay?.classList.add("hidden");
       }
     });
 
-    // Cerrar al hacer clic fuera (solo registrar una vez)
-    if (!(document as any).__schoolSelectorOutsideRegistered) {
-      (document as any).__schoolSelectorOutsideRegistered = true;
-      document.addEventListener("click", () => close());
-    }
-  }
+    // Selector de escuela
+    let schoolSelectorInitialized = false;
 
-  function runWhenReady() {
-    if (document.getElementById("sidebar")) setupSchoolSelector();
-    else setTimeout(runWhenReady, 50);
-  }
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", runWhenReady);
-  } else {
-    runWhenReady();
-  }
-  document.addEventListener("astro:page-load", runWhenReady);
-  document.addEventListener("astro:after-swap", runWhenReady);
+    function setupSchoolSelector() {
+      if (schoolSelectorInitialized) return;
+
+      const button = document.getElementById("schoolMenuButton");
+      const dropdown = document.getElementById("schoolMenuDropdown");
+      const label = document.getElementById("schoolMenuLabel");
+      const chevron = document.getElementById("schoolMenuChevron");
+
+      if (!button || !dropdown) {
+        setTimeout(setupSchoolSelector, 100);
+        return;
+      }
+
+      schoolSelectorInitialized = true;
+
+      // Toggle dropdown al hacer click en el botón
+      button.onclick = function(e) {
+        e.stopPropagation();
+        const isHidden = dropdown.classList.contains("hidden");
+
+        if (isHidden) {
+          dropdown.classList.remove("hidden");
+          button.setAttribute("aria-expanded", "true");
+          if (chevron) chevron.classList.add("rotate-180");
+        } else {
+          dropdown.classList.add("hidden");
+          button.setAttribute("aria-expanded", "false");
+          if (chevron) chevron.classList.remove("rotate-180");
+        }
+      };
+
+      // Seleccionar opción
+      const options = dropdown.querySelectorAll(".school-option");
+      options.forEach((option) => {
+        option.onclick = function(e) {
+          e.stopPropagation();
+          const name = option.getAttribute("data-school-name");
+          if (name && label) {
+            label.textContent = name;
+          }
+          dropdown.classList.add("hidden");
+          button.setAttribute("aria-expanded", "false");
+          if (chevron) chevron.classList.remove("rotate-180");
+        };
+      });
+
+      // Cerrar al hacer clic fuera
+      document.addEventListener("click", function() {
+        dropdown.classList.add("hidden");
+        button.setAttribute("aria-expanded", "false");
+        if (chevron) chevron.classList.remove("rotate-180");
+      });
+    }
+
+    // Ejecutar cuando el DOM esté listo
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", setupSchoolSelector);
+    } else {
+      setupSchoolSelector();
+    }
+
+    // Reiniciar después de transiciones de página
+    document.addEventListener("astro:page-load", function() {
+      schoolSelectorInitialized = false;
+      setupSchoolSelector();
+    });
+  })();
 </script>
 
 <style>

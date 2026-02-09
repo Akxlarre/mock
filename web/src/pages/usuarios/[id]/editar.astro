@@ -1,0 +1,252 @@
+---
+/**
+ * Editar Usuario - RF-003, RF-013
+ * Formulario de edición con todos los campos + sedes autorizadas para secretarias
+ */
+import DashboardLayout from '../../../layouts/DashboardLayout.astro';
+import Card from '../../../components/ui/Card.astro';
+import Input from '../../../components/ui/Input.astro';
+import Button from '../../../components/ui/Button.astro';
+import { ESCUELA_ACTUAL } from '../../../lib/mockData';
+
+export function getStaticPaths() {
+  return [
+    { params: { id: "1" } },
+    { params: { id: "2" } },
+    { params: { id: "3" } },
+    { params: { id: "4" } },
+    { params: { id: "5" } },
+  ];
+}
+
+const { id } = Astro.params;
+
+const usuarios: Record<string, any> = {
+  '1': { id: 1, nombre: 'Jorge Administrador', rut: '10.234.567-8', email: 'admin@escuela.cl', telefono: '+56 9 8765 4321', rol: 'admin', estado: 'activo', sede: 'ambas', sedesAutorizadas: ['autoescuela-chillan', 'conductores-chillan'] },
+  '2': { id: 2, nombre: 'Patricia Secretaria', rut: '12.456.789-0', email: 'secretaria@escuela.cl', telefono: '+56 9 1234 5678', rol: 'secretaria', estado: 'activo', sede: 'autoescuela-chillan', sedesAutorizadas: ['autoescuela-chillan'] },
+  '3': { id: 3, nombre: 'Carlos Rojas', rut: '14.567.890-1', email: 'crojas@escuela.cl', telefono: '+56 9 5555 1234', rol: 'instructor', estado: 'activo', sede: 'autoescuela-chillan', sedesAutorizadas: ['autoescuela-chillan'] },
+  '4': { id: 4, nombre: 'Ana Martínez', rut: '15.678.901-2', email: 'amartinez@escuela.cl', telefono: '+56 9 6666 7890', rol: 'instructor', estado: 'activo', sede: 'conductores-chillan', sedesAutorizadas: ['conductores-chillan'] },
+  '5': { id: 5, nombre: 'Luis Torres', rut: '16.789.012-3', email: 'ltorres@escuela.cl', telefono: '+56 9 7777 8901', rol: 'instructor', estado: 'inactivo', sede: 'autoescuela-chillan', sedesAutorizadas: ['autoescuela-chillan'] },
+};
+
+const user = usuarios[id!] || usuarios['1'];
+---
+<DashboardLayout title={`Editar ${user.nombre} - Usuarios`} escuela={ESCUELA_ACTUAL}>
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex items-center gap-2 text-sm text-secondary mb-2">
+      <a href="/dashboard" class="hover:text-gray-900">Inicio</a>
+      <span>/</span>
+      <a href="/usuarios" class="hover:text-gray-900">Usuarios</a>
+      <span>/</span>
+      <a href={`/usuarios/${user.id}`} class="hover:text-gray-900">{user.nombre}</a>
+      <span>/</span>
+      <span class="text-gray-900 font-medium">Editar</span>
+    </div>
+    <h1 class="text-3xl font-semibold text-gray-900">Editar usuario</h1>
+    <p class="text-secondary mt-1">Modificar datos de {user.nombre}</p>
+  </div>
+
+  <div class="grid lg:grid-cols-3 gap-6">
+    <!-- Formulario -->
+    <div class="lg:col-span-2 space-y-6">
+      <Card>
+        <h2 class="text-lg font-semibold text-gray-900 mb-6">Información personal</h2>
+        <form id="editUserForm" class="space-y-5" action={`/usuarios/${user.id}`} method="get">
+          <!-- Nombre -->
+          <Input label="Nombre completo" name="nombre" value={user.nombre} required />
+
+          <!-- RUT (solo lectura) -->
+          <div class="w-full">
+            <label class="block text-sm font-medium text-gray-700 mb-1.5" for="rut">
+              RUT
+            </label>
+            <input
+              type="text"
+              id="rut"
+              name="rut"
+              value={user.rut}
+              disabled
+              class="h-11 px-4 w-full text-sm bg-gray-100 rounded-md border border-gray-300 text-gray-500 cursor-not-allowed"
+            />
+            <p class="text-xs text-secondary mt-1">El RUT no puede ser modificado una vez registrado</p>
+          </div>
+
+          <!-- Email -->
+          <Input label="Correo electrónico" name="email" type="email" value={user.email} required />
+
+          <!-- Teléfono -->
+          <Input label="Teléfono" name="telefono" type="tel" value={user.telefono} required />
+
+          <!-- Rol -->
+          <div class="w-full">
+            <label class="block text-sm font-medium text-gray-700 mb-1.5" for="rol">
+              Rol *
+            </label>
+            <select
+              id="rol"
+              name="rol"
+              required
+              class="h-11 px-4 w-full text-sm bg-white rounded-md border border-gray-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-900 appearance-none"
+              style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E&quot;); background-repeat: no-repeat; background-position: right 0.5rem center; background-size: 1.5em 1.5em; padding-right: 2.5rem;"
+            >
+              <option value="admin" selected={user.rol === 'admin'}>Administrador</option>
+              <option value="secretaria" selected={user.rol === 'secretaria'}>Secretaría</option>
+              <option value="instructor" selected={user.rol === 'instructor'}>Instructor</option>
+            </select>
+          </div>
+
+          <!-- Estado -->
+          <div class="w-full">
+            <label class="block text-sm font-medium text-gray-700 mb-1.5" for="estado">
+              Estado
+            </label>
+            <select
+              id="estado"
+              name="estado"
+              class="h-11 px-4 w-full text-sm bg-white rounded-md border border-gray-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-900 appearance-none"
+              style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E&quot;); background-repeat: no-repeat; background-position: right 0.5rem center; background-size: 1.5em 1.5em; padding-right: 2.5rem;"
+            >
+              <option value="activo" selected={user.estado === 'activo'}>Activo</option>
+              <option value="inactivo" selected={user.estado === 'inactivo'}>Inactivo</option>
+            </select>
+          </div>
+
+          <!-- Botones -->
+          <div class="flex gap-3 pt-4 border-t border-gray-200">
+            <a href={`/usuarios/${user.id}`} class="inline-flex items-center justify-center h-11 px-4 text-sm font-medium rounded-md bg-white border border-gray-300 text-gray-900 hover:bg-gray-50 hover:border-gray-400 shadow-sm transition-all duration-200">
+              Cancelar
+            </a>
+            <Button type="submit" variant="primary">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Guardar cambios
+            </Button>
+          </div>
+        </form>
+      </Card>
+
+      <!-- RF-013: Sedes Autorizadas (solo para secretarias) -->
+      {user.rol === 'secretaria' && (
+        <Card>
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-gray-900">Sedes autorizadas</h2>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              RF-013
+            </span>
+          </div>
+          <p class="text-sm text-secondary mb-4">
+            El administrador puede autorizar a esta secretaria a operar en una o ambas sedes simultáneamente.
+          </p>
+          <div class="space-y-3">
+            <label class="flex items-center gap-3 p-3 bg-gray-50 hover:bg-gray-100 rounded-lg cursor-pointer transition-colors">
+              <input
+                type="checkbox"
+                name="sedes"
+                value="autoescuela-chillan"
+                checked={user.sedesAutorizadas.includes('autoescuela-chillan')}
+                class="w-5 h-5 rounded border-gray-300 text-gray-900 focus:ring-gray-900 focus:ring-offset-0"
+              />
+              <div>
+                <p class="text-sm font-medium text-gray-900">Autoescuela Chillán</p>
+                <p class="text-xs text-secondary">Clases B - Licencia básica</p>
+              </div>
+            </label>
+            <label class="flex items-center gap-3 p-3 bg-gray-50 hover:bg-gray-100 rounded-lg cursor-pointer transition-colors">
+              <input
+                type="checkbox"
+                name="sedes"
+                value="conductores-chillan"
+                checked={user.sedesAutorizadas.includes('conductores-chillan')}
+                class="w-5 h-5 rounded border-gray-300 text-gray-900 focus:ring-gray-900 focus:ring-offset-0"
+              />
+              <div>
+                <p class="text-sm font-medium text-gray-900">Conductores Chillán</p>
+                <p class="text-xs text-secondary">Clases Profesionales A2, A3, A4, A5</p>
+              </div>
+            </label>
+          </div>
+          <div class="flex items-start gap-3 p-3 mt-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <svg class="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+            </svg>
+            <p class="text-xs text-yellow-800">
+              Al autorizar ambas sedes, la secretaria podrá ver y gestionar datos de alumnos, pagos y agenda de ambas sucursales desde el selector de escuela.
+            </p>
+          </div>
+        </Card>
+      )}
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-4">
+      <!-- Info del registro -->
+      <Card class="bg-gray-50 border-gray-200">
+        <h3 class="text-sm font-semibold text-gray-900 mb-3">Registro de cambios</h3>
+        <p class="text-xs text-gray-700">
+          Cada modificación a este perfil queda registrada automáticamente en el log de auditoría con fecha, hora, campo modificado, valor anterior y nuevo.
+        </p>
+        <Button href="/usuarios/auditoria" variant="ghost" class="text-xs mt-3 p-0 h-auto text-gray-700">
+          Ver log de auditoría →
+        </Button>
+      </Card>
+
+      <!-- Contraseña -->
+      <Card>
+        <h3 class="text-sm font-semibold text-gray-900 mb-3">Contraseña</h3>
+        <p class="text-xs text-gray-700 mb-3">
+          Para resetear la contraseña del usuario se enviará un enlace temporal a su correo electrónico registrado.
+        </p>
+        <Button variant="secondary" class="w-full text-sm">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+          </svg>
+          Enviar enlace de reseteo
+        </Button>
+      </Card>
+
+      <!-- Peligro -->
+      <Card class="border-red-200">
+        <h3 class="text-sm font-semibold text-red-900 mb-3">Zona de peligro</h3>
+        <p class="text-xs text-gray-700 mb-3">
+          Desactivar la cuenta impedirá al usuario iniciar sesión.
+        </p>
+        <Button variant="ghost" class="w-full text-sm text-red-600 hover:bg-red-50 border border-red-200">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+          </svg>
+          Desactivar cuenta
+        </Button>
+      </Card>
+    </div>
+  </div>
+</DashboardLayout>
+
+<style>
+  input[type="checkbox"] {
+    appearance: none;
+    border: 1px solid rgb(209, 213, 219);
+    border-radius: 0.375rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+  }
+  input[type="checkbox"]:checked {
+    background-color: rgb(17, 24, 39);
+    border-color: rgb(17, 24, 39);
+  }
+  input[type="checkbox"]:checked::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3E%3C/svg%3E");
+    background-size: 100% 100%;
+  }
+  input[type="checkbox"]:focus {
+    outline: 2px solid rgb(17, 24, 39);
+    outline-offset: 2px;
+  }
+</style>
