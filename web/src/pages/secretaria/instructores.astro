@@ -1,11 +1,10 @@
 ---
 /**
- * Instructores - Listado completo (RF-041, RF-042)
+ * Instructores - Vista Secretaria (RF-041, RF-042)
  * Muestra instructores con licencia, vehículo y estado
  */
 import DashboardLayout from "../../layouts/DashboardLayout.astro";
 import Card from "../../components/ui/Card.astro";
-import Button from "../../components/ui/Button.astro";
 import { INSTRUCTORES } from "../../lib/mockInstructors";
 import { ESCUELA_ACTUAL } from "../../lib/mockData";
 
@@ -38,6 +37,7 @@ function getLicenciaBadge(estadoValidacion: string) {
 
 <DashboardLayout
   title="Instructores - Escuela de Conductores"
+  userRole="secretaria"
   escuela={ESCUELA_ACTUAL}
 >
   <!-- Header -->
@@ -51,22 +51,6 @@ function getLicenciaBadge(estadoValidacion: string) {
           Gestión de instructores Clase B con licencias y vehículos
         </p>
       </div>
-      <Button variant="primary" href="/instructores/crear">
-        <svg
-          class="w-4 h-4 mr-2"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
-          ></path>
-        </svg>
-        Nuevo instructor
-      </Button>
     </div>
   </div>
 
@@ -218,7 +202,7 @@ function getLicenciaBadge(estadoValidacion: string) {
                   <td class="py-4 px-4 text-right">
                     <div class="flex items-center justify-end gap-2">
                       <a
-                        href={`/instructores/${instructor.id}`}
+                        href={`/secretaria/instructores/${instructor.id}`}
                         class="text-sm text-gray-600 hover:text-gray-900 transition-colors"
                         title="Ver perfil"
                       >
@@ -243,7 +227,7 @@ function getLicenciaBadge(estadoValidacion: string) {
                         </svg>
                       </a>
                       <a
-                        href={`/instructores/${instructor.id}/editar`}
+                        href={`/secretaria/instructores/${instructor.id}/editar`}
                         class="text-sm text-gray-600 hover:text-gray-900 transition-colors"
                         title="Editar"
                       >

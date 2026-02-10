@@ -285,7 +285,7 @@ const notifications = [
     unread: false,
     icon: "🔒",
     color: "red",
-    action: { label: "Ver auditoría", href: "/usuarios/auditoria" },
+    action: { label: "Ver auditoría", href: "/auditoria" },
   },
 
   // PSICOTÉCNICO (RF-037)
@@ -379,7 +379,7 @@ const unreadCount = notifications.filter((n) => n.unread).length;
           {unreadCount} sin leer • {notifications.length} totales
         </p>
       </div>
-      <Button variant="ghost" onclick="window.location.reload()">
+      <Button variant="ghost" onClick="window.location.reload()">
         Marcar todas como leídas
       </Button>
     </div>
@@ -416,7 +416,7 @@ const unreadCount = notifications.filter((n) => n.unread).length;
               <Card class="p-4 border-l-4 border-red-500 bg-red-50">
                 <div class="flex items-start justify-between gap-4">
                   <div class="flex items-start gap-3 flex-1">
-                    <span class="text-2xl flex-shrink-0">{notif.icon}</span>
+                    <span class="text-2xl shrink-0">{notif.icon}</span>
                     <div class="flex-1 min-w-0">
                       <div class="flex items-center gap-2 mb-1">
                         <span class="w-2 h-2 bg-red-600 rounded-full" />
@@ -432,7 +432,7 @@ const unreadCount = notifications.filter((n) => n.unread).length;
                     <Button
                       href={notif.action.href}
                       variant="primary"
-                      class="flex-shrink-0"
+                      class="shrink-0"
                     >
                       {notif.action.label}
                     </Button>
@@ -459,7 +459,7 @@ const unreadCount = notifications.filter((n) => n.unread).length;
               >
                 <div class="flex items-start justify-between gap-4">
                   <div class="flex items-start gap-3 flex-1">
-                    <span class="text-2xl flex-shrink-0">{notif.icon}</span>
+                    <span class="text-2xl shrink-0">{notif.icon}</span>
                     <div class="flex-1 min-w-0">
                       <div class="flex items-center gap-2 mb-1">
                         {notif.unread && (
@@ -477,7 +477,7 @@ const unreadCount = notifications.filter((n) => n.unread).length;
                     <Button
                       href={notif.action.href}
                       variant="secondary"
-                      class="flex-shrink-0"
+                      class="shrink-0"
                     >
                       {notif.action.label}
                     </Button>
@@ -500,7 +500,7 @@ const unreadCount = notifications.filter((n) => n.unread).length;
               <Card class={`p-3 ${notif.unread ? "bg-blue-50" : ""}`}>
                 <div class="flex items-start justify-between gap-3">
                   <div class="flex items-start gap-2 flex-1 min-w-0">
-                    <span class="text-xl flex-shrink-0">{notif.icon}</span>
+                    <span class="text-xl shrink-0">{notif.icon}</span>
                     <div class="flex-1 min-w-0">
                       <h3 class="font-medium text-gray-900 text-sm mb-1">
                         {notif.title}
@@ -512,7 +512,7 @@ const unreadCount = notifications.filter((n) => n.unread).length;
                   {notif.action && (
                     <Button
                       href={notif.action.href}
-                      class="flex-shrink-0 text-xs"
+                      class="shrink-0 text-xs"
                     >
                       Ver
                     </Button>

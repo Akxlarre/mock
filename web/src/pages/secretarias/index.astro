@@ -1,68 +1,57 @@
 ---
 /**
- * Usuarios - Gestión de usuarios del sistema
- * RF-001 a RF-005: Alta, baja, modificación usuarios y roles
+ * Secretarias - Gestión de secretarias del sistema
+ * RF-001 a RF-005: Alta, baja, modificación de secretarias
  */
 import DashboardLayout from '../../layouts/DashboardLayout.astro';
 import Card from '../../components/ui/Card.astro';
 import Button from '../../components/ui/Button.astro';
 import Input from '../../components/ui/Input.astro';
 
-// Mock data
-const usuarios = [
-  { id: 1, nombre: 'Jorge Administrador', email: 'admin@escuela.cl', rol: 'admin', estado: 'activo', ultimoAcceso: '2026-02-03 09:30' },
-  { id: 2, nombre: 'Patricia Secretaria', email: 'secretaria@escuela.cl', rol: 'secretaria', estado: 'activo', ultimoAcceso: '2026-02-03 08:15' },
-  { id: 3, nombre: 'Carlos Rojas', email: 'crojas@escuela.cl', rol: 'instructor', estado: 'activo', ultimoAcceso: '2026-02-02 17:45' },
-  { id: 4, nombre: 'Ana Martínez', email: 'amartinez@escuela.cl', rol: 'instructor', estado: 'activo', ultimoAcceso: '2026-02-03 07:00' },
-  { id: 5, nombre: 'Luis Torres', email: 'ltorres@escuela.cl', rol: 'instructor', estado: 'inactivo', ultimoAcceso: '2026-01-28 14:20' },
+// Mock data - solo secretarias
+const secretarias = [
+  { id: 1, nombre: 'Patricia Secretaria', email: 'psecretaria@escuela.cl', telefono: '+56 9 8765 4321', sede: 'Autoescuela Chillán', estado: 'activo', ultimoAcceso: '2026-02-03 08:15' },
+  { id: 2, nombre: 'María González', email: 'mgonzalez@escuela.cl', telefono: '+56 9 7654 3210', sede: 'Conductores Chillán', estado: 'activo', ultimoAcceso: '2026-02-03 09:30' },
+  { id: 3, nombre: 'Carmen Silva', email: 'csilva@escuela.cl', telefono: '+56 9 6543 2109', sede: 'Autoescuela Chillán', estado: 'activo', ultimoAcceso: '2026-02-02 16:45' },
+  { id: 4, nombre: 'Rosa Pérez', email: 'rperez@escuela.cl', telefono: '+56 9 5432 1098', sede: 'Conductores Chillán', estado: 'inactivo', ultimoAcceso: '2026-01-28 14:20' },
 ];
-
-const rolConfig: Record<string, { label: string; icon: string; color: string }> = {
-  'admin': { label: 'Administrador', icon: '👑', color: 'purple' },
-  'secretaria': { label: 'Secretaria', icon: '📋', color: 'blue' },
-  'instructor': { label: 'Instructor', icon: '🚗', color: 'green' },
-};
 ---
 
-<DashboardLayout title="Usuarios - Escuela de Conductores">
+<DashboardLayout title="Secretarias - Escuela de Conductores">
   <!-- Header -->
   <div class="mb-8">
     <div class="flex items-center gap-2 text-sm text-secondary mb-2">
       <a href="/dashboard" class="hover:text-gray-900">Inicio</a>
       <span>/</span>
-      <span class="text-gray-900 font-medium">Usuarios</span>
+      <span class="text-gray-900 font-medium">Secretarias</span>
     </div>
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div>
-        <h1 class="text-3xl font-semibold text-gray-900">Gestión de Usuarios</h1>
-        <p class="text-secondary mt-1">Control de acceso al sistema</p>
+        <h1 class="text-3xl font-semibold text-gray-900 tracking-tight">Gestión de Secretarias</h1>
+        <p class="text-secondary mt-1">Control de acceso y gestión de personal de secretaría</p>
       </div>
-      <Button href="/usuarios/crear" variant="primary">
+      <Button href="/secretarias/crear" variant="primary">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
         </svg>
-        Nuevo Usuario
+        Nueva Secretaria
       </Button>
     </div>
   </div>
 
   <!-- Stats -->
-  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+  <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
     <Card class="p-4">
-      <p class="text-xs text-secondary">Total Usuarios</p>
-      <p class="text-2xl font-semibold text-gray-900 mt-1">15</p>
+      <p class="text-xs text-secondary">Total Secretarias</p>
+      <p class="text-2xl font-semibold text-gray-900 mt-1">{secretarias.length}</p>
     </Card>
     <Card class="p-4">
-      <p class="text-xs text-secondary">Activos</p>
-      <p class="text-2xl font-semibold text-green-600 mt-1">12</p>
+      <p class="text-xs text-secondary">Activas</p>
+      <p class="text-2xl font-semibold text-green-600 mt-1">{secretarias.filter(s => s.estado === 'activo').length}</p>
     </Card>
     <Card class="p-4">
-      <p class="text-xs text-secondary">Instructores</p>
-      <p class="text-2xl font-semibold text-blue-600 mt-1">8</p>
-    </Card>
-    <Card class="p-4">
-      <p class="text-xs text-secondary">Administradores</p>
-      <p class="text-2xl font-semibold text-purple-600 mt-1">2</p>
+      <p class="text-xs text-secondary">Inactivas</p>
+      <p class="text-2xl font-semibold text-gray-600 mt-1">{secretarias.filter(s => s.estado === 'inactivo').length}</p>
     </Card>
   </div>
 
@@ -77,67 +66,55 @@ const rolConfig: Record<string, { label: string; icon: string; color: string }> 
       </div>
       <div class="flex gap-2">
         <select class="h-11 px-4 text-sm bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-900">
-          <option value="">Todos los roles</option>
-          <option value="admin">Administrador</option>
-          <option value="secretaria">Secretaria</option>
-          <option value="instructor">Instructor</option>
+          <option value="">Todas las sedes</option>
+          <option value="autoescuela-chillan">Autoescuela Chillán</option>
+          <option value="conductores-chillan">Conductores Chillán</option>
         </select>
         <select class="h-11 px-4 text-sm bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-900">
           <option value="">Todos los estados</option>
-          <option value="activo">Activos</option>
-          <option value="inactivo">Inactivos</option>
+          <option value="activo">Activas</option>
+          <option value="inactivo">Inactivas</option>
         </select>
       </div>
     </div>
   </Card>
 
-  <!-- Grid: Tabla + Info Roles -->
+  <!-- Grid: Tabla + Info -->
   <div class="grid lg:grid-cols-3 gap-6">
-    <!-- Tabla usuarios -->
+    <!-- Tabla secretarias -->
     <div class="lg:col-span-2">
       <Card>
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">Lista de Usuarios</h2>
-        
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Lista de Secretarias</h2>
+
         <div class="space-y-3">
-          {usuarios.map((user) => {
-            const rolInfo = rolConfig[user.rol];
-            
+          {secretarias.map((secretaria) => {
             return (
               <div class="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
                 <div class="flex items-center gap-4 flex-1">
                   <!-- Avatar -->
-                  <div class={`w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold text-sm ${
-                    user.rol === 'admin' ? 'bg-purple-600' :
-                    user.rol === 'secretaria' ? 'bg-blue-600' :
-                    'bg-green-600'
-                  }`}>
-                    {user.nombre.split(' ').map(n => n[0]).join('').substring(0, 2)}
+                  <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold text-sm bg-blue-600">
+                    {secretaria.nombre.split(' ').map(n => n[0]).join('').substring(0, 2)}
                   </div>
 
                   <!-- Info -->
                   <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2 mb-1">
-                      <p class="text-sm font-semibold text-gray-900 truncate">{user.nombre}</p>
+                      <p class="text-sm font-semibold text-gray-900 truncate">{secretaria.nombre}</p>
                       <span class={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                        user.estado === 'activo' 
-                          ? 'bg-green-100 text-green-800' 
+                        secretaria.estado === 'activo'
+                          ? 'bg-green-100 text-green-800'
                           : 'bg-gray-100 text-gray-600'
                       }`}>
-                        {user.estado === 'activo' ? '✓ Activo' : '○ Inactivo'}
+                        {secretaria.estado === 'activo' ? '✓ Activa' : '○ Inactiva'}
                       </span>
                     </div>
-                    <p class="text-xs text-secondary truncate">{user.email}</p>
+                    <p class="text-xs text-secondary truncate">{secretaria.email}</p>
                     <div class="flex items-center gap-3 mt-1">
-                      <span class={`inline-flex items-center gap-1 text-xs font-medium ${
-                        rolInfo.color === 'purple' ? 'text-purple-700' :
-                        rolInfo.color === 'blue' ? 'text-blue-700' :
-                        'text-green-700'
-                      }`}>
-                        <span>{rolInfo.icon}</span>
-                        <span>{rolInfo.label}</span>
+                      <span class="text-xs text-gray-600">
+                        📍 {secretaria.sede}
                       </span>
                       <span class="text-xs text-muted">
-                        Último acceso: {user.ultimoAcceso}
+                        Último acceso: {secretaria.ultimoAcceso}
                       </span>
                     </div>
                   </div>
@@ -145,8 +122,8 @@ const rolConfig: Record<string, { label: string; icon: string; color: string }> 
 
                 <!-- Actions -->
                 <div class="flex items-center gap-2 shrink-0">
-                  <a 
-                    href={`/usuarios/${user.id}`}
+                  <a
+                    href={`/secretarias/${secretaria.id}`}
                     class="p-2 text-gray-600 hover:text-gray-900 hover:bg-white rounded transition-colors"
                     title="Ver perfil"
                   >
@@ -155,8 +132,8 @@ const rolConfig: Record<string, { label: string; icon: string; color: string }> 
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                     </svg>
                   </a>
-                  <a 
-                    href={`/usuarios/${user.id}/editar`}
+                  <a
+                    href={`/secretarias/${secretaria.id}/editar`}
                     class="p-2 text-gray-600 hover:text-gray-900 hover:bg-white rounded transition-colors"
                     title="Editar"
                   >
@@ -173,7 +150,7 @@ const rolConfig: Record<string, { label: string; icon: string; color: string }> 
         <!-- Pagination -->
         <div class="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
           <p class="text-sm text-secondary">
-            Mostrando 1-5 de 15 usuarios
+            Mostrando 1-{secretarias.length} de {secretarias.length} secretarias
           </p>
           <div class="flex gap-2">
             <Button variant="secondary" class="text-sm">Anterior</Button>
@@ -183,34 +160,35 @@ const rolConfig: Record<string, { label: string; icon: string; color: string }> 
       </Card>
     </div>
 
-    <!-- Sidebar: Roles y Permisos -->
+    <!-- Sidebar: Info y Accesos -->
     <div class="space-y-4">
-      <!-- Roles -->
+      <!-- Permisos de Secretaria -->
       <Card>
-        <h3 class="text-sm font-semibold text-gray-900 mb-4">Roles del Sistema</h3>
-        <div class="space-y-3">
-          <div class="p-3 bg-purple-50 border border-purple-200 rounded-lg">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="text-lg">👑</span>
-              <p class="text-sm font-semibold text-purple-900">Administrador</p>
-            </div>
-            <p class="text-xs text-purple-800">Control total del sistema, gestión de usuarios y configuración</p>
+        <h3 class="text-sm font-semibold text-gray-900 mb-4">Permisos de Secretaria</h3>
+        <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg mb-4">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-lg">📋</span>
+            <p class="text-sm font-semibold text-blue-900">Rol: Secretaria</p>
           </div>
+          <p class="text-xs text-blue-800">Gestión de matrículas, pagos, agenda y alumnos</p>
+        </div>
 
-          <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="text-lg">📋</span>
-              <p class="text-sm font-semibold text-blue-900">Secretaria</p>
-            </div>
-            <p class="text-xs text-blue-800">Gestión de matrículas, pagos, agenda y alumnos</p>
+        <div class="space-y-2 text-xs text-gray-700">
+          <div class="flex items-start gap-2">
+            <span class="text-green-600 mt-0.5">✓</span>
+            <span>Gestión de matrículas y alumnos</span>
           </div>
-
-          <div class="p-3 bg-green-50 border border-green-200 rounded-lg">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="text-lg">🚗</span>
-              <p class="text-sm font-semibold text-green-900">Instructor</p>
-            </div>
-            <p class="text-xs text-green-800">Vista de agenda personal, registro de clases y asistencia</p>
+          <div class="flex items-start gap-2">
+            <span class="text-green-600 mt-0.5">✓</span>
+            <span>Registro de pagos y cuadratura</span>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="text-green-600 mt-0.5">✓</span>
+            <span>Gestión de agenda y asistencia</span>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="text-green-600 mt-0.5">✓</span>
+            <span>Acceso a informes y certificados</span>
           </div>
         </div>
       </Card>
@@ -219,11 +197,11 @@ const rolConfig: Record<string, { label: string; icon: string; color: string }> 
       <Card>
         <h3 class="text-sm font-semibold text-gray-900 mb-3">Accesos Rápidos</h3>
         <div class="space-y-2">
-          <Button href="/usuarios/crear" variant="secondary" class="w-full justify-start text-sm">
+          <Button href="/secretarias/crear" variant="secondary" class="w-full justify-start text-sm">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
             </svg>
-            Crear Usuario
+            Crear Secretaria
           </Button>
           <Button href="/usuarios/roles" variant="secondary" class="w-full justify-start text-sm">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -239,7 +217,6 @@ const rolConfig: Record<string, { label: string; icon: string; color: string }> 
           </Button>
         </div>
       </Card>
-
     </div>
   </div>
 </DashboardLayout>

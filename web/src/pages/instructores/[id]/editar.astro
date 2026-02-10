@@ -1,0 +1,425 @@
+---
+/**
+ * Editar Instructor - RF-042, RF-045
+ * Formulario de edición con vehículo, historial y reemplazos
+ */
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+import Card from "../../../components/ui/Card.astro";
+import Input from "../../../components/ui/Input.astro";
+import Button from "../../../components/ui/Button.astro";
+import VehicleSelector from "../../../components/admin/VehicleSelector.astro";
+import VehicleAssignmentHistory from "../../../components/admin/VehicleAssignmentHistory.astro";
+import { getInstructorById } from "../../../lib/mockInstructors";
+import { ESCUELA_ACTUAL } from "../../../lib/mockData";
+
+export function getStaticPaths() {
+  return [
+    { params: { id: "1" } },
+    { params: { id: "2" } },
+    { params: { id: "3" } },
+    { params: { id: "4" } },
+    { params: { id: "5" } },
+  ];
+}
+
+const { id } = Astro.params;
+const instructor = getInstructorById(parseInt(id!));
+
+if (!instructor) {
+  return Astro.redirect("/instructores");
+}
+
+// Helper para badge de licencia
+function getLicenciaBadge(estadoValidacion: string) {
+  switch (estadoValidacion) {
+    case "vigente":
+      return { text: "Vigente", class: "bg-green-100 text-green-800" };
+    case "por_vencer":
+      return { text: "Por vencer", class: "bg-yellow-100 text-yellow-800" };
+    case "vencida":
+      return { text: "Vencida", class: "bg-red-100 text-red-800" };
+    default:
+      return { text: "Desconocido", class: "bg-gray-100 text-gray-800" };
+  }
+}
+
+const licenciaBadge = getLicenciaBadge(instructor.licencia.estadoValidacion);
+---
+
+<DashboardLayout
+  title={`Editar ${instructor.nombre} - Instructor`}
+  escuela={ESCUELA_ACTUAL}
+>
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex items-center gap-2 text-sm text-secondary mb-2">
+      <a href="/dashboard" class="hover:text-gray-900">Inicio</a>
+      <span>/</span>
+      <a href="/instructores" class="hover:text-gray-900">Instructores</a>
+      <span>/</span>
+      <a href={`/instructores/${id}`} class="hover:text-gray-900"
+        >{instructor.nombre}</a
+      >
+      <span>/</span>
+      <span class="text-gray-900 font-medium">Editar</span>
+    </div>
+    <h1 class="text-3xl font-semibold text-gray-900 tracking-tight">
+      Editar instructor
+    </h1>
+    <p class="text-secondary mt-1">
+      Modificar información personal, licencia y asignación de vehículo
+    </p>
+  </div>
+
+  <form id="editInstructorForm" method="get" action={`/instructores/${id}`}>
+    <div class="grid lg:grid-cols-3 gap-6">
+      <!-- Main Content -->
+      <div class="lg:col-span-2 space-y-6">
+        <!-- Información Personal -->
+        <Card>
+          <h2 class="text-lg font-semibold text-gray-900 mb-6">
+            Información Personal
+          </h2>
+          <div class="space-y-5">
+            <Input
+              label="Nombre completo"
+              name="nombre"
+              value={instructor.nombre}
+              required
+            />
+
+            <div class="w-full">
+              <label
+                class="block text-sm font-medium text-gray-700 mb-1.5"
+                for="rut"
+              >
+                RUT *
+              </label>
+              <input
+                type="text"
+                id="rut"
+                name="rut"
+                value={instructor.rut}
+                disabled
+                class="h-11 px-4 w-full text-sm bg-gray-100 rounded-md border border-gray-300 cursor-not-allowed text-gray-500"
+              />
+              <p class="text-xs text-gray-500 mt-1.5">
+                El RUT no puede ser modificado
+              </p>
+            </div>
+
+            <Input
+              label="Correo electrónico"
+              name="email"
+              type="email"
+              value={instructor.email}
+              required
+            />
+
+            <Input
+              label="Teléfono"
+              name="telefono"
+              type="tel"
+              value={instructor.telefono}
+              required
+            />
+          </div>
+        </Card>
+
+        <!-- Información de Licencia -->
+        <Card>
+          <h2 class="text-lg font-semibold text-gray-900 mb-6">
+            Información de Licencia
+          </h2>
+          <div class="space-y-5">
+            <Input
+              label="Número de licencia"
+              name="licencia_numero"
+              value={instructor.licencia.numero}
+              required
+            />
+
+            <div class="w-full">
+              <label
+                class="block text-sm font-medium text-gray-700 mb-1.5"
+                for="licencia_clase"
+              >
+                Clase de licencia *
+              </label>
+              <select
+                id="licencia_clase"
+                name="licencia_clase"
+                required
+                class="h-11 px-4 w-full text-sm bg-white rounded-md border border-gray-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-900 appearance-none"
+                style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%236B7280%27%3E%3Cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M19 9l-7 7-7-7%27%3E%3C/path%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 0.5rem center; background-size: 1.5em 1.5em; padding-right: 2.5rem;"
+              >
+                <option value="B" selected={instructor.licencia.clase === "B"}
+                  >Clase B (Automóviles)</option
+                >
+                <option value="A2" selected={instructor.licencia.clase === "A2"}
+                  >Clase A2 (Taxi básico)</option
+                >
+                <option value="A3" selected={instructor.licencia.clase === "A3"}
+                  >Clase A3 (Ambulancia)</option
+                >
+                <option value="A4" selected={instructor.licencia.clase === "A4"}
+                  >Clase A4 (Buses)</option
+                >
+                <option value="A5" selected={instructor.licencia.clase === "A5"}
+                  >Clase A5 (Camiones)</option
+                >
+              </select>
+            </div>
+
+            <div class="w-full">
+              <label
+                class="block text-sm font-medium text-gray-700 mb-1.5"
+                for="licencia_vencimiento"
+              >
+                Fecha de vencimiento *
+              </label>
+              <input
+                type="date"
+                id="licencia_vencimiento"
+                name="licencia_vencimiento"
+                required
+                value={instructor.licencia.fechaVencimiento}
+                class="h-11 px-4 w-full text-sm bg-white rounded-md border border-gray-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-900"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1.5">
+                Estado de validación
+              </label>
+              <span
+                class={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${licenciaBadge.class}`}
+              >
+                {licenciaBadge.text}
+              </span>
+            </div>
+          </div>
+        </Card>
+
+        <!-- Tipo de Instructor -->
+        <Card>
+          <h2 class="text-lg font-semibold text-gray-900 mb-6">
+            Tipo de Instructor
+          </h2>
+          <div class="space-y-5">
+            <div class="w-full">
+              <label
+                class="block text-sm font-medium text-gray-700 mb-1.5"
+                for="tipo"
+              >
+                Tipo de instructor *
+              </label>
+              <select
+                id="tipo"
+                name="tipo"
+                required
+                class="h-11 px-4 w-full text-sm bg-white rounded-md border border-gray-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-900 appearance-none"
+                style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%236B7280%27%3E%3Cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M19 9l-7 7-7-7%27%3E%3C/path%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 0.5rem center; background-size: 1.5em 1.5em; padding-right: 2.5rem;"
+              >
+                <option value="practico" selected={instructor.tipo === "practico"}
+                  >Práctico</option
+                >
+                <option value="teorico" selected={instructor.tipo === "teorico"}
+                  >Teórico</option
+                >
+                <option value="ambos" selected={instructor.tipo === "ambos"}
+                  >Ambos (Teórico y Práctico)</option
+                >
+              </select>
+            </div>
+          </div>
+        </Card>
+
+        <!-- Asignación de Vehículo (RF-045) -->
+        <Card>
+          <h2 class="text-lg font-semibold text-gray-900 mb-6">
+            Asignación de Vehículo
+          </h2>
+          <VehicleSelector
+            selectedVehicleId={instructor.vehiculoAsignado?.id}
+            instructorId={instructor.id}
+            name="vehiculo"
+            label="Vehículo asignado"
+          />
+          <p class="text-xs text-gray-500 mt-3">
+            Al cambiar el vehículo, se creará una nueva entrada en el historial
+            de asignaciones.
+          </p>
+        </Card>
+
+        <!-- Historial de Vehículos (RF-042) -->
+        <Card>
+          <h2 class="text-lg font-semibold text-gray-900 mb-6">
+            Historial de Asignaciones
+          </h2>
+          <VehicleAssignmentHistory
+            historialVehiculos={instructor.historialVehiculos}
+          />
+        </Card>
+
+        <!-- Botones de acción -->
+        <div class="flex gap-3 pb-4">
+          <a
+            href={`/instructores/${id}`}
+            class="inline-flex items-center justify-center h-11 px-4 text-sm font-medium rounded-md bg-white border border-gray-300 text-gray-900 hover:bg-gray-50 hover:border-gray-400 shadow-sm transition-all duration-200"
+          >
+            Cancelar
+          </a>
+          <Button type="submit" variant="primary">
+            <svg
+              class="w-4 h-4 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M5 13l4 4L19 7"></path>
+            </svg>
+            Guardar cambios
+          </Button>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="space-y-4">
+        <!-- Stats Rápidas -->
+        <Card class="bg-blue-50 border-blue-200">
+          <h3 class="text-sm font-semibold text-blue-900 mb-3">
+            Clases activas
+          </h3>
+          <p class="text-3xl font-semibold text-blue-900">
+            {instructor.clasesActivas}
+          </p>
+          <p class="text-xs text-blue-700 mt-1">
+            Clases agendadas actualmente
+          </p>
+        </Card>
+
+        <!-- Gestión de Reemplazos (RF-044) -->
+        <Card>
+          <h3 class="text-sm font-semibold text-gray-900 mb-3">
+            Gestión de reemplazos
+          </h3>
+          <p class="text-xs text-gray-600 mb-3">
+            {
+              instructor.reemplazos.length > 0
+                ? `${instructor.reemplazos.length} reemplazo(s) registrado(s)`
+                : "Sin reemplazos registrados"
+            }
+          </p>
+          <a
+            href={`/instructores/${id}/reemplazar`}
+            class="block w-full text-center px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+          >
+            Asignar reemplazo
+          </a>
+        </Card>
+
+        <!-- Zona de Peligro (RF-043) -->
+        <Card class="bg-red-50 border-red-200">
+          <h3 class="text-sm font-semibold text-red-900 mb-3">Zona de peligro</h3>
+          <p class="text-xs text-red-700 mb-3">
+            Desactivar este instructor impedirá nuevas asignaciones de clases.
+          </p>
+          {
+            instructor.activo ? (
+              <button
+                type="button"
+                id="deactivateButton"
+                class="w-full px-4 py-2 text-sm font-medium text-red-700 bg-white border border-red-300 rounded-md hover:bg-red-50 transition-colors"
+              >
+                Desactivar instructor
+              </button>
+            ) : (
+              <button
+                type="button"
+                id="activateButton"
+                class="w-full px-4 py-2 text-sm font-medium text-green-700 bg-white border border-green-300 rounded-md hover:bg-green-50 transition-colors"
+              >
+                Reactivar instructor
+              </button>
+            )
+          }
+        </Card>
+
+        <!-- Acceso a perfil -->
+        <Card>
+          <h3 class="text-sm font-semibold text-gray-900 mb-3">
+            Acciones rápidas
+          </h3>
+          <div class="space-y-2">
+            <a
+              href={`/instructores/${id}`}
+              class="block w-full text-center px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+            >
+              Ver perfil completo
+            </a>
+            <a
+              href="/instructor/horario"
+              class="block w-full text-center px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+            >
+              Ver horario
+            </a>
+          </div>
+        </Card>
+      </div>
+    </div>
+  </form>
+</DashboardLayout>
+
+<script define:vars={{ clasesActivas: instructor.clasesActivas, activo: instructor.activo }}>
+  // Submit del formulario
+  const form = document.getElementById("editInstructorForm");
+  form?.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    alert(
+      "✓ Cambios guardados exitosamente\n\nLa información del instructor ha sido actualizada.\n\nRedirigiendo al perfil..."
+    );
+
+    // Redirect simulado
+    const id = window.location.pathname.split("/")[2];
+    window.location.href = `/instructores/${id}`;
+  });
+
+  // Botón de desactivar (RF-043 - placeholder para modal futuro)
+  const deactivateButton = document.getElementById("deactivateButton");
+  deactivateButton?.addEventListener("click", () => {
+    if (clasesActivas > 0) {
+      // TODO: Mostrar modal PendingClassesWarning
+      alert(
+        `⚠️ Advertencia\n\nEste instructor tiene ${clasesActivas} clase(s) activa(s) agendada(s).\n\nSi desactivas este instructor, las clases deberán ser reasignadas a otro instructor.\n\n¿Deseas continuar con la desactivación?`
+      );
+    } else {
+      if (
+        confirm(
+          "¿Estás seguro de que deseas desactivar este instructor?\n\nPodrás reactivarlo en cualquier momento."
+        )
+      ) {
+        alert("✓ Instructor desactivado exitosamente");
+        window.location.reload();
+      }
+    }
+  });
+
+  // Botón de reactivar
+  const activateButton = document.getElementById("activateButton");
+  activateButton?.addEventListener("click", () => {
+    if (
+      confirm(
+        "¿Deseas reactivar este instructor?\n\nPodrá volver a recibir asignaciones de clases."
+      )
+    ) {
+      alert("✓ Instructor reactivado exitosamente");
+      window.location.reload();
+    }
+  });
+</script>
