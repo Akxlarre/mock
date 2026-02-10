@@ -81,7 +81,7 @@ function formatearFecha(fecha: string): string {
   <!-- Contexto del reemplazo -->
   <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
     <div class="flex items-start gap-3">
-      <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+      <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
         <svg
           class="w-5 h-5 text-blue-600"
           fill="none"
@@ -268,57 +268,54 @@ function formatearFecha(fecha: string): string {
   </form>
 </div>
 
-<script define:vars={{ originalInstructorName }}>
-  const form = document.getElementById("replacementForm");
+<script define:vars={{ originalInstructorName, id }}>
+  const form = document.getElementById(id);
 
   // Validación de fechas
-  const fechaInicio = document.getElementById(
-    "replacementForm-fecha-inicio"
-  ) as HTMLInputElement;
-  const fechaFin = document.getElementById(
-    "replacementForm-fecha-fin"
-  ) as HTMLInputElement;
+  const fechaInicio = document.getElementById(`${id}-fecha-inicio`);
+  const fechaFin = document.getElementById(`${id}-fecha-fin`);
 
-  fechaInicio?.addEventListener("change", () => {
-    if (fechaFin && fechaInicio.value) {
-      fechaFin.min = fechaInicio.value;
-      if (fechaFin.value && fechaFin.value < fechaInicio.value) {
-        fechaFin.value = fechaInicio.value;
+  if (fechaInicio && fechaFin) {
+    fechaInicio.addEventListener("change", () => {
+      if (fechaInicio.value) {
+        fechaFin.min = fechaInicio.value;
+        if (fechaFin.value && fechaFin.value < fechaInicio.value) {
+          fechaFin.value = fechaInicio.value;
+        }
       }
-    }
-  });
+    });
+  }
 
   // Submit del formulario
-  form?.addEventListener("submit", (e) => {
-    e.preventDefault();
+  if (form) {
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
 
-    // Validar que se haya seleccionado al menos una clase
-    const clasesSeleccionadas = document.querySelectorAll(
-      'input[name="clases_afectadas"]:checked'
-    );
-
-    if (clasesSeleccionadas.length === 0) {
-      alert(
-        "⚠️ Error de validación\n\nDebes seleccionar al menos una clase para reasignar."
+      // Validar que se haya seleccionado al menos una clase
+      const clasesSeleccionadas = document.querySelectorAll(
+        'input[name="clases_afectadas"]:checked'
       );
-      return;
-    }
 
-    // Obtener datos del formulario
-    const formData = new FormData(form as HTMLFormElement);
-    const instructorSelect = document.getElementById(
-      "replacementForm-instructor"
-    ) as HTMLSelectElement;
-    const selectedOption =
-      instructorSelect.options[instructorSelect.selectedIndex];
-    const reemplazoNombre =
-      selectedOption.getAttribute("data-instructor-name");
-    const motivo = formData.get("motivo");
-    const fechaInicioVal = formData.get("fecha_inicio");
-    const fechaFinVal = formData.get("fecha_fin");
+      if (clasesSeleccionadas.length === 0) {
+        alert(
+          "⚠️ Error de validación\n\nDebes seleccionar al menos una clase para reasignar."
+        );
+        return;
+      }
 
-    // Confirmación
-    const message = `✓ Reemplazo asignado exitosamente
+      // Obtener datos del formulario
+      const formData = new FormData(form);
+      const instructorSelect = document.getElementById(`${id}-instructor`);
+      const selectedOption =
+        instructorSelect.options[instructorSelect.selectedIndex];
+      const reemplazoNombre =
+        selectedOption.getAttribute("data-instructor-name");
+      const motivo = formData.get("motivo");
+      const fechaInicioVal = formData.get("fecha_inicio");
+      const fechaFinVal = formData.get("fecha_fin");
+
+      // Confirmación
+      const message = `✓ Reemplazo asignado exitosamente
 
 Instructor original: ${originalInstructorName}
 Instructor reemplazo: ${reemplazoNombre}
@@ -328,34 +325,37 @@ Motivo: ${motivo}
 
 El instructor de reemplazo ha sido notificado y las clases aparecerán en su horario.`;
 
-    alert(message);
+      alert(message);
 
-    // Redirect o cerrar modal (dependiendo del contexto)
-    if (window.location.pathname.includes("/reemplazar")) {
-      // Si estamos en la página dedicada, redirect al perfil
-      const instructorId = window.location.pathname.split("/")[2];
-      window.location.href = `/instructores/${instructorId}`;
-    } else {
-      // Si es un modal o inline, recargar la página
-      window.location.reload();
-    }
-  });
-
-  // Botón cancelar
-  const cancelButton = document.getElementById("replacementForm-cancel");
-  cancelButton?.addEventListener("click", () => {
-    if (
-      confirm(
-        "¿Deseas cancelar la asignación de reemplazo?\n\nLos datos ingresados se perderán."
-      )
-    ) {
+      // Redirect o cerrar modal (dependiendo del contexto)
       if (window.location.pathname.includes("/reemplazar")) {
-        // Si estamos en la página dedicada, volver atrás
-        window.history.back();
+        // Si estamos en la página dedicada, redirect al perfil
+        const instructorId = window.location.pathname.split("/")[2];
+        window.location.href = `/instructores/${instructorId}`;
       } else {
-        // Si es un modal, cerrarlo (implementar según patrón de modales)
+        // Si es un modal o inline, recargar la página
         window.location.reload();
       }
-    }
-  });
+    });
+  }
+
+  // Botón cancelar
+  const cancelButton = document.getElementById(`${id}-cancel`);
+  if (cancelButton) {
+    cancelButton.addEventListener("click", () => {
+      if (
+        confirm(
+          "¿Deseas cancelar la asignación de reemplazo?\n\nLos datos ingresados se perderán."
+        )
+      ) {
+        if (window.location.pathname.includes("/reemplazar")) {
+          // Si estamos en la página dedicada, volver atrás
+          window.history.back();
+        } else {
+          // Si es un modal, cerrarlo (implementar según patrón de modales)
+          window.location.reload();
+        }
+      }
+    });
+  }
 </script>
