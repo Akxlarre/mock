@@ -1,6 +1,7 @@
 ---
 /**
  * Wizard Matrícula - Paso 2: Documentos (secretaria)
+ * RF-082.1: Upload Autorización Notarial condicional (menores 17)
  */
 import DashboardLayout from "../../../../layouts/DashboardLayout.astro";
 import Card from "../../../../components/ui/Card.astro";
@@ -10,66 +11,258 @@ import UploadDocumento from "../../../../components/matricula/UploadDocumento.as
 import { ESCUELA_ACTUAL } from "../../../../lib/mockData";
 
 const basePath = "/secretaria";
-const alumnoData = { nombre: "María González Pérez", rut: "18.234.567-8", curso: "Clase B" };
+const alumnoData = {
+  nombre: "María González Pérez",
+  rut: "18.234.567-8",
+  curso: "Clase B",
+};
 ---
 
-<DashboardLayout title="Matrícula - Documentación" escuela={ESCUELA_ACTUAL} userRole="secretaria">
+<DashboardLayout
+  title="Matrícula - Documentación"
+  escuela={ESCUELA_ACTUAL}
+  userRole="secretaria"
+>
   <MatriculaWizardSteps pasoActual={2} basePath={basePath} />
 
   <Card class="max-w-4xl mx-auto">
-    <div id="alumno-info" class="bg-blue-50 rounded-lg p-4 mb-6 flex items-center gap-3">
-      <div id="alumno-inicial" class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">{alumnoData.nombre.charAt(0)}</div>
+    <div
+      id="alumno-info"
+      class="bg-blue-50 rounded-lg p-4 mb-6 flex items-center gap-3"
+    >
+      <div
+        id="alumno-inicial"
+        class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold"
+      >
+        {alumnoData.nombre.charAt(0)}
+      </div>
       <div>
-        <p id="alumno-nombre" class="text-sm font-semibold text-gray-900">{alumnoData.nombre}</p>
-        <p id="alumno-rut-curso" class="text-xs text-secondary">{alumnoData.rut} • {alumnoData.curso}</p>
+        <p id="alumno-nombre" class="text-sm font-semibold text-gray-900">
+          {alumnoData.nombre}
+        </p>
+        <p id="alumno-rut-curso" class="text-xs text-secondary">
+          {alumnoData.rut} • {alumnoData.curso}
+        </p>
       </div>
     </div>
-    <h2 class="text-xl font-semibold text-base-content mb-6">Documentos Requeridos</h2>
+
+    <!-- RF-082.1: Banner menor de edad -->
+    <div
+      id="menor-edad-banner"
+      class="hidden mb-6 p-4 rounded-lg border-2 border-yellow-300 bg-yellow-50"
+    >
+      <div class="flex items-start gap-3">
+        <svg
+          class="w-6 h-6 text-yellow-600 flex-shrink-0 mt-0.5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          ><path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+          ></path></svg
+        >
+        <div>
+          <p class="text-sm font-bold text-yellow-900">
+            ⚠️ Alumno menor de edad — Documentación adicional requerida
+          </p>
+          <p class="text-xs text-yellow-800 mt-1">
+            Se requiere <strong>Autorización Notarial firmada</strong> por el apoderado.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="text-xl font-semibold text-base-content mb-6">
+      Documentos Requeridos
+    </h2>
     <form id="documentos-form" class="space-y-6">
-      <UploadDocumento label="Foto Carnet de Identidad (anverso y reverso)" required={true} acceptedFormats=".jpg,.png,.pdf" maxSize="5" id="carnet" helperText="Asegúrate de que se vean todos los datos claramente" />
-      <UploadDocumento label="Foto del Alumno (frontal, fondo blanco)" required={true} acceptedFormats=".jpg,.png" maxSize="2" id="foto-alumno" helperText="⚠️ Evitar pixelación, rostro debe estar completamente visible" />
-      <UploadDocumento label="Certificado Médico (opcional)" required={false} acceptedFormats=".pdf" maxSize="5" id="certificado-medico" helperText="Opcional - Puedes presentarlo en la escuela" />
+      <UploadDocumento
+        label="Foto Carnet de Identidad (anverso y reverso)"
+        required={true}
+        acceptedFormats=".jpg,.png,.pdf"
+        maxSize="5"
+        id="carnet"
+        helperText="Asegúrate de que se vean todos los datos claramente"
+      />
+      <UploadDocumento
+        label="Foto del Alumno (frontal, fondo blanco)"
+        required={true}
+        acceptedFormats=".jpg,.png"
+        maxSize="2"
+        id="foto-alumno"
+        helperText="⚠️ Evitar pixelación, rostro debe estar completamente visible"
+      />
+      <UploadDocumento
+        label="Certificado Médico (opcional)"
+        required={false}
+        acceptedFormats=".pdf"
+        maxSize="5"
+        id="certificado-medico"
+        helperText="Opcional - Puedes presentarlo en la escuela"
+      />
+
+      <!-- RF-084: Upload SEMEP (opcional) -->
+      <UploadDocumento
+        label="Certificado SEMEP - Psicotécnico (opcional)"
+        required={false}
+        acceptedFormats=".pdf"
+        maxSize="5"
+        id="certificado-semep"
+        helperText="Si ya rendiste el examen psicotécnico municipal"
+      />
+
+      <!-- RF-082.1: Upload Autorización Notarial (condicional) -->
+      <div id="autorizacion-notarial-wrap" class="hidden">
+        <div
+          class="p-4 bg-yellow-50 rounded-lg border-2 border-dashed border-yellow-400"
+        >
+          <label class="block mb-2"
+            ><span class="text-sm font-medium text-yellow-900"
+              >📋 Autorización Notarial Firmada *</span
+            ></label
+          >
+          <input
+            type="file"
+            id="autorizacion-notarial"
+            accept=".jpg,.png,.pdf"
+            class="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-yellow-100 file:text-yellow-700 hover:file:bg-yellow-200 cursor-pointer"
+          />
+          <p class="text-xs text-yellow-800 mt-2">
+            Documento notarial que autoriza al menor. Formatos: JPG, PNG, PDF •
+            Máx: 5MB
+          </p>
+          <p
+            id="autorizacion-feedback"
+            class="text-xs text-red-600 mt-1 hidden"
+          >
+            ⚠️ Este documento es obligatorio para menores de edad
+          </p>
+        </div>
+      </div>
+
       <div class="bg-gray-50 rounded-lg p-4">
         <div class="flex gap-3">
-          <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          <svg
+            class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            ></path></svg
+          >
           <div>
             <p class="text-sm font-medium text-gray-900 mb-1">💡 Consejos</p>
-            <ul class="text-xs text-gray-700 space-y-1"><li>• Usa buena iluminación</li><li>• Asegúrate de que el texto sea legible</li><li>• Formato JPEG o PNG para fotos</li></ul>
+            <ul class="text-xs text-gray-700 space-y-1">
+              <li>• Usa buena iluminación</li><li>
+                • Asegúrate de que el texto sea legible
+              </li><li>• Formato JPEG o PNG para fotos</li>
+            </ul>
           </div>
         </div>
       </div>
     </form>
     <div class="flex gap-3 pt-6 mt-6 border-t border-gray-200">
-      <a href={`${basePath}/matricula/nueva/paso-1`} class="btn btn-ghost min-h-11">← Anterior</a>
-      <Button id="btn-siguiente" variant="primary" onClick="continuarPaso3()">Siguiente</Button>
+      <a
+        href={`${basePath}/matricula/nueva/paso-1`}
+        class="btn btn-ghost min-h-11">← Anterior</a
+      >
+      <Button id="btn-siguiente" variant="primary" onClick="continuarPaso3()"
+        >Siguiente</Button
+      >
     </div>
   </Card>
 </DashboardLayout>
 
 <script define:vars={{ basePath }}>
-  document.addEventListener('DOMContentLoaded', () => {
+  let esMenorFlag = false;
+  document.addEventListener("DOMContentLoaded", () => {
     try {
-      const raw = sessionStorage.getItem('matricula_paso1');
+      const raw = sessionStorage.getItem("matricula_paso1");
       if (raw) {
         const data = JSON.parse(raw);
-        const nombreCompleto = [data.nombres, data.apellidos].filter(Boolean).join(' ') || 'Alumno';
-        const cursoLabels = { clase_b: 'Clase B', clase_b_sence: 'Clase B + SENCE', profesional_a2: 'Profesional A2', profesional_a3: 'Profesional A3', profesional_a4: 'Profesional A4', profesional_a5: 'Profesional A5' };
-        const cursoLabel = cursoLabels[String(data.tipo_curso ?? '')] || data.tipo_curso || 'Clase B';
-        const inicial = document.getElementById('alumno-inicial');
-        const nombreEl = document.getElementById('alumno-nombre');
-        const rutCursoEl = document.getElementById('alumno-rut-curso');
-        if (inicial) inicial.textContent = nombreCompleto.charAt(0).toUpperCase();
+        const nombreCompleto =
+          [data.nombres, data.apellidos].filter(Boolean).join(" ") || "Alumno";
+        const cursoLabels = {
+          clase_b: "Clase B",
+          clase_b_sence: "Clase B + SENCE",
+          profesional_a2: "Profesional A2",
+          profesional_a3: "Profesional A3",
+          profesional_a4: "Profesional A4",
+          profesional_a5: "Profesional A5",
+        };
+        const cursoLabel =
+          cursoLabels[String(data.tipo_curso ?? "")] ||
+          data.tipo_curso ||
+          "Clase B";
+        const inicial = document.getElementById("alumno-inicial");
+        const nombreEl = document.getElementById("alumno-nombre");
+        const rutCursoEl = document.getElementById("alumno-rut-curso");
+        if (inicial)
+          inicial.textContent = nombreCompleto.charAt(0).toUpperCase();
         if (nombreEl) nombreEl.textContent = nombreCompleto;
-        if (rutCursoEl) rutCursoEl.textContent = `${data.rut || ''} • ${cursoLabel}`;
+        if (rutCursoEl)
+          rutCursoEl.textContent = `${data.rut || ""} • ${cursoLabel}`;
+        if (data.esMenor === true) {
+          esMenorFlag = true;
+          const banner = document.getElementById("menor-edad-banner");
+          const autWrap = document.getElementById("autorizacion-notarial-wrap");
+          if (banner) banner.classList.remove("hidden");
+          if (autWrap) autWrap.classList.remove("hidden");
+        }
       }
     } catch (_) {}
   });
-  let uploaded = { carnet: false, fotoAlumno: false };
+  let uploaded = {
+    carnet: false,
+    fotoAlumno: false,
+    autorizacion: false,
+    semep: false,
+  };
   function checkCanContinue() {
     const btn = document.getElementById("btn-siguiente");
-    if (btn) { btn.disabled = !(uploaded.carnet && uploaded.fotoAlumno); btn.classList.toggle("opacity-50", !(uploaded.carnet && uploaded.fotoAlumno)); }
+    let ok = uploaded.carnet && uploaded.fotoAlumno;
+    if (esMenorFlag && !uploaded.autorizacion) ok = false;
+    if (btn) {
+      btn.disabled = !ok;
+      btn.classList.toggle("opacity-50", !ok);
+    }
   }
-  document.getElementById("carnet")?.addEventListener("change", (e) => { uploaded.carnet = ((e.target as HTMLInputElement).files?.length ?? 0) > 0; checkCanContinue(); });
-  document.getElementById("foto-alumno")?.addEventListener("change", (e) => { uploaded.fotoAlumno = ((e.target as HTMLInputElement).files?.length ?? 0) > 0; checkCanContinue(); });
-  (window as any).continuarPaso3 = function () { sessionStorage.setItem('matricula_paso2', 'ok'); window.location.href = (typeof basePath !== 'undefined' ? basePath : '') + "/matricula/nueva/paso-3"; };
+  document.getElementById("carnet")?.addEventListener("change", (e) => {
+    uploaded.carnet = (e.target.files?.length ?? 0) > 0;
+    checkCanContinue();
+  });
+  document.getElementById("foto-alumno")?.addEventListener("change", (e) => {
+    uploaded.fotoAlumno = (e.target.files?.length ?? 0) > 0;
+    checkCanContinue();
+  });
+  document
+    .getElementById("certificado-semep")
+    ?.addEventListener("change", (e) => {
+      uploaded.semep = (e.target.files?.length ?? 0) > 0;
+    });
+  document
+    .getElementById("autorizacion-notarial")
+    ?.addEventListener("change", (e) => {
+      uploaded.autorizacion = (e.target.files?.length ?? 0) > 0;
+      const fb = document.getElementById("autorizacion-feedback");
+      if (fb) fb.classList.toggle("hidden", uploaded.autorizacion);
+      checkCanContinue();
+    });
+  window.continuarPaso3 = function () {
+    if (esMenorFlag && !uploaded.autorizacion) {
+      alert("⚠️ Debe adjuntar la Autorización Notarial.");
+      return;
+    }
+    sessionStorage.setItem("matricula_paso2", "ok");
+    window.location.href =
+      (typeof basePath !== "undefined" ? basePath : "") +
+      "/matricula/nueva/paso-3";
+  };
 </script>

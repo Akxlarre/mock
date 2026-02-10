@@ -2,6 +2,7 @@
 /**
  * Wizard Matrícula - Paso 2: Documentos
  * RF-006: Upload documentos requeridos
+ * RF-082.1: Upload Autorización Notarial condicional (menores 17)
  */
 import DashboardLayout from "../../../layouts/DashboardLayout.astro";
 import Card from "../../../components/ui/Card.astro";
@@ -25,7 +26,10 @@ const alumnoData = {
 
   <Card class="max-w-4xl mx-auto">
     <!-- Alumno info (se actualiza desde sessionStorage si viene del paso 1) -->
-    <div id="alumno-info" class="bg-blue-50 rounded-lg p-4 mb-6 flex items-center gap-3">
+    <div
+      id="alumno-info"
+      class="bg-blue-50 rounded-lg p-4 mb-6 flex items-center gap-3"
+    >
       <div
         id="alumno-inicial"
         class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold"
@@ -33,10 +37,43 @@ const alumnoData = {
         {alumnoData.nombre.charAt(0)}
       </div>
       <div>
-        <p id="alumno-nombre" class="text-sm font-semibold text-gray-900">{alumnoData.nombre}</p>
+        <p id="alumno-nombre" class="text-sm font-semibold text-gray-900">
+          {alumnoData.nombre}
+        </p>
         <p id="alumno-rut-curso" class="text-xs text-secondary">
           {alumnoData.rut} • {alumnoData.curso}
         </p>
+      </div>
+    </div>
+
+    <!-- RF-082.1: Banner menor de edad (se muestra dinámicamente) -->
+    <div
+      id="menor-edad-banner"
+      class="hidden mb-6 p-4 rounded-lg border-2 border-yellow-300 bg-yellow-50"
+    >
+      <div class="flex items-start gap-3">
+        <svg
+          class="w-6 h-6 text-yellow-600 flex-shrink-0 mt-0.5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+          ></path>
+        </svg>
+        <div>
+          <p class="text-sm font-bold text-yellow-900">
+            ⚠️ Alumno menor de edad — Documentación adicional requerida
+          </p>
+          <p class="text-xs text-yellow-800 mt-1">
+            Se requiere <strong>Autorización Notarial firmada</strong> por el apoderado.
+            Sin este documento no se podrá completar la matrícula.
+          </p>
+        </div>
       </div>
     </div>
 
@@ -72,6 +109,45 @@ const alumnoData = {
         helperText="Opcional - Puedes presentarlo en la escuela"
       />
 
+      <!-- RF-084: Upload SEMEP (opcional) -->
+      <UploadDocumento
+        label="Certificado SEMEP - Psicotécnico (opcional)"
+        required={false}
+        acceptedFormats=".pdf"
+        maxSize="5"
+        id="certificado-semep"
+        helperText="Si ya rendiste el examen psicotécnico municipal"
+      />
+
+      <!-- RF-082.1: Upload Autorización Notarial (condicional, solo menores) -->
+      <div id="autorizacion-notarial-wrap" class="hidden">
+        <div
+          class="p-4 bg-yellow-50 rounded-lg border-2 border-dashed border-yellow-400"
+        >
+          <label class="block mb-2">
+            <span class="text-sm font-medium text-yellow-900"
+              >📋 Autorización Notarial Firmada *</span
+            >
+          </label>
+          <input
+            type="file"
+            id="autorizacion-notarial"
+            accept=".jpg,.png,.pdf"
+            class="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-yellow-100 file:text-yellow-700 hover:file:bg-yellow-200 cursor-pointer"
+          />
+          <p class="text-xs text-yellow-800 mt-2">
+            Documento notarial que autoriza al menor a inscribirse. Formatos:
+            JPG, PNG, PDF • Máx: 5MB
+          </p>
+          <p
+            id="autorizacion-feedback"
+            class="text-xs text-red-600 mt-1 hidden"
+          >
+            ⚠️ Este documento es obligatorio para menores de edad
+          </p>
+        </div>
+      </div>
+
       <div class="bg-gray-50 rounded-lg p-4">
         <div class="flex gap-3">
           <svg
@@ -100,14 +176,11 @@ const alumnoData = {
     </form>
 
     <div class="flex gap-3 pt-6 mt-6 border-t border-gray-200">
-      <a href={`${basePath}/matricula/nueva/paso-1`} class="btn btn-ghost min-h-11"
-        >← Anterior</a
+      <a
+        href={`${basePath}/matricula/nueva/paso-1`}
+        class="btn btn-ghost min-h-11">← Anterior</a
       >
-      <Button
-        id="btn-siguiente"
-        variant="primary"
-        onClick="continuarPaso3()"
-      >
+      <Button id="btn-siguiente" variant="primary" onClick="continuarPaso3()">
         Siguiente
       </Button>
     </div>
@@ -115,30 +188,63 @@ const alumnoData = {
 </DashboardLayout>
 
 <script define:vars={{ basePath }}>
-  // Datos del paso 1 desde sessionStorage (flujo unificado)
-  document.addEventListener('DOMContentLoaded', () => {
+  let esMenorFlag = false;
+
+  document.addEventListener("DOMContentLoaded", () => {
     try {
-      const raw = sessionStorage.getItem('matricula_paso1');
+      const raw = sessionStorage.getItem("matricula_paso1");
       if (raw) {
         const data = JSON.parse(raw);
-        const nombreCompleto = [data.nombres, data.apellidos].filter(Boolean).join(' ') || 'Alumno';
-        const cursoLabels: Record<string, string> = { clase_b: 'Clase B', clase_b_sence: 'Clase B + SENCE', profesional_a2: 'Profesional A2', profesional_a3: 'Profesional A3', profesional_a4: 'Profesional A4', profesional_a5: 'Profesional A5' };
-        const cursoLabel = cursoLabels[String(data.tipo_curso ?? '')] || data.tipo_curso || 'Clase B';
-        const inicial = document.getElementById('alumno-inicial');
-        const nombreEl = document.getElementById('alumno-nombre');
-        const rutCursoEl = document.getElementById('alumno-rut-curso');
-        if (inicial) inicial.textContent = nombreCompleto.charAt(0).toUpperCase();
+        const nombreCompleto =
+          [data.nombres, data.apellidos].filter(Boolean).join(" ") || "Alumno";
+        const cursoLabels = {
+          clase_b: "Clase B",
+          clase_b_sence: "Clase B + SENCE",
+          profesional_a2: "Profesional A2",
+          profesional_a3: "Profesional A3",
+          profesional_a4: "Profesional A4",
+          profesional_a5: "Profesional A5",
+        };
+        const cursoLabel =
+          cursoLabels[String(data.tipo_curso ?? "")] ||
+          data.tipo_curso ||
+          "Clase B";
+        const inicial = document.getElementById("alumno-inicial");
+        const nombreEl = document.getElementById("alumno-nombre");
+        const rutCursoEl = document.getElementById("alumno-rut-curso");
+        if (inicial)
+          inicial.textContent = nombreCompleto.charAt(0).toUpperCase();
         if (nombreEl) nombreEl.textContent = nombreCompleto;
-        if (rutCursoEl) rutCursoEl.textContent = `${data.rut || ''} • ${cursoLabel}`;
+        if (rutCursoEl)
+          rutCursoEl.textContent = `${data.rut || ""} • ${cursoLabel}`;
+
+        // RF-082.1: Check if minor
+        if (data.esMenor === true) {
+          esMenorFlag = true;
+          const banner = document.getElementById("menor-edad-banner");
+          const autWrap = document.getElementById("autorizacion-notarial-wrap");
+          if (banner) banner.classList.remove("hidden");
+          if (autWrap) autWrap.classList.remove("hidden");
+        }
       }
     } catch (_) {}
   });
 
-  let uploaded = { carnet: false, fotoAlumno: false };
+  let uploaded = {
+    carnet: false,
+    fotoAlumno: false,
+    autorizacion: false,
+    semep: false,
+  };
 
   function checkCanContinue() {
-    const btn = document.getElementById("btn-siguiente") as HTMLButtonElement;
-    const canContinue = uploaded.carnet && uploaded.fotoAlumno;
+    const btn = document.getElementById("btn-siguiente");
+    let canContinue = uploaded.carnet && uploaded.fotoAlumno;
+
+    // RF-082.1: If minor, also require notarial authorization
+    if (esMenorFlag && !uploaded.autorizacion) {
+      canContinue = false;
+    }
 
     if (btn) {
       btn.disabled = !canContinue;
@@ -146,22 +252,43 @@ const alumnoData = {
     }
   }
 
-  const carnetInput = document.getElementById("carnet") as HTMLInputElement;
-  const fotoInput = document.getElementById("foto-alumno") as HTMLInputElement;
+  const carnetInput = document.getElementById("carnet");
+  const fotoInput = document.getElementById("foto-alumno");
+  const semepInput = document.getElementById("certificado-semep");
+  const autInput = document.getElementById("autorizacion-notarial");
 
   carnetInput?.addEventListener("change", (e) => {
-    uploaded.carnet = ((e.target as HTMLInputElement).files?.length ?? 0) > 0;
+    uploaded.carnet = (e.target.files?.length ?? 0) > 0;
     checkCanContinue();
   });
 
   fotoInput?.addEventListener("change", (e) => {
-    uploaded.fotoAlumno =
-      ((e.target as HTMLInputElement).files?.length ?? 0) > 0;
+    uploaded.fotoAlumno = (e.target.files?.length ?? 0) > 0;
     checkCanContinue();
   });
 
-  (window as any).continuarPaso3 = function () {
-    sessionStorage.setItem('matricula_paso2', 'ok');
-    window.location.href = (typeof basePath !== 'undefined' ? basePath : '') + "/matricula/nueva/paso-3";
+  semepInput?.addEventListener("change", (e) => {
+    uploaded.semep = (e.target.files?.length ?? 0) > 0;
+    // SEMEP es opcional, no bloquea continuar
+  });
+
+  autInput?.addEventListener("change", (e) => {
+    uploaded.autorizacion = (e.target.files?.length ?? 0) > 0;
+    const feedback = document.getElementById("autorizacion-feedback");
+    if (feedback) feedback.classList.toggle("hidden", uploaded.autorizacion);
+    checkCanContinue();
+  });
+
+  window.continuarPaso3 = function () {
+    if (esMenorFlag && !uploaded.autorizacion) {
+      const feedback = document.getElementById("autorizacion-feedback");
+      if (feedback) feedback.classList.remove("hidden");
+      alert("⚠️ Debe adjuntar la Autorización Notarial para continuar.");
+      return;
+    }
+    sessionStorage.setItem("matricula_paso2", "ok");
+    window.location.href =
+      (typeof basePath !== "undefined" ? basePath : "") +
+      "/matricula/nueva/paso-3";
   };
 </script>

@@ -1,0 +1,420 @@
+---
+/**
+ * RF-083: Contrato Digital con Firma Electrónica
+ * Permite al alumno revisar y aceptar el contrato de matrícula antes de finalizar.
+ */
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import Card from "../../components/ui/Card.astro";
+import Button from "../../components/ui/Button.astro";
+import { ESCUELA_ACTUAL } from "../../lib/mockData";
+
+const basePath = "";
+---
+
+<DashboardLayout title="Contrato Digital" escuela={ESCUELA_ACTUAL}>
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex items-center gap-2 text-sm text-secondary mb-2">
+                <a href={`${basePath}/dashboard`} class="hover:text-gray-900"
+                    >Inicio</a
+                >
+                <span>/</span>
+                <a href={`${basePath}/matricula`} class="hover:text-gray-900"
+                    >Matrículas</a
+                >
+                <span>/</span>
+                <span class="text-gray-900 font-medium">Contrato Digital</span>
+            </div>
+            <h1 class="text-3xl font-semibold text-gray-900">
+                Contrato de Matrícula
+            </h1>
+            <p class="text-secondary mt-1">
+                Revise y acepte los términos del contrato de matrícula
+            </p>
+        </div>
+
+        <!-- Alumno Info -->
+        <Card class="mb-6">
+            <div id="contrato-alumno" class="flex items-center gap-4">
+                <div
+                    id="alumno-avatar"
+                    class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg"
+                >
+                    M
+                </div>
+                <div>
+                    <p
+                        id="alumno-nombre"
+                        class="text-lg font-semibold text-gray-900"
+                    >
+                        María González Pérez
+                    </p>
+                    <p id="alumno-detalle" class="text-sm text-secondary">
+                        RUT: 18.234.567-8 • Clase B • Matrícula #MAT-2026-0247
+                    </p>
+                </div>
+            </div>
+        </Card>
+
+        <!-- Contrato Document -->
+        <Card class="mb-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-semibold text-gray-900">
+                    📄 Contrato de Prestación de Servicios Educativos
+                </h2>
+                <span
+                    class="text-xs text-secondary bg-gray-100 px-3 py-1 rounded-full"
+                    >v2.1 — Febrero 2026</span
+                >
+            </div>
+
+            <div
+                id="contrato-contenido"
+                class="prose prose-sm max-w-none border border-gray-200 rounded-lg p-6 bg-gray-50 max-h-96 overflow-y-auto"
+            >
+                <p class="text-xs text-secondary mb-4 italic">
+                    Última actualización: 01 de Febrero de 2026
+                </p>
+
+                <h3 class="text-base font-bold text-gray-900 mt-0">
+                    CLÁUSULA PRIMERA — PARTES
+                </h3>
+                <p class="text-sm text-gray-700">
+                    Entre la <strong
+                        >Escuela de Conductores "AutoEscuela Profesional SpA"</strong
+                    >, RUT 76.543.210-9, representada por su Director, en
+                    adelante "la Escuela", y el alumno identificado en el
+                    encabezado de este documento, en adelante "el Alumno", se
+                    celebra el siguiente contrato de prestación de servicios
+                    educativos.
+                </p>
+
+                <h3 class="text-base font-bold text-gray-900">
+                    CLÁUSULA SEGUNDA — OBJETO
+                </h3>
+                <p class="text-sm text-gray-700">
+                    La Escuela se compromete a impartir al Alumno un programa
+                    teórico-práctico de conducción vehicular, conforme a la
+                    normativa vigente del Ministerio de Transportes y
+                    Telecomunicaciones, para la obtención de la licencia de
+                    conducir correspondiente al tipo de curso contratado.
+                </p>
+
+                <h3 class="text-base font-bold text-gray-900">
+                    CLÁUSULA TERCERA — PROGRAMA DE FORMACIÓN
+                </h3>
+                <p class="text-sm text-gray-700">El programa incluye:</p>
+                <ul class="text-sm text-gray-700 list-disc pl-5 space-y-1">
+                    <li>
+                        Clases teóricas presenciales según plan de estudios
+                        aprobado
+                    </li>
+                    <li>
+                        Clases prácticas de conducción con instructor habilitado
+                    </li>
+                    <li>Material didáctico y acceso a plataforma e-learning</li>
+                    <li>Evaluaciones periódicas del avance del alumno</li>
+                    <li>
+                        Certificado de aprobación al finalizar
+                        satisfactoriamente el curso
+                    </li>
+                </ul>
+
+                <h3 class="text-base font-bold text-gray-900">
+                    CLÁUSULA CUARTA — ARANCELES Y FORMA DE PAGO
+                </h3>
+                <p class="text-sm text-gray-700">
+                    El valor total del programa se establece según la lista de
+                    precios vigente al momento de la matrícula. El pago podrá
+                    realizarse al contado o en cuotas según las modalidades
+                    ofrecidas. El incumplimiento de pago faculta a la Escuela a
+                    suspender las clases hasta regularizar la situación
+                    financiera.
+                </p>
+
+                <h3 class="text-base font-bold text-gray-900">
+                    CLÁUSULA QUINTA — OBLIGACIONES DEL ALUMNO
+                </h3>
+                <ul class="text-sm text-gray-700 list-disc pl-5 space-y-1">
+                    <li>Asistir puntualmente a las clases programadas</li>
+                    <li>Cumplir con el reglamento interno de la Escuela</li>
+                    <li>
+                        Presentar la documentación requerida en los plazos
+                        establecidos
+                    </li>
+                    <li>Mantener al día los pagos comprometidos</li>
+                    <li>
+                        Respetar las normas de tránsito durante las clases
+                        prácticas
+                    </li>
+                </ul>
+
+                <h3 class="text-base font-bold text-gray-900">
+                    CLÁUSULA SEXTA — POLÍTICA DE CANCELACIÓN
+                </h3>
+                <p class="text-sm text-gray-700">
+                    El Alumno podrá desistir del contrato dentro de los 10 días
+                    hábiles siguientes a la firma, con derecho a la devolución
+                    del 100% del monto pagado. Posterior a dicho plazo, se
+                    aplicará una retención proporcional según las clases
+                    efectivamente realizadas.
+                </p>
+
+                <h3 class="text-base font-bold text-gray-900">
+                    CLÁUSULA SÉPTIMA — PROTECCIÓN DE DATOS
+                </h3>
+                <p class="text-sm text-gray-700">
+                    La Escuela se compromete a proteger los datos personales del
+                    Alumno conforme a la Ley 19.628 sobre Protección de la Vida
+                    Privada. Los datos serán utilizados exclusivamente para
+                    fines educativos y administrativos relacionados con el
+                    servicio contratado.
+                </p>
+            </div>
+
+            <p class="text-xs text-secondary mt-3 text-center">
+                📜 Scroll hacia abajo para leer el contrato completo antes de
+                aceptar
+            </p>
+        </Card>
+
+        <!-- Aceptación y Firma -->
+        <Card>
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">
+                ✍️ Aceptación y Firma Electrónica
+            </h2>
+
+            <div class="space-y-4">
+                <!-- Checkbox Términos -->
+                <label
+                    class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors"
+                >
+                    <input
+                        type="checkbox"
+                        id="check-terminos"
+                        class="mt-1 w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                    />
+                    <div>
+                        <p class="text-sm font-medium text-gray-900">
+                            Declaro haber leído y comprendido todas las
+                            cláusulas del contrato
+                        </p>
+                        <p class="text-xs text-secondary">
+                            Acepto los términos y condiciones establecidos en el
+                            contrato de prestación de servicios.
+                        </p>
+                    </div>
+                </label>
+
+                <!-- Checkbox Datos -->
+                <label
+                    class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors"
+                >
+                    <input
+                        type="checkbox"
+                        id="check-datos"
+                        class="mt-1 w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                    />
+                    <div>
+                        <p class="text-sm font-medium text-gray-900">
+                            Autorizo el tratamiento de mis datos personales
+                        </p>
+                        <p class="text-xs text-secondary">
+                            Conforme a la Ley 19.628 de Protección de Datos
+                            Personales.
+                        </p>
+                    </div>
+                </label>
+
+                <!-- Checkbox Reglamento -->
+                <label
+                    class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors"
+                >
+                    <input
+                        type="checkbox"
+                        id="check-reglamento"
+                        class="mt-1 w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                    />
+                    <div>
+                        <p class="text-sm font-medium text-gray-900">
+                            Me comprometo a cumplir el reglamento interno de la
+                            escuela
+                        </p>
+                        <p class="text-xs text-secondary">
+                            Incluye asistencia, puntualidad y comportamiento
+                            durante las clases.
+                        </p>
+                    </div>
+                </label>
+
+                <!-- Firma electrónica: campo nombre completo -->
+                <div
+                    class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200"
+                >
+                    <label
+                        for="firma-nombre"
+                        class="block text-sm font-medium text-blue-900 mb-2"
+                    >
+                        ✏️ Firma electrónica — escriba su nombre completo
+                    </label>
+                    <input
+                        type="text"
+                        id="firma-nombre"
+                        placeholder="Ej: María González Pérez"
+                        class="w-full h-11 px-4 text-sm border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white font-medium"
+                    />
+                    <p class="text-xs text-blue-700 mt-2">
+                        Al escribir su nombre completo y confirmar, está
+                        firmando electrónicamente este contrato conforme a la
+                        Ley 19.799.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="flex gap-3 pt-6 mt-6 border-t border-gray-200">
+                <a href={`${basePath}/matricula`} class="btn btn-ghost min-h-11"
+                    >← Cancelar</a
+                >
+                <Button
+                    id="btn-firmar"
+                    variant="primary"
+                    onClick="firmarContrato()"
+                    class="opacity-50"
+                    disabled
+                >
+                    🖊️ Firmar Contrato
+                </Button>
+            </div>
+
+            <!-- Timestamp de firma (oculto, se muestra al firmar) -->
+            <div
+                id="firma-confirmada"
+                class="hidden mt-6 p-4 rounded-lg bg-green-50 border-2 border-green-300"
+            >
+                <div class="flex items-center gap-3">
+                    <svg
+                        class="w-8 h-8 text-green-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        ></path>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-bold text-green-900">
+                            ✅ Contrato firmado exitosamente
+                        </p>
+                        <p id="firma-timestamp" class="text-xs text-green-700">
+                        </p>
+                        <p class="text-xs text-green-700 mt-1">
+                            Se ha enviado una copia al email del alumno.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </Card>
+    </div>
+</DashboardLayout>
+
+<script define:vars={{ basePath }}>
+    const checkTerminos = document.getElementById("check-terminos");
+    const checkDatos = document.getElementById("check-datos");
+    const checkReglamento = document.getElementById("check-reglamento");
+    const firmaNombre = document.getElementById("firma-nombre");
+    const btnFirmar = document.getElementById("btn-firmar");
+
+    function checkCanSign() {
+        const allChecked =
+            checkTerminos?.checked &&
+            checkDatos?.checked &&
+            checkReglamento?.checked;
+        const nombreLleno = (firmaNombre?.value || "").trim().length >= 5;
+        const canSign = allChecked && nombreLleno;
+        if (btnFirmar) {
+            btnFirmar.disabled = !canSign;
+            btnFirmar.classList.toggle("opacity-50", !canSign);
+        }
+    }
+
+    checkTerminos?.addEventListener("change", checkCanSign);
+    checkDatos?.addEventListener("change", checkCanSign);
+    checkReglamento?.addEventListener("change", checkCanSign);
+    firmaNombre?.addEventListener("input", checkCanSign);
+
+    window.firmarContrato = function () {
+        const nombre = (firmaNombre?.value || "").trim();
+        if (!nombre || nombre.length < 5) {
+            alert("⚠️ Debe escribir su nombre completo para firmar.");
+            return;
+        }
+        if (
+            !checkTerminos?.checked ||
+            !checkDatos?.checked ||
+            !checkReglamento?.checked
+        ) {
+            alert("⚠️ Debe aceptar todos los términos antes de firmar.");
+            return;
+        }
+
+        const now = new Date();
+        const timestamp = now.toLocaleString("es-CL", {
+            dateStyle: "full",
+            timeStyle: "medium",
+        });
+
+        const firmaData = {
+            nombre: nombre,
+            timestamp: now.toISOString(),
+            ip: "192.168.1." + Math.floor(Math.random() * 254 + 1),
+            hash:
+                "SHA256:" +
+                Array.from({ length: 16 }, () =>
+                    Math.floor(Math.random() * 16).toString(16),
+                ).join(""),
+        };
+
+        sessionStorage.setItem("contrato_firma", JSON.stringify(firmaData));
+
+        // Disable form
+        if (checkTerminos) checkTerminos.disabled = true;
+        if (checkDatos) checkDatos.disabled = true;
+        if (checkReglamento) checkReglamento.disabled = true;
+        if (firmaNombre) firmaNombre.disabled = true;
+        if (btnFirmar) {
+            btnFirmar.disabled = true;
+            btnFirmar.classList.add("opacity-50");
+            btnFirmar.textContent = "✅ Firmado";
+        }
+
+        // Show confirmation
+        const confirmDiv = document.getElementById("firma-confirmada");
+        const timestampEl = document.getElementById("firma-timestamp");
+        if (confirmDiv) confirmDiv.classList.remove("hidden");
+        if (timestampEl)
+            timestampEl.textContent = `Firmado por "${nombre}" el ${timestamp} • Hash: ${firmaData.hash}`;
+    };
+
+    // Load student data from sessionStorage if available
+    document.addEventListener("DOMContentLoaded", () => {
+        try {
+            const raw = sessionStorage.getItem("matricula_paso1");
+            if (raw) {
+                const d = JSON.parse(raw);
+                const name =
+                    [d.nombres, d.apellidos].filter(Boolean).join(" ") ||
+                    "Alumno";
+                const avatar = document.getElementById("alumno-avatar");
+                const nombreEl = document.getElementById("alumno-nombre");
+                if (avatar) avatar.textContent = name.charAt(0).toUpperCase();
+                if (nombreEl) nombreEl.textContent = name;
+            }
+        } catch (_) {}
+    });
+</script>
