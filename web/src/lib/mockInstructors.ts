@@ -60,6 +60,15 @@ export interface Instructor {
 
     activo: boolean;
     fechaRegistro: string;
+
+    // Historial de horas trabajadas por mes
+    horasMensuales: {
+        [key: string]: { // formato: "febrero2026", "enero2026", etc.
+            teoricas: number;        // horas teóricas dictadas
+            practicas: number;       // cantidad de sesiones prácticas (cada una = 1.5h)
+            totalEquivalente: number; // teoricas + (practicas * 1.5)
+        };
+    };
 }
 
 export const INSTRUCTORES: Instructor[] = [
@@ -94,6 +103,11 @@ export const INSTRUCTORES: Instructor[] = [
         },
         activo: true,
         fechaRegistro: "2024-01-15",
+        horasMensuales: {
+            "febrero2026": { teoricas: 0, practicas: 30, totalEquivalente: 45 },
+            "enero2026": { teoricas: 0, practicas: 28, totalEquivalente: 42 },
+            "diciembre2025": { teoricas: 0, practicas: 25, totalEquivalente: 37.5 },
+        },
     },
 
     /** RF-042: Instructor con historial de vehículos (3 asignaciones previas) */
@@ -152,6 +166,11 @@ export const INSTRUCTORES: Instructor[] = [
         },
         activo: true,
         fechaRegistro: "2024-01-20",
+        horasMensuales: {
+            "febrero2026": { teoricas: 0, practicas: 25, totalEquivalente: 37.5 },
+            "enero2026": { teoricas: 0, practicas: 30, totalEquivalente: 45 },
+            "diciembre2025": { teoricas: 0, practicas: 28, totalEquivalente: 42 },
+        },
     },
 
     /** RF-044: Instructor inactivo con ejemplo de reemplazo */
@@ -197,6 +216,11 @@ export const INSTRUCTORES: Instructor[] = [
         },
         activo: false,
         fechaRegistro: "2024-02-01",
+        horasMensuales: {
+            "febrero2026": { teoricas: 0, practicas: 0, totalEquivalente: 0 },
+            "enero2026": { teoricas: 0, practicas: 18, totalEquivalente: 27 },
+            "diciembre2025": { teoricas: 0, practicas: 22, totalEquivalente: 33 },
+        },
     },
 
     /** RF-041: Instructor con licencia por vencer (20 días) */
@@ -230,6 +254,11 @@ export const INSTRUCTORES: Instructor[] = [
         },
         activo: true,
         fechaRegistro: "2024-03-15",
+        horasMensuales: {
+            "febrero2026": { teoricas: 0, practicas: 20, totalEquivalente: 30 },
+            "enero2026": { teoricas: 0, practicas: 22, totalEquivalente: 33 },
+            "diciembre2025": { teoricas: 0, practicas: 18, totalEquivalente: 27 },
+        },
     },
 
     /** RF-042: Instructor con múltiple historial (5 asignaciones) */
@@ -304,6 +333,11 @@ export const INSTRUCTORES: Instructor[] = [
         },
         activo: true,
         fechaRegistro: "2024-01-10",
+        horasMensuales: {
+            "febrero2026": { teoricas: 35, practicas: 28, totalEquivalente: 77 },
+            "enero2026": { teoricas: 32, practicas: 30, totalEquivalente: 77 },
+            "diciembre2025": { teoricas: 30, practicas: 25, totalEquivalente: 67.5 },
+        },
     },
 ];
 
@@ -322,4 +356,58 @@ export function getPracticalInstructors(): Instructor[] {
     return INSTRUCTORES.filter(
         (i) => i.activo && (i.tipo === "practico" || i.tipo === "ambos")
     );
+}
+
+/**
+ * Calcula comparativa de horas entre dos meses
+ */
+export function getHorasComparison(
+    instructor: Instructor,
+    mesActual: string,
+    mesAnterior: string
+): { porcentaje: number; direccion: "up" | "down" | "equal" } {
+    const horasActuales = instructor.horasMensuales[mesActual]?.totalEquivalente || 0;
+    const horasAnteriores = instructor.horasMensuales[mesAnterior]?.totalEquivalente || 0;
+
+    if (horasAnteriores === 0) {
+        return { porcentaje: 0, direccion: "equal" };
+    }
+
+    const porcentaje = Math.round(((horasActuales - horasAnteriores) / horasAnteriores) * 100);
+    const direccion = porcentaje > 0 ? "up" : porcentaje < 0 ? "down" : "equal";
+
+    return { porcentaje: Math.abs(porcentaje), direccion };
+}
+
+/**
+ * Obtiene totales agregados de todos los instructores activos para un mes
+ */
+export function getTotalesHorasMes(mes: string): {
+    totalTeoricas: number;
+    totalPracticas: number;
+    totalEquivalente: number;
+    promedioEquivalente: number;
+    instructoresActivos: number;
+} {
+    const activos = getActiveInstructors();
+    let totalTeoricas = 0;
+    let totalPracticas = 0;
+    let totalEquivalente = 0;
+
+    activos.forEach((instructor) => {
+        const horas = instructor.horasMensuales[mes];
+        if (horas) {
+            totalTeoricas += horas.teoricas;
+            totalPracticas += horas.practicas;
+            totalEquivalente += horas.totalEquivalente;
+        }
+    });
+
+    return {
+        totalTeoricas,
+        totalPracticas,
+        totalEquivalente,
+        promedioEquivalente: activos.length > 0 ? Math.round(totalEquivalente / activos.length) : 0,
+        instructoresActivos: activos.length,
+    };
 }

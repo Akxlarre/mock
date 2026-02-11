@@ -24,6 +24,7 @@ const HORA_ACTUAL_DEMO = "14:15";
 
 const proximasClasesHoy = [
   {
+    id: 1,
     horaInicio: "14:00",
     horaFin: "14:45",
     alumno: "María González",
@@ -31,6 +32,7 @@ const proximasClasesHoy = [
     tipo: "práctica" as const,
   },
   {
+    id: 2,
     horaInicio: "15:00",
     horaFin: "16:00",
     promocion: "Enero 2026 - Grupo A",
@@ -38,6 +40,7 @@ const proximasClasesHoy = [
     tipo: "teórica" as const,
   },
   {
+    id: 3,
     horaInicio: "16:30",
     horaFin: "17:15",
     alumno: "Juan Pérez",
@@ -229,16 +232,17 @@ const proximasClasesHoy = [
                                 ? `Clase en curso: ${clase.alumno || clase.promocion}`
                                 : undefined;
                         return (
-                            <div
+                            <a
+                                href={`/secretaria/clases/${clase.id}`}
                                 role="listitem"
                                 aria-current={enCurso ? "true" : undefined}
                                 aria-label={label}
-                                class={`flex items-center gap-3 p-3 border rounded-lg transition-colors ${
+                                class={`flex items-center gap-3 p-3 border rounded-lg transition-colors group cursor-pointer ${
                                     enCurso
-                                        ? "border-l-4 border-l-blue-500 border-gray-200 bg-blue-50/60"
+                                        ? "border-l-4 border-l-blue-500 border-gray-200 bg-blue-50/60 hover:bg-blue-50"
                                         : finalizada
-                                          ? "border-gray-200 bg-gray-50/50 opacity-90"
-                                          : "border-gray-200"
+                                          ? "border-gray-200 bg-gray-50/50 opacity-90 hover:bg-gray-100/50"
+                                          : "border-gray-200 hover:bg-gray-50 hover:border-gray-300"
                                 }`}
                             >
                                 <div
@@ -284,7 +288,10 @@ const proximasClasesHoy = [
                                 >
                                     {clase.tipo === "práctica" ? "🚗" : "📚"}
                                 </span>
-                            </div>
+                                <svg class="w-4 h-4 text-gray-400 shrink-0 group-hover:text-gray-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </a>
                         );
                     })
                 }
@@ -318,7 +325,7 @@ const proximasClasesHoy = [
                 </svg>
                 Nueva Matrícula
             </Button>
-            <Button href="/pagos" variant="secondary" class="justify-center">
+            <Button href="/secretaria/pagos" variant="secondary" class="justify-center">
                 <svg
                     class="w-5 h-5 mr-2"
                     fill="none"
@@ -334,7 +341,7 @@ const proximasClasesHoy = [
                 </svg>
                 Registrar Pago
             </Button>
-            <Button href="/agenda" variant="secondary" class="justify-center">
+            <Button href="/secretaria/agenda" variant="secondary" class="justify-center">
                 <svg
                     class="w-5 h-5 mr-2"
                     fill="none"

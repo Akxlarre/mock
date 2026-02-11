@@ -1,0 +1,423 @@
+---
+/**
+ * Ficha de Alumno - Vista Admin
+ * RF-055: Dashboard de progreso con % clases prácticas y teóricas
+ * RF-056: Historial completo de clases con notas técnicas
+ */
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+import Card from "../../../components/ui/Card.astro";
+import Button from "../../../components/ui/Button.astro";
+
+export function getStaticPaths() {
+  return [
+    { params: { id: "1" } },
+    { params: { id: "2" } },
+    { params: { id: "3" } },
+    { params: { id: "4" } },
+    { params: { id: "5" } },
+  ];
+}
+
+const { id } = Astro.params;
+
+// Mock data - alumnos
+const alumnos: Record<string, any> = {
+  '1': {
+    id: 1,
+    nombre: "María González Pérez",
+    rut: "18.234.567-8",
+    email: "maria@email.cl",
+    telefono: "+56 9 8765 4321",
+    curso: "Clase B",
+    escuela: "Autoescuela Chillán",
+    fechaIngreso: "2026-02-01",
+    estado: "active"
+  },
+  '2': {
+    id: 2,
+    nombre: "Juan Pablo Rojas",
+    rut: "19.456.789-0",
+    email: "juan@email.cl",
+    telefono: "+56 9 7654 3210",
+    curso: "Clase B",
+    escuela: "Autoescuela Chillán",
+    fechaIngreso: "2026-02-01",
+    estado: "pending_payment"
+  },
+  '3': {
+    id: 3,
+    nombre: "Ana Martínez Silva",
+    rut: "17.890.123-4",
+    email: "ana@email.cl",
+    telefono: "+56 9 6543 2109",
+    curso: "Clase B",
+    escuela: "Conductores Chillán",
+    fechaIngreso: "2026-01-30",
+    estado: "pending_documents"
+  },
+  '4': {
+    id: 4,
+    nombre: "Carlos Fernández",
+    rut: "20.123.456-7",
+    email: "carlos@email.cl",
+    telefono: "+56 9 5432 1098",
+    curso: "Clase B",
+    escuela: "Autoescuela Chillán",
+    fechaIngreso: "2026-01-28",
+    estado: "active"
+  },
+  '5': {
+    id: 5,
+    nombre: "Sofía Vargas López",
+    rut: "18.567.890-1",
+    email: "sofia@email.cl",
+    telefono: "+56 9 4321 0987",
+    curso: "Clase B",
+    escuela: "Conductores Chillán",
+    fechaIngreso: "2026-01-25",
+    estado: "inactive"
+  },
+};
+
+const alumno = alumnos[id!] || alumnos['1'];
+
+// RF-055: Progreso de clases prácticas y teóricas
+const progresoPracticas = {
+  completadas: 8,
+  total: 12,
+  porcentaje: 67
+};
+
+const progresoTeoricas = {
+  completadas: 6,
+  total: 8,
+  porcentaje: 75
+};
+
+// RF-056: Ficha técnica con las 12 clases prácticas
+const clasesPracticas = [
+  { numero: 1, fecha: "2026-01-15", hora: "14:00-14:45", kmInicio: 45120, kmFinal: 45142, observaciones: "Primera clase, reconocimiento de controles", firmaAlumno: true, firmaProfesor: true, instructor: "Carlos Rojas" },
+  { numero: 2, fecha: "2026-01-17", hora: "15:00-15:45", kmInicio: 45142, kmFinal: 45165, observaciones: "Práctica de arranque y detención", firmaAlumno: true, firmaProfesor: true, instructor: "Carlos Rojas" },
+  { numero: 3, fecha: "2026-01-19", hora: "14:00-14:45", kmInicio: 45165, kmFinal: 45188, observaciones: "Cambios de marcha, curvas básicas", firmaAlumno: true, firmaProfesor: true, instructor: "Carlos Rojas" },
+  { numero: 4, fecha: "2026-01-22", hora: "16:00-16:45", kmInicio: 45188, kmFinal: 45210, observaciones: "Estacionamiento paralelo", firmaAlumno: true, firmaProfesor: true, instructor: "Ana Martínez" },
+  { numero: 5, fecha: "2026-01-24", hora: "14:00-14:45", kmInicio: 45210, kmFinal: 45234, observaciones: "Circulación en ciudad, señalización", firmaAlumno: true, firmaProfesor: true, instructor: "Carlos Rojas" },
+  { numero: 6, fecha: "2026-01-26", hora: "10:00-10:45", kmInicio: 45234, kmFinal: 45258, observaciones: "Rotondas y giros", firmaAlumno: true, firmaProfesor: true, instructor: "Luis Torres" },
+  { numero: 7, fecha: "2026-01-29", hora: "15:00-15:45", kmInicio: 45258, kmFinal: 45280, observaciones: "Conducción defensiva", firmaAlumno: true, firmaProfesor: true, instructor: "Ana Martínez" },
+  { numero: 8, fecha: "2026-01-31", hora: "14:00-14:45", kmInicio: 45280, kmFinal: 45302, observaciones: "Retroceso y maniobras", firmaAlumno: true, firmaProfesor: true, instructor: "Carlos Rojas" },
+  { numero: 9, fecha: "", hora: "", kmInicio: null, kmFinal: null, observaciones: "", firmaAlumno: false, firmaProfesor: false, instructor: "" },
+  { numero: 10, fecha: "", hora: "", kmInicio: null, kmFinal: null, observaciones: "", firmaAlumno: false, firmaProfesor: false, instructor: "" },
+  { numero: 11, fecha: "", hora: "", kmInicio: null, kmFinal: null, observaciones: "", firmaAlumno: false, firmaProfesor: false, instructor: "" },
+  { numero: 12, fecha: "", hora: "", kmInicio: null, kmFinal: null, observaciones: "", firmaAlumno: false, firmaProfesor: false, instructor: "" },
+];
+
+// RF-052: Registro de inasistencias
+const inasistencias = [
+  { fecha: "2026-01-20", motivo: "Enfermedad", tipo: "práctica", justificada: true },
+];
+---
+
+<DashboardLayout title={`Ficha de ${alumno.nombre} - Escuela de Conductores`} userRole="admin">
+  <div class="max-w-7xl mx-auto">
+    <!-- Breadcrumb -->
+    <div class="flex items-center gap-2 text-sm text-secondary mb-2">
+      <a href="/dashboard" class="hover:text-gray-900">Inicio</a>
+      <span>/</span>
+      <a href="/alumnos" class="hover:text-gray-900">Alumnos</a>
+      <span>/</span>
+      <span class="text-gray-900 font-medium">Ficha de {alumno.nombre}</span>
+    </div>
+
+    <!-- Header -->
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <h1 class="text-3xl font-semibold text-gray-900 tracking-tight">{alumno.nombre}</h1>
+        <p class="text-secondary mt-1">{alumno.curso} - {alumno.escuela}</p>
+      </div>
+      <div class="flex gap-2">
+        <Button href={`/alumnos/${id}/editar`} variant="secondary">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+          </svg>
+          Editar
+        </Button>
+      </div>
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-6 mb-6">
+      <!-- Información personal -->
+      <Card class="lg:col-span-1">
+        <h3 class="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wide">Información Personal</h3>
+        <div class="space-y-3">
+          <div>
+            <label class="text-xs text-secondary uppercase tracking-wide">RUT</label>
+            <p class="text-sm font-medium text-gray-900 mt-0.5">{alumno.rut}</p>
+          </div>
+          <div>
+            <label class="text-xs text-secondary uppercase tracking-wide">Email</label>
+            <p class="text-sm font-medium text-gray-900 mt-0.5">{alumno.email}</p>
+          </div>
+          <div>
+            <label class="text-xs text-secondary uppercase tracking-wide">Teléfono</label>
+            <p class="text-sm font-medium text-gray-900 mt-0.5">{alumno.telefono}</p>
+          </div>
+          <div>
+            <label class="text-xs text-secondary uppercase tracking-wide">Fecha de Ingreso</label>
+            <p class="text-sm font-medium text-gray-900 mt-0.5">{alumno.fechaIngreso}</p>
+          </div>
+          <div>
+            <label class="text-xs text-secondary uppercase tracking-wide">Estado</label>
+            <p class="text-sm font-medium text-gray-900 mt-0.5">
+              <span class={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${
+                alumno.estado === 'active' ? 'bg-green-100 text-green-800 border-green-200' :
+                alumno.estado === 'pending_payment' ? 'bg-orange-100 text-orange-800 border-orange-200' :
+                alumno.estado === 'pending_documents' ? 'bg-blue-100 text-blue-800 border-blue-200' :
+                'bg-gray-100 text-gray-800 border-gray-200'
+              }`}>
+                {alumno.estado === 'active' ? 'Activo' :
+                 alumno.estado === 'pending_payment' ? 'Pendiente Pago' :
+                 alumno.estado === 'pending_documents' ? 'Docs Pendientes' :
+                 'Inactivo'}
+              </span>
+            </p>
+          </div>
+        </div>
+      </Card>
+
+      <!-- RF-055: Progreso de Clases Prácticas -->
+      <Card class="lg:col-span-1">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900">Clases Prácticas</h3>
+            <p class="text-xs text-secondary mt-0.5">De 12 clases requeridas</p>
+          </div>
+          <div class="text-right">
+            <p class="text-4xl font-bold text-blue-600">{progresoPracticas.porcentaje}%</p>
+          </div>
+        </div>
+
+        <!-- Barra de progreso -->
+        <div class="relative w-full bg-gray-200 rounded-full h-6 mb-3">
+          <div
+            class="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-end px-3 transition-all duration-500"
+            style={`width: ${progresoPracticas.porcentaje}%`}
+          >
+            <span class="text-xs font-semibold text-white">
+              {progresoPracticas.completadas}/{progresoPracticas.total}
+            </span>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between text-sm">
+          <span class="text-secondary">
+            {progresoPracticas.completadas} completadas
+          </span>
+          <span class="font-semibold text-gray-900">
+            {progresoPracticas.total - progresoPracticas.completadas} restantes
+          </span>
+        </div>
+      </Card>
+
+      <!-- RF-055: Progreso de Clases Teóricas -->
+      <Card class="lg:col-span-1">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900">Clases Teóricas</h3>
+            <p class="text-xs text-secondary mt-0.5">De 8 clases requeridas</p>
+          </div>
+          <div class="text-right">
+            <p class="text-4xl font-bold text-green-600">{progresoTeoricas.porcentaje}%</p>
+          </div>
+        </div>
+
+        <!-- Barra de progreso -->
+        <div class="relative w-full bg-gray-200 rounded-full h-6 mb-3">
+          <div
+            class="absolute inset-y-0 left-0 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-end px-3 transition-all duration-500"
+            style={`width: ${progresoTeoricas.porcentaje}%`}
+          >
+            <span class="text-xs font-semibold text-white">
+              {progresoTeoricas.completadas}/{progresoTeoricas.total}
+            </span>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between text-sm">
+          <span class="text-secondary">
+            {progresoTeoricas.completadas} asistidas
+          </span>
+          <span class="font-semibold text-gray-900">
+            {progresoTeoricas.total - progresoTeoricas.completadas} restantes
+          </span>
+        </div>
+      </Card>
+    </div>
+
+    <!-- RF-052: Registro de Inasistencias -->
+    {inasistencias.length > 0 && (
+      <Card class="mb-6 border-orange-200 bg-orange-50/30">
+        <div class="flex items-start gap-3">
+          <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-sm font-semibold text-orange-900 mb-1">Inasistencias Registradas</h3>
+            <div class="space-y-2 mt-3">
+              {inasistencias.map((inasistencia) => (
+                <div class="flex items-center justify-between p-2 bg-white rounded border border-orange-200">
+                  <div class="flex-1">
+                    <p class="text-sm font-medium text-gray-900">{inasistencia.fecha}</p>
+                    <p class="text-xs text-secondary mt-0.5">
+                      <span class="capitalize">{inasistencia.tipo}</span> • {inasistencia.motivo}
+                    </p>
+                  </div>
+                  <span class={`text-xs px-2 py-1 rounded-full ${
+                    inasistencia.justificada
+                      ? 'bg-blue-100 text-blue-800'
+                      : 'bg-red-100 text-red-800'
+                  }`}>
+                    {inasistencia.justificada ? 'Justificada' : 'Sin justificar'}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <Button variant="ghost" class="text-orange-700 hover:bg-orange-100 text-sm mt-3" onclick="registrarInasistencia()">
+              + Registrar nueva inasistencia
+            </Button>
+          </div>
+        </div>
+      </Card>
+    )}
+
+    <!-- RF-056: Ficha Técnica - Tabla de Clases Prácticas -->
+    <Card>
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-xl font-semibold text-gray-900">Ficha Técnica - Clases Prácticas</h3>
+          <p class="text-sm text-secondary mt-1">Registro detallado de las 12 clases prácticas</p>
+        </div>
+        <Button variant="secondary" class="text-sm" onclick="window.print()">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+          </svg>
+          Imprimir Ficha
+        </Button>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b-2 border-gray-300">
+              <th class="text-left py-3 px-3 font-semibold text-gray-900">N°</th>
+              <th class="text-left py-3 px-3 font-semibold text-gray-900">Fecha</th>
+              <th class="text-left py-3 px-3 font-semibold text-gray-900">Hora</th>
+              <th class="text-left py-3 px-3 font-semibold text-gray-900">Instructor</th>
+              <th class="text-right py-3 px-3 font-semibold text-gray-900">Km Inicio</th>
+              <th class="text-right py-3 px-3 font-semibold text-gray-900">Km Fin</th>
+              <th class="text-left py-3 px-3 font-semibold text-gray-900">Observaciones</th>
+              <th class="text-center py-3 px-3 font-semibold text-gray-900">Firmas</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            {clasesPracticas.map((clase) => (
+              <tr class={clase.fecha ? "hover:bg-gray-50" : "bg-gray-50/50"}>
+                <td class="py-3 px-3 font-medium text-gray-900">
+                  Clase {clase.numero}
+                </td>
+                <td class="py-3 px-3 text-gray-700 font-mono text-xs">
+                  {clase.fecha || '-'}
+                </td>
+                <td class="py-3 px-3 text-gray-700 font-mono text-xs">
+                  {clase.hora || '-'}
+                </td>
+                <td class="py-3 px-3 text-gray-700 text-xs">
+                  {clase.instructor || '-'}
+                </td>
+                <td class="py-3 px-3 text-right text-gray-700 font-mono text-xs">
+                  {clase.kmInicio !== null ? clase.kmInicio.toLocaleString() : '-'}
+                </td>
+                <td class="py-3 px-3 text-right text-gray-700 font-mono text-xs">
+                  {clase.kmFinal !== null ? clase.kmFinal.toLocaleString() : '-'}
+                </td>
+                <td class="py-3 px-3 text-gray-700 text-xs">
+                  <div class="max-w-xs">
+                    {clase.observaciones || (
+                      <span class="text-gray-400 italic">Pendiente</span>
+                    )}
+                  </div>
+                </td>
+                <td class="py-3 px-3">
+                  <div class="flex items-center justify-center gap-1">
+                    {clase.firmaAlumno ? (
+                      <span title="Firmado por alumno" class="text-green-600">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </span>
+                    ) : (
+                      <span title="Sin firma de alumno" class="text-gray-300">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </span>
+                    )}
+                    {clase.firmaProfesor ? (
+                      <span title="Firmado por instructor" class="text-blue-600">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </span>
+                    ) : (
+                      <span title="Sin firma de instructor" class="text-gray-300">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </span>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+        <div class="flex items-center gap-4 text-xs text-secondary">
+          <div class="flex items-center gap-1">
+            <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Alumno</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Instructor</span>
+          </div>
+          <span class="text-gray-400">• Las firmas se registran al finalizar cada clase</span>
+        </div>
+      </div>
+    </Card>
+
+    <!-- Acciones -->
+    <div class="flex gap-3 mt-6">
+      <Button href="/alumnos" variant="ghost">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Volver al Listado
+      </Button>
+    </div>
+  </div>
+</DashboardLayout>
+
+<script>
+  function registrarInasistencia() {
+    alert('🗓️ Registrar Inasistencia\n\nEsta funcionalidad permite:\n• Seleccionar fecha de la inasistencia\n• Indicar si es clase práctica o teórica\n• Agregar motivo de la inasistencia\n• Marcar si está justificada\n\n[Mockup - RF-052]');
+  }
+
+  (window as any).registrarInasistencia = registrarInasistencia;
+</script>

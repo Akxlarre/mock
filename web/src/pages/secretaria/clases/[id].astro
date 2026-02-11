@@ -1,0 +1,493 @@
+---
+/**
+ * Gestión de Clase - Vista Secretaría
+ * La secretaria puede supervisar el estado de cada clase y cerrarla
+ * si el instructor no lo ha hecho desde su dispositivo.
+ */
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+import Card from "../../../components/ui/Card.astro";
+import Button from "../../../components/ui/Button.astro";
+import Input from "../../../components/ui/Input.astro";
+
+export function getStaticPaths() {
+  return [
+    { params: { id: "1" } },
+    { params: { id: "2" } },
+    { params: { id: "3" } },
+    { params: { id: "4" } },
+    { params: { id: "5" } },
+  ];
+}
+
+const { id } = Astro.params;
+
+// Mock: clases del día con datos enriquecidos
+const clases: Record<string, {
+  id: number;
+  horaInicio: string;
+  horaFin: string;
+  alumno?: string;
+  promocion?: string;
+  instructor: string;
+  vehiculo?: string;
+  tipo: "práctica" | "teórica";
+  numeroClase: number;
+  totalClases: number;
+  sede: string;
+  kmInicial?: number;
+  kmFinal?: number;
+}> = {
+  "1": {
+    id: 1,
+    horaInicio: "14:00",
+    horaFin: "14:45",
+    alumno: "María González",
+    instructor: "Carlos Rojas",
+    vehiculo: "ABC-123 (Suzuki Swift)",
+    tipo: "práctica",
+    numeroClase: 9,
+    totalClases: 18,
+    sede: "Autoescuela Chillán",
+    kmInicial: 45320,
+    kmFinal: undefined, // en curso, aún no registrado
+  },
+  "2": {
+    id: 2,
+    horaInicio: "15:00",
+    horaFin: "16:00",
+    promocion: "Enero 2026 - Grupo A",
+    instructor: "Ana López",
+    tipo: "teórica",
+    numeroClase: 4,
+    totalClases: 8,
+    sede: "Conductores Chillán",
+  },
+  "3": {
+    id: 3,
+    horaInicio: "16:30",
+    horaFin: "17:15",
+    alumno: "Juan Pérez",
+    instructor: "Carlos Rojas",
+    vehiculo: "XYZ-789 (Nissan March)",
+    tipo: "práctica",
+    numeroClase: 12,
+    totalClases: 18,
+    sede: "Autoescuela Chillán",
+  },
+  "4": {
+    id: 4,
+    horaInicio: "09:00",
+    horaFin: "09:45",
+    alumno: "Sofía Vargas",
+    instructor: "Pedro Muñoz",
+    vehiculo: "DEF-456 (Kia Morning)",
+    tipo: "práctica",
+    numeroClase: 3,
+    totalClases: 18,
+    sede: "Autoescuela Chillán",
+    kmInicial: 12150,
+    kmFinal: 12178,
+  },
+  "5": {
+    id: 5,
+    horaInicio: "10:00",
+    horaFin: "11:00",
+    promocion: "Febrero 2026 - Grupo B",
+    instructor: "Ana López",
+    tipo: "teórica",
+    numeroClase: 1,
+    totalClases: 8,
+    sede: "Conductores Chillán",
+  },
+};
+
+const clase = clases[id!] || clases["1"];
+
+// Estado basado en hora demo (igual que en dashboard)
+const HORA_ACTUAL_DEMO = "14:15";
+function estadoClase(horaInicio: string, horaFin: string, ahora: string): "pendiente" | "en_curso" | "finalizada" {
+  if (ahora < horaInicio) return "pendiente";
+  if (ahora >= horaFin) return "finalizada";
+  return "en_curso";
+}
+
+const estado = estadoClase(clase.horaInicio, clase.horaFin, HORA_ACTUAL_DEMO);
+const progreso = Math.round((clase.numeroClase / clase.totalClases) * 100);
+const nombreClase = clase.alumno || clase.promocion || "Clase";
+const esPractica = clase.tipo === "práctica";
+---
+
+<DashboardLayout
+  title={`Clase - ${nombreClase}`}
+  userRole="secretaria"
+  userName="Patricia Secretaria"
+>
+  <div class="max-w-3xl mx-auto">
+    <!-- Breadcrumb -->
+    <div class="flex items-center gap-2 text-sm text-secondary mb-2">
+      <a href="/secretaria/dashboard" class="hover:text-gray-900">Inicio</a>
+      <span>/</span>
+      <span class="text-gray-900 font-medium">Clase #{clase.id}</span>
+    </div>
+
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-semibold text-gray-900 tracking-tight">
+          {nombreClase}
+        </h1>
+        <p class="text-secondary mt-1">
+          {clase.tipo === "práctica" ? "Clase práctica" : "Clase teórica"} · {clase.horaInicio} – {clase.horaFin}
+        </p>
+      </div>
+      <span class={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium ${
+        estado === "en_curso"
+          ? "bg-blue-100 text-blue-800 border border-blue-200"
+          : estado === "finalizada"
+            ? "bg-green-100 text-green-800 border border-green-200"
+            : "bg-gray-100 text-gray-800 border border-gray-200"
+      }`}>
+        {estado === "en_curso" && (
+          <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse" aria-hidden="true"></span>
+        )}
+        {estado === "en_curso" ? "En curso" : estado === "finalizada" ? "Finalizada" : "Pendiente"}
+      </span>
+    </div>
+
+    <!-- Estado visual -->
+    <Card class="mb-6">
+      <div class="text-center py-8">
+        {estado === "pendiente" && (
+          <>
+            <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-10 h-10 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h2 class="text-xl font-semibold text-gray-900 mb-1">Clase Programada</h2>
+            <p class="text-secondary text-sm">Esperando que el instructor inicie la clase desde su dispositivo</p>
+          </>
+        )}
+        {estado === "en_curso" && (
+          <>
+            <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+              <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+            <h2 class="text-xl font-semibold text-blue-600 mb-1">Clase en Curso</h2>
+            <p class="text-secondary text-sm">Iniciada a las {clase.horaInicio} · Instructor: {clase.instructor}</p>
+          </>
+        )}
+        {estado === "finalizada" && (
+          <>
+            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h2 class="text-xl font-semibold text-green-700 mb-1">Clase Finalizada</h2>
+            <p class="text-secondary text-sm">Cerrada por el instructor a las {clase.horaFin}</p>
+          </>
+        )}
+      </div>
+    </Card>
+
+    <!-- Detalles de la clase -->
+    <Card class="mb-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Detalles de la Clase</h3>
+      <div class="space-y-0">
+        {clase.alumno && (
+          <div class="flex items-center justify-between py-3 border-b border-gray-200">
+            <span class="text-sm text-secondary">Alumno</span>
+            <span class="text-sm font-medium text-gray-900">{clase.alumno}</span>
+          </div>
+        )}
+        {clase.promocion && (
+          <div class="flex items-center justify-between py-3 border-b border-gray-200">
+            <span class="text-sm text-secondary">Promoción</span>
+            <span class="text-sm font-medium text-gray-900">{clase.promocion}</span>
+          </div>
+        )}
+        <div class="flex items-center justify-between py-3 border-b border-gray-200">
+          <span class="text-sm text-secondary">Instructor</span>
+          <span class="text-sm font-medium text-gray-900">{clase.instructor}</span>
+        </div>
+        {clase.vehiculo && (
+          <div class="flex items-center justify-between py-3 border-b border-gray-200">
+            <span class="text-sm text-secondary">Vehículo</span>
+            <span class="text-sm font-medium text-gray-900">{clase.vehiculo}</span>
+          </div>
+        )}
+        <div class="flex items-center justify-between py-3 border-b border-gray-200">
+          <span class="text-sm text-secondary">Tipo</span>
+          <span class="text-sm font-medium text-gray-900">
+            {clase.tipo === "práctica" ? "🚗 Clase Práctica" : "📚 Clase Teórica"}
+          </span>
+        </div>
+        <div class="flex items-center justify-between py-3 border-b border-gray-200">
+          <span class="text-sm text-secondary">Horario</span>
+          <span class="text-sm font-medium text-gray-900">{clase.horaInicio} – {clase.horaFin}</span>
+        </div>
+        <div class="flex items-center justify-between py-3 border-b border-gray-200">
+          <span class="text-sm text-secondary">Sede</span>
+          <span class="text-sm font-medium text-gray-900">{clase.sede}</span>
+        </div>
+        <div class="flex items-center justify-between py-3">
+          <span class="text-sm text-secondary">Progreso</span>
+          <span class="text-sm font-medium text-gray-900">Clase {clase.numeroClase} de {clase.totalClases}</span>
+        </div>
+      </div>
+      <!-- Barra de progreso -->
+      <div class="mt-4">
+        <div class="w-full bg-gray-200 rounded-full h-2">
+          <div
+            class="bg-blue-600 h-2 rounded-full transition-all"
+            style={`width: ${progreso}%`}
+          ></div>
+        </div>
+        <p class="text-xs text-secondary mt-1 text-center">{progreso}% completado</p>
+      </div>
+    </Card>
+
+    <!-- Kilometraje (solo clases prácticas) -->
+    {esPractica && (
+      <Card class="mb-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Kilometraje</h3>
+        <div class="grid md:grid-cols-2 gap-4">
+          <Input
+            label="KM Inicial"
+            id="km_inicial"
+            name="km_inicial"
+            type="number"
+            placeholder="Ej: 45320"
+            value={clase.kmInicial?.toString()}
+            required
+          />
+          <Input
+            label="KM Final"
+            id="km_final"
+            name="km_final"
+            type="number"
+            placeholder="Ej: 45350"
+            value={clase.kmFinal?.toString()}
+            required
+          />
+        </div>
+        {clase.kmInicial && clase.kmFinal ? (
+          <p class="text-xs text-secondary mt-2">
+            Recorrido total: <strong>{clase.kmFinal - clase.kmInicial} km</strong>
+          </p>
+        ) : clase.kmInicial && !clase.kmFinal ? (
+          <p class="text-xs text-amber-600 mt-2">
+            KM Final pendiente de registro por el instructor
+          </p>
+        ) : (
+          <p class="text-xs text-secondary mt-2">
+            El instructor registra el kilometraje al iniciar y finalizar la clase
+          </p>
+        )}
+      </Card>
+    )}
+
+    <!-- Acciones de secretaría (solo clases prácticas) -->
+    {esPractica && estado === "en_curso" && (
+      <Card class="mb-6 border-blue-200 bg-blue-50/50">
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
+            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-sm font-semibold text-blue-900 mb-1">Cerrar clase manualmente</h3>
+            <p class="text-xs text-blue-800 mb-4">
+              Si el instructor no cierra la clase desde su dispositivo, puedes cerrarla aquí.
+              Se registrará que fue cerrada por secretaría.
+            </p>
+            <div class="mb-4">
+              <label for="km-final-cierre" class="block text-xs font-medium text-blue-900 mb-1">
+                KM Final al cierre (opcional)
+              </label>
+              <input
+                id="km-final-cierre"
+                type="number"
+                placeholder="Ej: 45350"
+                class="w-full px-3 py-2 text-sm border border-blue-200 rounded-lg bg-white focus:ring-2 focus:ring-black focus:ring-offset-1 mb-3"
+              />
+              <label for="observaciones-cierre" class="block text-xs font-medium text-blue-900 mb-1">
+                Observaciones (opcional)
+              </label>
+              <textarea
+                id="observaciones-cierre"
+                rows="2"
+                placeholder="Ej: Instructor no cerró a tiempo, clase terminó sin novedades..."
+                class="w-full px-3 py-2 text-sm border border-blue-200 rounded-lg bg-white focus:ring-2 focus:ring-black focus:ring-offset-1 resize-none"
+              ></textarea>
+            </div>
+            <Button variant="primary" class="w-full" onclick="cerrarClase()">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Cerrar Clase
+            </Button>
+          </div>
+        </div>
+      </Card>
+    )}
+
+    {esPractica && estado === "pendiente" && (
+      <Card class="mb-6 border-gray-200 bg-gray-50/50">
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
+            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-sm font-semibold text-gray-900 mb-1">Esperando inicio</h3>
+            <p class="text-xs text-secondary mb-4">
+              El instructor aún no ha iniciado esta clase. Se espera que inicie a las <strong>{clase.horaInicio}</strong> desde su dispositivo.
+            </p>
+            <Button variant="ghost" class="text-red-600 hover:text-red-700 hover:bg-red-50 text-sm" onclick="marcarNoRealizada()">
+              <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              Marcar como No Realizada
+            </Button>
+          </div>
+        </div>
+      </Card>
+    )}
+
+    {esPractica && estado === "finalizada" && (
+      <Card class="mb-6 border-green-200 bg-green-50/50">
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
+            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-sm font-semibold text-green-900 mb-1">Clase cerrada correctamente</h3>
+            <p class="text-xs text-green-800">
+              Cerrada por el instructor · {clase.horaFin} hrs
+            </p>
+          </div>
+        </div>
+      </Card>
+    )}
+
+    <!-- Registro de asistencia -->
+    {clase.alumno && (
+      <Card class="mb-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Registro de Asistencia</h3>
+        <div class="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
+          <input
+            type="checkbox"
+            id="asistencia"
+            checked={estado !== "pendiente"}
+            class="w-5 h-5 rounded border-gray-300"
+          />
+          <div class="flex-1">
+            <label for="asistencia" class="text-sm font-medium text-gray-900 cursor-pointer">
+              {clase.alumno} asistió a la clase
+            </label>
+            {estado !== "pendiente" && (
+              <p class="text-xs text-secondary mt-0.5">Registrado a las {clase.horaInicio}</p>
+            )}
+          </div>
+        </div>
+      </Card>
+    )}
+
+    <!-- Observaciones -->
+    <Card class="mb-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Observaciones de Secretaría</h3>
+      <textarea
+        id="observaciones"
+        rows="3"
+        placeholder="Agregar notas sobre esta clase..."
+        class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-black focus:ring-offset-1 resize-none"
+      ></textarea>
+      <div class="flex justify-end mt-3">
+        <Button variant="secondary" class="text-sm" onclick="guardarObservaciones()">
+          Guardar Observaciones
+        </Button>
+      </div>
+    </Card>
+
+    <!-- Volver -->
+    <div class="flex gap-3">
+      <Button href="/secretaria/dashboard" variant="ghost" class="flex-1">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Volver al Dashboard
+      </Button>
+    </div>
+  </div>
+</DashboardLayout>
+
+<script>
+  function cerrarClase() {
+    const obs = (document.getElementById("observaciones-cierre") as HTMLTextAreaElement)?.value || "";
+    const kmFinal = (document.getElementById("km-final-cierre") as HTMLInputElement)?.value || "";
+    if (confirm("¿Confirmas que deseas cerrar esta clase manualmente?")) {
+      let msg = "✓ Clase cerrada por secretaría.";
+      if (kmFinal) msg += `\nKM Final registrado: ${kmFinal}`;
+      if (obs) msg += `\nObservaciones: ${obs}`;
+      if (!kmFinal && !obs) msg += " Se registró el cierre manual.";
+      alert(msg);
+      window.location.href = "/secretaria/dashboard";
+    }
+  }
+
+  function marcarNoRealizada() {
+    if (confirm("¿Marcar esta clase como no realizada? Se notificará al instructor.")) {
+      alert("✓ Clase marcada como no realizada. Se notificará al instructor y se actualizará el registro.");
+      window.location.href = "/secretaria/dashboard";
+    }
+  }
+
+  function guardarObservaciones() {
+    const obs = (document.getElementById("observaciones") as HTMLTextAreaElement)?.value || "";
+    if (obs.trim()) {
+      alert("✓ Observaciones guardadas correctamente.");
+    } else {
+      alert("No hay observaciones para guardar.");
+    }
+  }
+
+  (window as any).cerrarClase = cerrarClase;
+  (window as any).marcarNoRealizada = marcarNoRealizada;
+  (window as any).guardarObservaciones = guardarObservaciones;
+</script>
+
+<style>
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+  .animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  input[type="checkbox"] {
+    appearance: none;
+    border: 1px solid rgb(209, 213, 219);
+    border-radius: 0.25rem;
+    cursor: pointer;
+    position: relative;
+  }
+  input[type="checkbox"]:checked {
+    background-color: rgb(17, 24, 39);
+    border-color: rgb(17, 24, 39);
+  }
+  input[type="checkbox"]:checked::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3E%3C/svg%3E");
+    background-size: 100% 100%;
+  }
+</style>

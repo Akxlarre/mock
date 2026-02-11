@@ -1,0 +1,305 @@
+---
+/**
+ * Página de Ensayos Teóricos - Instructor
+ * RF-057: Registro de puntajes en ensayos teóricos (preparación examen municipal)
+ */
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import Card from '../../components/ui/Card.astro';
+import Button from '../../components/ui/Button.astro';
+
+// Mock data - Puntajes de ensayos teóricos (Clase B)
+const puntajesEnsayos = [
+  {
+    id: '1',
+    alumno: 'Juan García López',
+    rut: '12.345.678-9',
+    puntaje: 85,
+    fecha: '2026-02-10',
+  },
+  {
+    id: '2',
+    alumno: 'María López González',
+    rut: '98.765.432-1',
+    puntaje: 92,
+    fecha: '2026-02-09',
+  },
+  {
+    id: '3',
+    alumno: 'Carlos Rodríguez Silva',
+    rut: '11.111.111-1',
+    puntaje: 78,
+    fecha: '2026-02-08',
+  },
+  {
+    id: '4',
+    alumno: 'Ana Martínez Flores',
+    rut: '22.222.222-2',
+    puntaje: 88,
+    fecha: '2026-02-07',
+  },
+  {
+    id: '5',
+    alumno: 'Roberto Pérez Valdez',
+    rut: '33.333.333-3',
+    puntaje: 75,
+    fecha: '2026-02-06',
+  },
+];
+
+const alumnosDisponibles = [
+  { id: '1', nombre: 'Juan García López', rut: '12.345.678-9' },
+  { id: '2', nombre: 'María López González', rut: '98.765.432-1' },
+  { id: '3', nombre: 'Carlos Rodríguez Silva', rut: '11.111.111-1' },
+  { id: '4', nombre: 'Ana Martínez Flores', rut: '22.222.222-2' },
+  { id: '5', nombre: 'Roberto Pérez Valdez', rut: '33.333.333-3' },
+];
+---
+
+<DashboardLayout title="Ensayos Teóricos - Instructor" userRole="instructor">
+  <div class="space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-semibold text-gray-900">Ensayos Teóricos</h1>
+        <p class="text-gray-600 mt-1">Registro de puntajes para preparación de examen municipal</p>
+      </div>
+      <Button
+        variant="primary"
+        onClick="document.getElementById('modal-registrar').showModal()"
+      >
+        Registrar Puntaje
+      </Button>
+    </div>
+
+    <!-- Tabla de puntajes -->
+    <Card>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="border-b border-gray-200">
+            <tr class="text-left">
+              <th class="pb-3 font-medium text-gray-700">Alumno</th>
+              <th class="pb-3 font-medium text-gray-700">RUT</th>
+              <th class="pb-3 font-medium text-gray-700">Puntaje</th>
+              <th class="pb-3 font-medium text-gray-700">Fecha</th>
+              <th class="pb-3 font-medium text-gray-700">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {puntajesEnsayos.map((registro) => (
+              <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                <td class="py-3 font-medium text-gray-900">{registro.alumno}</td>
+                <td class="py-3 text-gray-600">{registro.rut}</td>
+                <td class="py-3">
+                  <span class="font-semibold text-gray-900">{registro.puntaje}/100</span>
+                </td>
+                <td class="py-3 text-gray-600">{registro.fecha}</td>
+                <td class="py-3">
+                  <span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    registro.puntaje >= 80
+                      ? 'bg-green-100 text-green-800'
+                      : registro.puntaje >= 60
+                      ? 'bg-yellow-100 text-yellow-800'
+                      : 'bg-red-100 text-red-800'
+                  }`}>
+                    {registro.puntaje >= 80
+                      ? '✓ Aprobado'
+                      : registro.puntaje >= 60
+                      ? '⚠ Mejora necesaria'
+                      : '✗ Reprobado'}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </Card>
+
+    <!-- Estadísticas rápidas -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <Card class="p-4">
+        <p class="text-xs text-gray-600 font-medium">Total Registros</p>
+        <p class="text-2xl font-semibold text-gray-900 mt-2">{puntajesEnsayos.length}</p>
+      </Card>
+      <Card class="p-4">
+        <p class="text-xs text-gray-600 font-medium">Promedio</p>
+        <p class="text-2xl font-semibold text-gray-900 mt-2">
+          {Math.round(puntajesEnsayos.reduce((sum, r) => sum + r.puntaje, 0) / puntajesEnsayos.length)}
+        </p>
+      </Card>
+      <Card class="p-4">
+        <p class="text-xs text-gray-600 font-medium">Aprobados (80+)</p>
+        <p class="text-2xl font-semibold text-green-600 mt-2">
+          {puntajesEnsayos.filter(r => r.puntaje >= 80).length}
+        </p>
+      </Card>
+    </div>
+  </div>
+
+  <!-- Modal para registrar puntaje -->
+  <dialog id="modal-registrar" class="backdrop:bg-black/50 rounded-lg shadow-xl max-w-md w-full bg-white p-0 border-0">
+    <form method="dialog" class="p-6 space-y-4 bg-white">
+      <!-- Header -->
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900">Registrar Puntaje Ensayo Teórico</h2>
+          <p class="text-sm text-gray-600 mt-1">Completa los campos para registrar el puntaje del alumno</p>
+        </div>
+        <button
+          type="button"
+          onclick="document.getElementById('modal-registrar').close()"
+          class="text-gray-400 hover:text-gray-600 transition-colors"
+          aria-label="Cerrar modal"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Alumno -->
+      <div>
+        <label for="alumno" class="block text-sm font-medium text-gray-700 mb-1.5">
+          Alumno <span class="text-red-500">*</span>
+        </label>
+        <select
+          id="alumno"
+          required
+          class="h-11 px-4 w-full text-sm text-gray-900 bg-white rounded-md border border-gray-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-1"
+        >
+          <option value="">-- Selecciona un alumno --</option>
+          {alumnosDisponibles.map((alumno) => (
+            <option value={alumno.id}>
+              {alumno.nombre} ({alumno.rut})
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <!-- Puntaje -->
+      <div>
+        <label for="puntaje" class="block text-sm font-medium text-gray-700 mb-1.5">
+          Puntaje (0-100) <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="number"
+          id="puntaje"
+          name="puntaje"
+          min="0"
+          max="100"
+          required
+          placeholder="85"
+          class="h-11 px-4 w-full text-sm text-gray-900 bg-white rounded-md border border-gray-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-1 placeholder:text-gray-400"
+        />
+        <p class="text-xs text-gray-500 mt-1.5">Ingresa un valor entre 0 y 100</p>
+      </div>
+
+      <!-- Fecha -->
+      <div>
+        <label for="fecha" class="block text-sm font-medium text-gray-700 mb-1.5">
+          Fecha del Ensayo <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="date"
+          id="fecha"
+          name="fecha"
+          required
+          class="h-11 px-4 w-full text-sm text-gray-900 bg-white rounded-md border border-gray-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-1"
+        />
+      </div>
+
+      <!-- Botones -->
+      <div class="flex gap-3 pt-4 border-t border-gray-200">
+        <button
+          type="submit"
+          class="flex-1 inline-flex items-center justify-center h-11 px-4 text-sm font-medium rounded-md bg-gray-900 text-white hover:bg-gray-800 shadow-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 focus-visible:ring-offset-2"
+        >
+          Guardar Puntaje
+        </button>
+        <button
+          type="button"
+          onclick="document.getElementById('modal-registrar').close()"
+          class="flex-1 inline-flex items-center justify-center h-11 px-4 text-sm font-medium rounded-md bg-white border border-gray-300 text-gray-900 hover:bg-gray-50 hover:border-gray-400 shadow-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 focus-visible:ring-offset-2"
+        >
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Script para manejo del modal -->
+  <script>
+    // Cerrar modal al hacer clic fuera
+    const modal = document.getElementById('modal-registrar') as HTMLDialogElement;
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        const rect = modal.getBoundingClientRect();
+        const isInDialog = (
+          rect.top <= e.clientY &&
+          e.clientY <= rect.top + rect.height &&
+          rect.left <= e.clientX &&
+          e.clientX <= rect.left + rect.width
+        );
+        if (!isInDialog) {
+          modal.close();
+        }
+      });
+    }
+
+    // Simular envío del formulario
+    const form = modal?.querySelector('form');
+    if (form) {
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const alumnoSelect = form.querySelector('#alumno') as HTMLSelectElement;
+        const puntajeInput = form.querySelector('#puntaje') as HTMLInputElement;
+        const fechaInput = form.querySelector('#fecha') as HTMLInputElement;
+
+        const alumno = alumnoSelect.options[alumnoSelect.selectedIndex]?.text || '';
+        const puntaje = puntajeInput.value;
+        const fecha = fechaInput.value;
+
+        if (alumno && puntaje && fecha) {
+          // Mostrar confirmación (en mockup, solo visual)
+          alert(`✓ Puntaje registrado exitosamente\n\nAlumno: ${alumno}\nPuntaje: ${puntaje}/100\nFecha: ${fecha}`);
+          modal.close();
+          form.reset();
+        }
+      });
+    }
+  </script>
+
+  <style>
+    /* Estilos para centrar el modal correctamente */
+    #modal-registrar {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      margin: 0;
+      max-height: calc(100vh - 2rem);
+      overflow-y: auto;
+    }
+
+    #modal-registrar::backdrop {
+      background-color: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(2px);
+    }
+
+    /* Animación de apertura */
+    #modal-registrar[open] {
+      animation: slideIn 0.2s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translate(-50%, -45%);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+      }
+    }
+  </style>
+</DashboardLayout>

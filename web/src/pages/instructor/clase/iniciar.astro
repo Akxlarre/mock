@@ -18,6 +18,7 @@ const clasesHoy = [
     id: 1,
     hora: "09:00",
     alumno: "María González",
+    alumnoId: 1,
     vehiculo: "ABC-123 (Suzuki Swift)",
     numeroClase: 9,
     estado: "pending",
@@ -26,6 +27,7 @@ const clasesHoy = [
     id: 2,
     hora: "11:00",
     alumno: "Juan Pablo Rojas",
+    alumnoId: 2,
     vehiculo: "ABC-123 (Suzuki Swift)",
     numeroClase: 10,
     estado: "pending",
@@ -34,6 +36,7 @@ const clasesHoy = [
     id: 3,
     hora: "17:00",
     alumno: "Ana Martínez",
+    alumnoId: 3,
     vehiculo: "XYZ-789 (Nissan March)",
     numeroClase: 11,
     estado: "pending",
@@ -99,12 +102,12 @@ const estadoBadge: Record<string, { label: string; class: string }> = {
                     <Button
                       variant="primary"
                       class="text-xs"
-                      href={`/instructor/ficha/${clase.id}`}
+                      href={`/instructor/alumnos/${clase.alumnoId}/clase/${clase.numeroClase}`}
                     >
                       Iniciar clase
                     </Button>
-                    <Button variant="ghost" class="text-xs text-gray-700">
-                      Ver detalle
+                    <Button variant="ghost" class="text-xs text-gray-700" href={`/instructor/alumnos/${clase.alumnoId}/ficha`}>
+                      Ver ficha
                     </Button>
                   </div>
                 </td>
@@ -115,9 +118,9 @@ const estadoBadge: Record<string, { label: string; class: string }> = {
       </div>
 
       <p class="text-xs text-secondary mt-4">
-        En producción, al hacer clic en <strong>“Iniciar clase”</strong> se marcará el estado como
-        <code class="px-1 py-0.5 bg-gray-100 rounded text-[11px]">started</code>, se abrirá la ficha técnica
-        correspondiente (RF-053) y se registrará la asistencia del alumno.
+        En producción, al hacer clic en <strong>"Iniciar clase"</strong> se marcará el estado como
+        <code class="px-1 py-0.5 bg-gray-100 rounded text-[11px]">started</code>, se abrirá la evaluación de la clase
+        (con formulario, firma digital, etc.) y se registrará la asistencia del alumno automáticamente (RF-051).
       </p>
     </Card>
   </div>

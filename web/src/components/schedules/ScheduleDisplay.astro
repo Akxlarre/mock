@@ -23,9 +23,10 @@ export interface Props {
     completedClasses: number;
     totalClasses: number;
     nextClassNumber: number;
+    showProgressCard?: boolean;
 }
 
-const { bookings, completedClasses, totalClasses, nextClassNumber } =
+const { bookings, completedClasses, totalClasses, nextClassNumber, showProgressCard = false } =
     Astro.props;
 
 const progressPercent = (completedClasses / totalClasses) * 100;
@@ -39,87 +40,106 @@ const pastClasses = bookings.filter(
 ---
 
 <div class="space-y-6">
-    <!-- Progreso General -->
-    <Card class="p-6">
-        <div class="flex items-start justify-between mb-4">
-            <div>
-                <h2 class="text-xl font-semibold text-gray-900 mb-1">
-                    Progreso del Curso Clase B
-                </h2>
-                <p class="text-sm text-gray-600">
-                    Sistema de agendamiento individual - 12 clases totales
-                </p>
-            </div>
-            <div
-                class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium"
-            >
-                {completedClasses}/{totalClasses} clases
-            </div>
-        </div>
-
-        <div class="mb-4">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-medium text-gray-700"
-                    >Clases Completadas</span
-                >
-                <span class="text-sm font-semibold text-gray-900">
-                    {completedClasses}/{totalClasses}
-                </span>
-            </div>
-            <div class="w-full bg-gray-200 rounded-full h-3">
+    <!-- Progreso General (opcional) -->
+    {showProgressCard && (
+        <Card class="p-6">
+            <div class="flex items-start justify-between mb-4">
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-900 mb-1">
+                        Progreso del Curso Clase B
+                    </h2>
+                    <p class="text-sm text-gray-600">
+                        Sistema de agendamiento individual - 12 clases totales
+                    </p>
+                </div>
                 <div
-                    class="bg-green-600 h-3 rounded-full transition-all duration-500"
-                    style={`width: ${progressPercent}%`}
+                    class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium"
                 >
+                    {completedClasses}/{totalClasses} clases
                 </div>
             </div>
+
+            <div class="mb-4">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-gray-700"
+                        >Clases Completadas</span
+                    >
+                    <span class="text-sm font-semibold text-gray-900">
+                        {completedClasses}/{totalClasses}
+                    </span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-3">
+                    <div
+                        class="bg-green-600 h-3 rounded-full transition-all duration-500"
+                        style={`width: ${progressPercent}%`}
+                    >
+                    </div>
+                </div>
+            </div>
+
+            {nextClassNumber <= totalClasses ? (
+                <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p class="text-sm font-medium text-blue-900 mb-1">
+                        📚 Próxima clase disponible
+                    </p>
+                    <p class="text-sm text-blue-800">
+                        Puedes agendar tu{" "}
+                        <strong>Clase {nextClassNumber}</strong> cuando lo desees
+                        (respetando 24 hrs de anticipación)
+                    </p>
+                    <Button href="/alumno/agendar" variant="primary" class="mt-3">
+                        Agendar Clase {nextClassNumber}
+                    </Button>
+                </div>
+            ) : null}
+
+            {completedClasses === totalClasses ? (
+                <div class="p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <p class="text-sm font-medium text-green-900 mb-1">
+                        🎉 ¡Felicitaciones!
+                    </p>
+                    <p class="text-sm text-green-800">
+                        Has completado las 12 clases prácticas. Ya puedes descargar
+                        tu certificado.
+                    </p>
+                    <Button variant="primary" class="mt-3">
+                        Descargar Certificado
+                    </Button>
+                </div>
+            ) : null}
+        </Card>
+    )}
+
+    <!-- Mini card de Próxima clase disponible (sin progress card) -->
+    {!showProgressCard && nextClassNumber <= totalClasses ? (
+        <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p class="text-sm font-medium text-blue-900 mb-1">
+                📚 Próxima clase disponible
+            </p>
+            <p class="text-sm text-blue-800">
+                Puedes agendar tu{" "}
+                <strong>Clase {nextClassNumber}</strong> cuando lo desees
+                (respetando 24 hrs de anticipación)
+            </p>
+            <Button href="/alumno/agendar" variant="primary" class="mt-3">
+                Agendar Clase {nextClassNumber}
+            </Button>
         </div>
-
-        {nextClassNumber <= totalClasses ? (
-            <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <p class="text-sm font-medium text-blue-900 mb-1">
-                    📚 Próxima clase disponible
-                </p>
-                <p class="text-sm text-blue-800">
-                    Puedes agendar tu{" "}
-                    <strong>Clase {nextClassNumber}</strong> cuando lo desees
-                    (respetando 24 hrs de anticipación)
-                </p>
-                <Button href="/alumno/agendar" variant="primary" class="mt-3">
-                    Agendar Clase {nextClassNumber}
-                </Button>
-            </div>
-        ) : null}
-
-        {completedClasses === totalClasses ? (
-            <div class="p-4 bg-green-50 border border-green-200 rounded-lg">
-                <p class="text-sm font-medium text-green-900 mb-1">
-                    🎉 ¡Felicitaciones!
-                </p>
-                <p class="text-sm text-green-800">
-                    Has completado las 12 clases prácticas. Ya puedes descargar
-                    tu certificado.
-                </p>
-                <Button variant="primary" class="mt-3">
-                    Descargar Certificado
-                </Button>
-            </div>
-        ) : null}
-    </Card>
+    ) : null}
 
     <!-- Clases Agendadas (Próximas) -->
     {
         scheduledClasses.length > 0 && (
             <Card class="p-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                    Próximas Clases Agendadas
+                    Próximas Clases Prácticas Agendadas
                 </h3>
 
                 <div class="space-y-3">
                     {scheduledClasses.map((clase) => (
                         <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
                             <div class="flex items-center gap-4">
-                                <div class="text-center min-w-[60px]">
+                                <div class="text-center min-w-15">
                                     <p class="text-sm font-medium text-gray-900">
                                         {new Date(
                                             clase.date,
@@ -182,14 +202,14 @@ const pastClasses = bookings.filter(
         completedClassList.length > 0 && (
             <Card class="p-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                    Clases Completadas ({completedClassList.length})
+                    Clases Prácticas Completadas ({completedClassList.length})
                 </h3>
 
                 <div class="space-y-2">
                     {completedClassList.map((clase) => (
                         <div class="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-lg">
                             <div class="flex items-center gap-4">
-                                <div class="text-center min-w-[60px]">
+                                <div class="text-center min-w-15">
                                     <p class="text-sm font-medium text-gray-700">
                                         {new Date(
                                             clase.date,
@@ -231,7 +251,7 @@ const pastClasses = bookings.filter(
     <Card class="p-6 bg-yellow-50 border-yellow-200">
         <div class="flex gap-3">
             <svg
-                class="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5"
+                class="w-5 h-5 text-yellow-600 shrink-0 mt-0.5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"

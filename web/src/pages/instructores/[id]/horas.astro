@@ -1,26 +1,37 @@
 ---
 /**
- * Liquidación Instructor - Solo Horas/Sesiones
- * No muestra dinero explícitamente, solo cantidad de horas trabajadas
+ * Detalle de Horas por Instructor - Vista Administrador
+ * Muestra el detalle mensual de horas de un instructor específico
  */
-import DashboardLayout from "../../layouts/DashboardLayout.astro";
-import Card from "../../components/ui/Card.astro";
-import Button from "../../components/ui/Button.astro";
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+import Card from "../../../components/ui/Card.astro";
+import Button from "../../../components/ui/Button.astro";
+import { getInstructorById } from "../../../lib/mockInstructors";
+import { ESCUELA_ACTUAL } from "../../../lib/mockData";
 
-// Mock data - vendría de API según instructor logueado
-const instructor = {
-    nombre: "Carlos Rojas",
-    tipo: "ambos", // teórico | práctico | ambos
-};
+export function getStaticPaths() {
+    return [
+        { params: { id: "1" } },
+        { params: { id: "2" } },
+        { params: { id: "3" } },
+        { params: { id: "4" } },
+        { params: { id: "5" } },
+    ];
+}
 
-const mesFebrero = {
-    mes: "Febrero 2026",
-    horasTeoricas: 25,
-    sesionesPracticas: 30,
-    totalHorasEquivalentes: 70, // 25 hrs teóricas + 45 hrs prácticas (30 sesiones × 1.5)
-};
+const { id } = Astro.params;
+const instructor = getInstructorById(parseInt(id!));
 
-// Detalle por día
+if (!instructor) {
+    return Astro.redirect("/instructores/horas");
+}
+
+// Mes actual
+const mesActual = "febrero2026";
+const mesActualDisplay = "Febrero 2026";
+const horasMes = instructor.horasMensuales[mesActual];
+
+// Detalle por día (mockup - en producción vendría de API)
 const detalleSesiones = [
     {
         fecha: "2026-02-03",
@@ -47,43 +58,106 @@ const detalleSesiones = [
         horas: 2,
         alumno: "Promoción Enero - Grupo B",
     },
-    // ... más sesiones
 ];
 
+// Comparativo mensual (últimos 5 meses) - usar datos reales del instructor
+const meses = ["diciembre2025", "enero2026", "febrero2026"];
 const comparativoMeses = [
-    { mes: "Octubre", teoricas: 20, practicas: 25 },
-    { mes: "Noviembre", teoricas: 22, practicas: 28 },
-    { mes: "Diciembre", teoricas: 15, practicas: 20 },
-    { mes: "Enero", teoricas: 24, practicas: 32 },
-    { mes: "Febrero", teoricas: 25, practicas: 30 },
+    {
+        mes: "Octubre",
+        teoricas: instructor.tipo !== "practico" ? 20 : 0,
+        practicas: instructor.tipo !== "teorico" ? 25 : 0,
+    },
+    {
+        mes: "Noviembre",
+        teoricas: instructor.tipo !== "practico" ? 22 : 0,
+        practicas: instructor.tipo !== "teorico" ? 28 : 0,
+    },
+    {
+        mes: "Diciembre",
+        teoricas: instructor.horasMensuales["diciembre2025"]?.teoricas || 0,
+        practicas: instructor.horasMensuales["diciembre2025"]?.practicas || 0,
+    },
+    {
+        mes: "Enero",
+        teoricas: instructor.horasMensuales["enero2026"]?.teoricas || 0,
+        practicas: instructor.horasMensuales["enero2026"]?.practicas || 0,
+    },
+    {
+        mes: "Febrero",
+        teoricas: instructor.horasMensuales["febrero2026"]?.teoricas || 0,
+        practicas: instructor.horasMensuales["febrero2026"]?.practicas || 0,
+    },
 ];
+
+// Calcular comparativa vs mes anterior
+const horasMesAnterior = instructor.horasMensuales["enero2026"]?.totalEquivalente || 0;
+const horasActual = horasMes.totalEquivalente;
+const porcentajeCambio =
+    horasMesAnterior > 0
+        ? Math.round(((horasActual - horasMesAnterior) / horasMesAnterior) * 100)
+        : 0;
+const direccion = porcentajeCambio > 0 ? "up" : porcentajeCambio < 0 ? "down" : "equal";
 ---
 
 <DashboardLayout
-    title="Mis Horas - Instructor"
-    userRole="instructor"
-    userName={instructor.nombre}
+    title={`Horas ${instructor.nombre} - Instructores`}
+    escuela={ESCUELA_ACTUAL}
 >
     <div class="max-w-6xl mx-auto">
-        <!-- Header -->
-        <div class="mb-8">
+        <!-- Breadcrumbs -->
+        <div class="mb-6">
             <div class="flex items-center gap-2 text-sm text-secondary mb-2">
-                <a href="/instructor/dashboard" class="hover:text-gray-900"
-                    >Mi Dashboard</a
+                <a href="/dashboard" class="hover:text-gray-900">Inicio</a>
+                <span>/</span>
+                <a href="/instructores" class="hover:text-gray-900"
+                    >Instructores</a
                 >
                 <span>/</span>
-                <span class="text-gray-900 font-medium">Mis Horas</span>
+                <a href="/instructores/horas" class="hover:text-gray-900"
+                    >Horas Trabajadas</a
+                >
+                <span>/</span>
+                <span class="text-gray-900 font-medium"
+                    >{instructor.nombre}</span
+                >
             </div>
-            <h1 class="text-3xl font-semibold text-gray-900">
-                Resumen Mensual
-            </h1>
-            <p class="text-secondary mt-1">{mesFebrero.mes}</p>
+        </div>
+
+        <!-- Header -->
+        <div class="mb-8">
+            <div
+                class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+            >
+                <div>
+                    <h1
+                        class="text-3xl font-semibold text-gray-900 tracking-tight"
+                    >
+                        {instructor.nombre}
+                    </h1>
+                    <p class="text-secondary mt-1">
+                        Instructor {instructor.tipo} · {mesActualDisplay}
+                    </p>
+                </div>
+
+                <div class="flex gap-2">
+                    <Button
+                        variant="secondary"
+                        href={`/instructores/${instructor.id}`}
+                    >
+                        Ver perfil
+                    </Button>
+                    <Button variant="primary" href="/instructores/horas">
+                        Volver al listado
+                    </Button>
+                </div>
+            </div>
         </div>
 
         <!-- Stats principales -->
         <div class="grid md:grid-cols-4 gap-4 mb-8">
             {
-                instructor.tipo !== "práctico" && (
+                instructor.tipo !== "practico" && (
                     <Card class="p-6">
                         <div class="flex items-center gap-3 mb-2">
                             <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -94,7 +168,7 @@ const comparativoMeses = [
                                     Horas Teóricas
                                 </p>
                                 <p class="text-2xl font-bold text-gray-900">
-                                    {mesFebrero.horasTeoricas}
+                                    {horasMes.teoricas}
                                 </p>
                             </div>
                         </div>
@@ -104,7 +178,7 @@ const comparativoMeses = [
             }
 
             {
-                instructor.tipo !== "teórico" && (
+                instructor.tipo !== "teorico" && (
                     <Card class="p-6">
                         <div class="flex items-center gap-3 mb-2">
                             <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
@@ -115,7 +189,7 @@ const comparativoMeses = [
                                     Sesiones Prácticas
                                 </p>
                                 <p class="text-2xl font-bold text-gray-900">
-                                    {mesFebrero.sesionesPracticas}
+                                    {horasMes.practicas}
                                 </p>
                             </div>
                         </div>
@@ -134,7 +208,7 @@ const comparativoMeses = [
                     <div>
                         <p class="text-xs text-secondary">Total Horas Equiv.</p>
                         <p class="text-2xl font-bold text-gray-900">
-                            {mesFebrero.totalHorasEquivalentes}
+                            {horasMes.totalEquivalente}
                         </p>
                     </div>
                 </div>
@@ -142,7 +216,7 @@ const comparativoMeses = [
             </Card>
 
             <Card
-                class="p-6 bg-linear-to-br from-blue-50 to-purple-50 border-blue-200"
+                class="p-6 bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200"
             >
                 <div class="flex items-center gap-3 mb-2">
                     <div
@@ -158,15 +232,27 @@ const comparativoMeses = [
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
                                 stroke-width="2"
-                                d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                d={direccion === "up"
+                                    ? "M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                                    : "M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"}></path>
                         </svg>
                     </div>
                     <div>
                         <p class="text-xs text-blue-700">vs Mes Anterior</p>
-                        <p class="text-2xl font-bold text-blue-900">+8%</p>
+                        <p class="text-2xl font-bold text-blue-900">
+                            {direccion === "up" ? "+" : ""}{porcentajeCambio}%
+                        </p>
                     </div>
                 </div>
-                <p class="text-xs text-blue-700">↗ Incremento positivo</p>
+                <p class="text-xs text-blue-700">
+                    {
+                        direccion === "up"
+                            ? "↗ Incremento positivo"
+                            : direccion === "down"
+                              ? "↘ Disminución"
+                              : "→ Sin cambio"
+                    }
+                </p>
             </Card>
         </div>
 
@@ -182,9 +268,8 @@ const comparativoMeses = [
                     <div class="space-y-4">
                         {
                             comparativoMeses.map((mes) => {
-                                const maxHoras = 60;
+                                const maxHoras = 80;
                                 const totalMes = mes.teoricas + mes.practicas;
-                                const porcentaje = (totalMes / maxHoras) * 100;
 
                                 return (
                                     <div>
@@ -253,7 +338,7 @@ const comparativoMeses = [
                                 >Promedio diario</span
                             >
                             <span class="text-sm font-semibold text-gray-900"
-                                >3.5h</span
+                                >{Math.round((horasMes.totalEquivalente / 20) * 10) / 10}h</span
                             >
                         </div>
                         <div
@@ -273,24 +358,24 @@ const comparativoMeses = [
                                 >Alumnos atendidos</span
                             >
                             <span class="text-sm font-semibold text-gray-900"
-                                >24</span
+                                >{horasMes.practicas > 0 ? horasMes.practicas : "N/A"}</span
                             >
                         </div>
                         <div class="flex items-center justify-between py-2">
                             <span class="text-sm text-secondary"
-                                >Fichas completadas</span
+                                >Clases activas</span
                             >
                             <span class="text-sm font-semibold text-gray-900"
-                                >30/30</span
+                                >{instructor.clasesActivas}</span
                             >
                         </div>
                     </div>
                 </Card>
 
-                <Card class="bg-green-50 border-green-200">
+                <Card class="bg-blue-50 border-blue-200">
                     <div class="flex gap-3">
                         <svg
-                            class="w-5 h-5 text-green-600 shrink-0"
+                            class="w-5 h-5 text-blue-600 flex-shrink-0"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -299,30 +384,21 @@ const comparativoMeses = [
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
                                 stroke-width="2"
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                             ></path>
                         </svg>
                         <div>
-                            <p class="text-sm font-medium text-green-900 mb-1">
-                                Buen Rendimiento
+                            <p class="text-sm font-medium text-blue-900 mb-1">
+                                Vista Administrador
                             </p>
-                            <p class="text-xs text-green-800">
-                                Estás superando tu promedio mensual en un 8%
+                            <p class="text-xs text-blue-800">
+                                Estos datos corresponden al instructor {
+                                    instructor.nombre
+                                }. Desde esta vista puedes ver el detalle de
+                                horas trabajadas.
                             </p>
                         </div>
                     </div>
-                </Card>
-
-                <Card>
-                    <h3 class="text-sm font-semibold text-gray-900 mb-2">
-                        Próxima Liquidación
-                    </h3>
-                    <p class="text-xs text-secondary mb-3">
-                        La liquidación se genera el día 28 de cada mes
-                    </p>
-                    <Button variant="secondary" class="w-full text-sm">
-                        Ver Detalle Completo
-                    </Button>
                 </Card>
             </div>
         </div>
@@ -368,37 +444,45 @@ const comparativoMeses = [
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         {
-                            detalleSesiones.map((sesion) => (
-                                <tr class="hover:bg-gray-50">
-                                    <td class="py-3 px-3 text-sm text-secondary">
-                                        {new Date(
-                                            sesion.fecha,
-                                        ).toLocaleDateString("es-CL", {
-                                            day: "numeric",
-                                            month: "short",
-                                        })}
-                                    </td>
-                                    <td class="py-3 px-3">
-                                        <span
-                                            class={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${
-                                                sesion.tipo === "práctica"
-                                                    ? "bg-green-100 text-green-800"
-                                                    : "bg-blue-100 text-blue-800"
-                                            }`}
-                                        >
-                                            {sesion.tipo === "práctica"
-                                                ? "🚗 Práctica"
-                                                : "📚 Teórica"}
-                                        </span>
-                                    </td>
-                                    <td class="py-3 px-3 text-sm text-gray-700">
-                                        {sesion.alumno}
-                                    </td>
-                                    <td class="py-3 px-3 text-sm font-semibold text-gray-900 text-right">
-                                        {sesion.horas}h
-                                    </td>
-                                </tr>
-                            ))
+                            detalleSesiones
+                                .filter((sesion) => {
+                                    if (instructor.tipo === "practico")
+                                        return sesion.tipo === "práctica";
+                                    if (instructor.tipo === "teorico")
+                                        return sesion.tipo === "teórica";
+                                    return true;
+                                })
+                                .map((sesion) => (
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="py-3 px-3 text-sm text-secondary">
+                                            {new Date(
+                                                sesion.fecha
+                                            ).toLocaleDateString("es-CL", {
+                                                day: "numeric",
+                                                month: "short",
+                                            })}
+                                        </td>
+                                        <td class="py-3 px-3">
+                                            <span
+                                                class={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${
+                                                    sesion.tipo === "práctica"
+                                                        ? "bg-green-100 text-green-800"
+                                                        : "bg-blue-100 text-blue-800"
+                                                }`}
+                                            >
+                                                {sesion.tipo === "práctica"
+                                                    ? "🚗 Práctica"
+                                                    : "📚 Teórica"}
+                                            </span>
+                                        </td>
+                                        <td class="py-3 px-3 text-sm text-gray-700">
+                                            {sesion.alumno}
+                                        </td>
+                                        <td class="py-3 px-3 text-sm font-semibold text-gray-900 text-right">
+                                            {sesion.horas}h
+                                        </td>
+                                    </tr>
+                                ))
                         }
                     </tbody>
                 </table>
@@ -410,7 +494,7 @@ const comparativoMeses = [
             >
                 <p class="text-sm font-medium text-gray-700">Total del Mes</p>
                 <p class="text-xl font-bold text-gray-900">
-                    {mesFebrero.totalHorasEquivalentes} horas
+                    {horasMes.totalEquivalente} horas
                 </p>
             </div>
         </Card>

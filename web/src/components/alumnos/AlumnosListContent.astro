@@ -35,17 +35,32 @@ const estadoBadge: Record<string, { label: string; class: string }> = {
     <span>/</span>
     <span class="text-gray-900 font-medium">Alumnos</span>
   </div>
-  <div class="flex items-center justify-between">
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
     <div>
       <h1 class="text-3xl font-semibold text-gray-900">Alumnos</h1>
       <p class="text-secondary mt-1">Listado de alumnos de la escuela</p>
     </div>
-    <Button href={`${basePath}/matricula/nueva/paso-1`} variant="primary">
-      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-      </svg>
-      Nueva Matrícula
-    </Button>
+    <div class="flex flex-wrap gap-2">
+      <!-- RF-054: Envío masivo de enlaces Zoom -->
+      <Button variant="secondary" onclick="enviarEnlaceZoom()">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+        </svg>
+        Enviar enlace Zoom
+      </Button>
+      <Button variant="secondary" onclick="registrarAsistenciaZoom()">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        Registrar asistencia
+      </Button>
+      <Button href={`${basePath}/matricula/nueva/paso-1`} variant="primary">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        Nueva Matrícula
+      </Button>
+    </div>
   </div>
 </div>
 
@@ -138,7 +153,7 @@ const estadoBadge: Record<string, { label: string; class: string }> = {
             <td class="py-3 px-4 text-right">
               <div class="flex items-center justify-end gap-2">
                 <a
-                  href={`${basePath}/alumno/dashboard`}
+                  href={`${basePath}/alumnos/${a.id}/ficha`}
                   class="p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
                   title="Ver ficha"
                 >
@@ -175,6 +190,53 @@ const estadoBadge: Record<string, { label: string; class: string }> = {
     </div>
   </div>
 </Card>
+
+<script>
+  /**
+   * RF-054: Envío masivo de enlace Zoom para clases teóricas Clase B
+   */
+  function enviarEnlaceZoom() {
+    const confirmacion = confirm(
+      '📹 Enviar Enlace de Zoom - Clase Teórica\n\n' +
+      'Esta acción enviará un correo con el enlace de Zoom a todos los alumnos activos de Clase B.\n\n' +
+      '¿Confirmar envío masivo?'
+    );
+
+    if (confirmacion) {
+      alert(
+        '✓ Enlaces enviados exitosamente\n\n' +
+        '• 183 correos enviados a alumnos activos\n' +
+        '• Enlace: https://zoom.us/j/123456789\n' +
+        '• Fecha: Hoy a las 15:00 hrs\n\n' +
+        'Los alumnos recibirán el enlace en su correo registrado.\n\n' +
+        '[Mockup - RF-054]'
+      );
+    }
+  }
+
+  /**
+   * RF-054: Registro de asistencia a clases teóricas basado en reporte de Zoom
+   */
+  function registrarAsistenciaZoom() {
+    alert(
+      '📋 Registrar Asistencia - Clase Teórica Zoom\n\n' +
+      'Pasos para registrar asistencia:\n\n' +
+      '1. Descarga el reporte de asistencia desde Zoom\n' +
+      '2. Revisa la lista de nombres/correos de asistentes\n' +
+      '3. Marca manualmente quiénes asistieron en esta pantalla\n\n' +
+      'Esta funcionalidad abrirá un modal donde podrás:\n' +
+      '• Ver lista de alumnos de la clase\n' +
+      '• Marcar checkboxes de asistencia\n' +
+      '• Guardar registro de asistencia\n\n' +
+      '[Mockup - RF-054]\n\n' +
+      'En producción, esto se registrará en la base de datos y actualizará el progreso de clases teóricas de cada alumno.'
+    );
+  }
+
+  // Hacer funciones globales para que funcionen con onclick
+  (window as any).enviarEnlaceZoom = enviarEnlaceZoom;
+  (window as any).registrarAsistenciaZoom = registrarAsistenciaZoom;
+</script>
 
 <style>
   select {
