@@ -164,6 +164,27 @@ const notifications = [
         unread: false,
         icon: "💾",
     },
+    // NUEVAS ALERTAS (COMUNICACIONES)
+    {
+        id: 101, // RF-021
+        priority: "urgent",
+        title: "Vencimiento Revisión Técnica",
+        message: "Patente FL-XT-99 (Vence en 2 días)",
+        time: "Hace 10 minutos",
+        unread: true,
+        icon: "🚗",
+        action: { label: "Agendar", href: "/flota/mantenimiento" },
+    },
+    {
+        id: 102, // RF-018
+        priority: "high",
+        title: "Cobro Pendiente",
+        message: "Alumno Juan Pérez (2da Cuota atrasada)",
+        time: "Hace 20 minutos",
+        unread: true,
+        icon: "💸",
+        action: { label: "Notificar", href: "/pagos/pendientes" },
+    },
 ];
 
 const urgent = notifications.filter((n) => n.priority === "urgent" && n.unread);
