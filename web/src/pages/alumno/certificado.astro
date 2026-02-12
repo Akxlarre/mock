@@ -1,7 +1,8 @@
 ---
 /**
  * Mi Certificado - Portal Alumno
- * Descarga de certificado cuando esté disponible
+ * RF-082.4: Gatillo Clase B — 12 clases + 100% teoría → habilitar certificado
+ * RF-093: Gatillo Profesional — 30 días + asistencia + notas + pago total
  */
 import DashboardLayout from '../../layouts/DashboardLayout.astro';
 import Card from '../../components/ui/Card.astro';
@@ -10,14 +11,48 @@ import Button from '../../components/ui/Button.astro';
 const alumnoData = {
   nombre: 'Juan Pérez García',
   rut: '18.765.432-1',
-  curso: 'Clase B',
+  curso: 'Clase B', // Cambiar a 'Profesional A2' para ver requisitos profesionales
   clasesCompletadas: 8,
   clasesTotales: 12,
-  certificadoDisponible: false
+  certificadoDisponible: false,
+  // RF-082.4: Requisitos Clase B
+  asistenciaTeoria: 85, // %
+  // RF-093: Requisitos adicionales Profesional
+  fechaMatricula: '2026-01-05',
+  asistenciaPractica: 100, // %
+  notaModulos: [4.5, 3.8, 5.0, 4.2], // notas por módulo
+  estadoPago: 'parcial', // 'total' | 'parcial' | 'pendiente'
+  documentacionCompleta: true,
 };
 
+const esProfesional = alumnoData.curso.startsWith('Profesional');
 const progreso = Math.round((alumnoData.clasesCompletadas / alumnoData.clasesTotales) * 100);
 const clasesRestantes = alumnoData.clasesTotales - alumnoData.clasesCompletadas;
+
+// RF-082.4: Cálculo requisitos Clase B
+const clasesOk = alumnoData.clasesCompletadas >= alumnoData.clasesTotales;
+const teoriaOk = alumnoData.asistenciaTeoria >= 100;
+const pagoOk = alumnoData.estadoPago === 'total';
+const docsOk = alumnoData.documentacionCompleta;
+
+// RF-093: Cálculo requisitos adicionales Profesional
+const hoy = new Date();
+const fechaMat = new Date(alumnoData.fechaMatricula);
+const diasDesdeMatricula = Math.floor((hoy.getTime() - fechaMat.getTime()) / (24 * 60 * 60 * 1000));
+const dias30Ok = diasDesdeMatricula >= 30;
+const practicaOk = alumnoData.asistenciaPractica >= 100;
+const teoriaProf75Ok = alumnoData.asistenciaTeoria >= 75;
+const notasOk = alumnoData.notaModulos.every(n => n >= 4.0);
+const notaMin = Math.min(...alumnoData.notaModulos);
+
+// Determinar si el certificado se puede habilitar
+let puedeHabilitar = false;
+if (esProfesional) {
+  puedeHabilitar = clasesOk && teoriaProf75Ok && practicaOk && notasOk && pagoOk && docsOk && dias30Ok;
+} else {
+  puedeHabilitar = clasesOk && teoriaOk && pagoOk && docsOk;
+}
+if (alumnoData.certificadoDisponible) puedeHabilitar = true;
 ---
 
 <DashboardLayout title="Mi Certificado" userRole="alumno">
@@ -34,6 +69,9 @@ const clasesRestantes = alumnoData.clasesTotales - alumnoData.clasesCompletadas;
         <p class="text-lg font-bold text-blue-900">{alumnoData.nombre}</p>
         <p class="text-sm text-blue-800">RUT: {alumnoData.rut} • Curso: {alumnoData.curso}</p>
       </div>
+      <span class={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${esProfesional ? 'bg-purple-100 text-purple-800' : 'bg-blue-200 text-blue-800'}`}>
+        {alumnoData.curso}
+      </span>
     </div>
   </Card>
 
@@ -42,29 +80,23 @@ const clasesRestantes = alumnoData.clasesTotales - alumnoData.clasesCompletadas;
       <!-- Progreso -->
       <Card class="mb-6">
         <h2 class="text-xl font-semibold text-gray-900 mb-4">📚 Progreso del Curso</h2>
-        
         <div class="mb-6">
           <div class="flex items-center justify-between text-sm mb-2">
             <span class="font-medium text-gray-700">Clases completadas</span>
             <span class="font-bold text-gray-900">{alumnoData.clasesCompletadas} / {alumnoData.clasesTotales}</span>
           </div>
           <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
-            <div 
-              class="bg-gradient-to-r from-blue-500 to-blue-600 h-full rounded-full transition-all duration-300 flex items-center justify-end pr-2"
-              style={`width: ${progreso}%`}
-            >
+            <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-full rounded-full transition-all duration-300 flex items-center justify-end pr-2" style={`width: ${progreso}%`}>
               <span class="text-xs font-bold text-white">{progreso}%</span>
             </div>
           </div>
         </div>
-
         <div class="grid sm:grid-cols-2 gap-4">
           <div class="p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
             <p class="text-sm text-blue-900 font-semibold mb-1">Completadas</p>
             <p class="text-3xl font-bold text-blue-600">{alumnoData.clasesCompletadas}</p>
             <p class="text-xs text-blue-700 mt-1">clases prácticas</p>
           </div>
-
           <div class="p-4 bg-orange-50 rounded-lg border-l-4 border-orange-500">
             <p class="text-sm text-orange-900 font-semibold mb-1">Restantes</p>
             <p class="text-3xl font-bold text-orange-600">{clasesRestantes}</p>
@@ -73,69 +105,106 @@ const clasesRestantes = alumnoData.clasesTotales - alumnoData.clasesCompletadas;
         </div>
       </Card>
 
-      <!-- Requisitos -->
-      <Card class="mb-6 bg-yellow-50 border-l-4 border-yellow-500">
-        <div class="flex items-start gap-3">
-          <svg class="w-6 h-6 text-yellow-600 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-          <div>
-            <p class="font-semibold text-yellow-900 mb-2">📋 Requisitos para Certificado</p>
-            <ul class="space-y-2 text-sm text-yellow-800">
-              <li class="flex items-start gap-2">
-                <span class={alumnoData.clasesCompletadas >= alumnoData.clasesTotales ? 'text-green-600' : 'text-yellow-600'}>
-                  {alumnoData.clasesCompletadas >= alumnoData.clasesTotales ? '✓' : '○'}
-                </span>
-                <span>Completar las {alumnoData.clasesTotales} clases prácticas obligatorias</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <span class="text-yellow-600">○</span>
-                <span>No tener pagos pendientes</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <span class="text-yellow-600">○</span>
-                <span>Documentación completa (cédula, certificado médico vigente)</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <span class="text-yellow-600">○</span>
-                <span>Aprobar examen teórico interno (si aplica)</span>
-              </li>
-            </ul>
+      <!-- RF-082.4 / RF-093: Requisitos con chequeo automático -->
+      <Card class="mb-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-2">📋 Requisitos para Certificado</h2>
+        <p class="text-xs text-secondary mb-4">
+          {esProfesional ? 'RF-093: Requisitos Licencia Profesional' : 'RF-082.4: Requisitos Clase B'} — El botón se habilitará automáticamente al cumplir todos
+        </p>
+        <div class="space-y-3">
+          <!-- Clases -->
+          <div class={`flex items-center gap-3 p-3 rounded-lg border ${clasesOk ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
+            <span class={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${clasesOk ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'}`}>{clasesOk ? '✓' : '○'}</span>
+            <div class="flex-1">
+              <p class={`text-sm font-medium ${clasesOk ? 'text-green-900' : 'text-gray-700'}`}>Completar las {alumnoData.clasesTotales} clases prácticas</p>
+              <p class="text-xs text-secondary">{alumnoData.clasesCompletadas}/{alumnoData.clasesTotales} completadas</p>
+            </div>
+          </div>
+          <!-- Teoría -->
+          {esProfesional ? (
+            <>
+              <div class={`flex items-center gap-3 p-3 rounded-lg border ${teoriaProf75Ok ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
+                <span class={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${teoriaProf75Ok ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'}`}>{teoriaProf75Ok ? '✓' : '○'}</span>
+                <div class="flex-1">
+                  <p class={`text-sm font-medium ${teoriaProf75Ok ? 'text-green-900' : 'text-gray-700'}`}>Asistencia teórica ≥ 75%</p>
+                  <p class="text-xs text-secondary">Actual: {alumnoData.asistenciaTeoria}%</p>
+                </div>
+              </div>
+              <div class={`flex items-center gap-3 p-3 rounded-lg border ${practicaOk ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
+                <span class={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${practicaOk ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'}`}>{practicaOk ? '✓' : '○'}</span>
+                <div class="flex-1">
+                  <p class={`text-sm font-medium ${practicaOk ? 'text-green-900' : 'text-gray-700'}`}>Asistencia práctica 100%</p>
+                  <p class="text-xs text-secondary">Actual: {alumnoData.asistenciaPractica}%</p>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div class={`flex items-center gap-3 p-3 rounded-lg border ${teoriaOk ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
+              <span class={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${teoriaOk ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'}`}>{teoriaOk ? '✓' : '○'}</span>
+              <div class="flex-1">
+                <p class={`text-sm font-medium ${teoriaOk ? 'text-green-900' : 'text-gray-700'}`}>100% asistencia clases teóricas</p>
+                <p class="text-xs text-secondary">Actual: {alumnoData.asistenciaTeoria}%</p>
+              </div>
+            </div>
+          )}
+          <!-- RF-093: Notas -->
+          {esProfesional && (
+            <div class={`flex items-center gap-3 p-3 rounded-lg border ${notasOk ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+              <span class={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${notasOk ? 'bg-green-500 text-white' : 'bg-red-400 text-white'}`}>{notasOk ? '✓' : '✗'}</span>
+              <div class="flex-1">
+                <p class={`text-sm font-medium ${notasOk ? 'text-green-900' : 'text-red-800'}`}>Notas módulos ≥ 4.0</p>
+                <p class="text-xs text-secondary">Notas: {alumnoData.notaModulos.map((n, i) => `M${i+1}: ${n.toFixed(1)}`).join(' • ')} — Mín: {notaMin.toFixed(1)}</p>
+              </div>
+            </div>
+          )}
+          <!-- RF-093: 30 días -->
+          {esProfesional && (
+            <div class={`flex items-center gap-3 p-3 rounded-lg border ${dias30Ok ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
+              <span class={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${dias30Ok ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'}`}>{dias30Ok ? '✓' : '○'}</span>
+              <div class="flex-1">
+                <p class={`text-sm font-medium ${dias30Ok ? 'text-green-900' : 'text-gray-700'}`}>30 días desde promoción cumplidos</p>
+                <p class="text-xs text-secondary">{diasDesdeMatricula} días transcurridos (mínimo 30)</p>
+              </div>
+            </div>
+          )}
+          <!-- Pago -->
+          <div class={`flex items-center gap-3 p-3 rounded-lg border ${pagoOk ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+            <span class={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${pagoOk ? 'bg-green-500 text-white' : 'bg-red-400 text-white'}`}>{pagoOk ? '✓' : '✗'}</span>
+            <div class="flex-1">
+              <p class={`text-sm font-medium ${pagoOk ? 'text-green-900' : 'text-red-800'}`}>{esProfesional ? 'Estado contable "Pagado Total"' : 'No tener pagos pendientes'}</p>
+              <p class="text-xs text-secondary">Estado: {alumnoData.estadoPago === 'total' ? '✓ Pagado' : alumnoData.estadoPago === 'parcial' ? '⚠️ Pago parcial' : '❌ Pendiente'}</p>
+            </div>
+          </div>
+          <!-- Documentación -->
+          <div class={`flex items-center gap-3 p-3 rounded-lg border ${docsOk ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
+            <span class={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${docsOk ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'}`}>{docsOk ? '✓' : '○'}</span>
+            <div class="flex-1">
+              <p class={`text-sm font-medium ${docsOk ? 'text-green-900' : 'text-gray-700'}`}>Documentación completa</p>
+              <p class="text-xs text-secondary">{docsOk ? 'Expediente completo' : 'Faltan documentos en expediente'}</p>
+            </div>
           </div>
         </div>
+        {puedeHabilitar ? (
+          <div class="mt-6 p-4 bg-green-50 rounded-lg border-2 border-green-300">
+            <p class="text-sm font-bold text-green-900">🎉 ¡Todos los requisitos cumplidos! El certificado está listo para generar.</p>
+          </div>
+        ) : (
+          <div class="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+            <p class="text-sm font-medium text-yellow-900">⏳ Aún no se cumplen todos los requisitos. Complete los pendientes para habilitar la emisión.</p>
+          </div>
+        )}
       </Card>
 
-      <!-- Info Certificado -->
+      <!-- Botón Generar -->
       <Card>
-        <h2 class="text-xl font-semibold text-gray-900 mb-4">📜 Sobre el Certificado</h2>
-        <div class="prose prose-sm max-w-none text-gray-700">
-          <p class="mb-3">
-            Una vez completados todos los requisitos, tu certificado será <strong>generado automáticamente</strong> 
-            y estará disponible para descarga en esta página.
-          </p>
-          
-          <p class="mb-3">
-            El certificado incluye:
-          </p>
-          <ul class="list-disc list-inside space-y-1 mb-3">
-            <li>Nombre completo y RUT del alumno</li>
-            <li>Curso completado (Clase B)</li>
-            <li>Fechas de inicio y término</li>
-            <li>Número único de certificado</li>
-            <li>Código QR de validación</li>
-            <li>Firma digital de la directora</li>
-          </ul>
-
-          <p class="mb-3">
-            Además recibirás una <strong>notificación por email y WhatsApp</strong> cuando esté listo.
-          </p>
-
-          <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-            <p class="text-sm text-blue-900">
-              <strong>💡 Próximos pasos:</strong> Completa las {clasesRestantes} clases restantes y 
-              el certificado estará disponible en 24 horas después de tu última clase.
-            </p>
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-semibold text-gray-900">📜 Generar Certificado</h2>
+            <p class="text-xs text-secondary mt-1">Se generará automáticamente al cumplir requisitos</p>
           </div>
+          <Button variant="primary" class={!puedeHabilitar ? 'opacity-50 cursor-not-allowed' : ''} disabled={!puedeHabilitar} onClick="generarCertificado()">
+            {puedeHabilitar ? '✅ Generar Certificado' : '🔒 Requisitos pendientes'}
+          </Button>
         </div>
       </Card>
     </>
@@ -145,54 +214,25 @@ const clasesRestantes = alumnoData.clasesTotales - alumnoData.clasesCompletadas;
       <Card class="mb-6 bg-gradient-to-r from-green-50 to-green-100 border-l-4 border-green-500">
         <div class="flex items-start gap-4">
           <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
           </div>
           <div class="flex-1">
             <p class="text-lg font-bold text-green-900 mb-1">🎉 ¡Felicitaciones!</p>
-            <p class="text-sm text-green-800 mb-4">
-              Has completado exitosamente el curso de <strong>{alumnoData.curso}</strong>. 
-              Tu certificado está listo para descargar.
-            </p>
+            <p class="text-sm text-green-800 mb-4">Has completado exitosamente el curso de <strong>{alumnoData.curso}</strong>. Tu certificado está listo.</p>
             <div class="flex gap-3">
-              <Button variant="primary" onclick="descargarCertificado()">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-                Descargar Certificado PDF
-              </Button>
-              <Button variant="secondary" onclick="verQR()">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
-                </svg>
-                Ver QR Validación
-              </Button>
+              <Button variant="primary" onClick="descargarCertificado()">📄 Descargar PDF</Button>
+              <Button variant="secondary" onClick="verQR()">📱 Ver QR</Button>
             </div>
           </div>
         </div>
       </Card>
-
-      <!-- Detalles Certificado -->
       <Card>
         <h2 class="text-xl font-semibold text-gray-900 mb-4">📄 Detalles del Certificado</h2>
         <dl class="grid sm:grid-cols-2 gap-4">
-          <div>
-            <dt class="text-sm text-secondary mb-1">Número de Certificado</dt>
-            <dd class="text-base font-mono font-bold text-gray-900">CERT-2026-0123</dd>
-          </div>
-          <div>
-            <dt class="text-sm text-secondary mb-1">Fecha de Emisión</dt>
-            <dd class="text-base font-semibold text-gray-900">03 de Febrero 2026</dd>
-          </div>
-          <div>
-            <dt class="text-sm text-secondary mb-1">Curso Completado</dt>
-            <dd class="text-base font-semibold text-gray-900">{alumnoData.curso}</dd>
-          </div>
-          <div>
-            <dt class="text-sm text-secondary mb-1">Total Clases</dt>
-            <dd class="text-base font-semibold text-gray-900">{alumnoData.clasesTotales} clases prácticas</dd>
-          </div>
+          <div><dt class="text-sm text-secondary mb-1">Número</dt><dd class="text-base font-mono font-bold text-gray-900">CERT-2026-0123</dd></div>
+          <div><dt class="text-sm text-secondary mb-1">Fecha Emisión</dt><dd class="text-base font-semibold text-gray-900">03 de Febrero 2026</dd></div>
+          <div><dt class="text-sm text-secondary mb-1">Curso</dt><dd class="text-base font-semibold text-gray-900">{alumnoData.curso}</dd></div>
+          <div><dt class="text-sm text-secondary mb-1">Total Clases</dt><dd class="text-base font-semibold text-gray-900">{alumnoData.clasesTotales} prácticas</dd></div>
         </dl>
       </Card>
     </>
@@ -200,38 +240,13 @@ const clasesRestantes = alumnoData.clasesTotales - alumnoData.clasesCompletadas;
 </DashboardLayout>
 
 <script>
-  function descargarCertificado() {
-    alert(`📄 Descargando Certificado
-
-Archivo: certificado_CERT-2026-0123.pdf
-
-Contenido:
-• Datos alumno completos
-• Curso: Clase B
-• Fecha inicio: 15/01/2026
-• Fecha término: 03/02/2026
-• Total clases: 12/12 ✓
-• Número certificado único
-• QR código validación
-• Firma digital directora
-
-Descarga iniciada...`);
-  }
-
-  function verQR() {
-    alert(`📱 Código QR de Validación
-
-Escanea este código para verificar la autenticidad del certificado.
-
-URL: https://escuela.cl/validar/CERT-2026-0123
-
-Al escanear muestra:
-• Nombre alumno
-• Curso completado
-• Fecha certificación
-• Escuela emisora
-• ✓ Certificado válido
-
-[QR Code aparecería aquí]`);
-  }
+  window.generarCertificado = function() {
+    alert('📜 Generando Certificado...\n\n✓ Todos los requisitos verificados\n✓ Certificado generado\n\nArchivo: certificado_CERT-2026-0248.pdf\nSe ha enviado copia por email.');
+  };
+  window.descargarCertificado = function() {
+    alert('📄 Descargando certificado_CERT-2026-0123.pdf...\n\nContenido: datos alumno, curso, fechas, QR, firma digital.');
+  };
+  window.verQR = function() {
+    alert('📱 QR de Validación\n\nURL: https://escuela.cl/validar/CERT-2026-0123\n\nAl escanear: nombre, curso, fecha, escuela, ✓ válido');
+  };
 </script>

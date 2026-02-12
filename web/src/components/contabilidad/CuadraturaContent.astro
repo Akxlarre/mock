@@ -1,6 +1,9 @@
 ---
 /**
  * Contenido de Cuadratura de Caja. Reutilizable para admin y secretaria con basePath.
+ * RF-028: Módulo de egresos con gastos categorizados
+ * RF-029: Balance automático de efectivo diario (Ingresos Cash - Gastos Cash)
+ * RF-032: Cuadratura Diaria por concepto SII (B, Profesional, Psicotécnico)
  * RF-036: Control de ingresos y cierre diario
  */
 import Card from "../ui/Card.astro";
@@ -14,21 +17,217 @@ const { basePath = "" } = Astro.props;
 
 const fechaHoy = new Date().toLocaleDateString("es-CL");
 
+// ── INGRESOS ──────────────────────────────────────────────
 const transacciones = [
-  { id: 1, hora: "09:15", tipo: "Matrícula", alumno: "Juan Pérez", monto: 280000, metodo: "efectivo", ref: "MAT-2026-0234" },
-  { id: 2, hora: "10:30", tipo: "Matrícula", alumno: "Ana García", monto: 230000, metodo: "transferencia", ref: "MAT-2026-0235" },
-  { id: 3, hora: "11:45", tipo: "Pago Clase Extra", alumno: "Carlos López", monto: 25000, metodo: "efectivo", ref: "PAGO-456" },
-  { id: 4, hora: "14:20", tipo: "Matrícula", alumno: "María González", monto: 280000, metodo: "tarjeta", ref: "MAT-2026-0236" },
-  { id: 5, hora: "15:00", tipo: "Certificado", alumno: "Pedro Sánchez", monto: 15000, metodo: "efectivo", ref: "CERT-123" },
-  { id: 6, hora: "16:10", tipo: "Matrícula", alumno: "Laura Martínez", monto: 280000, metodo: "efectivo", ref: "MAT-2026-0237" },
-  { id: 7, hora: "16:45", tipo: "Reagendar Clase", alumno: "Diego Rojas", monto: 0, metodo: "n/a", ref: "REAG-789" },
-  { id: 8, hora: "17:30", tipo: "Pago Pendiente", alumno: "Sofía Torres", monto: 50000, metodo: "transferencia", ref: "PAGO-457" },
+  {
+    id: 1,
+    hora: "09:15",
+    tipo: "Matrícula",
+    concepto: "Clase B",
+    alumno: "Juan Pérez",
+    monto: 280000,
+    metodo: "efectivo",
+    ref: "MAT-2026-0234",
+  },
+  {
+    id: 2,
+    hora: "10:30",
+    tipo: "Matrícula",
+    concepto: "Clase B",
+    alumno: "Ana García",
+    monto: 230000,
+    metodo: "transferencia",
+    ref: "MAT-2026-0235",
+  },
+  {
+    id: 3,
+    hora: "11:45",
+    tipo: "Pago Clase Extra",
+    concepto: "Clase B",
+    alumno: "Carlos López",
+    monto: 25000,
+    metodo: "efectivo",
+    ref: "PAGO-456",
+  },
+  {
+    id: 4,
+    hora: "14:20",
+    tipo: "Matrícula",
+    concepto: "Profesional",
+    alumno: "María González",
+    monto: 380000,
+    metodo: "tarjeta",
+    ref: "MAT-2026-0236",
+  },
+  {
+    id: 5,
+    hora: "15:00",
+    tipo: "Psicotécnico",
+    concepto: "Psicotécnico",
+    alumno: "Pedro Sánchez",
+    monto: 40000,
+    metodo: "efectivo",
+    ref: "PSI-123",
+  },
+  {
+    id: 6,
+    hora: "16:10",
+    tipo: "Matrícula",
+    concepto: "Clase B",
+    alumno: "Laura Martínez",
+    monto: 280000,
+    metodo: "efectivo",
+    ref: "MAT-2026-0237",
+  },
+  {
+    id: 7,
+    hora: "16:45",
+    tipo: "Certificado",
+    concepto: "Otro",
+    alumno: "Diego Rojas",
+    monto: 15000,
+    metodo: "transferencia",
+    ref: "CERT-789",
+  },
+  {
+    id: 8,
+    hora: "17:30",
+    tipo: "Matrícula",
+    concepto: "Profesional",
+    alumno: "Sofía Torres",
+    monto: 380000,
+    metodo: "transferencia",
+    ref: "MAT-2026-0238",
+  },
 ];
 
-const totalEfectivo = transacciones.filter((t) => t.metodo === "efectivo").reduce((sum, t) => sum + t.monto, 0);
-const totalTransferencia = transacciones.filter((t) => t.metodo === "transferencia").reduce((sum, t) => sum + t.monto, 0);
-const totalTarjeta = transacciones.filter((t) => t.metodo === "tarjeta").reduce((sum, t) => sum + t.monto, 0);
-const totalDia = totalEfectivo + totalTransferencia + totalTarjeta;
+const totalEfectivo = transacciones
+  .filter((t) => t.metodo === "efectivo")
+  .reduce((sum, t) => sum + t.monto, 0);
+const totalTransferencia = transacciones
+  .filter((t) => t.metodo === "transferencia")
+  .reduce((sum, t) => sum + t.monto, 0);
+const totalTarjeta = transacciones
+  .filter((t) => t.metodo === "tarjeta")
+  .reduce((sum, t) => sum + t.monto, 0);
+const totalIngresos = totalEfectivo + totalTransferencia + totalTarjeta;
+
+// ── EGRESOS (RF-028) ──────────────────────────────────────
+const categoriasGasto = [
+  "Bencina",
+  "Arriendo",
+  "Aseo",
+  "Mantención",
+  "Materiales",
+  "Sueldos",
+  "Servicios",
+  "Otros",
+] as const;
+
+const gastos = [
+  {
+    id: 1,
+    hora: "08:30",
+    categoria: "Bencina",
+    descripcion: "Combustible vehículo ABC-123",
+    monto: 35000,
+    metodo: "efectivo",
+    registradoPor: "Patricia",
+  },
+  {
+    id: 2,
+    hora: "09:00",
+    categoria: "Aseo",
+    descripcion: "Insumos de limpieza oficina",
+    monto: 12000,
+    metodo: "efectivo",
+    registradoPor: "Patricia",
+  },
+  {
+    id: 3,
+    hora: "12:00",
+    categoria: "Materiales",
+    descripcion: "Fotocopias material teórico",
+    monto: 8500,
+    metodo: "efectivo",
+    registradoPor: "Patricia",
+  },
+  {
+    id: 4,
+    hora: "13:15",
+    categoria: "Bencina",
+    descripcion: "Combustible vehículo DEF-456",
+    monto: 40000,
+    metodo: "transferencia",
+    registradoPor: "Patricia",
+  },
+  {
+    id: 5,
+    hora: "14:30",
+    categoria: "Mantención",
+    descripcion: "Cambio aceite vehículo ABC-123",
+    monto: 28000,
+    metodo: "transferencia",
+    registradoPor: "Jorge",
+  },
+];
+
+const totalGastosEfectivo = gastos
+  .filter((g) => g.metodo === "efectivo")
+  .reduce((sum, g) => sum + g.monto, 0);
+const totalGastosTransferencia = gastos
+  .filter((g) => g.metodo === "transferencia")
+  .reduce((sum, g) => sum + g.monto, 0);
+const totalGastos = totalGastosEfectivo + totalGastosTransferencia;
+
+// ── BALANCE (RF-029) ──────────────────────────────────────
+const balanceEfectivo = totalEfectivo - totalGastosEfectivo;
+const balanceGeneral = totalIngresos - totalGastos;
+
+// ── CUADRATURA SII (RF-032) ───────────────────────────────
+const conceptosSII = [
+  "Clase B",
+  "Profesional",
+  "Psicotécnico",
+  "Otro",
+] as const;
+const resumenSII = conceptosSII
+  .map((concepto) => {
+    const items = transacciones.filter((t) => t.concepto === concepto);
+    return {
+      concepto,
+      cantidad: items.length,
+      total: items.reduce((sum, t) => sum + t.monto, 0),
+    };
+  })
+  .filter((r) => r.cantidad > 0);
+
+// ── COLOR MAPS (moved here for Astro TS compat) ──────────
+const siiColorMap: Record<string, string> = {
+  "Clase B": "bg-blue-100 text-blue-800",
+  Profesional: "bg-purple-100 text-purple-800",
+  Psicotécnico: "bg-yellow-100 text-yellow-800",
+  Otro: "bg-gray-100 text-gray-800",
+};
+
+const conceptoColorMap: Record<string, string> = {
+  "Clase B": "bg-blue-100 text-blue-700",
+  Profesional: "bg-purple-100 text-purple-700",
+  Psicotécnico: "bg-yellow-100 text-yellow-700",
+  Otro: "bg-gray-100 text-gray-600",
+};
+
+const catColorMap: Record<string, string> = {
+  Bencina: "bg-amber-100 text-amber-800",
+  Arriendo: "bg-indigo-100 text-indigo-800",
+  Aseo: "bg-teal-100 text-teal-800",
+  Mantención: "bg-orange-100 text-orange-800",
+  Materiales: "bg-cyan-100 text-cyan-800",
+  Sueldos: "bg-pink-100 text-pink-800",
+  Servicios: "bg-violet-100 text-violet-800",
+  Otros: "bg-gray-100 text-gray-700",
+};
+
 const cajaAbierta = true;
 ---
 
@@ -36,119 +235,465 @@ const cajaAbierta = true;
   <div class="flex items-center gap-2 text-sm text-secondary mb-2">
     <a href={`${basePath}/dashboard`} class="hover:text-gray-900">Inicio</a>
     <span>/</span>
-    <a href={`${basePath}/contabilidad/cuadratura`} class="hover:text-gray-900">Contabilidad</a>
+    <a href={`${basePath}/contabilidad/cuadratura`} class="hover:text-gray-900"
+      >Contabilidad</a
+    >
     <span>/</span>
     <span class="text-gray-900 font-medium">Cuadratura</span>
   </div>
 </div>
 
 <!-- Header -->
-<div class="mb-8 flex items-center justify-between">
+<div class="mb-4 flex items-center justify-between">
   <div>
     <h1 class="text-3xl font-semibold text-gray-900">Cuadratura de Caja</h1>
     <p class="text-secondary mt-1">Cierre diario - {fechaHoy}</p>
   </div>
   <div>
-    {cajaAbierta ? (
-      <span class="inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-800 rounded-lg font-medium">
-        <span class="w-2 h-2 bg-green-600 rounded-full animate-pulse" />
-        Caja Abierta
-      </span>
-    ) : (
-      <span class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-800 rounded-lg font-medium">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-        </svg>
-        Caja Cerrada
-      </span>
-    )}
+    {
+      cajaAbierta ? (
+        <span class="inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-800 rounded-lg font-medium">
+          <span class="w-2 h-2 bg-green-600 rounded-full animate-pulse" />
+          Caja Abierta
+        </span>
+      ) : (
+        <span class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-800 rounded-lg font-medium">
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+            />
+          </svg>
+          Caja Cerrada
+        </span>
+      )
+    }
   </div>
 </div>
 
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- NAVEGACIÓN DIARIA + BLOQUEO DE EDICIÓN (RF-037) -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<Card class="mb-6">
+  <div
+    class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+  >
+    <div class="flex items-center gap-2">
+      <svg
+        class="w-4 h-4 text-gray-500"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+        ></path>
+      </svg>
+      <span class="text-sm font-medium text-gray-700">Navegar por día:</span>
+    </div>
+    <div class="flex items-center gap-1 overflow-x-auto">
+      {
+        [
+          { fecha: "04/02", dia: "Mar", cerrado: true },
+          { fecha: "05/02", dia: "Mié", cerrado: true },
+          { fecha: "06/02", dia: "Jue", cerrado: true },
+          { fecha: "07/02", dia: "Vie", cerrado: true },
+          { fecha: "08/02", dia: "Sáb", cerrado: false },
+          { fecha: "09/02", dia: "Dom", cerrado: false },
+          { fecha: "10/02", dia: "Hoy", cerrado: false },
+        ].map((d) => (
+          <button
+            class={`flex flex-col items-center px-3 py-2 rounded-lg border text-xs font-medium transition-colors ${d.dia === "Hoy" ? "bg-gray-900 text-white border-gray-900" : d.cerrado ? "bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100" : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"}`}
+            onclick={
+              d.cerrado
+                ? `alert('🔒 Día ${d.fecha} bloqueado (RF-037)\\n\\nEste día ya fue cuadrado y cerrado.\\nLos datos no se pueden editar.\\n\\nPara solicitar desbloqueo, contacte al administrador.')`
+                : undefined
+            }
+          >
+            <span class="text-[10px] text-opacity-70">{d.dia}</span>
+            <span class="font-semibold">{d.fecha}</span>
+            {d.cerrado && (
+              <svg
+                class="w-3 h-3 mt-0.5 text-gray-400"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            )}
+          </button>
+        ))
+      }
+    </div>
+    <div class="flex items-center gap-3 text-xs text-gray-500">
+      <span class="flex items-center gap-1">
+        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+          <path
+            fill-rule="evenodd"
+            d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+            clip-rule="evenodd"></path>
+        </svg>
+        Cerrado
+      </span>
+      <span class="flex items-center gap-1">
+        <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+        Editable
+      </span>
+    </div>
+  </div>
+</Card>
+
+<!-- Banner RF-037: Ejemplo de día bloqueado (solo visible para días cerrados) -->
+<div id="banner-bloqueo" class="hidden mb-6">
+  <Card
+    class="border-2 border-amber-300 bg-gradient-to-r from-amber-50 to-yellow-50"
+  >
+    <div class="flex items-start gap-3">
+      <div
+        class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
+      >
+        <svg
+          class="w-5 h-5 text-amber-600"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+          ></path>
+        </svg>
+      </div>
+      <div class="flex-1">
+        <h3 class="text-sm font-bold text-amber-900">
+          🔒 Bloqueo de Edición Activo (RF-037)
+        </h3>
+        <p class="text-xs text-amber-800 mt-1">
+          Este día ya fue cuadrado y cerrado. Los registros están bloqueados
+          para edición. Solo un administrador puede desbloquear una cuadratura
+          cerrada para realizar modificaciones.
+        </p>
+        <div class="flex items-center gap-3 mt-3">
+          <button
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium rounded-lg transition-colors"
+            onclick="alert('📧 Solicitud enviada al administrador.\n\nMotivo de desbloqueo requerido.\nRecibirá notificación cuando se apruebe.')"
+          >
+            <svg
+              class="w-3.5 h-3.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
+              ></path>
+            </svg>
+            Solicitar desbloqueo
+          </button>
+          <span class="text-xs text-amber-600"
+            >Cerrado por: Patricia · 10/02/2026 18:35</span
+          >
+        </div>
+      </div>
+    </div>
+  </Card>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- BALANCE NETO DEL DÍA (RF-029) -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="grid sm:grid-cols-3 gap-4 mb-6">
+  <Card
+    class={`border-2 ${balanceEfectivo >= 0 ? "border-green-300 bg-gradient-to-br from-green-50 to-emerald-50" : "border-red-300 bg-gradient-to-br from-red-50 to-rose-50"}`}
+  >
+    <div class="flex items-center gap-2 mb-2">
+      <span class="text-2xl">💰</span>
+      <p class="text-sm font-semibold text-gray-900">Balance Efectivo</p>
+    </div>
+    <p
+      class={`text-3xl font-bold ${balanceEfectivo >= 0 ? "text-green-700" : "text-red-700"}`}
+    >
+      ${balanceEfectivo.toLocaleString("es-CL")}
+    </p>
+    <div class="mt-2 space-y-1">
+      <p class="text-xs text-gray-600">
+        <span class="text-green-600"
+          >+${totalEfectivo.toLocaleString("es-CL")}</span
+        > ingresos
+      </p>
+      <p class="text-xs text-gray-600">
+        <span class="text-red-600"
+          >-${totalGastosEfectivo.toLocaleString("es-CL")}</span
+        > gastos
+      </p>
+    </div>
+  </Card>
+
+  <Card
+    class="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50"
+  >
+    <div class="flex items-center gap-2 mb-2">
+      <span class="text-2xl">📊</span>
+      <p class="text-sm font-semibold text-gray-900">Total Ingresos</p>
+    </div>
+    <p class="text-3xl font-bold text-blue-700">
+      ${totalIngresos.toLocaleString("es-CL")}
+    </p>
+    <p class="text-xs text-blue-600 mt-2">
+      {transacciones.length} transacciones
+    </p>
+  </Card>
+
+  <Card
+    class="border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-amber-50"
+  >
+    <div class="flex items-center gap-2 mb-2">
+      <span class="text-2xl">📉</span>
+      <p class="text-sm font-semibold text-gray-900">Total Gastos</p>
+    </div>
+    <p class="text-3xl font-bold text-orange-700">
+      ${totalGastos.toLocaleString("es-CL")}
+    </p>
+    <p class="text-xs text-orange-600 mt-2">
+      {gastos.length} egresos registrados
+    </p>
+  </Card>
+</div>
+
+<!-- Balance General -->
+<Card class="mb-6">
+  <div
+    class="bg-gradient-to-r from-gray-900 to-gray-800 rounded-lg p-6 text-white"
+  >
+    <div class="flex justify-between items-center">
+      <div>
+        <p class="text-sm text-gray-300 mb-1">
+          Balance General del Día (Ingresos - Gastos)
+        </p>
+        <p class="text-xs text-gray-400">RF-029 · Cálculo automático</p>
+      </div>
+      <div class="text-right">
+        <p
+          class={`text-4xl font-bold ${balanceGeneral >= 0 ? "text-green-400" : "text-red-400"}`}
+        >
+          ${balanceGeneral.toLocaleString("es-CL")}
+        </p>
+        <p class="text-xs text-gray-400 mt-1">
+          ${totalIngresos.toLocaleString("es-CL")} ingresos - ${
+            totalGastos.toLocaleString("es-CL")
+          } gastos
+        </p>
+      </div>
+    </div>
+  </div>
+</Card>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- RESUMEN DE INGRESOS POR MÉTODO -->
+<!-- ═══════════════════════════════════════════════════════════ -->
 <div class="grid lg:grid-cols-3 gap-6 mb-6">
   <Card class="lg:col-span-2">
-    <h2 class="text-xl font-semibold text-gray-900 mb-6">Resumen de Ingresos</h2>
+    <h2 class="text-xl font-semibold text-gray-900 mb-6">
+      Resumen de Ingresos
+    </h2>
 
     <div class="grid sm:grid-cols-3 gap-4 mb-6">
-      <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border-2 border-green-200">
+      <div
+        class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border-2 border-green-200"
+      >
         <div class="flex items-center gap-2 mb-2">
           <span class="text-2xl">💵</span>
           <p class="text-sm font-medium text-green-900">Efectivo</p>
         </div>
-        <p class="text-2xl font-bold text-green-700">${totalEfectivo.toLocaleString("es-CL")}</p>
-        <p class="text-xs text-green-600 mt-1">{transacciones.filter((t) => t.metodo === "efectivo").length} transacciones</p>
+        <p class="text-2xl font-bold text-green-700">
+          ${totalEfectivo.toLocaleString("es-CL")}
+        </p>
+        <p class="text-xs text-green-600 mt-1">
+          {transacciones.filter((t) => t.metodo === "efectivo").length} transacciones
+        </p>
       </div>
 
-      <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border-2 border-blue-200">
+      <div
+        class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border-2 border-blue-200"
+      >
         <div class="flex items-center gap-2 mb-2">
           <span class="text-2xl">🏦</span>
           <p class="text-sm font-medium text-blue-900">Transferencias</p>
         </div>
-        <p class="text-2xl font-bold text-blue-700">${totalTransferencia.toLocaleString("es-CL")}</p>
-        <p class="text-xs text-blue-600 mt-1">{transacciones.filter((t) => t.metodo === "transferencia").length} transacciones</p>
+        <p class="text-2xl font-bold text-blue-700">
+          ${totalTransferencia.toLocaleString("es-CL")}
+        </p>
+        <p class="text-xs text-blue-600 mt-1">
+          {transacciones.filter((t) => t.metodo === "transferencia").length} transacciones
+        </p>
       </div>
 
-      <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border-2 border-purple-200">
+      <div
+        class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border-2 border-purple-200"
+      >
         <div class="flex items-center gap-2 mb-2">
           <span class="text-2xl">💳</span>
           <p class="text-sm font-medium text-purple-900">Tarjetas</p>
         </div>
-        <p class="text-2xl font-bold text-purple-700">${totalTarjeta.toLocaleString("es-CL")}</p>
-        <p class="text-xs text-purple-600 mt-1">{transacciones.filter((t) => t.metodo === "tarjeta").length} transacciones</p>
-      </div>
-    </div>
-
-    <div class="bg-gradient-to-r from-gray-900 to-gray-800 rounded-lg p-6 text-white">
-      <div class="flex justify-between items-center">
-        <div>
-          <p class="text-sm text-gray-300 mb-1">Total Ingresos del Día</p>
-          <p class="text-xs text-gray-400">{transacciones.length} transacciones totales</p>
-        </div>
-        <p class="text-4xl font-bold">${totalDia.toLocaleString("es-CL")}</p>
+        <p class="text-2xl font-bold text-purple-700">
+          ${totalTarjeta.toLocaleString("es-CL")}
+        </p>
+        <p class="text-xs text-purple-600 mt-1">
+          {transacciones.filter((t) => t.metodo === "tarjeta").length} transacciones
+        </p>
       </div>
     </div>
   </Card>
 
+  <!-- Acciones -->
   <Card>
     <h3 class="text-lg font-semibold text-gray-900 mb-4">Acciones</h3>
     <div class="space-y-3">
-      <Button variant="secondary" class="w-full justify-center" onClick="exportarCuadratura()">
-        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+      <Button
+        variant="secondary"
+        class="w-full justify-center"
+        onClick="exportarCuadratura()"
+      >
+        <svg
+          class="w-4 h-4 mr-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+          ></path>
         </svg>
         Exportar Excel
       </Button>
 
-      <Button variant="secondary" class="w-full justify-center" onClick="imprimirCuadratura()">
-        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+      <Button
+        variant="secondary"
+        class="w-full justify-center"
+        onClick="imprimirCuadratura()"
+      >
+        <svg
+          class="w-4 h-4 mr-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+          ></path>
         </svg>
         Imprimir
       </Button>
 
-      <Button variant="secondary" class="w-full justify-center" onClick="registrarGasto()">
-        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+      <Button
+        variant="secondary"
+        class="w-full justify-center"
+        id="btn-toggle-gasto"
+      >
+        <svg
+          class="w-4 h-4 mr-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
         </svg>
         Registrar Gasto
       </Button>
 
+      <Button
+        variant="secondary"
+        class="w-full justify-center"
+        id="btn-toggle-ingreso"
+      >
+        <svg
+          class="w-4 h-4 mr-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+        </svg>
+        Registrar Ingreso
+      </Button>
+
       <div class="border-t border-gray-200 pt-3 mt-3">
         <label class="label">
-          <span class="label-text font-medium text-sm">Monto en Caja (CLP)</span>
+          <span class="label-text font-medium text-sm">Monto en Caja (CLP)</span
+          >
         </label>
-        <input type="number" id="monto-real" class="input input-bordered w-full min-h-11 mb-2" placeholder={totalEfectivo.toString()} value={totalEfectivo} />
+        <input
+          type="number"
+          id="monto-real"
+          class="input input-bordered w-full min-h-11 mb-2"
+          placeholder={balanceEfectivo.toString()}
+          value={balanceEfectivo}
+        />
 
         <div id="diferencia-section" class="hidden mb-3">
           <label class="label">
-            <span class="label-text font-medium text-sm text-red-600">Justificación Diferencia *</span>
+            <span class="label-text font-medium text-sm text-red-600"
+              >Justificación Diferencia *</span
+            >
           </label>
-          <textarea id="justificacion" class="textarea textarea-bordered w-full h-20 text-sm" placeholder="Explicar motivo de la diferencia..."></textarea>
+          <textarea
+            id="justificacion"
+            class="textarea textarea-bordered w-full h-20 text-sm"
+            placeholder="Explicar motivo de la diferencia..."></textarea>
         </div>
 
-        <Button id="btn-cerrar-caja" variant="primary" class="w-full justify-center" disabled={!cajaAbierta} onClick="cerrarCaja()">
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+        <Button
+          id="btn-cerrar-caja"
+          variant="primary"
+          class="w-full justify-center"
+          disabled={!cajaAbierta}
+          onClick="cerrarCaja()"
+        >
+          <svg
+            class="w-4 h-4 mr-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+            ></path>
           </svg>
           Cerrar Caja
         </Button>
@@ -157,8 +702,15 @@ const cajaAbierta = true;
 
     <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
       <p class="text-xs text-blue-800">
-        <svg class="w-3 h-3 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+        <svg
+          class="w-3 h-3 inline mr-1"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+            clip-rule="evenodd"></path>
         </svg>
         Al cerrar caja se generará un registro inmutable en el log de auditoría
       </p>
@@ -166,9 +718,395 @@ const cajaAbierta = true;
   </Card>
 </div>
 
-<Card>
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- FORMULARIO INLINE REGISTRO DE GASTO (RF-028) -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="form-gasto" class="hidden mb-6">
+  <Card
+    class="border-2 border-orange-300 bg-gradient-to-r from-orange-50 to-amber-50"
+  >
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+        <span class="text-xl">📝</span>
+        Registrar Nuevo Gasto
+      </h2>
+      <button
+        id="btn-cerrar-form-gasto"
+        class="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-200 rounded transition-colors"
+        title="Cerrar"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div class="grid sm:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1"
+          >Categoría *</label
+        >
+        <select
+          id="gasto-categoria"
+          class="w-full h-11 px-4 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+        >
+          <option value="">Seleccionar categoría...</option>
+          {categoriasGasto.map((cat) => <option value={cat}>{cat}</option>)}
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1"
+          >Monto (CLP) *</label
+        >
+        <input
+          type="number"
+          id="gasto-monto"
+          class="w-full h-11 px-4 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+          placeholder="ej: 35000"
+          min="1"
+        />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1"
+          >Método de pago *</label
+        >
+        <select
+          id="gasto-metodo"
+          class="w-full h-11 px-4 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+        >
+          <option value="efectivo">💵 Efectivo</option>
+          <option value="transferencia">🏦 Transferencia</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1"
+          >Descripción</label
+        >
+        <input
+          type="text"
+          id="gasto-descripcion"
+          class="w-full h-11 px-4 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+          placeholder="Detalle del gasto..."
+        />
+      </div>
+    </div>
+
+    <div class="flex justify-end gap-3 mt-4 pt-4 border-t border-orange-200">
+      <Button variant="secondary" class="text-sm" id="btn-cancelar-gasto"
+        >Cancelar</Button
+      >
+      <button
+        class="inline-flex items-center gap-2 px-5 py-2.5 bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium rounded-lg transition-colors"
+        id="btn-confirmar-gasto"
+      >
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M5 13l4 4L19 7"></path>
+        </svg>
+        Confirmar Gasto
+      </button>
+    </div>
+  </Card>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- FORMULARIO INLINE INGRESO LIBRE (RF-026) -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="form-ingreso" class="hidden mb-6">
+  <Card
+    class="border-2 border-green-300 bg-gradient-to-r from-green-50 to-emerald-50"
+  >
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+        <span class="text-xl">💵</span>
+        Registrar Ingreso Libre (RF-026)
+      </h2>
+      <button
+        class="text-gray-400 hover:text-gray-600 transition-colors"
+        id="btn-close-ingreso"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div class="grid sm:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1"
+          >Categoría de Ingreso</label
+        >
+        <select
+          id="ingreso-categoria"
+          class="w-full h-11 px-4 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+        >
+          <option value="">Seleccionar categoría...</option>
+          <option value="matricula-b">Matrícula Clase B</option>
+          <option value="matricula-prof">Matrícula Profesional</option>
+          <option value="mensualidad">Mensualidad</option>
+          <option value="psicotecnico">Psicotécnico ($40.000)</option>
+          <option value="materiales">Venta de Materiales</option>
+          <option value="certificados">Certificados/Duplicados</option>
+          <option value="arriendo-sala">Arriendo de Sala</option>
+          <option value="extraordinario">Ingreso Extraordinario</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1"
+          >Concepto SII</label
+        >
+        <select
+          id="ingreso-concepto-sii"
+          class="w-full h-11 px-4 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+        >
+          <option value="clase-b">Clase B</option>
+          <option value="profesional">Profesional</option>
+          <option value="psicotecnico">Psicotécnico</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1"
+          >Monto (CLP)</label
+        >
+        <input
+          type="number"
+          id="ingreso-monto"
+          class="w-full h-11 px-4 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+          placeholder="0"
+          min="0"
+        />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1"
+          >Método de Pago</label
+        >
+        <select
+          id="ingreso-metodo"
+          class="w-full h-11 px-4 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+        >
+          <option value="efectivo">💵 Efectivo</option>
+          <option value="transferencia">🏦 Transferencia</option>
+          <option value="tarjeta">💳 Débito/Crédito</option>
+          <option value="cheque">📝 Cheque</option>
+          <option value="voucher">🧾 Voucher</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1"
+          >Nº Documento / Referencia</label
+        >
+        <input
+          type="text"
+          id="ingreso-referencia"
+          class="w-full h-11 px-4 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+          placeholder="TRF-00123, Boleta 456..."
+        />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1"
+          >Descripción</label
+        >
+        <input
+          type="text"
+          id="ingreso-descripcion"
+          class="w-full h-11 px-4 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+          placeholder="Detalle del ingreso..."
+        />
+      </div>
+    </div>
+
+    <div class="flex justify-end gap-3 mt-4 pt-4 border-t border-green-200">
+      <Button variant="secondary" class="text-sm" id="btn-cancelar-ingreso"
+        >Cancelar</Button
+      >
+      <button
+        class="inline-flex items-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
+        id="btn-confirmar-ingreso"
+      >
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M5 13l4 4L19 7"></path>
+        </svg>
+        Confirmar Ingreso
+      </button>
+    </div>
+  </Card>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- CUADRATURA SII — RESUMEN POR CONCEPTO (RF-032) -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<Card class="mb-6">
   <div class="flex items-center justify-between mb-4">
-    <h2 class="text-xl font-semibold text-gray-900">Detalle de Transacciones</h2>
+    <div>
+      <h2 class="text-xl font-semibold text-gray-900 flex items-center gap-2">
+        <svg
+          class="w-5 h-5 text-indigo-600"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+          ></path>
+        </svg>
+        Cuadratura SII — Resumen por Concepto
+      </h2>
+      <p class="text-sm text-secondary mt-1">
+        RF-032 · Desglose para declaración al Servicio de Impuestos Internos
+      </p>
+    </div>
+    <button
+      class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors"
+      onclick="generarInformeSII()"
+    >
+      <svg
+        class="w-4 h-4"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+        ></path>
+      </svg>
+      Generar Informe SII
+    </button>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="w-full">
+      <thead>
+        <tr class="border-b-2 border-indigo-200 bg-indigo-50/50">
+          <th
+            class="text-left py-3 px-4 text-xs font-semibold text-indigo-900 uppercase"
+            >Concepto</th
+          >
+          <th
+            class="text-center py-3 px-4 text-xs font-semibold text-indigo-900 uppercase"
+            >N° Operaciones</th
+          >
+          <th
+            class="text-right py-3 px-4 text-xs font-semibold text-indigo-900 uppercase"
+            >Total</th
+          >
+          <th
+            class="text-right py-3 px-4 text-xs font-semibold text-indigo-900 uppercase"
+            >% del Total</th
+          >
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {
+          resumenSII.map((item) => {
+            const porcentaje =
+              totalIngresos > 0
+                ? ((item.total / totalIngresos) * 100).toFixed(1)
+                : "0";
+            const badgeColor =
+              siiColorMap[item.concepto] || "bg-gray-100 text-gray-800";
+            return (
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="py-3 px-4">
+                  <span
+                    class={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${badgeColor}`}
+                  >
+                    {item.concepto}
+                  </span>
+                </td>
+                <td class="py-3 px-4 text-center text-sm font-medium text-gray-900">
+                  {item.cantidad}
+                </td>
+                <td class="py-3 px-4 text-right text-sm font-bold text-gray-900">
+                  ${item.total.toLocaleString("es-CL")}
+                </td>
+                <td class="py-3 px-4 text-right">
+                  <div class="flex items-center justify-end gap-2">
+                    <div class="w-16 bg-gray-200 rounded-full h-2">
+                      <div
+                        class="bg-indigo-500 h-2 rounded-full"
+                        style={`width: ${porcentaje}%`}
+                      />
+                    </div>
+                    <span class="text-xs text-secondary w-10 text-right">
+                      {porcentaje}%
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            );
+          })
+        }
+      </tbody>
+      <tfoot>
+        <tr class="border-t-2 border-indigo-200 bg-indigo-50/30">
+          <td class="py-3 px-4 text-sm font-bold text-indigo-900">TOTAL</td>
+          <td class="py-3 px-4 text-center text-sm font-bold text-indigo-900"
+            >{transacciones.length}</td
+          >
+          <td class="py-3 px-4 text-right text-sm font-bold text-indigo-900"
+            >${totalIngresos.toLocaleString("es-CL")}</td
+          >
+          <td class="py-3 px-4 text-right text-sm font-bold text-indigo-900"
+            >100%</td
+          >
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</Card>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- DETALLE DE INGRESOS -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<Card class="mb-6">
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-xl font-semibold text-gray-900">Detalle de Ingresos</h2>
     <span class="text-sm text-secondary">{transacciones.length} registros</span>
   </div>
 
@@ -176,89 +1114,377 @@ const cajaAbierta = true;
     <table class="w-full">
       <thead>
         <tr class="border-b border-gray-200">
-          <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase">Hora</th>
-          <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase">Tipo</th>
-          <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase">Alumno</th>
-          <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase">Referencia</th>
-          <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase">Método</th>
-          <th class="text-right py-3 px-4 text-xs font-semibold text-gray-700 uppercase">Monto</th>
+          <th
+            class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase"
+            >Hora</th
+          >
+          <th
+            class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase"
+            >Tipo</th
+          >
+          <th
+            class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase"
+            >Concepto SII</th
+          >
+          <th
+            class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase"
+            >Alumno</th
+          >
+          <th
+            class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase"
+            >Referencia</th
+          >
+          <th
+            class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase"
+            >Método</th
+          >
+          <th
+            class="text-right py-3 px-4 text-xs font-semibold text-gray-700 uppercase"
+            >Monto</th
+          >
         </tr>
       </thead>
       <tbody class="divide-y divide-gray-100">
-        {transacciones.map((t) => (
-          <tr class="hover:bg-gray-50 transition-colors">
-            <td class="py-3 px-4 text-sm text-secondary whitespace-nowrap">{t.hora}</td>
-            <td class="py-3 px-4 text-sm text-gray-900 font-medium">{t.tipo}</td>
-            <td class="py-3 px-4 text-sm text-gray-700">{t.alumno}</td>
-            <td class="py-3 px-4 text-xs text-muted font-mono">{t.ref}</td>
-            <td class="py-3 px-4">
-              <span class={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${t.metodo === "efectivo" ? "bg-green-100 text-green-800" : t.metodo === "transferencia" ? "bg-blue-100 text-blue-800" : t.metodo === "tarjeta" ? "bg-purple-100 text-purple-800" : "bg-gray-100 text-gray-600"}`}>
-                {t.metodo === "efectivo" ? "💵" : t.metodo === "transferencia" ? "🏦" : t.metodo === "tarjeta" ? "💳" : "-"}
-                <span class="capitalize">{t.metodo}</span>
-              </span>
-            </td>
-            <td class="py-3 px-4 text-right text-sm font-semibold text-gray-900">
-              {t.monto > 0 ? `$${t.monto.toLocaleString("es-CL")}` : "-"}
-            </td>
-          </tr>
-        ))}
+        {
+          transacciones.map((t) => {
+            return (
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="py-3 px-4 text-sm text-secondary whitespace-nowrap">
+                  {t.hora}
+                </td>
+                <td class="py-3 px-4 text-sm text-gray-900 font-medium">
+                  {t.tipo}
+                </td>
+                <td class="py-3 px-4">
+                  <span
+                    class={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${conceptoColorMap[t.concepto] || "bg-gray-100 text-gray-600"}`}
+                  >
+                    {t.concepto}
+                  </span>
+                </td>
+                <td class="py-3 px-4 text-sm text-gray-700">{t.alumno}</td>
+                <td class="py-3 px-4 text-xs text-muted font-mono">{t.ref}</td>
+                <td class="py-3 px-4">
+                  <span
+                    class={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${t.metodo === "efectivo" ? "bg-green-100 text-green-800" : t.metodo === "transferencia" ? "bg-blue-100 text-blue-800" : t.metodo === "tarjeta" ? "bg-purple-100 text-purple-800" : "bg-gray-100 text-gray-600"}`}
+                  >
+                    {t.metodo === "efectivo"
+                      ? "💵"
+                      : t.metodo === "transferencia"
+                        ? "🏦"
+                        : t.metodo === "tarjeta"
+                          ? "💳"
+                          : "-"}
+                    <span class="capitalize">{t.metodo}</span>
+                  </span>
+                </td>
+                <td class="py-3 px-4 text-right text-sm font-semibold text-green-700">
+                  +${t.monto.toLocaleString("es-CL")}
+                </td>
+              </tr>
+            );
+          })
+        }
       </tbody>
     </table>
   </div>
 </Card>
 
-<script define:vars={{ totalEfectivo, totalDia }}>
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- DETALLE DE EGRESOS (RF-028) -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<Card>
+  <div class="flex items-center justify-between mb-4">
+    <div>
+      <h2 class="text-xl font-semibold text-gray-900 flex items-center gap-2">
+        <span class="text-xl">📉</span>
+        Detalle de Egresos
+      </h2>
+      <p class="text-sm text-secondary mt-1">
+        RF-028 · Registro de gastos categorizados del día
+      </p>
+    </div>
+    <span
+      class="inline-flex items-center gap-1 px-3 py-1.5 bg-orange-100 text-orange-800 rounded-full text-sm font-semibold"
+    >
+      Total: ${totalGastos.toLocaleString("es-CL")}
+    </span>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="w-full">
+      <thead>
+        <tr class="border-b border-gray-200">
+          <th
+            class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase"
+            >Hora</th
+          >
+          <th
+            class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase"
+            >Categoría</th
+          >
+          <th
+            class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase"
+            >Descripción</th
+          >
+          <th
+            class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase"
+            >Método</th
+          >
+          <th
+            class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase"
+            >Registrado por</th
+          >
+          <th
+            class="text-right py-3 px-4 text-xs font-semibold text-gray-700 uppercase"
+            >Monto</th
+          >
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {
+          gastos.map((g) => {
+            return (
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="py-3 px-4 text-sm text-secondary whitespace-nowrap">
+                  {g.hora}
+                </td>
+                <td class="py-3 px-4">
+                  <span
+                    class={`inline-flex px-2.5 py-1 rounded-full text-xs font-semibold ${catColorMap[g.categoria] || "bg-gray-100 text-gray-700"}`}
+                  >
+                    {g.categoria}
+                  </span>
+                </td>
+                <td class="py-3 px-4 text-sm text-gray-700">{g.descripcion}</td>
+                <td class="py-3 px-4">
+                  <span
+                    class={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${g.metodo === "efectivo" ? "bg-green-100 text-green-800" : "bg-blue-100 text-blue-800"}`}
+                  >
+                    {g.metodo === "efectivo" ? "💵" : "🏦"}
+                    <span class="capitalize">{g.metodo}</span>
+                  </span>
+                </td>
+                <td class="py-3 px-4 text-sm text-secondary">
+                  {g.registradoPor}
+                </td>
+                <td class="py-3 px-4 text-right text-sm font-semibold text-red-600">
+                  -${g.monto.toLocaleString("es-CL")}
+                </td>
+              </tr>
+            );
+          })
+        }
+      </tbody>
+      <tfoot>
+        <tr class="border-t-2 border-orange-200 bg-orange-50/50">
+          <td colspan="5" class="py-3 px-4 text-sm font-bold text-orange-900"
+            >TOTAL EGRESOS</td
+          >
+          <td class="py-3 px-4 text-right text-sm font-bold text-red-700"
+            >-${totalGastos.toLocaleString("es-CL")}</td
+          >
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <!-- Desglose por categoría -->
+  <div class="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+    <p class="text-sm font-semibold text-gray-900 mb-3">
+      Desglose por Categoría
+    </p>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      {
+        Array.from(new Set(gastos.map((g) => g.categoria))).map((cat) => {
+          const catTotal = gastos
+            .filter((g) => g.categoria === cat)
+            .reduce((s, g) => s + g.monto, 0);
+          const catCount = gastos.filter((g) => g.categoria === cat).length;
+          const pct =
+            totalGastos > 0 ? ((catTotal / totalGastos) * 100).toFixed(0) : "0";
+          return (
+            <div class="flex items-center justify-between p-2.5 bg-white rounded-lg border border-gray-200">
+              <div>
+                <p class="text-xs font-medium text-gray-900">{cat}</p>
+                <p class="text-xs text-secondary">
+                  {catCount} registro{catCount > 1 ? "s" : ""}
+                </p>
+              </div>
+              <div class="text-right">
+                <p class="text-sm font-bold text-orange-700">
+                  ${catTotal.toLocaleString("es-CL")}
+                </p>
+                <p class="text-xs text-secondary">{pct}%</p>
+              </div>
+            </div>
+          );
+        })
+      }
+    </div>
+  </div>
+</Card>
+
+<script
+  define:vars={{ balanceEfectivo, totalIngresos, totalGastos, balanceGeneral }}
+>
   const montoRealInput = document.getElementById("monto-real");
   const diferenciaSection = document.getElementById("diferencia-section");
   const justificacionInput = document.getElementById("justificacion");
 
+  // ── Diferencia en caja ────────────────────────────────────
   montoRealInput?.addEventListener("input", (e) => {
     const montoReal = parseInt(e.target?.value || "0") || 0;
-    const diferencia = Math.abs(totalEfectivo - montoReal);
+    const diferencia = Math.abs(balanceEfectivo - montoReal);
     if (diferencia > 0) diferenciaSection?.classList.remove("hidden");
     else diferenciaSection?.classList.add("hidden");
   });
 
-  function exportarCuadratura() {
-    alert(`✓ Generando archivo Excel...\n\nContenido:\n• Resumen ingresos\n• Detalle ${8} transacciones\n• Total: $${totalDia.toLocaleString("es-CL")}\n\nDescarga iniciada.`);
+  // ── Formulario de gasto (RF-028) ──────────────────────────
+  const formGasto = document.getElementById("form-gasto");
+  const btnToggleGasto = document.getElementById("btn-toggle-gasto");
+  const btnCerrarFormGasto = document.getElementById("btn-cerrar-form-gasto");
+  const btnCancelarGasto = document.getElementById("btn-cancelar-gasto");
+  const btnConfirmarGasto = document.getElementById("btn-confirmar-gasto");
+
+  function toggleFormGasto() {
+    formGasto?.classList.toggle("hidden");
+    if (!formGasto?.classList.contains("hidden")) {
+      formGasto?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   }
 
-  function imprimirCuadratura() {
-    window.print();
+  btnToggleGasto?.addEventListener("click", toggleFormGasto);
+  btnCerrarFormGasto?.addEventListener("click", () =>
+    formGasto?.classList.add("hidden"),
+  );
+  btnCancelarGasto?.addEventListener("click", () =>
+    formGasto?.classList.add("hidden"),
+  );
+
+  // ── Ingreso Libre (RF-026) ─────────────────────────────────
+  const formIngreso = document.getElementById("form-ingreso");
+  const btnToggleIngreso = document.getElementById("btn-toggle-ingreso");
+  const btnCloseIngreso = document.getElementById("btn-close-ingreso");
+  const btnCancelarIngreso = document.getElementById("btn-cancelar-ingreso");
+  const btnConfirmarIngreso = document.getElementById("btn-confirmar-ingreso");
+
+  function toggleFormIngreso() {
+    formIngreso?.classList.toggle("hidden");
+    if (!formIngreso?.classList.contains("hidden")) {
+      formIngreso?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   }
 
-  window.registrarGasto = function () {
-    const monto = prompt("Ingresa el monto del gasto (CLP):");
-    if (!monto || isNaN(parseFloat(monto)) || parseFloat(monto) <= 0) {
-      if (monto !== null) alert("⚠️ Debes ingresar un monto válido mayor a 0");
+  btnToggleIngreso?.addEventListener("click", toggleFormIngreso);
+  btnCloseIngreso?.addEventListener("click", () =>
+    formIngreso?.classList.add("hidden"),
+  );
+  btnCancelarIngreso?.addEventListener("click", () =>
+    formIngreso?.classList.add("hidden"),
+  );
+
+  btnConfirmarIngreso?.addEventListener("click", () => {
+    const categoria = document.getElementById("ingreso-categoria")?.value;
+    const monto = document.getElementById("ingreso-monto")?.value;
+    const metodo = document.getElementById("ingreso-metodo")?.value;
+    const referencia =
+      document.getElementById("ingreso-referencia")?.value || "";
+    const descripcion =
+      document.getElementById("ingreso-descripcion")?.value || "";
+
+    if (!categoria) {
+      alert("⚠️ Selecciona una categoría de ingreso");
       return;
     }
-    const categoria = prompt("Categoría del gasto (ej: Combustible, Mantención, Materiales, Otros):");
-    if (!categoria || categoria.trim() === "") {
-      alert("⚠️ Debes especificar la categoría del gasto");
+    if (!monto || parseFloat(monto) <= 0) {
+      alert("⚠️ Ingresa un monto válido mayor a 0");
       return;
     }
-    const descripcion = prompt("Descripción del gasto (opcional):") || "";
-    
-    if (confirm(`¿Confirmar registro de gasto?\n\nMonto: $${parseFloat(monto).toLocaleString("es-CL")}\nCategoría: ${categoria}\n${descripcion ? `Descripción: ${descripcion}\n` : ""}\n\nEste gasto se registrará en el sistema y afectará el balance de caja.`)) {
-      alert(`✓ Gasto registrado exitosamente\n\n• Monto: $${parseFloat(monto).toLocaleString("es-CL")}\n• Categoría: ${categoria}\n• Registrado en: ${new Date().toLocaleString("es-CL")}\n\nEl gasto aparecerá en el detalle de transacciones.`);
-      // En producción aquí se haría POST a API para guardar el gasto
+
+    alert(
+      `✓ Ingreso registrado\n\nCategoría: ${categoria}\nMonto: $${parseFloat(monto).toLocaleString("es-CL")}\nMétodo: ${metodo}\nReferencia: ${referencia || "—"}\nDescripción: ${descripcion || "—"}\n\nEl ingreso se ha registrado en la cuadratura del día.`,
+    );
+    formIngreso?.classList.add("hidden");
+  });
+
+  btnConfirmarGasto?.addEventListener("click", () => {
+    const categoria = document.getElementById("gasto-categoria")?.value;
+    const monto = document.getElementById("gasto-monto")?.value;
+    const metodo = document.getElementById("gasto-metodo")?.value;
+    const descripcion =
+      document.getElementById("gasto-descripcion")?.value || "";
+
+    if (!categoria) {
+      alert("⚠️ Selecciona una categoría de gasto");
+      return;
     }
+    if (!monto || parseFloat(monto) <= 0) {
+      alert("⚠️ Ingresa un monto válido mayor a 0");
+      return;
+    }
+
+    const montoNum = parseFloat(monto);
+    const metodoLabel =
+      metodo === "efectivo" ? "💵 Efectivo" : "🏦 Transferencia";
+
+    if (
+      confirm(
+        `¿Confirmar registro de gasto?\n\nCategoría: ${categoria}\nMonto: $${montoNum.toLocaleString("es-CL")}\nMétodo: ${metodoLabel}\n${descripcion ? `Descripción: ${descripcion}\n` : ""}\nEste gasto se registrará en el sistema y afectará el balance de caja.`,
+      )
+    ) {
+      alert(
+        `✓ Gasto registrado exitosamente\n\n• Categoría: ${categoria}\n• Monto: $${montoNum.toLocaleString("es-CL")}\n• Método: ${metodoLabel}\n• Registrado en: ${new Date().toLocaleString("es-CL")}\n\nEl gasto ya aparece en el detalle de egresos.`,
+      );
+      formGasto?.classList.add("hidden");
+      // Limpiar formulario
+      document.getElementById("gasto-categoria").value = "";
+      document.getElementById("gasto-monto").value = "";
+      document.getElementById("gasto-descripcion").value = "";
+    }
+  });
+
+  // ── Exportar ──────────────────────────────────────────────
+  window.exportarCuadratura = function () {
+    alert(
+      `✓ Generando archivo Excel...\n\nContenido:\n• Resumen de ingresos por método\n• Resumen de egresos por categoría\n• Balance neto: $${balanceGeneral.toLocaleString("es-CL")}\n• Cuadratura SII por concepto\n• Total ingresos: $${totalIngresos.toLocaleString("es-CL")}\n• Total gastos: $${totalGastos.toLocaleString("es-CL")}\n\nDescarga iniciada.`,
+    );
   };
 
+  window.imprimirCuadratura = function () {
+    window.print();
+  };
+
+  // ── Informe SII (RF-032) ──────────────────────────────────
+  window.generarInformeSII = function () {
+    alert(
+      `✓ Generando Informe para SII\n\nContenido del informe:\n• Desglose por concepto (Clase B, Profesional, Psicotécnico)\n• Total de operaciones por tipo\n• Montos totales por concepto\n• Fecha: ${new Date().toLocaleDateString("es-CL")}\n\nFormato: PDF\nDescarga iniciada...`,
+    );
+  };
+
+  // ── Cerrar Caja ───────────────────────────────────────────
   window.cerrarCaja = function () {
     const montoReal = parseInt(montoRealInput?.value || "0");
-    const diferencia = Math.abs(totalEfectivo - montoReal);
+    const diferencia = Math.abs(balanceEfectivo - montoReal);
     if (diferencia > 0) {
       const justificacion = justificacionInput?.value?.trim();
       if (!justificacion) {
-        alert("⚠️ Debes justificar la diferencia en caja\n\nDiferencia: $" + diferencia.toLocaleString("es-CL"));
+        alert(
+          "⚠️ Debes justificar la diferencia en caja\n\nDiferencia: $" +
+            diferencia.toLocaleString("es-CL"),
+        );
         justificacionInput?.focus();
         return;
       }
     }
-    if (confirm(`¿Confirmar cierre de caja?\n\nTotal esperado: $${totalEfectivo.toLocaleString("es-CL")}\nTotal real: $${montoReal.toLocaleString("es-CL")}\nDiferencia: $${diferencia.toLocaleString("es-CL")}\n\n⚠️ Esta acción no se puede deshacer`)) {
-      alert(`✓ Caja cerrada exitosamente\n\n• Registro guardado en log de auditoría\n• Resumen enviado por email\n• Comprobante generado\n\nFecha: ${new Date().toLocaleDateString("es-CL")}\nHora: ${new Date().toLocaleTimeString("es-CL")}`);
+    if (
+      confirm(
+        `¿Confirmar cierre de caja?\n\nBalance esperado (efectivo): $${balanceEfectivo.toLocaleString("es-CL")}\nMonto real en caja: $${montoReal.toLocaleString("es-CL")}\nDiferencia: $${diferencia.toLocaleString("es-CL")}\n\nResumen del día:\n• Ingresos: $${totalIngresos.toLocaleString("es-CL")}\n• Gastos: $${totalGastos.toLocaleString("es-CL")}\n• Balance general: $${balanceGeneral.toLocaleString("es-CL")}\n\n⚠️ Esta acción no se puede deshacer y bloqueará la edición de registros del día.`,
+      )
+    ) {
+      alert(
+        `✓ Caja cerrada exitosamente\n\n• Registro guardado en log de auditoría\n• Resumen enviado por email\n• Comprobante generado\n• Registros del día bloqueados\n\nFecha: ${new Date().toLocaleDateString("es-CL")}\nHora: ${new Date().toLocaleTimeString("es-CL")}`,
+      );
       setTimeout(() => window.location.reload(), 2000);
     }
   };
@@ -266,8 +1492,21 @@ const cajaAbierta = true;
 
 <style>
   @media print {
-    header, button, .btn, nav {
+    header,
+    button,
+    .btn,
+    nav,
+    #form-gasto,
+    #form-ingreso {
       display: none !important;
     }
+  }
+  select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
   }
 </style>
