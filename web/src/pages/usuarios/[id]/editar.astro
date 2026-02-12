@@ -47,6 +47,36 @@ const user = usuarios[id!] || usuarios['1'];
     <p class="text-secondary mt-1">Modificar datos de {user.nombre}</p>
   </div>
 
+  <!-- Banner informativo para instructores -->
+  {user.rol === 'instructor' && (
+    <Card class="bg-blue-50 border-blue-200 mb-6">
+      <div class="flex items-start gap-4">
+        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-sm font-semibold text-blue-900 mb-1">
+            Gestión completa de instructores
+          </h3>
+          <p class="text-sm text-blue-800 mb-3">
+            Para editar información específica de instructores (licencias, vehículos asignados, historial de asignaciones y reemplazos), utiliza el perfil dedicado de instructores.
+          </p>
+          <a
+            href={`/instructores/${user.id}/editar`}
+            class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors shadow-sm"
+          >
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Ir a perfil de instructor
+          </a>
+        </div>
+      </div>
+    </Card>
+  )}
+
   <div class="grid lg:grid-cols-3 gap-6">
     <!-- Formulario -->
     <div class="lg:col-span-2 space-y-6">
@@ -168,7 +198,7 @@ const user = usuarios[id!] || usuarios['1'];
             </label>
           </div>
           <div class="flex items-start gap-3 p-3 mt-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <svg class="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 text-yellow-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
             </svg>
             <p class="text-xs text-yellow-800">
@@ -187,7 +217,7 @@ const user = usuarios[id!] || usuarios['1'];
         <p class="text-xs text-gray-700">
           Cada modificación a este perfil queda registrada automáticamente en el log de auditoría con fecha, hora, campo modificado, valor anterior y nuevo.
         </p>
-        <Button href="/usuarios/auditoria" variant="ghost" class="text-xs mt-3 p-0 h-auto text-gray-700">
+        <Button href="/auditoria" variant="ghost" class="text-xs mt-3 p-0 h-auto text-gray-700">
           Ver log de auditoría →
         </Button>
       </Card>

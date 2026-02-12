@@ -15,39 +15,45 @@ const instructor = {
 };
 
 const clasesHoy = [
-  { 
-    id: 1, 
+  {
+    id: 1,
     tipo: 'práctica',
-    hora: '09:00', 
-    alumno: 'María González Pérez', 
+    hora: '09:00',
+    alumno: 'María González Pérez',
+    alumnoId: 1,
+    numeroClase: 9,
     vehiculo: 'ABC-123 (Suzuki Swift)',
     estado: 'pending',
     duracion: 90
   },
-  { 
-    id: 2, 
+  {
+    id: 2,
     tipo: 'práctica',
-    hora: '11:00', 
-    alumno: 'Juan Pablo Rojas', 
+    hora: '11:00',
+    alumno: 'Juan Pablo Rojas',
+    alumnoId: 2,
+    numeroClase: 5,
     vehiculo: 'ABC-123 (Suzuki Swift)',
     estado: 'pending',
     duracion: 90
   },
-  { 
-    id: 3, 
+  {
+    id: 3,
     tipo: 'teórica',
-    hora: '15:00', 
+    hora: '15:00',
     promocion: 'Enero 2026 - Grupo A',
     sala: 'Sala 1',
     estado: 'pending',
     duracion: 120,
     alumnos: 18
   },
-  { 
-    id: 4, 
+  {
+    id: 4,
     tipo: 'práctica',
-    hora: '17:00', 
-    alumno: 'Ana Martínez Silva', 
+    hora: '17:00',
+    alumno: 'Ana Martínez Silva',
+    alumnoId: 3,
+    numeroClase: 11,
     vehiculo: 'XYZ-789 (Nissan March)',
     estado: 'pending',
     duracion: 90
@@ -159,31 +165,31 @@ const estadoClase: Record<string, { label: string; class: string }> = {
 
             <!-- Acciones -->
             <div class="flex flex-col gap-2 md:w-40">
-              {clase.estado === 'pending' && (
-                <Button 
-                  href={`/instructor/clase/iniciar`}
-                  variant="primary" 
+              {clase.estado === 'pending' && clase.tipo === 'práctica' && (
+                <Button
+                  href={`/instructor/alumnos/${clase.alumnoId}/clase/${clase.numeroClase}`}
+                  variant="primary"
                   class="w-full text-sm"
                 >
                   Iniciar Clase
                 </Button>
               )}
-              {clase.estado === 'started' && (
-                <Button 
-                  href={`/instructor/clase/${clase.id}`}
-                  variant="primary" 
+              {clase.estado === 'started' && clase.tipo === 'práctica' && (
+                <Button
+                  href={`/instructor/alumnos/${clase.alumnoId}/clase/${clase.numeroClase}`}
+                  variant="primary"
                   class="w-full text-sm"
                 >
                   Finalizar Clase
                 </Button>
               )}
               {clase.estado === 'completed' && clase.tipo === 'práctica' && (
-                <Button 
-                  href={`/instructor/ficha/${clase.id}`}
-                  variant="secondary" 
+                <Button
+                  href={`/instructor/alumnos/${clase.alumnoId}/clase/${clase.numeroClase}`}
+                  variant="secondary"
                   class="w-full text-sm"
                 >
-                  Ver Ficha
+                  Ver Evaluación
                 </Button>
               )}
             </div>
@@ -242,7 +248,7 @@ const estadoClase: Record<string, { label: string; class: string }> = {
       <!-- Recordatorio -->
       <Card class="bg-blue-50 border-blue-200">
         <div class="flex gap-3">
-          <svg class="w-5 h-5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
           <div>

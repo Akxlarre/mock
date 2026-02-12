@@ -12,16 +12,73 @@ interface Props {
 
 const { basePath = "" } = Astro.props;
 
+const PRECIO_PSICOTECNICO = 40000;
+
 const alumnosPendientes = [
-  { id: 1, nombre: "Juan Pérez González", rut: "12.345.678-9", curso: "Clase B", fechaMatricula: "2026-02-01", realizado: false, fechaEvaluacion: null },
-  { id: 2, nombre: "María López Silva", rut: "18.765.432-1", curso: "Clase B", fechaMatricula: "2026-02-02", realizado: false, fechaEvaluacion: null },
-  { id: 3, nombre: "Carlos Rojas Muñoz", rut: "15.234.567-8", curso: "Clase Profesional", fechaMatricula: "2026-01-28", realizado: true, fechaEvaluacion: "2026-01-30" },
-  { id: 4, nombre: "Ana García Torres", rut: "17.456.789-2", curso: "Clase B", fechaMatricula: "2026-02-03", realizado: false, fechaEvaluacion: null },
-  { id: 5, nombre: "Pedro Sánchez Díaz", rut: "16.789.123-5", curso: "Clase B", fechaMatricula: "2026-01-25", realizado: true, fechaEvaluacion: "2026-01-27" },
+  {
+    id: 1,
+    nombre: "Juan Pérez González",
+    rut: "12.345.678-9",
+    curso: "Clase B",
+    fechaMatricula: "2026-02-01",
+    realizado: false,
+    fechaEvaluacion: null,
+    resultado: null,
+    cobrado: false,
+  },
+  {
+    id: 2,
+    nombre: "María López Silva",
+    rut: "18.765.432-1",
+    curso: "Clase B",
+    fechaMatricula: "2026-02-02",
+    realizado: false,
+    fechaEvaluacion: null,
+    resultado: null,
+    cobrado: false,
+  },
+  {
+    id: 3,
+    nombre: "Carlos Rojas Muñoz",
+    rut: "15.234.567-8",
+    curso: "Clase Profesional",
+    fechaMatricula: "2026-01-28",
+    realizado: true,
+    fechaEvaluacion: "2026-01-30",
+    resultado: "Apto",
+    cobrado: true,
+  },
+  {
+    id: 4,
+    nombre: "Ana García Torres",
+    rut: "17.456.789-2",
+    curso: "Clase B",
+    fechaMatricula: "2026-02-03",
+    realizado: false,
+    fechaEvaluacion: null,
+    resultado: null,
+    cobrado: true,
+  },
+  {
+    id: 5,
+    nombre: "Pedro Sánchez Díaz",
+    rut: "16.789.123-5",
+    curso: "Clase B",
+    fechaMatricula: "2026-01-25",
+    realizado: true,
+    fechaEvaluacion: "2026-01-27",
+    resultado: "No Apto",
+    cobrado: true,
+  },
 ];
 
 const pendientes = alumnosPendientes.filter((a) => !a.realizado).length;
 const realizados = alumnosPendientes.filter((a) => a.realizado).length;
+const aptos = alumnosPendientes.filter((a) => a.resultado === "Apto").length;
+const noAptos = alumnosPendientes.filter(
+  (a) => a.resultado === "No Apto",
+).length;
+const cobrados = alumnosPendientes.filter((a) => a.cobrado).length;
 ---
 
 <div class="mb-8">
@@ -30,8 +87,12 @@ const realizados = alumnosPendientes.filter((a) => a.realizado).length;
     <span>/</span>
     <span class="text-gray-900 font-medium">Psicotécnico</span>
   </div>
-  <h1 class="text-3xl font-semibold text-gray-900 mb-2">Gestión de Psicotécnico</h1>
-  <p class="text-secondary">Control de evaluaciones psicosensométricas externas</p>
+  <h1 class="text-3xl font-semibold text-gray-900 mb-2">
+    Gestión de Psicotécnico
+  </h1>
+  <p class="text-secondary">
+    Control de evaluaciones psicosensométricas externas
+  </p>
 </div>
 
 <div class="grid sm:grid-cols-3 gap-4 mb-6">
@@ -55,15 +116,56 @@ const realizados = alumnosPendientes.filter((a) => a.realizado).length;
     <div class="flex items-center justify-between">
       <div>
         <p class="text-sm text-secondary mb-1">Total Alumnos</p>
-        <p class="text-3xl font-bold text-blue-600">{alumnosPendientes.length}</p>
+        <p class="text-3xl font-bold text-blue-600">
+          {alumnosPendientes.length}
+        </p>
       </div>
     </div>
   </Card>
 </div>
 
+<!-- RF-034: Pricing & Result Summary -->
+<div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+  <Card
+    class="bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-200"
+  >
+    <p class="text-sm text-secondary mb-1">Precio por evaluación</p>
+    <p class="text-2xl font-bold text-indigo-700">
+      ${PRECIO_PSICOTECNICO.toLocaleString("es-CL")}
+    </p>
+    <p class="text-xs text-indigo-500 mt-1">Servicio externo</p>
+  </Card>
+  <Card
+    class="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200"
+  >
+    <p class="text-sm text-secondary mb-1">✅ Aptos</p>
+    <p class="text-2xl font-bold text-green-700">{aptos}</p>
+    <p class="text-xs text-green-600 mt-1">de {realizados} evaluados</p>
+  </Card>
+  <Card class="bg-gradient-to-br from-red-50 to-rose-50 border border-red-200">
+    <p class="text-sm text-secondary mb-1">❌ No Aptos</p>
+    <p class="text-2xl font-bold text-red-700">{noAptos}</p>
+    <p class="text-xs text-red-600 mt-1">Requieren nueva evaluación</p>
+  </Card>
+  <Card
+    class="bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-200"
+  >
+    <p class="text-sm text-secondary mb-1">💰 Cobrados</p>
+    <p class="text-2xl font-bold text-blue-700">
+      {cobrados}/{alumnosPendientes.length}
+    </p>
+    <p class="text-xs text-blue-600 mt-1">
+      ${(cobrados * PRECIO_PSICOTECNICO).toLocaleString("es-CL")} recaudados
+    </p>
+  </Card>
+</div>
+
 <div class="flex flex-wrap gap-3 mb-6">
   <Button variant="primary" onClick="cargaMasiva()">Cargar Excel Masivo</Button>
-  <select id="filtro-estado" class="h-11 px-4 text-sm border border-gray-300 rounded-md">
+  <select
+    id="filtro-estado"
+    class="h-11 px-4 text-sm border border-gray-300 rounded-md"
+  >
     <option value="todos">Todos los alumnos</option>
     <option value="pendientes">Solo pendientes</option>
     <option value="realizados">Solo realizados</option>
@@ -74,45 +176,159 @@ const realizados = alumnosPendientes.filter((a) => a.realizado).length;
 <Card>
   <div class="flex items-center justify-between mb-4">
     <h2 class="text-xl font-semibold text-gray-900">Listado de Alumnos</h2>
-    <span class="text-sm text-secondary">{alumnosPendientes.length} registros</span>
+    <span class="text-sm text-secondary"
+      >{alumnosPendientes.length} registros</span
+    >
   </div>
   <div class="overflow-x-auto">
     <table class="w-full" id="tabla-alumnos">
       <thead>
         <tr class="border-b border-gray-200">
-          <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase">Alumno</th>
-          <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase">RUT</th>
-          <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase">Curso</th>
-          <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase">Fecha Matrícula</th>
-          <th class="text-center py-3 px-4 text-xs font-semibold text-gray-700 uppercase">Estado</th>
-          <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase">Fecha Evaluación</th>
-          <th class="text-center py-3 px-4 text-xs font-semibold text-gray-700 uppercase">Acción</th>
+          <th
+            class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase"
+            >Alumno</th
+          >
+          <th
+            class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase"
+            >RUT</th
+          >
+          <th
+            class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase"
+            >Curso</th
+          >
+          <th
+            class="text-center py-3 px-4 text-xs font-semibold text-gray-700 uppercase"
+            >Estado</th
+          >
+          <th
+            class="text-center py-3 px-4 text-xs font-semibold text-gray-700 uppercase"
+            >Resultado</th
+          >
+          <th
+            class="text-center py-3 px-4 text-xs font-semibold text-gray-700 uppercase"
+            >Cobro $40K</th
+          >
+          <th
+            class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase"
+            >Fecha Evaluación</th
+          >
+          <th
+            class="text-center py-3 px-4 text-xs font-semibold text-gray-700 uppercase"
+            >Acción</th
+          >
         </tr>
       </thead>
       <tbody class="divide-y divide-gray-100">
-        {alumnosPendientes.map((alumno) => (
-          <tr class={`hover:bg-gray-50 transition-colors ${alumno.realizado ? "opacity-60" : ""}`} data-estado={alumno.realizado ? "realizado" : "pendiente"}>
-            <td class="py-3 px-4 text-sm font-medium text-gray-900">{alumno.nombre}</td>
-            <td class="py-3 px-4 text-sm text-secondary">{alumno.rut}</td>
-            <td class="py-3 px-4 text-sm text-gray-700">{alumno.curso}</td>
-            <td class="py-3 px-4 text-sm text-secondary">{alumno.fechaMatricula}</td>
-            <td class="py-3 px-4 text-center">
-              {alumno.realizado ? <span class="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">Realizado</span> : <span class="inline-flex items-center gap-1 px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">Pendiente</span>}
-            </td>
-            <td class="py-3 px-4">{alumno.realizado ? <span class="text-sm text-gray-700">{alumno.fechaEvaluacion}</span> : <input type="date" class="w-full max-w-xs px-2 py-1 text-sm border border-gray-300 rounded" data-alumno-id={alumno.id} onchange={`registrarFecha(${alumno.id})`} />}</td>
-            <td class="py-3 px-4 text-center">
-              {alumno.realizado ? <button type="button" class="text-sm text-blue-600 hover:text-blue-700 font-medium" onclick={`verCertificado(${alumno.id})`}>Ver Certificado</button> : <label class="flex items-center justify-center gap-2 cursor-pointer"><input type="checkbox" class="rounded border-gray-300" onchange={`marcarRealizado(${alumno.id})`} /><span class="text-sm text-gray-700">Marcar realizado</span></label>}
-            </td>
-          </tr>
-        ))}
+        {
+          alumnosPendientes.map((alumno) => (
+            <tr
+              class={`hover:bg-gray-50 transition-colors ${alumno.realizado ? "" : ""}`}
+              data-estado={alumno.realizado ? "realizado" : "pendiente"}
+            >
+              <td class="py-3 px-4 text-sm font-medium text-gray-900">
+                {alumno.nombre}
+              </td>
+              <td class="py-3 px-4 text-sm text-secondary">{alumno.rut}</td>
+              <td class="py-3 px-4 text-sm text-gray-700">{alumno.curso}</td>
+              <td class="py-3 px-4 text-center">
+                {alumno.realizado ? (
+                  <span class="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
+                    Realizado
+                  </span>
+                ) : (
+                  <span class="inline-flex items-center gap-1 px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
+                    Pendiente
+                  </span>
+                )}
+              </td>
+              <td class="py-3 px-4 text-center">
+                {alumno.resultado === "Apto" ? (
+                  <span class="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">
+                    ✅ Apto
+                  </span>
+                ) : alumno.resultado === "No Apto" ? (
+                  <span class="inline-flex items-center gap-1 px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-semibold">
+                    ❌ No Apto
+                  </span>
+                ) : (
+                  <span class="text-xs text-gray-400">—</span>
+                )}
+              </td>
+              <td class="py-3 px-4 text-center">
+                {alumno.cobrado ? (
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-xs font-medium">
+                    💰 Cobrado
+                  </span>
+                ) : (
+                  <button
+                    class="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                    onclick={`alert('Registrar cobro de $40.000 para ${alumno.nombre}')`}
+                  >
+                    Cobrar
+                  </button>
+                )}
+              </td>
+              <td class="py-3 px-4">
+                {alumno.realizado ? (
+                  <span class="text-sm text-gray-700">
+                    {alumno.fechaEvaluacion}
+                  </span>
+                ) : (
+                  <input
+                    type="date"
+                    class="w-full max-w-xs px-2 py-1 text-sm border border-gray-300 rounded"
+                    data-alumno-id={alumno.id}
+                    onchange={`registrarFecha(${alumno.id})`}
+                  />
+                )}
+              </td>
+              <td class="py-3 px-4 text-center">
+                {alumno.realizado ? (
+                  <button
+                    type="button"
+                    class="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                    onclick={`verCertificado(${alumno.id})`}
+                  >
+                    Ver Certificado
+                  </button>
+                ) : (
+                  <label class="flex items-center justify-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      class="rounded border-gray-300"
+                      onchange={`marcarRealizado(${alumno.id})`}
+                    />
+                    <span class="text-sm text-gray-700">Marcar realizado</span>
+                  </label>
+                )}
+              </td>
+            </tr>
+          ))
+        }
       </tbody>
     </table>
   </div>
   <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-    <p class="text-sm font-medium text-blue-900 mb-1">📋 Información del Proceso</p>
+    <p class="text-sm font-medium text-blue-900 mb-1">
+      📋 Información del Proceso (RF-034)
+    </p>
     <ul class="text-xs text-blue-800 space-y-1">
-      <li>• Los alumnos pueden realizar el psicotécnico en centros autorizados.</li>
+      <li>
+        • <strong>Precio por evaluación: $40.000</strong> — cobro obligatorio al alumno
+        antes del examen.
+      </li>
+      <li>
+        • Los alumnos pueden realizar el psicotécnico en centros autorizados.
+      </li>
+      <li>
+        • El resultado puede ser <strong>Apto</strong> o <strong>No Apto</strong
+        >. En caso de No Apto se puede re-evaluar.
+      </li>
       <li>• El certificado debe ser subido al sistema dentro de 30 días.</li>
+      <li>
+        • Los cobros se integran automáticamente al módulo de ingresos
+        (concepto: Psicotécnico).
+      </li>
     </ul>
   </div>
 </Card>
@@ -120,19 +336,36 @@ const realizados = alumnosPendientes.filter((a) => a.realizado).length;
 <script is:inline>
   const filtroEstado = document.getElementById("filtro-estado");
   const tabla = document.getElementById("tabla-alumnos");
-  filtroEstado?.addEventListener("change", function(e) {
+  filtroEstado?.addEventListener("change", function (e) {
     const valor = e.target.value;
-    tabla?.querySelectorAll("tbody tr").forEach(function(fila) {
+    tabla?.querySelectorAll("tbody tr").forEach(function (fila) {
       const estado = fila.getAttribute("data-estado");
       if (valor === "todos") fila.style.display = "";
-      else if (valor === "pendientes" && estado === "pendiente") fila.style.display = "";
-      else if (valor === "realizados" && estado === "realizado") fila.style.display = "";
+      else if (valor === "pendientes" && estado === "pendiente")
+        fila.style.display = "";
+      else if (valor === "realizados" && estado === "realizado")
+        fila.style.display = "";
       else fila.style.display = "none";
     });
   });
-  window.cargaMasiva = function() { alert("Carga masiva de evaluaciones."); };
-  window.exportarExcel = function() { alert("Exportando Excel..."); };
-  window.marcarRealizado = function(alumnoId) { if (confirm("¿Confirmar psicotécnico realizado?")) { alert("Registrado."); setTimeout(function() { location.reload(); }, 1000); } };
-  window.registrarFecha = function(alumnoId) { console.log("Fecha alumno " + alumnoId); };
-  window.verCertificado = function(alumnoId) { alert("Ver certificado psicotécnico."); };
+  window.cargaMasiva = function () {
+    alert("Carga masiva de evaluaciones.");
+  };
+  window.exportarExcel = function () {
+    alert("Exportando Excel...");
+  };
+  window.marcarRealizado = function (alumnoId) {
+    if (confirm("¿Confirmar psicotécnico realizado?")) {
+      alert("Registrado.");
+      setTimeout(function () {
+        location.reload();
+      }, 1000);
+    }
+  };
+  window.registrarFecha = function (alumnoId) {
+    console.log("Fecha alumno " + alumnoId);
+  };
+  window.verCertificado = function (alumnoId) {
+    alert("Ver certificado psicotécnico.");
+  };
 </script>

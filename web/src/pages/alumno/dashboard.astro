@@ -17,10 +17,17 @@ const alumno = {
   escuela: 'Conductores Chillán'
 };
 
-const progreso = {
+// RF-055: Progreso de clases prácticas y teóricas
+const progresoPracticas = {
   clasesCompletadas: 8,
   clasesTotal: 12,
   porcentaje: 67
+};
+
+const progresoTeoricas = {
+  clasesCompletadas: 6,
+  clasesTotal: 8,
+  porcentaje: 75
 };
 
 const proximasClases = [
@@ -79,59 +86,96 @@ const historialReciente = [
       <div class="grid lg:grid-cols-3 gap-6">
         <!-- Columna principal -->
         <div class="lg:col-span-2 space-y-6">
-          <!-- Progreso -->
-          <Card>
-            <div class="flex items-center justify-between mb-6">
-              <div>
-                <h2 class="text-2xl font-semibold text-gray-900 mb-1">Tu Progreso</h2>
-                <p class="text-sm text-secondary">Clase B - {alumno.escuela}</p>
-              </div>
-              <div class="text-right">
-                <p class="text-5xl font-bold text-blue-600">{progreso.porcentaje}%</p>
-                <p class="text-xs text-secondary mt-1">completado</p>
-              </div>
-            </div>
-            
-            <!-- Progress bar -->
-            <div class="relative w-full bg-gray-200 rounded-full h-6 mb-4">
-              <div 
-                class="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-end px-3 transition-all duration-500" 
-                style={`width: ${progreso.porcentaje}%`}
-              >
-                <span class="text-xs font-semibold text-white">
-                  {progreso.clasesCompletadas}/{progreso.clasesTotal}
-                </span>
-              </div>
-            </div>
-            
-            <div class="flex items-center justify-between text-sm">
-              <span class="text-secondary">
-                {progreso.clasesCompletadas} clases completadas
-              </span>
-              <span class="font-semibold text-gray-900">
-                {progreso.clasesTotal - progreso.clasesCompletadas} clases restantes
-              </span>
-            </div>
-            
-            {progreso.clasesCompletadas >= 12 && (
-              <div class="mt-6 p-4 bg-green-50 border-2 border-green-200 rounded-lg">
-                <div class="flex items-start gap-3">
-                  <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                  </div>
-                  <div class="flex-1">
-                    <p class="text-green-900 font-semibold mb-1">¡Felicitaciones! Completaste todas tus clases</p>
-                    <p class="text-sm text-green-700 mb-3">Ya puedes descargar tu certificado y presentarte al examen municipal.</p>
-                    <Button href="/alumno/certificado" variant="primary" class="w-full sm:w-auto">
-                      📄 Descargar Certificado
-                    </Button>
-                  </div>
+          <!-- RF-055: Progreso de Clases Prácticas y Teóricas -->
+          <div class="grid sm:grid-cols-2 gap-4">
+            <!-- Progreso Clases Prácticas -->
+            <Card>
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h2 class="text-lg font-semibold text-gray-900">Clases Prácticas</h2>
+                  <p class="text-xs text-secondary mt-0.5">De 12 requeridas</p>
+                </div>
+                <div class="text-right">
+                  <p class="text-4xl font-bold text-blue-600">{progresoPracticas.porcentaje}%</p>
                 </div>
               </div>
-            )}
-          </Card>
+
+              <!-- Progress bar -->
+              <div class="relative w-full bg-gray-200 rounded-full h-6 mb-3">
+                <div
+                  class="absolute inset-y-0 left-0 bg-linear-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-end px-3 transition-all duration-500"
+                  style={`width: ${progresoPracticas.porcentaje}%`}
+                >
+                  <span class="text-xs font-semibold text-white">
+                    {progresoPracticas.clasesCompletadas}/{progresoPracticas.clasesTotal}
+                  </span>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-secondary">
+                  {progresoPracticas.clasesCompletadas} completadas
+                </span>
+                <span class="font-semibold text-gray-900">
+                  {progresoPracticas.clasesTotal - progresoPracticas.clasesCompletadas} restantes
+                </span>
+              </div>
+            </Card>
+
+            <!-- Progreso Clases Teóricas -->
+            <Card>
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h2 class="text-lg font-semibold text-gray-900">Clases Teóricas</h2>
+                  <p class="text-xs text-secondary mt-0.5">De 8 requeridas</p>
+                </div>
+                <div class="text-right">
+                  <p class="text-4xl font-bold text-green-600">{progresoTeoricas.porcentaje}%</p>
+                </div>
+              </div>
+
+              <!-- Progress bar -->
+              <div class="relative w-full bg-gray-200 rounded-full h-6 mb-3">
+                <div
+                  class="absolute inset-y-0 left-0 bg-linear-to-r from-green-500 to-green-600 rounded-full flex items-center justify-end px-3 transition-all duration-500"
+                  style={`width: ${progresoTeoricas.porcentaje}%`}
+                >
+                  <span class="text-xs font-semibold text-white">
+                    {progresoTeoricas.clasesCompletadas}/{progresoTeoricas.clasesTotal}
+                  </span>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-secondary">
+                  {progresoTeoricas.clasesCompletadas} asistidas
+                </span>
+                <span class="font-semibold text-gray-900">
+                  {progresoTeoricas.clasesTotal - progresoTeoricas.clasesCompletadas} restantes
+                </span>
+              </div>
+            </Card>
+          </div>
+
+          {/* Banner de éxito al completar todas las clases */}
+          {(progresoPracticas.clasesCompletadas >= 12 && progresoTeoricas.clasesCompletadas >= 8) && (
+            <Card class="bg-green-50 border-2 border-green-200">
+              <div class="flex items-start gap-3">
+                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center shrink-0">
+                  <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                </div>
+                <div class="flex-1">
+                  <p class="text-green-900 font-semibold mb-1">¡Felicitaciones! Completaste todas tus clases</p>
+                  <p class="text-sm text-green-700 mb-3">Ya puedes descargar tu certificado y presentarte al examen municipal.</p>
+                  <Button href="/alumno/certificado" variant="primary" class="w-full sm:w-auto">
+                    📄 Descargar Certificado
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          )}
 
           <!-- Próximas clases -->
           <Card>
@@ -144,8 +188,8 @@ const historialReciente = [
               {proximasClases.map((clase) => (
                 <div class="group relative flex items-start gap-4 p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-all">
                   <!-- Fecha -->
-                  <div class="flex-shrink-0">
-                    <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex flex-col items-center justify-center text-white shadow-md">
+                  <div class="shrink-0">
+                    <div class="w-16 h-16 bg-linear-to-br from-blue-500 to-blue-600 rounded-lg flex flex-col items-center justify-center text-white shadow-md">
                       <span class="text-xs uppercase font-medium">{clase.dia.substring(0, 3)}</span>
                       <span class="text-2xl font-bold">{clase.numero}</span>
                     </div>
@@ -298,9 +342,9 @@ const historialReciente = [
           </Card>
 
           <!-- Ayuda WhatsApp -->
-          <Card class="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+          <Card class="bg-linear-to-br from-green-50 to-emerald-50 border-green-200">
             <div class="flex gap-3">
-              <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+              <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center shrink-0">
                 <svg class="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
                 </svg>

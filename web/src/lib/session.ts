@@ -34,8 +34,10 @@ export function getCurrentUserRole(path: string, cookies?: CookieReader): UserRo
   // Fallback: inferir por ruta
   const cleanPath = path.split("?")[0].replace(/\/$/, "");
 
-  if (cleanPath.startsWith("/secretaria")) return "secretaria";
-  if (cleanPath.startsWith("/instructor")) return "instructor";
+  // /secretaria (dashboard secretaria) pero NO /secretarias (gestión de secretarias)
+  if (cleanPath === "/secretaria" || cleanPath.startsWith("/secretaria/")) return "secretaria";
+  // /instructor (dashboard instructor) pero NO /instructores (gestión de instructores)
+  if (cleanPath === "/instructor" || cleanPath.startsWith("/instructor/")) return "instructor";
   if (cleanPath.startsWith("/alumno") && !cleanPath.startsWith("/alumnos")) return "alumno";
   if (cleanPath === "/alumnos" || cleanPath.startsWith("/alumnos/")) return "admin";
 
@@ -49,8 +51,10 @@ export function getCurrentUserRole(path: string, cookies?: CookieReader): UserRo
 export function getRoleToSetFromPath(path: string): UserRole | null {
   const cleanPath = path.split("?")[0].replace(/\/$/, "");
 
-  if (cleanPath.startsWith("/secretaria")) return "secretaria";
-  if (cleanPath.startsWith("/instructor")) return "instructor";
+  // /secretaria (dashboard secretaria) pero NO /secretarias (gestión de secretarias)
+  if (cleanPath === "/secretaria" || cleanPath.startsWith("/secretaria/")) return "secretaria";
+  // /instructor (dashboard instructor) pero NO /instructores (gestión de instructores)
+  if (cleanPath === "/instructor" || cleanPath.startsWith("/instructor/")) return "instructor";
   if (cleanPath.startsWith("/alumno") && !cleanPath.startsWith("/alumnos")) return "alumno";
   // Admin: solo rutas que solo admin usa (no /matricula, /pagos, etc. que comparten con secretaria)
   if (cleanPath === "/dashboard" || cleanPath.startsWith("/dashboard/")) return "admin";
@@ -58,6 +62,7 @@ export function getRoleToSetFromPath(path: string): UserRole | null {
   if (cleanPath.startsWith("/tareas")) return "admin";
   if (cleanPath.startsWith("/contabilidad")) return "admin";
   if (cleanPath.startsWith("/flota")) return "admin";
+  // /instructores es compartida (admin/secretaria), no actualiza cookie
 
   return null;
 }

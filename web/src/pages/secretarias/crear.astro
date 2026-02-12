@@ -1,0 +1,223 @@
+---
+/**
+ * Crear Secretaria - RF-001
+ * Formulario con: nombre, RUT, email, teléfono y sede
+ */
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import Card from '../../components/ui/Card.astro';
+import Input from '../../components/ui/Input.astro';
+import Button from '../../components/ui/Button.astro';
+import { ESCUELA_ACTUAL } from '../../lib/mockData';
+---
+<DashboardLayout title="Crear secretaria - Escuela de Conductores" escuela={ESCUELA_ACTUAL}>
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex items-center gap-2 text-sm text-secondary mb-2">
+      <a href="/dashboard" class="hover:text-gray-900">Inicio</a>
+      <span>/</span>
+      <a href="/secretarias" class="hover:text-gray-900">Secretarias</a>
+      <span>/</span>
+      <span class="text-gray-900 font-medium">Crear secretaria</span>
+    </div>
+    <h1 class="text-3xl font-semibold text-gray-900 tracking-tight">Crear secretaria</h1>
+    <p class="text-secondary mt-1">Registrar nueva secretaria en el sistema</p>
+  </div>
+
+  <div class="grid lg:grid-cols-3 gap-6">
+    <!-- Formulario -->
+    <div class="lg:col-span-2">
+      <Card>
+        <h2 class="text-lg font-semibold text-gray-900 mb-6">Información de la secretaria</h2>
+        <form id="createSecretariaForm" class="space-y-5" action="/secretarias" method="get">
+          <!-- Nombre -->
+          <Input label="Nombre completo" name="nombre" placeholder="María González Pérez" required />
+
+          <!-- RUT -->
+          <div class="w-full">
+            <label class="block text-sm font-medium text-gray-700 mb-1.5" for="rut">
+              RUT *
+            </label>
+            <div class="relative">
+              <input
+                type="text"
+                id="rut"
+                name="rut"
+                placeholder="12.345.678-9"
+                required
+                maxlength="12"
+                class="h-11 px-4 w-full text-sm bg-white rounded-md border border-gray-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-900 placeholder:text-gray-400"
+              />
+              <span id="rutStatus" class="absolute right-3 top-1/2 -translate-y-1/2 text-sm hidden"></span>
+            </div>
+            <p id="rutError" class="text-red-600 text-sm mt-1.5 hidden" role="alert"></p>
+            <p id="rutSuccess" class="text-green-600 text-sm mt-1.5 hidden"></p>
+          </div>
+
+          <!-- Email -->
+          <Input label="Correo electrónico" name="email" type="email" placeholder="maria@escuela.cl" required />
+
+          <!-- Teléfono -->
+          <Input label="Teléfono" name="telefono" type="tel" placeholder="+56 9 1234 5678" required />
+
+          <!-- Sede -->
+          <div class="w-full">
+            <label class="block text-sm font-medium text-gray-700 mb-1.5" for="sede">
+              Sede asignada *
+            </label>
+            <select
+              id="sede"
+              name="sede"
+              required
+              class="h-11 px-4 w-full text-sm bg-white rounded-md border border-gray-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-900 appearance-none"
+              style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E&quot;); background-repeat: no-repeat; background-position: right 0.5rem center; background-size: 1.5em 1.5em; padding-right: 2.5rem;"
+            >
+              <option value="">Seleccione sede</option>
+              <option value="autoescuela-chillan">Autoescuela Chillán</option>
+              <option value="conductores-chillan">Conductores Chillán</option>
+            </select>
+          </div>
+
+          <!-- Botones -->
+          <div class="flex gap-3 pt-4 border-t border-gray-200">
+            <a href="/secretarias" class="inline-flex items-center justify-center h-11 px-4 text-sm font-medium rounded-md bg-white border border-gray-300 text-gray-900 hover:bg-gray-50 hover:border-gray-400 shadow-sm transition-all duration-200">
+              Cancelar
+            </a>
+            <Button type="submit" variant="primary">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+              </svg>
+              Crear secretaria
+            </Button>
+          </div>
+        </form>
+      </Card>
+    </div>
+
+    <!-- Sidebar info -->
+    <div class="space-y-4">
+      <Card class="bg-gray-50 border-gray-200">
+        <h3 class="text-sm font-semibold text-gray-900 mb-3">Campos obligatorios</h3>
+        <ul class="space-y-2 text-xs text-gray-700">
+          <li class="flex items-center gap-2">
+            <span class="w-1.5 h-1.5 bg-gray-900 rounded-full shrink-0"></span>
+            Nombre completo
+          </li>
+          <li class="flex items-center gap-2">
+            <span class="w-1.5 h-1.5 bg-gray-900 rounded-full shrink-0"></span>
+            RUT (formato chileno válido)
+          </li>
+          <li class="flex items-center gap-2">
+            <span class="w-1.5 h-1.5 bg-gray-900 rounded-full shrink-0"></span>
+            Correo electrónico
+          </li>
+          <li class="flex items-center gap-2">
+            <span class="w-1.5 h-1.5 bg-gray-900 rounded-full shrink-0"></span>
+            Teléfono de contacto
+          </li>
+          <li class="flex items-center gap-2">
+            <span class="w-1.5 h-1.5 bg-gray-900 rounded-full shrink-0"></span>
+            Sede asignada
+          </li>
+        </ul>
+      </Card>
+
+      <Card class="bg-blue-50 border-blue-200">
+        <h3 class="text-sm font-semibold text-blue-900 mb-3">Rol asignado</h3>
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-lg">📋</span>
+          <p class="text-sm font-semibold text-blue-900">Secretaria</p>
+        </div>
+        <p class="text-xs text-blue-800">
+          El rol de secretaria se asigna automáticamente. Con este rol tendrá acceso a gestión de matrículas, pagos, agenda y alumnos.
+        </p>
+      </Card>
+
+      <Card>
+        <h3 class="text-sm font-semibold text-gray-900 mb-3">Validaciones</h3>
+        <div class="space-y-3 text-xs text-gray-700">
+          <div class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-green-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span>RUT validado con Módulo 11</span>
+          </div>
+          <div class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-green-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span>Unicidad de RUT y email en BD</span>
+          </div>
+        </div>
+      </Card>
+    </div>
+  </div>
+</DashboardLayout>
+
+<script>
+  // RF-002: Simulación visual de validación RUT
+  const rutInput = document.getElementById('rut') as HTMLInputElement;
+  const rutError = document.getElementById('rutError');
+  const rutSuccess = document.getElementById('rutSuccess');
+  const rutStatus = document.getElementById('rutStatus');
+
+  rutInput?.addEventListener('input', () => {
+    let value = rutInput.value.replace(/[^0-9kK-]/g, '');
+
+    // Auto-formato: XX.XXX.XXX-X
+    const clean = value.replace(/\./g, '').replace(/-/g, '');
+    if (clean.length > 1) {
+      const body = clean.slice(0, -1);
+      const dv = clean.slice(-1);
+      const formatted = body.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      value = `${formatted}-${dv}`;
+    }
+    rutInput.value = value;
+
+    // Feedback visual simulado
+    if (rutError && rutSuccess && rutStatus) {
+      if (value.length >= 11) {
+        // Simular RUT válido
+        if (value === '11.111.111-1') {
+          // Simular RUT ya registrado
+          rutError.textContent = 'Este RUT ya está registrado en el sistema';
+          rutError.classList.remove('hidden');
+          rutSuccess.classList.add('hidden');
+          rutStatus.textContent = '✗';
+          rutStatus.className = 'absolute right-3 top-1/2 -translate-y-1/2 text-sm text-red-500';
+          rutInput.classList.add('border-red-300');
+          rutInput.classList.remove('border-green-300', 'border-gray-300');
+        } else {
+          rutSuccess.textContent = '✓ RUT válido y disponible';
+          rutSuccess.classList.remove('hidden');
+          rutError.classList.add('hidden');
+          rutStatus.textContent = '✓';
+          rutStatus.className = 'absolute right-3 top-1/2 -translate-y-1/2 text-sm text-green-500';
+          rutInput.classList.add('border-green-300');
+          rutInput.classList.remove('border-red-300', 'border-gray-300');
+        }
+      } else if (value.length > 0 && value.length < 11) {
+        rutError.textContent = 'Formato incompleto (ej: 12.345.678-9)';
+        rutError.classList.remove('hidden');
+        rutSuccess.classList.add('hidden');
+        rutStatus.textContent = '';
+        rutStatus.className = 'absolute right-3 top-1/2 -translate-y-1/2 text-sm hidden';
+        rutInput.classList.remove('border-green-300', 'border-red-300');
+        rutInput.classList.add('border-gray-300');
+      } else {
+        rutError.classList.add('hidden');
+        rutSuccess.classList.add('hidden');
+        rutStatus.className = 'absolute right-3 top-1/2 -translate-y-1/2 text-sm hidden';
+        rutInput.classList.remove('border-green-300', 'border-red-300');
+        rutInput.classList.add('border-gray-300');
+      }
+    }
+  });
+
+  // Submit handler
+  const form = document.getElementById('createSecretariaForm') as HTMLFormElement;
+  form?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    alert('✓ Secretaria creada exitosamente\n\nLa secretaria ha sido registrada en el sistema con rol de Secretaria.\n\nRedirigiendo...');
+    window.location.href = '/secretarias';
+  });
+</script>

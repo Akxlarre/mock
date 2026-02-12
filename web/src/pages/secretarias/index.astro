@@ -1,0 +1,233 @@
+---
+/**
+ * Secretarias - Gestión de secretarias del sistema
+ * RF-001 a RF-005: Alta, baja, modificación de secretarias
+ */
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import Card from '../../components/ui/Card.astro';
+import Button from '../../components/ui/Button.astro';
+import Input from '../../components/ui/Input.astro';
+
+// Mock data - solo secretarias
+const secretarias = [
+  { id: 1, nombre: 'Patricia Secretaria', email: 'psecretaria@escuela.cl', telefono: '+56 9 8765 4321', sede: 'Autoescuela Chillán', estado: 'activo', ultimoAcceso: '2026-02-03 08:15' },
+  { id: 2, nombre: 'María González', email: 'mgonzalez@escuela.cl', telefono: '+56 9 7654 3210', sede: 'Conductores Chillán', estado: 'activo', ultimoAcceso: '2026-02-03 09:30' },
+  { id: 3, nombre: 'Carmen Silva', email: 'csilva@escuela.cl', telefono: '+56 9 6543 2109', sede: 'Autoescuela Chillán', estado: 'activo', ultimoAcceso: '2026-02-02 16:45' },
+  { id: 4, nombre: 'Rosa Pérez', email: 'rperez@escuela.cl', telefono: '+56 9 5432 1098', sede: 'Conductores Chillán', estado: 'inactivo', ultimoAcceso: '2026-01-28 14:20' },
+];
+---
+
+<DashboardLayout title="Secretarias - Escuela de Conductores">
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex items-center gap-2 text-sm text-secondary mb-2">
+      <a href="/dashboard" class="hover:text-gray-900">Inicio</a>
+      <span>/</span>
+      <span class="text-gray-900 font-medium">Secretarias</span>
+    </div>
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-semibold text-gray-900 tracking-tight">Gestión de Secretarias</h1>
+        <p class="text-secondary mt-1">Control de acceso y gestión de personal de secretaría</p>
+      </div>
+      <Button href="/secretarias/crear" variant="primary">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        Nueva Secretaria
+      </Button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+    <Card class="p-4">
+      <p class="text-xs text-secondary">Total Secretarias</p>
+      <p class="text-2xl font-semibold text-gray-900 mt-1">{secretarias.length}</p>
+    </Card>
+    <Card class="p-4">
+      <p class="text-xs text-secondary">Activas</p>
+      <p class="text-2xl font-semibold text-green-600 mt-1">{secretarias.filter(s => s.estado === 'activo').length}</p>
+    </Card>
+    <Card class="p-4">
+      <p class="text-xs text-secondary">Inactivas</p>
+      <p class="text-2xl font-semibold text-gray-600 mt-1">{secretarias.filter(s => s.estado === 'inactivo').length}</p>
+    </Card>
+  </div>
+
+  <!-- Filtros -->
+  <Card class="mb-6">
+    <div class="flex flex-col md:flex-row gap-4">
+      <div class="flex-1">
+        <Input
+          placeholder="Buscar por nombre o email..."
+          type="search"
+        />
+      </div>
+      <div class="flex gap-2">
+        <select class="h-11 px-4 text-sm bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-900">
+          <option value="">Todas las sedes</option>
+          <option value="autoescuela-chillan">Autoescuela Chillán</option>
+          <option value="conductores-chillan">Conductores Chillán</option>
+        </select>
+        <select class="h-11 px-4 text-sm bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-900">
+          <option value="">Todos los estados</option>
+          <option value="activo">Activas</option>
+          <option value="inactivo">Inactivas</option>
+        </select>
+      </div>
+    </div>
+  </Card>
+
+  <!-- Grid: Tabla + Info -->
+  <div class="grid lg:grid-cols-3 gap-6">
+    <!-- Tabla secretarias -->
+    <div class="lg:col-span-2">
+      <Card>
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Lista de Secretarias</h2>
+
+        <div class="space-y-3">
+          {secretarias.map((secretaria) => {
+            return (
+              <div class="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+                <div class="flex items-center gap-4 flex-1">
+                  <!-- Avatar -->
+                  <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold text-sm bg-blue-600">
+                    {secretaria.nombre.split(' ').map(n => n[0]).join('').substring(0, 2)}
+                  </div>
+
+                  <!-- Info -->
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 mb-1">
+                      <p class="text-sm font-semibold text-gray-900 truncate">{secretaria.nombre}</p>
+                      <span class={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                        secretaria.estado === 'activo'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-600'
+                      }`}>
+                        {secretaria.estado === 'activo' ? '✓ Activa' : '○ Inactiva'}
+                      </span>
+                    </div>
+                    <p class="text-xs text-secondary truncate">{secretaria.email}</p>
+                    <div class="flex items-center gap-3 mt-1">
+                      <span class="text-xs text-gray-600">
+                        📍 {secretaria.sede}
+                      </span>
+                      <span class="text-xs text-muted">
+                        Último acceso: {secretaria.ultimoAcceso}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex items-center gap-2 shrink-0">
+                  <a
+                    href={`/secretarias/${secretaria.id}`}
+                    class="p-2 text-gray-600 hover:text-gray-900 hover:bg-white rounded transition-colors"
+                    title="Ver perfil"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                    </svg>
+                  </a>
+                  <a
+                    href={`/secretarias/${secretaria.id}/editar`}
+                    class="p-2 text-gray-600 hover:text-gray-900 hover:bg-white rounded transition-colors"
+                    title="Editar"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <!-- Pagination -->
+        <div class="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
+          <p class="text-sm text-secondary">
+            Mostrando 1-{secretarias.length} de {secretarias.length} secretarias
+          </p>
+          <div class="flex gap-2">
+            <Button variant="secondary" class="text-sm">Anterior</Button>
+            <Button variant="secondary" class="text-sm">Siguiente</Button>
+          </div>
+        </div>
+      </Card>
+    </div>
+
+    <!-- Sidebar: Info y Accesos -->
+    <div class="space-y-4">
+      <!-- Permisos de Secretaria -->
+      <Card>
+        <h3 class="text-sm font-semibold text-gray-900 mb-4">Permisos de Secretaria</h3>
+        <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg mb-4">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-lg">📋</span>
+            <p class="text-sm font-semibold text-blue-900">Rol: Secretaria</p>
+          </div>
+          <p class="text-xs text-blue-800">Gestión de matrículas, pagos, agenda y alumnos</p>
+        </div>
+
+        <div class="space-y-2 text-xs text-gray-700">
+          <div class="flex items-start gap-2">
+            <span class="text-green-600 mt-0.5">✓</span>
+            <span>Gestión de matrículas y alumnos</span>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="text-green-600 mt-0.5">✓</span>
+            <span>Registro de pagos y cuadratura</span>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="text-green-600 mt-0.5">✓</span>
+            <span>Gestión de agenda y asistencia</span>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="text-green-600 mt-0.5">✓</span>
+            <span>Acceso a informes y certificados</span>
+          </div>
+        </div>
+      </Card>
+
+      <!-- Accesos rápidos -->
+      <Card>
+        <h3 class="text-sm font-semibold text-gray-900 mb-3">Accesos Rápidos</h3>
+        <div class="space-y-2">
+          <Button href="/secretarias/crear" variant="secondary" class="w-full justify-start text-sm">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+            </svg>
+            Crear Secretaria
+          </Button>
+          <Button href="/usuarios/roles" variant="secondary" class="w-full justify-start text-sm">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+            </svg>
+            Gestionar Roles
+          </Button>
+          <Button href="/auditoria" variant="secondary" class="w-full justify-start text-sm">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+            </svg>
+            Ver Auditoría
+          </Button>
+        </div>
+      </Card>
+    </div>
+  </div>
+</DashboardLayout>
+
+<style>
+  select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+  }
+</style>

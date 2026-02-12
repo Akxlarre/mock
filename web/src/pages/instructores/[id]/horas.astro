@@ -1,0 +1,513 @@
+---
+/**
+ * Detalle de Horas por Instructor - Vista Administrador
+ * Muestra el detalle mensual de horas de un instructor específico
+ */
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+import Card from "../../../components/ui/Card.astro";
+import Button from "../../../components/ui/Button.astro";
+import { getInstructorById } from "../../../lib/mockInstructors";
+import { ESCUELA_ACTUAL } from "../../../lib/mockData";
+
+export function getStaticPaths() {
+    return [
+        { params: { id: "1" } },
+        { params: { id: "2" } },
+        { params: { id: "3" } },
+        { params: { id: "4" } },
+        { params: { id: "5" } },
+    ];
+}
+
+const { id } = Astro.params;
+const instructor = getInstructorById(parseInt(id!));
+
+if (!instructor) {
+    return Astro.redirect("/instructores/horas");
+}
+
+// Mes actual
+const mesActual = "febrero2026";
+const mesActualDisplay = "Febrero 2026";
+const horasMes = instructor.horasMensuales[mesActual];
+
+// Detalle por día (mockup - en producción vendría de API)
+const detalleSesiones = [
+    {
+        fecha: "2026-02-03",
+        tipo: "teórica",
+        horas: 2,
+        alumno: "Promoción Enero - Grupo A",
+    },
+    {
+        fecha: "2026-02-03",
+        tipo: "práctica",
+        horas: 1.5,
+        alumno: "María González",
+    },
+    { fecha: "2026-02-03", tipo: "práctica", horas: 1.5, alumno: "Juan Pérez" },
+    {
+        fecha: "2026-02-04",
+        tipo: "práctica",
+        horas: 1.5,
+        alumno: "Ana Martínez",
+    },
+    {
+        fecha: "2026-02-04",
+        tipo: "teórica",
+        horas: 2,
+        alumno: "Promoción Enero - Grupo B",
+    },
+];
+
+// Comparativo mensual (últimos 5 meses) - usar datos reales del instructor
+const meses = ["diciembre2025", "enero2026", "febrero2026"];
+const comparativoMeses = [
+    {
+        mes: "Octubre",
+        teoricas: instructor.tipo !== "practico" ? 20 : 0,
+        practicas: instructor.tipo !== "teorico" ? 25 : 0,
+    },
+    {
+        mes: "Noviembre",
+        teoricas: instructor.tipo !== "practico" ? 22 : 0,
+        practicas: instructor.tipo !== "teorico" ? 28 : 0,
+    },
+    {
+        mes: "Diciembre",
+        teoricas: instructor.horasMensuales["diciembre2025"]?.teoricas || 0,
+        practicas: instructor.horasMensuales["diciembre2025"]?.practicas || 0,
+    },
+    {
+        mes: "Enero",
+        teoricas: instructor.horasMensuales["enero2026"]?.teoricas || 0,
+        practicas: instructor.horasMensuales["enero2026"]?.practicas || 0,
+    },
+    {
+        mes: "Febrero",
+        teoricas: instructor.horasMensuales["febrero2026"]?.teoricas || 0,
+        practicas: instructor.horasMensuales["febrero2026"]?.practicas || 0,
+    },
+];
+
+// Calcular comparativa vs mes anterior
+const horasMesAnterior = instructor.horasMensuales["enero2026"]?.totalEquivalente || 0;
+const horasActual = horasMes.totalEquivalente;
+const porcentajeCambio =
+    horasMesAnterior > 0
+        ? Math.round(((horasActual - horasMesAnterior) / horasMesAnterior) * 100)
+        : 0;
+const direccion = porcentajeCambio > 0 ? "up" : porcentajeCambio < 0 ? "down" : "equal";
+---
+
+<DashboardLayout
+    title={`Horas ${instructor.nombre} - Instructores`}
+    escuela={ESCUELA_ACTUAL}
+>
+    <div class="max-w-6xl mx-auto">
+        <!-- Breadcrumbs -->
+        <div class="mb-6">
+            <div class="flex items-center gap-2 text-sm text-secondary mb-2">
+                <a href="/dashboard" class="hover:text-gray-900">Inicio</a>
+                <span>/</span>
+                <a href="/instructores" class="hover:text-gray-900"
+                    >Instructores</a
+                >
+                <span>/</span>
+                <a href="/instructores/horas" class="hover:text-gray-900"
+                    >Horas Trabajadas</a
+                >
+                <span>/</span>
+                <span class="text-gray-900 font-medium"
+                    >{instructor.nombre}</span
+                >
+            </div>
+        </div>
+
+        <!-- Header -->
+        <div class="mb-8">
+            <div
+                class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+            >
+                <div>
+                    <h1
+                        class="text-3xl font-semibold text-gray-900 tracking-tight"
+                    >
+                        {instructor.nombre}
+                    </h1>
+                    <p class="text-secondary mt-1">
+                        Instructor {instructor.tipo} · {mesActualDisplay}
+                    </p>
+                </div>
+
+                <div class="flex gap-2">
+                    <Button
+                        variant="secondary"
+                        href={`/instructores/${instructor.id}`}
+                    >
+                        Ver perfil
+                    </Button>
+                    <Button variant="primary" href="/instructores/horas">
+                        Volver al listado
+                    </Button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats principales -->
+        <div class="grid md:grid-cols-4 gap-4 mb-8">
+            {
+                instructor.tipo !== "practico" && (
+                    <Card class="p-6">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <span class="text-xl">📚</span>
+                            </div>
+                            <div>
+                                <p class="text-xs text-secondary">
+                                    Horas Teóricas
+                                </p>
+                                <p class="text-2xl font-bold text-gray-900">
+                                    {horasMes.teoricas}
+                                </p>
+                            </div>
+                        </div>
+                        <p class="text-xs text-muted">Relator de promociones</p>
+                    </Card>
+                )
+            }
+
+            {
+                instructor.tipo !== "teorico" && (
+                    <Card class="p-6">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                <span class="text-xl">🚗</span>
+                            </div>
+                            <div>
+                                <p class="text-xs text-secondary">
+                                    Sesiones Prácticas
+                                </p>
+                                <p class="text-2xl font-bold text-gray-900">
+                                    {horasMes.practicas}
+                                </p>
+                            </div>
+                        </div>
+                        <p class="text-xs text-muted">Clases de conducción</p>
+                    </Card>
+                )
+            }
+
+            <Card class="p-6">
+                <div class="flex items-center gap-3 mb-2">
+                    <div
+                        class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center"
+                    >
+                        <span class="text-xl">⏱️</span>
+                    </div>
+                    <div>
+                        <p class="text-xs text-secondary">Total Horas Equiv.</p>
+                        <p class="text-2xl font-bold text-gray-900">
+                            {horasMes.totalEquivalente}
+                        </p>
+                    </div>
+                </div>
+                <p class="text-xs text-muted">Suma total de horas</p>
+            </Card>
+
+            <Card
+                class="p-6 bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200"
+            >
+                <div class="flex items-center gap-3 mb-2">
+                    <div
+                        class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center"
+                    >
+                        <svg
+                            class="w-6 h-6 text-white"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d={direccion === "up"
+                                    ? "M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                                    : "M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"}></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-xs text-blue-700">vs Mes Anterior</p>
+                        <p class="text-2xl font-bold text-blue-900">
+                            {direccion === "up" ? "+" : ""}{porcentajeCambio}%
+                        </p>
+                    </div>
+                </div>
+                <p class="text-xs text-blue-700">
+                    {
+                        direccion === "up"
+                            ? "↗ Incremento positivo"
+                            : direccion === "down"
+                              ? "↘ Disminución"
+                              : "→ Sin cambio"
+                    }
+                </p>
+            </Card>
+        </div>
+
+        <!-- Gráfico comparativo -->
+        <div class="grid lg:grid-cols-3 gap-6 mb-8">
+            <div class="lg:col-span-2">
+                <Card>
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">
+                        Evolución Últimos 5 Meses
+                    </h2>
+
+                    <!-- Gráfico de barras simple -->
+                    <div class="space-y-4">
+                        {
+                            comparativoMeses.map((mes) => {
+                                const maxHoras = 80;
+                                const totalMes = mes.teoricas + mes.practicas;
+
+                                return (
+                                    <div>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-sm font-medium text-gray-700">
+                                                {mes.mes}
+                                            </span>
+                                            <span class="text-sm font-bold text-gray-900">
+                                                {totalMes}h
+                                            </span>
+                                        </div>
+                                        <div class="w-full bg-gray-200 rounded-full h-8 overflow-hidden">
+                                            <div class="h-full flex">
+                                                <div
+                                                    class="bg-blue-500 flex items-center justify-center text-xs text-white font-medium"
+                                                    style={`width: ${(mes.teoricas / maxHoras) * 100}%`}
+                                                    title={`${mes.teoricas}h teóricas`}
+                                                >
+                                                    {mes.teoricas > 0 &&
+                                                        `${mes.teoricas}h T`}
+                                                </div>
+                                                <div
+                                                    class="bg-green-500 flex items-center justify-center text-xs text-white font-medium"
+                                                    style={`width: ${(mes.practicas / maxHoras) * 100}%`}
+                                                    title={`${mes.practicas}h prácticas`}
+                                                >
+                                                    {mes.practicas > 0 &&
+                                                        `${mes.practicas}h P`}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        }
+                    </div>
+
+                    <!-- Leyenda -->
+                    <div
+                        class="flex items-center gap-4 mt-6 pt-4 border-t border-gray-200"
+                    >
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 bg-blue-500 rounded"></div>
+                            <span class="text-xs text-secondary">Teóricas</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 bg-green-500 rounded"></div>
+                            <span class="text-xs text-secondary">Prácticas</span
+                            >
+                        </div>
+                    </div>
+                </Card>
+            </div>
+
+            <!-- Stats adicionales -->
+            <div class="space-y-4">
+                <Card>
+                    <h3 class="text-sm font-semibold text-gray-900 mb-3">
+                        Estadísticas
+                    </h3>
+                    <div class="space-y-3">
+                        <div
+                            class="flex items-center justify-between py-2 border-b border-gray-200"
+                        >
+                            <span class="text-sm text-secondary"
+                                >Promedio diario</span
+                            >
+                            <span class="text-sm font-semibold text-gray-900"
+                                >{Math.round((horasMes.totalEquivalente / 20) * 10) / 10}h</span
+                            >
+                        </div>
+                        <div
+                            class="flex items-center justify-between py-2 border-b border-gray-200"
+                        >
+                            <span class="text-sm text-secondary"
+                                >Día más productivo</span
+                            >
+                            <span class="text-sm font-semibold text-gray-900"
+                                >Martes (6h)</span
+                            >
+                        </div>
+                        <div
+                            class="flex items-center justify-between py-2 border-b border-gray-200"
+                        >
+                            <span class="text-sm text-secondary"
+                                >Alumnos atendidos</span
+                            >
+                            <span class="text-sm font-semibold text-gray-900"
+                                >{horasMes.practicas > 0 ? horasMes.practicas : "N/A"}</span
+                            >
+                        </div>
+                        <div class="flex items-center justify-between py-2">
+                            <span class="text-sm text-secondary"
+                                >Clases activas</span
+                            >
+                            <span class="text-sm font-semibold text-gray-900"
+                                >{instructor.clasesActivas}</span
+                            >
+                        </div>
+                    </div>
+                </Card>
+
+                <Card class="bg-blue-50 border-blue-200">
+                    <div class="flex gap-3">
+                        <svg
+                            class="w-5 h-5 text-blue-600 flex-shrink-0"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                            ></path>
+                        </svg>
+                        <div>
+                            <p class="text-sm font-medium text-blue-900 mb-1">
+                                Vista Administrador
+                            </p>
+                            <p class="text-xs text-blue-800">
+                                Estos datos corresponden al instructor {
+                                    instructor.nombre
+                                }. Desde esta vista puedes ver el detalle de
+                                horas trabajadas.
+                            </p>
+                        </div>
+                    </div>
+                </Card>
+            </div>
+        </div>
+
+        <!-- Detalle de sesiones recientes -->
+        <Card>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-gray-900">
+                    Detalle de Sesiones
+                </h2>
+                <div class="flex gap-2">
+                    <select
+                        class="h-9 px-3 text-sm bg-white border border-gray-300 rounded-md"
+                    >
+                        <option>Todos los tipos</option>
+                        <option>Teóricas</option>
+                        <option>Prácticas</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b border-gray-200">
+                            <th
+                                class="text-left py-3 px-3 text-xs font-semibold text-gray-700 uppercase"
+                                >Fecha</th
+                            >
+                            <th
+                                class="text-left py-3 px-3 text-xs font-semibold text-gray-700 uppercase"
+                                >Tipo</th
+                            >
+                            <th
+                                class="text-left py-3 px-3 text-xs font-semibold text-gray-700 uppercase"
+                                >Alumno/Grupo</th
+                            >
+                            <th
+                                class="text-right py-3 px-3 text-xs font-semibold text-gray-700 uppercase"
+                                >Horas</th
+                            >
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        {
+                            detalleSesiones
+                                .filter((sesion) => {
+                                    if (instructor.tipo === "practico")
+                                        return sesion.tipo === "práctica";
+                                    if (instructor.tipo === "teorico")
+                                        return sesion.tipo === "teórica";
+                                    return true;
+                                })
+                                .map((sesion) => (
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="py-3 px-3 text-sm text-secondary">
+                                            {new Date(
+                                                sesion.fecha
+                                            ).toLocaleDateString("es-CL", {
+                                                day: "numeric",
+                                                month: "short",
+                                            })}
+                                        </td>
+                                        <td class="py-3 px-3">
+                                            <span
+                                                class={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${
+                                                    sesion.tipo === "práctica"
+                                                        ? "bg-green-100 text-green-800"
+                                                        : "bg-blue-100 text-blue-800"
+                                                }`}
+                                            >
+                                                {sesion.tipo === "práctica"
+                                                    ? "🚗 Práctica"
+                                                    : "📚 Teórica"}
+                                            </span>
+                                        </td>
+                                        <td class="py-3 px-3 text-sm text-gray-700">
+                                            {sesion.alumno}
+                                        </td>
+                                        <td class="py-3 px-3 text-sm font-semibold text-gray-900 text-right">
+                                            {sesion.horas}h
+                                        </td>
+                                    </tr>
+                                ))
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Totales -->
+            <div
+                class="flex items-center justify-between mt-6 pt-4 border-t border-gray-200"
+            >
+                <p class="text-sm font-medium text-gray-700">Total del Mes</p>
+                <p class="text-xl font-bold text-gray-900">
+                    {horasMes.totalEquivalente} horas
+                </p>
+            </div>
+        </Card>
+    </div>
+</DashboardLayout>
+
+<style>
+    select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.5rem center;
+        background-size: 1.5em 1.5em;
+        padding-right: 2.5rem;
+    }
+</style>

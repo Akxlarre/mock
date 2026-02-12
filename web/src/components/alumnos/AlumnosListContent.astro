@@ -13,12 +13,21 @@ interface Props {
 const { basePath = "" } = Astro.props;
 
 const alumnos = [
-  { id: 1, nombre: "María González Pérez", rut: "18.234.567-8", email: "maria@email.cl", telefono: "+56 9 8765 4321", fechaIngreso: "2026-02-01", estado: "active", curso: "Clase B" },
-  { id: 2, nombre: "Juan Pablo Rojas", rut: "19.456.789-0", email: "juan@email.cl", telefono: "+56 9 7654 3210", fechaIngreso: "2026-02-01", estado: "pending_payment", curso: "Clase B" },
-  { id: 3, nombre: "Ana Martínez Silva", rut: "17.890.123-4", email: "ana@email.cl", telefono: "+56 9 6543 2109", fechaIngreso: "2026-01-30", estado: "pending_documents", curso: "Clase B" },
-  { id: 4, nombre: "Carlos Fernández", rut: "20.123.456-7", email: "carlos@email.cl", telefono: "+56 9 5432 1098", fechaIngreso: "2026-01-28", estado: "active", curso: "Clase B" },
-  { id: 5, nombre: "Sofía Vargas López", rut: "18.567.890-1", email: "sofia@email.cl", telefono: "+56 9 4321 0987", fechaIngreso: "2026-01-25", estado: "inactive", curso: "Clase B" },
+  { id: 1, nombre: "María González Pérez", rut: "18.234.567-8", email: "maria@email.cl", telefono: "+56 9 8765 4321", fechaIngreso: "2026-02-01", estado: "active", curso: "Clase B", nroExpediente: "EXP-2026-0001", expediente: { ci: true, foto: true, medico: true, semep: false } },
+  { id: 2, nombre: "Juan Pablo Rojas", rut: "19.456.789-0", email: "juan@email.cl", telefono: "+56 9 7654 3210", fechaIngreso: "2026-02-01", estado: "pending_payment", curso: "Clase B", nroExpediente: "EXP-2026-0002", expediente: { ci: true, foto: true, medico: false, semep: false } },
+  { id: 3, nombre: "Ana Martínez Silva", rut: "17.890.123-4", email: "ana@email.cl", telefono: "+56 9 6543 2109", fechaIngreso: "2026-01-30", estado: "pending_documents", curso: "Clase B", nroExpediente: "EXP-2026-0003", expediente: { ci: false, foto: false, medico: false, semep: false } },
+  { id: 4, nombre: "Carlos Fernández", rut: "20.123.456-7", email: "carlos@email.cl", telefono: "+56 9 5432 1098", fechaIngreso: "2026-01-28", estado: "active", curso: "Clase B", nroExpediente: "EXP-2026-0004", expediente: { ci: true, foto: true, medico: true, semep: true } },
+  { id: 5, nombre: "Sofía Vargas López", rut: "18.567.890-1", email: "sofia@email.cl", telefono: "+56 9 4321 0987", fechaIngreso: "2026-01-25", estado: "inactive", curso: "Clase B", nroExpediente: "EXP-2026-0005", expediente: { ci: true, foto: false, medico: false, semep: false } },
 ];
+
+function getExpedienteStatus(exp: { ci: boolean; foto: boolean; medico: boolean; semep: boolean }) {
+  const docs = [exp.ci, exp.foto, exp.medico, exp.semep];
+  const total = docs.length;
+  const ok = docs.filter(Boolean).length;
+  if (ok === total) return { label: "Completo", class: "bg-green-100 text-green-800 border-green-200", icon: "🟢", count: `${ok}/${total}` };
+  if (ok === 0) return { label: "Pendiente", class: "bg-red-100 text-red-800 border-red-200", icon: "🔴", count: `${ok}/${total}` };
+  return { label: "Parcial", class: "bg-yellow-100 text-yellow-800 border-yellow-200", icon: "🟡", count: `${ok}/${total}` };
+}
 
 const estadoBadge: Record<string, { label: string; class: string }> = {
   active: { label: "Activo", class: "bg-green-100 text-green-800 border-green-200" },
@@ -35,17 +44,148 @@ const estadoBadge: Record<string, { label: string; class: string }> = {
     <span>/</span>
     <span class="text-gray-900 font-medium">Alumnos</span>
   </div>
-  <div class="flex items-center justify-between">
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
     <div>
       <h1 class="text-3xl font-semibold text-gray-900">Alumnos</h1>
       <p class="text-secondary mt-1">Listado de alumnos de la escuela</p>
     </div>
-    <Button href={`${basePath}/matricula/nueva/paso-1`} variant="primary">
-      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-      </svg>
-      Nueva Matrícula
-    </Button>
+    <div class="flex flex-wrap gap-2" x-data="{ showExpired: false }">
+      <!-- RF-054: Envío masivo de enlaces Zoom -->
+      <Button variant="secondary" onClick="enviarEnlaceZoom()">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+        </svg>
+        Enviar enlace Zoom
+      </Button>
+      <Button variant="secondary" onClick="registrarAsistenciaZoom()">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        Registrar asistencia
+      </Button>
+
+      <!-- RF-105: Historial de Ex-Alumnos -->
+      <Button variant="secondary" href="/secretaria/ex-alumnos">
+        📂 Ir a Historial de Ex-Alumnos
+      </Button>
+
+      <div class="relative">
+        <button
+          @click="showExpired = true"
+          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+        >
+          ⚠️ Alumnos por Vencer (5)
+        </button>
+
+        <!-- Modal RF-105 -->
+        <div
+          x-show="showExpired"
+          style="display: none;"
+          class="fixed inset-0 z-50 overflow-y-auto"
+          aria-labelledby="modal-title"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div
+              x-show="showExpired"
+              x-transition:enter="ease-out duration-300"
+              x-transition:enter-start="opacity-0"
+              x-transition:enter-end="opacity-100"
+              x-transition:leave="ease-in duration-200"
+              x-transition:leave-start="opacity-100"
+              x-transition:leave-end="opacity-0"
+              class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+              aria-hidden="true"
+              @click="showExpired = false"
+            ></div>
+
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div
+              x-show="showExpired"
+              x-transition:enter="ease-out duration-300"
+              x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+              x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+              x-transition:leave="ease-in duration-200"
+              x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+              x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+              class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+            >
+              <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="sm:flex sm:items-start">
+                  <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                      ⚠️ Alumnos por Vencer
+                    </h3>
+                    <div class="mt-4">
+                      <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                          <tr>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Curso</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vence</th>
+                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Días</th>
+                          </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                          <tr>
+                            <td class="px-3 py-2 text-sm text-gray-900">Juan Pérez</td>
+                            <td class="px-3 py-2 text-sm text-gray-500">Clase B</td>
+                            <td class="px-3 py-2 text-sm text-gray-500">2026-03-01</td>
+                            <td class="px-3 py-2 text-sm font-bold text-red-600">5</td>
+                          </tr>
+                          <tr>
+                            <td class="px-3 py-2 text-sm text-gray-900">Ana López</td>
+                            <td class="px-3 py-2 text-sm text-gray-500">Clase C</td>
+                            <td class="px-3 py-2 text-sm text-gray-500">2026-03-02</td>
+                            <td class="px-3 py-2 text-sm font-bold text-red-600">6</td>
+                          </tr>
+                           <tr>
+                            <td class="px-3 py-2 text-sm text-gray-900">Pedro Silva</td>
+                            <td class="px-3 py-2 text-sm text-gray-500">Profesional</td>
+                            <td class="px-3 py-2 text-sm text-gray-500">2026-03-03</td>
+                            <td class="px-3 py-2 text-sm font-bold text-red-600">7</td>
+                          </tr>
+                           <tr>
+                            <td class="px-3 py-2 text-sm text-gray-900">Maria Rojas</td>
+                            <td class="px-3 py-2 text-sm text-gray-500">Clase B</td>
+                            <td class="px-3 py-2 text-sm text-gray-500">2026-03-04</td>
+                            <td class="px-3 py-2 text-sm font-bold text-red-600">8</td>
+                          </tr>
+                           <tr>
+                            <td class="px-3 py-2 text-sm text-gray-900">Diego Soto</td>
+                            <td class="px-3 py-2 text-sm text-gray-500">Clase B</td>
+                            <td class="px-3 py-2 text-sm text-gray-500">2026-03-05</td>
+                            <td class="px-3 py-2 text-sm font-bold text-red-600">9</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <button
+                  type="button"
+                  class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"
+                  @click="showExpired = false"
+                >
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <Button href={`${basePath}/matricula/nueva/paso-1`} variant="primary">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        Nueva Matrícula
+      </Button>
+    </div>
   </div>
 </div>
 
@@ -73,7 +213,7 @@ const estadoBadge: Record<string, { label: string; class: string }> = {
 <Card class="mb-6">
   <div class="flex flex-col md:flex-row gap-4">
     <div class="flex-1">
-      <Input placeholder="Buscar por nombre o RUT..." type="search" class="w-full" />
+      <Input placeholder="Buscar por nombre, RUT o N° Expediente..." type="search" class="w-full" />
     </div>
     <div class="flex gap-2">
       <select
@@ -95,6 +235,16 @@ const estadoBadge: Record<string, { label: string; class: string }> = {
         <option value="clase_b_sence">Clase B + SENCE</option>
         <option value="profesional">Profesional</option>
       </select>
+      <!-- RF-085: Filtro expediente -->
+      <select
+        class="h-11 px-4 text-sm bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-1"
+        aria-label="Filtrar por expediente"
+      >
+        <option value="">Expediente: Todos</option>
+        <option value="completo">🟢 Completo</option>
+        <option value="parcial">🟡 Parcial</option>
+        <option value="pendiente">🔴 Pendiente</option>
+      </select>
     </div>
   </div>
 </Card>
@@ -107,9 +257,11 @@ const estadoBadge: Record<string, { label: string; class: string }> = {
         <tr class="border-b border-gray-200">
           <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase tracking-wide">Alumno</th>
           <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase tracking-wide">RUT</th>
+          <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase tracking-wide">Nº Exp.</th>
           <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase tracking-wide">Curso</th>
           <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase tracking-wide">Fecha ingreso</th>
           <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase tracking-wide">Estado</th>
+          <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase tracking-wide">Expediente</th>
           <th class="text-right py-3 px-4 text-xs font-semibold text-gray-700 uppercase tracking-wide">Acciones</th>
         </tr>
       </thead>
@@ -128,6 +280,7 @@ const estadoBadge: Record<string, { label: string; class: string }> = {
               </div>
             </td>
             <td class="py-3 px-4 text-sm text-gray-700 font-mono">{a.rut}</td>
+            <td class="py-3 px-4 text-xs text-gray-500 font-mono">{a.nroExpediente}</td>
             <td class="py-3 px-4 text-sm text-gray-700">{a.curso}</td>
             <td class="py-3 px-4 text-sm text-secondary">{a.fechaIngreso}</td>
             <td class="py-3 px-4">
@@ -135,10 +288,23 @@ const estadoBadge: Record<string, { label: string; class: string }> = {
                 {estadoBadge[a.estado].label}
               </span>
             </td>
+            <!-- RF-085: Expediente status -->
+            <td class="py-3 px-4">
+              {(() => {
+                const exp = getExpedienteStatus(a.expediente);
+                return (
+                  <span class={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border ${exp.class}`}
+                    title={`CI: ${a.expediente.ci ? '✓' : '✗'} | Foto: ${a.expediente.foto ? '✓' : '✗'} | Médico: ${a.expediente.medico ? '✓' : '✗'} | SEMEP: ${a.expediente.semep ? '✓' : '✗'}`}
+                  >
+                    {exp.icon} {exp.count}
+                  </span>
+                );
+              })()}
+            </td>
             <td class="py-3 px-4 text-right">
               <div class="flex items-center justify-end gap-2">
                 <a
-                  href={`${basePath}/alumno/dashboard`}
+                  href={`${basePath}/alumnos/${a.id}/ficha`}
                   class="p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
                   title="Ver ficha"
                 >
@@ -156,6 +322,17 @@ const estadoBadge: Record<string, { label: string; class: string }> = {
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                   </svg>
                 </a>
+                <!-- RF-086: Exportar Ficha PDF -->
+                <button
+                  type="button"
+                  class="p-1.5 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded transition-colors"
+                  title="Exportar Ficha Matrícula PDF"
+                  onclick={`exportarFicha(${a.id})`}
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                  </svg>
+                </button>
               </div>
             </td>
           </tr>
@@ -175,6 +352,61 @@ const estadoBadge: Record<string, { label: string; class: string }> = {
     </div>
   </div>
 </Card>
+
+<script>
+  /**
+   * RF-054: Envío masivo de enlace Zoom para clases teóricas Clase B
+   */
+  function enviarEnlaceZoom() {
+    const confirmacion = confirm(
+      '📹 Enviar Enlace de Zoom - Clase Teórica\n\n' +
+      'Esta acción enviará un correo con el enlace de Zoom a todos los alumnos activos de Clase B.\n\n' +
+      '¿Confirmar envío masivo?'
+    );
+
+    if (confirmacion) {
+      alert(
+        '✓ Enlaces enviados exitosamente\n\n' +
+        '• 183 correos enviados a alumnos activos\n' +
+        '• Enlace: https://zoom.us/j/123456789\n' +
+        '• Fecha: Hoy a las 15:00 hrs\n\n' +
+        'Los alumnos recibirán el enlace en su correo registrado.\n\n' +
+        '[Mockup - RF-054]'
+      );
+    }
+  }
+
+  /**
+   * RF-054: Registro de asistencia a clases teóricas basado en reporte de Zoom
+   */
+  function registrarAsistenciaZoom() {
+    alert(
+      '📋 Registrar Asistencia - Clase Teórica Zoom\n\n' +
+      'Pasos para registrar asistencia:\n\n' +
+      '1. Descarga el reporte de asistencia desde Zoom\n' +
+      '2. Revisa la lista de nombres/correos de asistentes\n' +
+      '3. Marca manualmente quiénes asistieron en esta pantalla\n\n' +
+      'Esta funcionalidad abrirá un modal donde podrás:\n' +
+      '• Ver lista de alumnos de la clase\n' +
+      '• Marcar checkboxes de asistencia\n' +
+      '• Guardar registro de asistencia\n\n' +
+      '[Mockup - RF-054]\n\n' +
+      'En producción, esto se registrará en la base de datos y actualizará el progreso de clases teóricas de cada alumno.'
+    );
+  }
+
+  /**
+   * RF-086: Exportar Ficha de Matrícula en PDF
+   */
+  function exportarFicha(id: number) {
+    alert(`📄 Exportando Ficha de Matrícula (ID: ${id})...\n\nSe generará un PDF con los datos del alumno y el contrato firmado para impresión física.`);
+  }
+
+  // Hacer funciones globales para que funcionen con onclick
+  (window as any).enviarEnlaceZoom = enviarEnlaceZoom;
+  (window as any).registrarAsistenciaZoom = registrarAsistenciaZoom;
+  (window as any).exportarFicha = exportarFicha;
+</script>
 
 <style>
   select {

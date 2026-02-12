@@ -74,14 +74,31 @@ const menuItems: {
           label: "Cuadratura Caja",
           icon: "dollar",
         },
-        { href: "/usuarios", label: "Usuarios", icon: "shield" },
+        { href: "/secretarias", label: "Secretarias", icon: "shield" },
+        { href: "/instructores", label: "Instructores", icon: "users" },
+        {
+          href: "/contabilidad/reportes",
+          label: "Reportes Contables",
+          icon: "check",
+        },
+        {
+          href: "/contabilidad/cursos-singulares",
+          label: "Cursos Singulares",
+          icon: "check",
+        },
+        {
+          href: "/contabilidad/anticipos",
+          label: "Anticipos Instructores",
+          icon: "dollar",
+        },
         { href: "/flota/vehiculos", label: "Flota", icon: "car" },
+        { href: "/libro-de-clases", label: "Libro de Clases", icon: "clipboard" },
       ],
     },
     {
       group: "Reportes",
       items: [
-        { href: "/usuarios/auditoria", label: "Auditoría", icon: "clock" },
+        { href: "/auditoria", label: "Auditoría", icon: "clock" },
         { href: "/reportes", label: "Reportes", icon: "check" },
       ],
     },
@@ -109,6 +126,7 @@ const menuItems: {
       items: [
         { href: "/instructor/horario", label: "Mi Horario", icon: "calendar" },
         { href: "/instructor/alumnos", label: "Mis Alumnos", icon: "users" },
+        { href: "/instructor/ensayos-teoricos", label: "Ensayos Teóricos", icon: "check" },
         { href: "/instructor/liquidacion", label: "Mis Horas", icon: "clock" },
       ],
     },
@@ -136,6 +154,7 @@ const menuItems: {
       items: [
         { href: "/secretaria/matricula", label: "Matrículas", icon: "users" },
         { href: "/secretaria/alumnos", label: "Base de Alumnos", icon: "user" },
+        { href: "/secretaria/comunicaciones", label: "Comunicaciones", icon: "user" },
         {
           href: "/secretaria/certificados",
           label: "Certificados",
@@ -153,12 +172,29 @@ const menuItems: {
       items: [
         { href: "/secretaria/agenda", label: "Agenda", icon: "calendar-check" },
         { href: "/secretaria/asistencia", label: "Asistencia", icon: "check" },
+        { href: "/secretaria/instructores", label: "Instructores", icon: "users" },
         { href: "/secretaria/pagos", label: "Pagos", icon: "dollar" },
         {
           href: "/secretaria/contabilidad/cuadratura",
           label: "Cuadratura Caja",
           icon: "dollar",
         },
+        {
+          href: "/secretaria/contabilidad/reportes",
+          label: "Reportes Contables",
+          icon: "check",
+        },
+        {
+          href: "/contabilidad/cursos-singulares",
+          label: "Cursos Singulares",
+          icon: "check",
+        },
+        {
+          href: "/contabilidad/anticipos",
+          label: "Anticipos Instructores",
+          icon: "dollar",
+        },
+        { href: "/libro-de-clases", label: "Libro de Clases", icon: "clipboard" },
       ],
     },
   ],
@@ -173,7 +209,6 @@ const menuItems: {
           icon: "bell",
           badge: 2,
         },
-        { href: "/alumno/progreso", label: "Mi Progreso", icon: "check" },
         { href: "/alumno/certificado", label: "Mi Certificado", icon: "check" },
       ],
     },
@@ -194,9 +229,7 @@ const menuItems: {
     },
     {
       group: "Pagos",
-      items: [
-        { href: "/alumno/pagos", label: "Mis Pagos", icon: "dollar" },
-      ],
+      items: [{ href: "/alumno/pagos", label: "Mis Pagos", icon: "dollar" }],
     },
   ],
 };
@@ -218,6 +251,7 @@ const icons = {
     "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4",
   check: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z",
   clock: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z",
+  clipboard: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2",
 };
 
 const currentMenu = menuItems[userRole];
@@ -435,7 +469,7 @@ const ayudaHref =
 </div>
 
 <script is:inline>
-  (function() {
+  (function () {
     // Sidebar toggle functionality
     const sidebar = document.querySelector("[data-sidebar]");
     const overlay = document.querySelector("[data-sidebar-overlay]");
@@ -479,7 +513,7 @@ const ayudaHref =
       schoolSelectorInitialized = true;
 
       // Toggle dropdown al hacer click en el botón
-      button.onclick = function(e) {
+      button.onclick = function (e) {
         e.stopPropagation();
         const isHidden = dropdown.classList.contains("hidden");
 
@@ -497,7 +531,7 @@ const ayudaHref =
       // Seleccionar opción
       const options = dropdown.querySelectorAll(".school-option");
       options.forEach((option) => {
-        option.onclick = function(e) {
+        option.onclick = function (e) {
           e.stopPropagation();
           const name = option.getAttribute("data-school-name");
           if (name && label) {
@@ -510,7 +544,7 @@ const ayudaHref =
       });
 
       // Cerrar al hacer clic fuera
-      document.addEventListener("click", function() {
+      document.addEventListener("click", function () {
         dropdown.classList.add("hidden");
         button.setAttribute("aria-expanded", "false");
         if (chevron) chevron.classList.remove("rotate-180");
@@ -525,7 +559,7 @@ const ayudaHref =
     }
 
     // Reiniciar después de transiciones de página
-    document.addEventListener("astro:page-load", function() {
+    document.addEventListener("astro:page-load", function () {
       schoolSelectorInitialized = false;
       setupSchoolSelector();
     });

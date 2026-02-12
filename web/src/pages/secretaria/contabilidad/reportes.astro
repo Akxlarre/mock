@@ -1,0 +1,14 @@
+---
+/**
+ * Reportes Contables (ruta secretaria)
+ * RF-030: Reporte contable mensual exportable a PDF y Excel
+ * RF-031: Total Neto por rango de fechas
+ */
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+import ReportesContent from "../../../components/contabilidad/ReportesContent.astro";
+import { ESCUELA_ACTUAL } from "../../../lib/mockData";
+---
+
+<DashboardLayout title="Reportes Contables" escuela={ESCUELA_ACTUAL}>
+    <ReportesContent basePath="/secretaria" />
+</DashboardLayout>

@@ -1,0 +1,383 @@
+---
+/**
+ * Horas Trabajadas - Vista Administrador
+ * Consolidado de horas de todos los instructores por mes
+ */
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import Card from "../../components/ui/Card.astro";
+import Button from "../../components/ui/Button.astro";
+import { INSTRUCTORES, getTotalesHorasMes, getHorasComparison } from "../../lib/mockInstructors";
+import { ESCUELA_ACTUAL } from "../../lib/mockData";
+
+// Mes actual y anterior
+const mesActual = "febrero2026";
+const mesAnterior = "enero2026";
+const mesActualDisplay = "Febrero 2026";
+
+// Calcular totales
+const totales = getTotalesHorasMes(mesActual);
+
+// Preparar datos de instructores con comparativa
+const instructoresConHoras = INSTRUCTORES.map((instructor) => {
+    const horasMes = instructor.horasMensuales[mesActual] || {
+        teoricas: 0,
+        practicas: 0,
+        totalEquivalente: 0,
+    };
+
+    const comparativa = getHorasComparison(instructor, mesActual, mesAnterior);
+
+    return {
+        ...instructor,
+        horasMes,
+        comparativa,
+    };
+});
+---
+
+<DashboardLayout
+    title="Horas Trabajadas - Instructores"
+    escuela={ESCUELA_ACTUAL}
+>
+    <!-- Breadcrumbs -->
+    <div class="mb-6">
+        <div class="flex items-center gap-2 text-sm text-secondary mb-2">
+            <a href="/dashboard" class="hover:text-gray-900">Inicio</a>
+            <span>/</span>
+            <a href="/instructores" class="hover:text-gray-900">Instructores</a>
+            <span>/</span>
+            <span class="text-gray-900 font-medium">Horas Trabajadas</span>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <div class="mb-8">
+        <div
+            class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+        >
+            <div>
+                <h1
+                    class="text-3xl font-semibold text-gray-900 tracking-tight"
+                >
+                    Horas Trabajadas
+                </h1>
+                <p class="text-secondary mt-1">{mesActualDisplay}</p>
+            </div>
+
+            <!-- Selector de mes (mockup, sin funcionalidad) -->
+            <select
+                class="h-11 px-4 text-sm bg-white border border-gray-300 rounded-md shadow-sm"
+            >
+                <option selected>Febrero 2026</option>
+                <option>Enero 2026</option>
+                <option>Diciembre 2025</option>
+                <option>Noviembre 2025</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Cards de estadísticas rápidas -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <!-- Total horas del mes -->
+        <Card class="p-6">
+            <div class="flex items-center gap-3 mb-2">
+                <div
+                    class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center"
+                >
+                    <span class="text-xl">⏱️</span>
+                </div>
+                <div>
+                    <p class="text-xs text-secondary">Total Horas Equiv.</p>
+                    <p class="text-2xl font-bold text-gray-900">
+                        {totales.totalEquivalente}
+                    </p>
+                </div>
+            </div>
+            <p class="text-xs text-muted">Suma total del mes</p>
+        </Card>
+
+        <!-- Promedio por instructor -->
+        <Card class="p-6">
+            <div class="flex items-center gap-3 mb-2">
+                <div
+                    class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"
+                >
+                    <span class="text-xl">📊</span>
+                </div>
+                <div>
+                    <p class="text-xs text-secondary">
+                        Promedio por Instructor
+                    </p>
+                    <p class="text-2xl font-bold text-gray-900">
+                        {totales.promedioEquivalente}h
+                    </p>
+                </div>
+            </div>
+            <p class="text-xs text-muted">Horas equivalentes</p>
+        </Card>
+
+        <!-- Instructores activos -->
+        <Card class="p-6">
+            <div class="flex items-center gap-3 mb-2">
+                <div
+                    class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center"
+                >
+                    <span class="text-xl">👥</span>
+                </div>
+                <div>
+                    <p class="text-xs text-secondary">Instructores Activos</p>
+                    <p class="text-2xl font-bold text-gray-900">
+                        {totales.instructoresActivos}
+                    </p>
+                </div>
+            </div>
+            <p class="text-xs text-muted">
+                Del total de {INSTRUCTORES.length}
+            </p>
+        </Card>
+    </div>
+
+    <!-- Filtros y búsqueda -->
+    <Card class="mb-6 p-4">
+        <div
+            class="flex flex-col sm:flex-row items-start sm:items-center gap-4"
+        >
+            <span class="text-sm font-medium text-gray-700">Filtros:</span>
+
+            <!-- Filtro por tipo -->
+            <select
+                class="h-9 px-3 text-sm bg-white border border-gray-300 rounded-md"
+            >
+                <option selected>Todos los tipos</option>
+                <option>Teórico</option>
+                <option>Práctico</option>
+                <option>Ambos</option>
+            </select>
+
+            <!-- Filtro por estado -->
+            <select
+                class="h-9 px-3 text-sm bg-white border border-gray-300 rounded-md"
+            >
+                <option selected>Todos los estados</option>
+                <option>Activos</option>
+                <option>Inactivos</option>
+            </select>
+
+            <!-- Búsqueda -->
+            <div class="flex-1 sm:ml-auto">
+                <input
+                    type="text"
+                    placeholder="Buscar instructor..."
+                    class="w-full h-9 px-3 text-sm bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-black focus:ring-offset-1 focus:border-transparent"
+                />
+            </div>
+        </div>
+    </Card>
+
+    <!-- Tabla consolidada -->
+    <Card class="overflow-hidden p-0">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="bg-gray-50 border-b border-gray-200">
+                        <th
+                            class="font-semibold text-sm py-3 px-4 text-left text-gray-900"
+                        >
+                            Nombre
+                        </th>
+                        <th
+                            class="font-semibold text-sm py-3 px-4 text-left text-gray-900"
+                        >
+                            Tipo
+                        </th>
+                        <th
+                            class="font-semibold text-sm py-3 px-4 text-center text-gray-900"
+                        >
+                            Horas Teóricas
+                        </th>
+                        <th
+                            class="font-semibold text-sm py-3 px-4 text-center text-gray-900"
+                        >
+                            Sesiones Prácticas
+                        </th>
+                        <th
+                            class="font-semibold text-sm py-3 px-4 text-center text-gray-900"
+                        >
+                            Total Horas Equiv.
+                        </th>
+                        <th
+                            class="font-semibold text-sm py-3 px-4 text-center text-gray-900"
+                        >
+                            vs Mes Anterior
+                        </th>
+                        <th
+                            class="font-semibold text-sm py-3 px-4 text-right text-gray-900"
+                        >
+                            Acciones
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {
+                        instructoresConHoras.map((instructor) => (
+                            <tr class="hover:bg-gray-50 border-b border-gray-200 transition-colors">
+                                <!-- Nombre -->
+                                <td class="py-4 px-4">
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900">
+                                            {instructor.nombre}
+                                        </div>
+                                        <div class="text-xs text-gray-500">
+                                            {instructor.rut}
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Tipo -->
+                                <td class="py-4 px-4">
+                                    <span class="text-sm text-gray-700 capitalize">
+                                        {instructor.tipo}
+                                    </span>
+                                </td>
+
+                                <!-- Horas Teóricas -->
+                                <td class="py-4 px-4 text-center">
+                                    {instructor.tipo !== "practico" ? (
+                                        <span class="text-sm font-semibold text-blue-600">
+                                            {instructor.horasMes.teoricas}h
+                                        </span>
+                                    ) : (
+                                        <span class="text-xs text-gray-400">
+                                            N/A
+                                        </span>
+                                    )}
+                                </td>
+
+                                <!-- Sesiones Prácticas -->
+                                <td class="py-4 px-4 text-center">
+                                    {instructor.tipo !== "teorico" ? (
+                                        <span class="text-sm font-semibold text-green-600">
+                                            {instructor.horasMes.practicas}
+                                        </span>
+                                    ) : (
+                                        <span class="text-xs text-gray-400">
+                                            N/A
+                                        </span>
+                                    )}
+                                </td>
+
+                                <!-- Total Horas Equivalentes -->
+                                <td class="py-4 px-4 text-center">
+                                    <span class="text-sm font-bold text-gray-900">
+                                        {instructor.horasMes.totalEquivalente}h
+                                    </span>
+                                </td>
+
+                                <!-- Comparativa -->
+                                <td class="py-4 px-4 text-center">
+                                    {instructor.comparativa.direccion === "up" ? (
+                                        <div class="inline-flex items-center gap-1 text-sm font-medium text-green-600">
+                                            <svg
+                                                class="w-4 h-4"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M5 10l7-7m0 0l7 7m-7-7v18"
+                                                />
+                                            </svg>
+                                            <span>
+                                                +{instructor.comparativa.porcentaje}%
+                                            </span>
+                                        </div>
+                                    ) : instructor.comparativa.direccion === "down" ? (
+                                        <div class="inline-flex items-center gap-1 text-sm font-medium text-red-600">
+                                            <svg
+                                                class="w-4 h-4"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                                                />
+                                            </svg>
+                                            <span>
+                                                -{instructor.comparativa.porcentaje}%
+                                            </span>
+                                        </div>
+                                    ) : (
+                                        <span class="text-xs text-gray-500">
+                                            Sin cambio
+                                        </span>
+                                    )}
+                                </td>
+
+                                <!-- Acciones -->
+                                <td class="py-4 px-4 text-right">
+                                    <Button
+                                        variant="secondary"
+                                        class="text-xs h-8 px-3"
+                                        href={`/instructores/${instructor.id}/horas`}
+                                    >
+                                        Ver detalle
+                                    </Button>
+                                </td>
+                            </tr>
+                        ))
+                    }
+                </tbody>
+
+                <!-- Totales al pie -->
+                <tfoot>
+                    <tr class="bg-gray-100 border-t-2 border-gray-300">
+                        <td
+                            colspan="2"
+                            class="py-4 px-4 text-sm font-bold text-gray-900"
+                        >
+                            TOTALES
+                        </td>
+                        <td class="py-4 px-4 text-center">
+                            <span class="text-sm font-bold text-blue-700">
+                                {totales.totalTeoricas}h
+                            </span>
+                        </td>
+                        <td class="py-4 px-4 text-center">
+                            <span class="text-sm font-bold text-green-700">
+                                {totales.totalPracticas}
+                            </span>
+                        </td>
+                        <td class="py-4 px-4 text-center">
+                            <span class="text-sm font-bold text-gray-900">
+                                {totales.totalEquivalente}h
+                            </span>
+                        </td>
+                        <td colspan="2"></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </Card>
+</DashboardLayout>
+
+<style>
+    select,
+    input {
+        appearance: none;
+    }
+
+    select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.5rem center;
+        background-size: 1.5em 1.5em;
+        padding-right: 2.5rem;
+    }
+</style>

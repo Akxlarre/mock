@@ -1,36 +1,323 @@
 ---
-import DashboardLayout from '../../layouts/DashboardLayout.astro';
-import Card from '../../components/ui/Card.astro';
-import Button from '../../components/ui/Button.astro';
-import { instructores, ESCUELA_ACTUAL } from '../../lib/mockData';
+/**
+ * Instructores - Listado completo (RF-041, RF-042)
+ * Muestra instructores con licencia, vehículo y estado
+ */
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import Card from "../../components/ui/Card.astro";
+import Button from "../../components/ui/Button.astro";
+import { INSTRUCTORES } from "../../lib/mockInstructors";
+import { ESCUELA_ACTUAL } from "../../lib/mockData";
+
+// Función helper para badge de licencia
+function getLicenciaBadge(estadoValidacion: string) {
+  switch (estadoValidacion) {
+    case "vigente":
+      return {
+        text: "Vigente",
+        class: "bg-green-100 text-green-800",
+      };
+    case "por_vencer":
+      return {
+        text: "Por vencer",
+        class: "bg-yellow-100 text-yellow-800",
+      };
+    case "vencida":
+      return {
+        text: "Vencida",
+        class: "bg-red-100 text-red-800",
+      };
+    default:
+      return {
+        text: "Desconocido",
+        class: "bg-gray-100 text-gray-800",
+      };
+  }
+}
 ---
-<DashboardLayout title="Instructores - Escuela de Conductores" escuela={ESCUELA_ACTUAL}>
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-    <h1 class="text-2xl font-semibold text-base-content">Instructores</h1>
-    <Button variant="primary">Nuevo instructor</Button>
+
+<DashboardLayout
+  title="Instructores - Escuela de Conductores"
+  escuela={ESCUELA_ACTUAL}
+>
+  <!-- Header -->
+  <div class="mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-semibold text-gray-900 tracking-tight">
+          Instructores
+        </h1>
+        <p class="text-secondary mt-1">
+          Gestión de instructores Clase B con licencias y vehículos
+        </p>
+      </div>
+      <div class="flex items-center gap-3">
+        <Button variant="secondary" href="/instructores/horas">
+          <svg
+            class="w-4 h-4 mr-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+            ></path>
+          </svg>
+          Horas trabajadas
+        </Button>
+        <Button variant="primary" href="/instructores/crear">
+          <svg
+            class="w-4 h-4 mr-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+            ></path>
+          </svg>
+          Nuevo instructor
+        </Button>
+      </div>
+    </div>
   </div>
+
+  <!-- Filtros rápidos -->
+  <Card class="mb-4">
+    <div class="flex items-center gap-4">
+      <span class="text-sm font-medium text-gray-700">Filtros:</span>
+      <button
+        class="px-3 py-1.5 text-xs font-medium rounded-md bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+        onclick="filterAll()"
+      >
+        Todos ({INSTRUCTORES.length})
+      </button>
+      <button
+        class="px-3 py-1.5 text-xs font-medium rounded-md bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+        onclick="filterActivos()"
+      >
+        Activos ({INSTRUCTORES.filter((i) => i.activo).length})
+      </button>
+      <button
+        class="px-3 py-1.5 text-xs font-medium rounded-md bg-yellow-100 border border-yellow-300 text-yellow-800 hover:bg-yellow-200 transition-colors"
+        onclick="filterPorVencer()"
+      >
+        <svg
+          class="w-3 h-3 inline mr-1"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+          ></path>
+        </svg>
+        Licencia por vencer ({
+          INSTRUCTORES.filter((i) => i.licencia.estadoValidacion === "por_vencer")
+            .length
+        })
+      </button>
+    </div>
+  </Card>
+
+  <!-- Tabla de Instructores -->
   <Card class="overflow-hidden p-0">
     <div class="overflow-x-auto">
-      <table class="table">
+      <table class="w-full">
         <thead>
-          <tr class="bg-base-200 text-base-content">
-            <th class="font-semibold text-sm py-3 px-4">Nombre</th>
-            <th class="font-semibold text-sm py-3 px-4">Email</th>
-            <th class="font-semibold text-sm py-3 px-4">Clases hoy</th>
-            <th class="font-semibold text-sm py-3 px-4">Estado</th>
+          <tr class="bg-gray-50 border-b border-gray-200">
+            <th class="font-semibold text-sm py-3 px-4 text-left text-gray-900">
+              Nombre
+            </th>
+            <th class="font-semibold text-sm py-3 px-4 text-left text-gray-900">
+              RUT
+            </th>
+            <th class="font-semibold text-sm py-3 px-4 text-left text-gray-900">
+              Licencia
+            </th>
+            <th class="font-semibold text-sm py-3 px-4 text-left text-gray-900">
+              Vehículo
+            </th>
+            <th class="font-semibold text-sm py-3 px-4 text-left text-gray-900">
+              Tipo
+            </th>
+            <th class="font-semibold text-sm py-3 px-4 text-left text-gray-900">
+              Clases activas
+            </th>
+            <th class="font-semibold text-sm py-3 px-4 text-left text-gray-900">
+              Estado
+            </th>
+            <th class="font-semibold text-sm py-3 px-4 text-right text-gray-900">
+              Acciones
+            </th>
           </tr>
         </thead>
         <tbody>
-          {instructores.map((i) => (
-            <tr class="hover:bg-base-200/80 border-b border-base-300/50">
-              <td class="py-4 px-4">{i.nombre}</td>
-              <td class="py-4 px-4">{i.email}</td>
-              <td class="py-4 px-4">{i.clasesHoy}</td>
-              <td class="py-4 px-4"><span class="badge badge-sm badge-success">{i.estado}</span></td>
-            </tr>
-          ))}
+          {
+            INSTRUCTORES.map((instructor) => {
+              const licenciaBadge = getLicenciaBadge(
+                instructor.licencia.estadoValidacion
+              );
+              return (
+                <tr
+                  class="hover:bg-gray-50 border-b border-gray-200 transition-colors instructor-row"
+                  data-activo={instructor.activo}
+                  data-licencia={instructor.licencia.estadoValidacion}
+                >
+                  <td class="py-4 px-4">
+                    <div>
+                      <div class="text-sm font-medium text-gray-900">
+                        {instructor.nombre}
+                      </div>
+                      <div class="text-xs text-gray-500">
+                        {instructor.email}
+                      </div>
+                    </div>
+                  </td>
+                  <td class="py-4 px-4 text-sm text-gray-700">
+                    {instructor.rut}
+                  </td>
+                  <td class="py-4 px-4">
+                    <span
+                      class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${licenciaBadge.class}`}
+                    >
+                      {licenciaBadge.text}
+                    </span>
+                    <div class="text-xs text-gray-500 mt-1">
+                      Vence: {instructor.licencia.fechaVencimiento}
+                    </div>
+                  </td>
+                  <td class="py-4 px-4">
+                    {instructor.vehiculoAsignado ? (
+                      <div>
+                        <div class="text-sm font-medium text-gray-900">
+                          {instructor.vehiculoAsignado.patente}
+                        </div>
+                        <div class="text-xs text-gray-500">
+                          {instructor.vehiculoAsignado.modelo}
+                        </div>
+                      </div>
+                    ) : (
+                      <span class="text-xs text-gray-400 italic">
+                        Sin asignar
+                      </span>
+                    )}
+                  </td>
+                  <td class="py-4 px-4">
+                    <span class="text-sm text-gray-700 capitalize">
+                      {instructor.tipo}
+                    </span>
+                  </td>
+                  <td class="py-4 px-4 text-center">
+                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-800 text-sm font-medium">
+                      {instructor.clasesActivas}
+                    </span>
+                  </td>
+                  <td class="py-4 px-4">
+                    {instructor.activo ? (
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Activo
+                      </span>
+                    ) : (
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        Inactivo
+                      </span>
+                    )}
+                  </td>
+                  <td class="py-4 px-4 text-right">
+                    <div class="flex items-center justify-end gap-2">
+                      <a
+                        href={`/instructores/${instructor.id}`}
+                        class="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                        title="Ver perfil"
+                      >
+                        <svg
+                          class="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                          />
+                        </svg>
+                      </a>
+                      <a
+                        href={`/instructores/${instructor.id}/editar`}
+                        class="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                        title="Editar"
+                      >
+                        <svg
+                          class="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                          />
+                        </svg>
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })
+          }
         </tbody>
       </table>
     </div>
   </Card>
 </DashboardLayout>
+
+<script>
+  // Filtros de instructores
+  function filterAll() {
+    const rows = document.querySelectorAll(".instructor-row");
+    rows.forEach((row) => {
+      (row as HTMLElement).style.display = "";
+    });
+  }
+
+  function filterActivos() {
+    const rows = document.querySelectorAll(".instructor-row");
+    rows.forEach((row) => {
+      const activo = (row as HTMLElement).dataset.activo === "true";
+      (row as HTMLElement).style.display = activo ? "" : "none";
+    });
+  }
+
+  function filterPorVencer() {
+    const rows = document.querySelectorAll(".instructor-row");
+    rows.forEach((row) => {
+      const licencia = (row as HTMLElement).dataset.licencia;
+      (row as HTMLElement).style.display = licencia === "por_vencer" ? "" : "none";
+    });
+  }
+
+  // Exponer funciones globalmente
+  (window as any).filterAll = filterAll;
+  (window as any).filterActivos = filterActivos;
+  (window as any).filterPorVencer = filterPorVencer;
+</script>

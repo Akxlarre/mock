@@ -1,0 +1,361 @@
+---
+/**
+ * ReplacementManager - Formulario para asignar instructor de reemplazo
+ * RF-044: Gestión de reemplazos (instructor real vs original)
+ */
+import { getActiveInstructors } from "../../lib/mockInstructors";
+
+interface PendingClass {
+  id: number;
+  alumno: string;
+  fecha: string;
+  hora: string;
+  tipo: string;
+}
+
+interface Props {
+  originalInstructorId: number;
+  originalInstructorName: string;
+  id?: string;
+}
+
+const { originalInstructorId, originalInstructorName, id = "replacementForm" } =
+  Astro.props;
+
+// Obtener instructores activos disponibles (excluyendo el original)
+const availableInstructors = getActiveInstructors().filter(
+  (i) => i.id !== originalInstructorId
+);
+
+// Mock de clases pendientes del instructor (en sistema real viene del backend)
+const clasesPendientes: PendingClass[] = [
+  {
+    id: 101,
+    alumno: "Juan Pérez",
+    fecha: "2025-02-12",
+    hora: "09:00",
+    tipo: "Práctica",
+  },
+  {
+    id: 102,
+    alumno: "María González",
+    fecha: "2025-02-12",
+    hora: "11:00",
+    tipo: "Práctica",
+  },
+  {
+    id: 103,
+    alumno: "Pedro Soto",
+    fecha: "2025-02-13",
+    hora: "14:00",
+    tipo: "Práctica",
+  },
+  {
+    id: 104,
+    alumno: "Ana Martínez",
+    fecha: "2025-02-14",
+    hora: "10:00",
+    tipo: "Práctica",
+  },
+  {
+    id: 105,
+    alumno: "Carlos Rojas",
+    fecha: "2025-02-15",
+    hora: "15:00",
+    tipo: "Práctica",
+  },
+];
+
+// Función helper para formatear fecha
+function formatearFecha(fecha: string): string {
+  const date = new Date(fecha);
+  return date.toLocaleDateString("es-CL", {
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+  });
+}
+---
+
+<div class="space-y-6">
+  <!-- Contexto del reemplazo -->
+  <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+    <div class="flex items-start gap-3">
+      <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
+        <svg
+          class="w-5 h-5 text-blue-600"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+      <div>
+        <h3 class="text-sm font-semibold text-blue-900 mb-1">
+          Asignar instructor de reemplazo
+        </h3>
+        <p class="text-xs text-blue-800">
+          El instructor de reemplazo tomará las clases seleccionadas de <strong
+            >{originalInstructorName}</strong
+          > durante el período especificado.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulario -->
+  <form id={id} class="space-y-5">
+    <!-- Instructor de reemplazo -->
+    <div class="w-full">
+      <label
+        class="block text-sm font-medium text-gray-700 mb-1.5"
+        for={`${id}-instructor`}
+      >
+        Instructor de reemplazo *
+      </label>
+      <select
+        id={`${id}-instructor`}
+        name="instructor_reemplazo"
+        required
+        class="h-11 px-4 w-full text-sm bg-white rounded-md border border-gray-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-900 appearance-none"
+        style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%236B7280%27%3E%3Cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M19 9l-7 7-7-7%27%3E%3C/path%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 0.5rem center; background-size: 1.5em 1.5em; padding-right: 2.5rem;"
+      >
+        <option value="">Seleccione instructor</option>
+        {
+          availableInstructors.map((instructor) => (
+            <option value={instructor.id} data-instructor-name={instructor.nombre}>
+              {instructor.nombre} - {instructor.tipo} (
+              {instructor.sede === "autoescuela-chillan"
+                ? "Autoescuela"
+                : "Conductores"}
+              )
+            </option>
+          ))
+        }
+      </select>
+      <p class="text-xs text-gray-500 mt-1.5">
+        Solo se muestran instructores activos disponibles
+      </p>
+    </div>
+
+    <!-- Rango de fechas -->
+    <div class="grid grid-cols-2 gap-4">
+      <div class="w-full">
+        <label
+          class="block text-sm font-medium text-gray-700 mb-1.5"
+          for={`${id}-fecha-inicio`}
+        >
+          Fecha de inicio *
+        </label>
+        <input
+          type="date"
+          id={`${id}-fecha-inicio`}
+          name="fecha_inicio"
+          required
+          min={new Date().toISOString().split("T")[0]}
+          class="h-11 px-4 w-full text-sm bg-white rounded-md border border-gray-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-900"
+        />
+      </div>
+      <div class="w-full">
+        <label
+          class="block text-sm font-medium text-gray-700 mb-1.5"
+          for={`${id}-fecha-fin`}
+        >
+          Fecha de fin *
+        </label>
+        <input
+          type="date"
+          id={`${id}-fecha-fin`}
+          name="fecha_fin"
+          required
+          min={new Date().toISOString().split("T")[0]}
+          class="h-11 px-4 w-full text-sm bg-white rounded-md border border-gray-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-900"
+        />
+      </div>
+    </div>
+
+    <!-- Clases afectadas -->
+    <div class="w-full">
+      <label class="block text-sm font-medium text-gray-700 mb-3">
+        Clases a reasignar *
+      </label>
+      <div
+        class="border border-gray-300 rounded-lg p-4 space-y-2 max-h-64 overflow-y-auto"
+      >
+        {
+          clasesPendientes.map((clase) => (
+            <label class="flex items-start gap-3 p-2 hover:bg-gray-50 rounded transition-colors cursor-pointer">
+              <input
+                type="checkbox"
+                name="clases_afectadas"
+                value={clase.id}
+                class="mt-1 w-4 h-4 rounded border-gray-300 text-gray-900 focus:ring-2 focus:ring-gray-900 focus:ring-offset-1"
+              />
+              <div class="flex-1">
+                <div class="flex items-center justify-between">
+                  <span class="text-sm font-medium text-gray-900">
+                    {clase.alumno}
+                  </span>
+                  <span class="text-xs text-gray-500">{clase.tipo}</span>
+                </div>
+                <p class="text-xs text-gray-500">
+                  {formatearFecha(clase.fecha)} - {clase.hora}
+                </p>
+              </div>
+            </label>
+          ))
+        }
+      </div>
+      <p class="text-xs text-gray-500 mt-1.5">
+        Selecciona las clases que tomará el instructor de reemplazo
+      </p>
+    </div>
+
+    <!-- Motivo -->
+    <div class="w-full">
+      <label
+        class="block text-sm font-medium text-gray-700 mb-1.5"
+        for={`${id}-motivo`}
+      >
+        Motivo del reemplazo *
+      </label>
+      <textarea
+        id={`${id}-motivo`}
+        name="motivo"
+        required
+        rows="3"
+        placeholder="Ej: Licencia médica por intervención quirúrgica"
+        class="px-4 py-3 w-full text-sm bg-white rounded-md border border-gray-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-900 placeholder:text-gray-400 resize-none"
+      ></textarea>
+      <p class="text-xs text-gray-500 mt-1.5">
+        Describe el motivo por el cual se necesita un reemplazo
+      </p>
+    </div>
+
+    <!-- Botones -->
+    <div class="flex gap-3 pt-4 border-t border-gray-200">
+      <button
+        type="button"
+        id={`${id}-cancel`}
+        class="inline-flex items-center justify-center h-11 px-4 text-sm font-medium rounded-md bg-white border border-gray-300 text-gray-900 hover:bg-gray-50 hover:border-gray-400 shadow-sm transition-all duration-200"
+      >
+        Cancelar
+      </button>
+      <button
+        type="submit"
+        class="inline-flex items-center justify-center h-11 px-4 text-sm font-medium rounded-md bg-gray-900 text-white hover:bg-gray-800 shadow-sm transition-all duration-200"
+      >
+        <svg
+          class="w-4 h-4 mr-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        Asignar reemplazo
+      </button>
+    </div>
+  </form>
+</div>
+
+<script define:vars={{ originalInstructorName, id }}>
+  const form = document.getElementById(id);
+
+  // Validación de fechas
+  const fechaInicio = document.getElementById(`${id}-fecha-inicio`);
+  const fechaFin = document.getElementById(`${id}-fecha-fin`);
+
+  if (fechaInicio && fechaFin) {
+    fechaInicio.addEventListener("change", () => {
+      if (fechaInicio.value) {
+        fechaFin.min = fechaInicio.value;
+        if (fechaFin.value && fechaFin.value < fechaInicio.value) {
+          fechaFin.value = fechaInicio.value;
+        }
+      }
+    });
+  }
+
+  // Submit del formulario
+  if (form) {
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      // Validar que se haya seleccionado al menos una clase
+      const clasesSeleccionadas = document.querySelectorAll(
+        'input[name="clases_afectadas"]:checked'
+      );
+
+      if (clasesSeleccionadas.length === 0) {
+        alert(
+          "⚠️ Error de validación\n\nDebes seleccionar al menos una clase para reasignar."
+        );
+        return;
+      }
+
+      // Obtener datos del formulario
+      const formData = new FormData(form);
+      const instructorSelect = document.getElementById(`${id}-instructor`);
+      const selectedOption =
+        instructorSelect.options[instructorSelect.selectedIndex];
+      const reemplazoNombre =
+        selectedOption.getAttribute("data-instructor-name");
+      const motivo = formData.get("motivo");
+      const fechaInicioVal = formData.get("fecha_inicio");
+      const fechaFinVal = formData.get("fecha_fin");
+
+      // Confirmación
+      const message = `✓ Reemplazo asignado exitosamente
+
+Instructor original: ${originalInstructorName}
+Instructor reemplazo: ${reemplazoNombre}
+Período: ${fechaInicioVal} al ${fechaFinVal}
+Clases reasignadas: ${clasesSeleccionadas.length}
+Motivo: ${motivo}
+
+El instructor de reemplazo ha sido notificado y las clases aparecerán en su horario.`;
+
+      alert(message);
+
+      // Redirect o cerrar modal (dependiendo del contexto)
+      if (window.location.pathname.includes("/reemplazar")) {
+        // Si estamos en la página dedicada, redirect al perfil
+        const instructorId = window.location.pathname.split("/")[2];
+        window.location.href = `/instructores/${instructorId}`;
+      } else {
+        // Si es un modal o inline, recargar la página
+        window.location.reload();
+      }
+    });
+  }
+
+  // Botón cancelar
+  const cancelButton = document.getElementById(`${id}-cancel`);
+  if (cancelButton) {
+    cancelButton.addEventListener("click", () => {
+      if (
+        confirm(
+          "¿Deseas cancelar la asignación de reemplazo?\n\nLos datos ingresados se perderán."
+        )
+      ) {
+        if (window.location.pathname.includes("/reemplazar")) {
+          // Si estamos en la página dedicada, volver atrás
+          window.history.back();
+        } else {
+          // Si es un modal, cerrarlo (implementar según patrón de modales)
+          window.location.reload();
+        }
+      }
+    });
+  }
+</script>

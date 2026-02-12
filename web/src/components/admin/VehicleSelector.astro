@@ -1,0 +1,118 @@
+---
+/**
+ * VehicleSelector - Selector de vehículos con verificación de disponibilidad
+ * RF-045: Asignación dinámica de vehículo a instructor
+ */
+import { VEHICULOS, type Vehicle } from "../../lib/mockVehicles";
+import { INSTRUCTORES } from "../../lib/mockInstructors";
+
+interface Props {
+  selectedVehicleId?: number;
+  instructorId?: number; // ID del instructor actual (para excluir en verificación)
+  name?: string;
+  id?: string;
+  label?: string;
+  required?: boolean;
+  class?: string;
+}
+
+const {
+  selectedVehicleId,
+  instructorId,
+  name = "vehiculo",
+  id = "vehiculo",
+  label = "Vehículo asignado",
+  required = false,
+  class: className = "",
+} = Astro.props;
+
+// Obtener vehículos con información de asignación
+const vehiculosConEstado = VEHICULOS.map((vehiculo) => {
+  const instructorAsignado = INSTRUCTORES.find(
+    (i) => i.vehiculoAsignado?.id === vehiculo.id
+  );
+
+  return {
+    ...vehiculo,
+    disponible:
+      !instructorAsignado || instructorAsignado.id === instructorId,
+    nombreInstructor: instructorAsignado?.nombre,
+  };
+});
+---
+
+<div class={className}>
+  {
+    label && (
+      <label class="block text-sm font-medium text-gray-700 mb-1.5" for={id}>
+        {label}
+        {required && " *"}
+      </label>
+    )
+  }
+
+  <select
+    id={id}
+    name={name}
+    required={required}
+    class="h-11 px-4 w-full text-sm bg-white border border-gray-300 rounded-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-1 appearance-none bg-no-repeat bg-[right_0.5rem_center] bg-[length:1.25em_1.25em] pr-10"
+    style="background-image: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 fill=%27none%27 viewBox=%270 0 24 24%27 stroke=%27%236B7280%27%3E%3Cpath stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M19 9l-7 7-7-7%27%3E%3C/path%3E%3C/svg%3E');"
+  >
+    <option value="">Sin vehículo asignado</option>
+    {
+      vehiculosConEstado.map((vehiculo) => (
+        <option
+          value={vehiculo.id}
+          selected={selectedVehicleId === vehiculo.id}
+          disabled={!vehiculo.disponible}
+        >
+          {vehiculo.patente} - {vehiculo.modelo} {vehiculo.año}
+          {!vehiculo.disponible &&
+            vehiculo.nombreInstructor &&
+            ` (Asignado a ${vehiculo.nombreInstructor})`}
+          {vehiculo.status === "mantencion" && " [EN MANTENCIÓN]"}
+          {vehiculo.status === "bloqueado" && " [BLOQUEADO]"}
+        </option>
+      ))
+    }
+  </select>
+
+  <!-- Leyenda de disponibilidad -->
+  <div class="mt-2 flex items-center gap-4 text-xs">
+    <div class="flex items-center gap-1.5">
+      <div class="w-3 h-3 rounded-full bg-green-500"></div>
+      <span class="text-gray-600">Disponible</span>
+    </div>
+    <div class="flex items-center gap-1.5">
+      <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+      <span class="text-gray-600">Asignado a otro instructor</span>
+    </div>
+    <div class="flex items-center gap-1.5">
+      <div class="w-3 h-3 rounded-full bg-red-500"></div>
+      <span class="text-gray-600">En mantención/bloqueado</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Advertencia al seleccionar vehículo ya asignado
+  const selector = document.getElementById("vehiculo") as HTMLSelectElement;
+
+  if (selector) {
+    selector.addEventListener("change", (e) => {
+      const target = e.target as HTMLSelectElement;
+      const selectedOption = target.options[target.selectedIndex];
+      const optionText = selectedOption.text;
+
+      // Verificar si el vehículo está asignado a otro instructor
+      if (optionText.includes("(Asignado a")) {
+        const instructorName = optionText.match(/\(Asignado a (.+?)\)/)?.[1];
+        if (instructorName) {
+          alert(
+            `⚠️ Advertencia\n\nEste vehículo está actualmente asignado a ${instructorName}.\n\nAl confirmar esta asignación, el vehículo se desasignará automáticamente de ${instructorName}.`
+          );
+        }
+      }
+    });
+  }
+</script>

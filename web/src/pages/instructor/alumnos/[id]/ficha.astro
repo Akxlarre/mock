@@ -1,0 +1,347 @@
+---
+/**
+ * Ficha de Alumno - Vista Instructor
+ * RF-055: Dashboard de progreso con % clases prácticas y teóricas
+ * RF-056: Historial completo de clases con notas técnicas
+ */
+import DashboardLayout from "../../../../layouts/DashboardLayout.astro";
+import Card from "../../../../components/ui/Card.astro";
+import Button from "../../../../components/ui/Button.astro";
+
+export function getStaticPaths() {
+  return [
+    { params: { id: "1" } },
+    { params: { id: "2" } },
+    { params: { id: "3" } },
+    { params: { id: "4" } },
+    { params: { id: "5" } },
+    { params: { id: "6" } },
+  ];
+}
+
+const { id } = Astro.params;
+
+// Mock data - alumnos
+const alumnos: Record<string, any> = {
+  '1': {
+    id: 1,
+    nombre: "María González Pérez",
+    rut: "18.234.567-8",
+    email: "maria@email.cl",
+    telefono: "+56 9 8765 4321",
+    curso: "Clase B",
+    escuela: "Autoescuela Chillán",
+    fechaIngreso: "2026-02-01",
+    estado: "active"
+  },
+  '2': {
+    id: 2,
+    nombre: "Juan Pablo Rojas",
+    rut: "19.456.789-0",
+    email: "juan@email.cl",
+    telefono: "+56 9 7654 3210",
+    curso: "Clase B",
+    escuela: "Autoescuela Chillán",
+    fechaIngreso: "2026-02-01",
+    estado: "pending_payment"
+  },
+  '3': {
+    id: 3,
+    nombre: "Ana Martínez Silva",
+    rut: "17.890.123-4",
+    email: "ana@email.cl",
+    telefono: "+56 9 6543 2109",
+    curso: "Clase B",
+    escuela: "Conductores Chillán",
+    fechaIngreso: "2026-01-30",
+    estado: "pending_documents"
+  },
+  '4': {
+    id: 4,
+    nombre: "Pedro Silva Muñoz",
+    rut: "20.123.456-7",
+    email: "pedro@email.cl",
+    telefono: "+56 9 5432 1098",
+    curso: "Clase B",
+    escuela: "Autoescuela Chillán",
+    fechaIngreso: "2026-01-28",
+    estado: "active"
+  },
+  '5': {
+    id: 5,
+    nombre: "Sofía López Torres",
+    rut: "18.567.890-1",
+    email: "sofia@email.cl",
+    telefono: "+56 9 4321 0987",
+    curso: "Clase B",
+    escuela: "Conductores Chillán",
+    fechaIngreso: "2026-01-25",
+    estado: "inactive"
+  },
+  '6': {
+    id: 6,
+    nombre: "Diego Torres Vega",
+    rut: "21.678.901-2",
+    email: "diego@email.cl",
+    telefono: "+56 9 3210 9876",
+    curso: "Clase B",
+    escuela: "Autoescuela Chillán",
+    fechaIngreso: "2026-01-20",
+    estado: "active"
+  },
+};
+
+const alumno = alumnos[id!] || alumnos['1'];
+
+// RF-055: Progreso de clases prácticas y teóricas
+const progresoPracticas = {
+  completadas: 8,
+  total: 12,
+  porcentaje: 67
+};
+
+const progresoTeoricas = {
+  completadas: 6,
+  total: 8,
+  porcentaje: 75
+};
+
+// RF-056: Ficha técnica con las 12 clases prácticas
+const clasesPracticas = [
+  { numero: 1, fecha: "2026-01-15", hora: "14:00-14:45", kmInicio: 45120, kmFinal: 45142, observaciones: "Primera clase, reconocimiento de controles", firmaAlumno: true, firmaProfesor: true, instructor: "Carlos Rojas" },
+  { numero: 2, fecha: "2026-01-17", hora: "15:00-15:45", kmInicio: 45142, kmFinal: 45165, observaciones: "Práctica de arranque y detención", firmaAlumno: true, firmaProfesor: true, instructor: "Carlos Rojas" },
+  { numero: 3, fecha: "2026-01-19", hora: "14:00-14:45", kmInicio: 45165, kmFinal: 45188, observaciones: "Cambios de marcha, curvas básicas", firmaAlumno: true, firmaProfesor: true, instructor: "Carlos Rojas" },
+  { numero: 4, fecha: "2026-01-22", hora: "16:00-16:45", kmInicio: 45188, kmFinal: 45210, observaciones: "Estacionamiento paralelo", firmaAlumno: true, firmaProfesor: true, instructor: "Ana Martínez" },
+  { numero: 5, fecha: "2026-01-24", hora: "14:00-14:45", kmInicio: 45210, kmFinal: 45234, observaciones: "Circulación en ciudad, señalización", firmaAlumno: true, firmaProfesor: true, instructor: "Carlos Rojas" },
+  { numero: 6, fecha: "2026-01-26", hora: "10:00-10:45", kmInicio: 45234, kmFinal: 45258, observaciones: "Rotondas y giros", firmaAlumno: true, firmaProfesor: true, instructor: "Luis Torres" },
+  { numero: 7, fecha: "2026-01-29", hora: "15:00-15:45", kmInicio: 45258, kmFinal: 45280, observaciones: "Conducción defensiva", firmaAlumno: true, firmaProfesor: true, instructor: "Ana Martínez" },
+  { numero: 8, fecha: "2026-01-31", hora: "14:00-14:45", kmInicio: 45280, kmFinal: 45302, observaciones: "Retroceso y maniobras", firmaAlumno: true, firmaProfesor: true, instructor: "Carlos Rojas" },
+  { numero: 9, fecha: "", hora: "", kmInicio: null, kmFinal: null, observaciones: "", firmaAlumno: false, firmaProfesor: false, instructor: "" },
+  { numero: 10, fecha: "", hora: "", kmInicio: null, kmFinal: null, observaciones: "", firmaAlumno: false, firmaProfesor: false, instructor: "" },
+  { numero: 11, fecha: "", hora: "", kmInicio: null, kmFinal: null, observaciones: "", firmaAlumno: false, firmaProfesor: false, instructor: "" },
+  { numero: 12, fecha: "", hora: "", kmInicio: null, kmFinal: null, observaciones: "", firmaAlumno: false, firmaProfesor: false, instructor: "" },
+];
+---
+
+<DashboardLayout title={`Ficha de ${alumno.nombre} - Instructor`} userRole="instructor" userName="Carlos Rojas">
+  <div class="max-w-7xl mx-auto">
+    <!-- Breadcrumb -->
+    <div class="flex items-center gap-2 text-sm text-secondary mb-2">
+      <a href="/instructor/dashboard" class="hover:text-gray-900">Dashboard</a>
+      <span>/</span>
+      <a href="/instructor/alumnos" class="hover:text-gray-900">Mis Alumnos</a>
+      <span>/</span>
+      <span class="text-gray-900 font-medium">Ficha de {alumno.nombre}</span>
+    </div>
+
+    <!-- Header -->
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <h1 class="text-3xl font-semibold text-gray-900 tracking-tight">{alumno.nombre}</h1>
+        <p class="text-secondary mt-1">{alumno.curso} - {alumno.escuela}</p>
+      </div>
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-6 mb-6">
+      <!-- Información personal -->
+      <Card class="lg:col-span-1">
+        <h3 class="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wide">Información del Alumno</h3>
+        <div class="space-y-3">
+          <div>
+            <label class="text-xs text-secondary uppercase tracking-wide">RUT</label>
+            <p class="text-sm font-medium text-gray-900 mt-0.5">{alumno.rut}</p>
+          </div>
+          <div>
+            <label class="text-xs text-secondary uppercase tracking-wide">Email</label>
+            <p class="text-sm font-medium text-gray-900 mt-0.5">{alumno.email}</p>
+          </div>
+          <div>
+            <label class="text-xs text-secondary uppercase tracking-wide">Teléfono</label>
+            <p class="text-sm font-medium text-gray-900 mt-0.5">{alumno.telefono}</p>
+          </div>
+          <div>
+            <label class="text-xs text-secondary uppercase tracking-wide">Fecha de Ingreso</label>
+            <p class="text-sm font-medium text-gray-900 mt-0.5">{alumno.fechaIngreso}</p>
+          </div>
+        </div>
+      </Card>
+
+      <!-- RF-055: Progreso de Clases Prácticas -->
+      <Card class="lg:col-span-1">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900">Clases Prácticas</h3>
+            <p class="text-xs text-secondary mt-0.5">De 12 clases requeridas</p>
+          </div>
+          <div class="text-right">
+            <p class="text-4xl font-bold text-blue-600">{progresoPracticas.porcentaje}%</p>
+          </div>
+        </div>
+
+        <!-- Barra de progreso -->
+        <div class="relative w-full bg-gray-200 rounded-full h-6 mb-3">
+          <div
+            class="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-end px-3 transition-all duration-500"
+            style={`width: ${progresoPracticas.porcentaje}%`}
+          >
+            <span class="text-xs font-semibold text-white">
+              {progresoPracticas.completadas}/{progresoPracticas.total}
+            </span>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between text-sm">
+          <span class="text-secondary">
+            {progresoPracticas.completadas} completadas
+          </span>
+          <span class="font-semibold text-gray-900">
+            {progresoPracticas.total - progresoPracticas.completadas} restantes
+          </span>
+        </div>
+      </Card>
+
+      <!-- RF-055: Progreso de Clases Teóricas -->
+      <Card class="lg:col-span-1">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900">Clases Teóricas</h3>
+            <p class="text-xs text-secondary mt-0.5">De 8 clases requeridas</p>
+          </div>
+          <div class="text-right">
+            <p class="text-4xl font-bold text-green-600">{progresoTeoricas.porcentaje}%</p>
+          </div>
+        </div>
+
+        <!-- Barra de progreso -->
+        <div class="relative w-full bg-gray-200 rounded-full h-6 mb-3">
+          <div
+            class="absolute inset-y-0 left-0 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-end px-3 transition-all duration-500"
+            style={`width: ${progresoTeoricas.porcentaje}%`}
+          >
+            <span class="text-xs font-semibold text-white">
+              {progresoTeoricas.completadas}/{progresoTeoricas.total}
+            </span>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between text-sm">
+          <span class="text-secondary">
+            {progresoTeoricas.completadas} asistidas
+          </span>
+          <span class="font-semibold text-gray-900">
+            {progresoTeoricas.total - progresoTeoricas.completadas} restantes
+          </span>
+        </div>
+      </Card>
+    </div>
+
+    <!-- RF-056: Ficha Técnica - Tabla de Clases Prácticas -->
+    <Card>
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-xl font-semibold text-gray-900">Ficha Técnica - Clases Prácticas</h3>
+          <p class="text-sm text-secondary mt-1">Registro detallado de las 12 clases prácticas del alumno</p>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b-2 border-gray-300">
+              <th class="text-left py-3 px-3 font-semibold text-gray-900">N°</th>
+              <th class="text-left py-3 px-3 font-semibold text-gray-900">Fecha</th>
+              <th class="text-left py-3 px-3 font-semibold text-gray-900">Hora</th>
+              <th class="text-left py-3 px-3 font-semibold text-gray-900">Instructor</th>
+              <th class="text-right py-3 px-3 font-semibold text-gray-900">Km Inicio</th>
+              <th class="text-right py-3 px-3 font-semibold text-gray-900">Km Fin</th>
+              <th class="text-left py-3 px-3 font-semibold text-gray-900">Observaciones</th>
+              <th class="text-center py-3 px-3 font-semibold text-gray-900">Estado</th>
+              <th class="text-center py-3 px-3 font-semibold text-gray-900">Acción</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            {clasesPracticas.map((clase) => (
+              <tr class={clase.fecha ? "hover:bg-gray-50" : "bg-gray-50/50"}>
+                <td class="py-3 px-3 font-medium text-gray-900">
+                  Clase {clase.numero}
+                </td>
+                <td class="py-3 px-3 text-gray-700 font-mono text-xs">
+                  {clase.fecha || '-'}
+                </td>
+                <td class="py-3 px-3 text-gray-700 font-mono text-xs">
+                  {clase.hora || '-'}
+                </td>
+                <td class="py-3 px-3 text-gray-700 text-xs">
+                  {clase.instructor || '-'}
+                </td>
+                <td class="py-3 px-3 text-right text-gray-700 font-mono text-xs">
+                  {clase.kmInicio !== null ? clase.kmInicio.toLocaleString() : '-'}
+                </td>
+                <td class="py-3 px-3 text-right text-gray-700 font-mono text-xs">
+                  {clase.kmFinal !== null ? clase.kmFinal.toLocaleString() : '-'}
+                </td>
+                <td class="py-3 px-3 text-gray-700 text-xs">
+                  <div class="max-w-xs">
+                    {clase.observaciones || (
+                      <span class="text-gray-400 italic">Pendiente</span>
+                    )}
+                  </div>
+                </td>
+                <td class="py-3 px-3 text-center">
+                  {clase.firmaAlumno && clase.firmaProfesor ? (
+                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                      Completada
+                    </span>
+                  ) : clase.fecha ? (
+                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                      En proceso
+                    </span>
+                  ) : (
+                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
+                      Pendiente
+                    </span>
+                  )}
+                </td>
+                <td class="py-3 px-3 text-center">
+                  {clase.fecha && (!clase.firmaAlumno || !clase.firmaProfesor) ? (
+                    <a
+                      href={`/instructor/alumnos/${id}/clase/${clase.numero}`}
+                      class="text-blue-600 hover:text-blue-800 text-xs font-medium hover:underline"
+                    >
+                      Evaluar
+                    </a>
+                  ) : clase.firmaAlumno && clase.firmaProfesor ? (
+                    <a
+                      href={`/instructor/alumnos/${id}/clase/${clase.numero}`}
+                      class="text-gray-600 hover:text-gray-800 text-xs font-medium hover:underline"
+                    >
+                      Ver
+                    </a>
+                  ) : (
+                    <span class="text-gray-400 text-xs">-</span>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+        <p class="text-xs text-blue-800">
+          💡 <strong>Nota:</strong> Puedes evaluar las clases pendientes haciendo clic en "Evaluar". Las clases completadas se pueden revisar con "Ver".
+        </p>
+      </div>
+    </Card>
+
+    <!-- Acciones -->
+    <div class="flex gap-3 mt-6">
+      <Button href="/instructor/alumnos" variant="ghost">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Volver a Mis Alumnos
+      </Button>
+    </div>
+  </div>
+</DashboardLayout>

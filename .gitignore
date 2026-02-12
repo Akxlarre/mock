@@ -169,5 +169,6 @@ htmlcov/
 *.bak
 *.backup
 *.orig
+*.pdf
 .eslintcache
 .stylelintcache

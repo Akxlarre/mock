@@ -1,0 +1,459 @@
+---
+/**
+ * Perfil de Instructor - Vista Secretaria (RF-041, RF-042)
+ * Visualización completa de información del instructor con historial
+ */
+import DashboardLayout from "../../../../layouts/DashboardLayout.astro";
+import Card from "../../../../components/ui/Card.astro";
+import Button from "../../../../components/ui/Button.astro";
+import VehicleAssignmentHistory from "../../../../components/admin/VehicleAssignmentHistory.astro";
+import { getInstructorById } from "../../../../lib/mockInstructors";
+import { ESCUELA_ACTUAL } from "../../../../lib/mockData";
+
+export function getStaticPaths() {
+  return [
+    { params: { id: "1" } },
+    { params: { id: "2" } },
+    { params: { id: "3" } },
+    { params: { id: "4" } },
+    { params: { id: "5" } },
+  ];
+}
+
+const { id } = Astro.params;
+const instructor = getInstructorById(parseInt(id!));
+
+if (!instructor) {
+  return Astro.redirect("/secretaria/instructores");
+}
+
+// Helper para badge de licencia
+function getLicenciaBadge(estadoValidacion: string) {
+  switch (estadoValidacion) {
+    case "vigente":
+      return { text: "Vigente", class: "bg-green-100 text-green-800" };
+    case "por_vencer":
+      return { text: "Por vencer", class: "bg-yellow-100 text-yellow-800" };
+    case "vencida":
+      return { text: "Vencida", class: "bg-red-100 text-red-800" };
+    default:
+      return { text: "Desconocido", class: "bg-gray-100 text-gray-800" };
+  }
+}
+
+const licenciaBadge = getLicenciaBadge(instructor.licencia.estadoValidacion);
+
+---
+
+<DashboardLayout
+  title={`${instructor.nombre} - Instructor`}
+  userRole="secretaria"
+  escuela={ESCUELA_ACTUAL}
+>
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex items-center gap-2 text-sm text-secondary mb-2">
+      <a href="/secretaria/dashboard" class="hover:text-gray-900">Inicio</a>
+      <span>/</span>
+      <a href="/secretaria/instructores" class="hover:text-gray-900">Instructores</a>
+      <span>/</span>
+      <span class="text-gray-900 font-medium">{instructor.nombre}</span>
+    </div>
+    <div
+      class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+    >
+      <div>
+        <h1 class="text-3xl font-semibold text-gray-900 tracking-tight">
+          {instructor.nombre}
+        </h1>
+        <p class="text-secondary mt-1">
+          Instructor {instructor.tipo}
+        </p>
+      </div>
+      <Button variant="primary" href={`/secretaria/instructores/${instructor.id}/editar`}>
+        <svg
+          class="w-4 h-4 mr-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+          ></path>
+        </svg>
+        Editar instructor
+      </Button>
+    </div>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <!-- Clases Activas -->
+    <Card class="bg-blue-50 border-blue-200">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-blue-700 font-medium">Clases activas</p>
+          <p class="text-3xl font-semibold text-blue-900 mt-1">
+            {instructor.clasesActivas}
+          </p>
+        </div>
+        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+          <svg
+            class="w-6 h-6 text-blue-600"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+            ></path>
+          </svg>
+        </div>
+      </div>
+    </Card>
+
+    <!-- Vehículo Asignado -->
+    <Card class="bg-green-50 border-green-200">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-green-700 font-medium">Vehículo asignado</p>
+          <p class="text-lg font-semibold text-green-900 mt-1">
+            {
+              instructor.vehiculoAsignado
+                ? instructor.vehiculoAsignado.patente
+                : "Sin asignar"
+            }
+          </p>
+          {
+            instructor.vehiculoAsignado && (
+              <p class="text-xs text-green-700">
+                {instructor.vehiculoAsignado.modelo}
+              </p>
+            )
+          }
+        </div>
+        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+          <svg
+            class="w-6 h-6 text-green-600"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+            ></path>
+          </svg>
+        </div>
+      </div>
+    </Card>
+
+    <!-- Estado Licencia -->
+    <Card
+      class={`${
+        instructor.licencia.estadoValidacion === "vigente"
+          ? "bg-green-50 border-green-200"
+          : instructor.licencia.estadoValidacion === "por_vencer"
+            ? "bg-yellow-50 border-yellow-200"
+            : "bg-red-50 border-red-200"
+      }`}
+    >
+      <div class="flex items-center justify-between">
+        <div>
+          <p
+            class={`text-sm font-medium ${
+              instructor.licencia.estadoValidacion === "vigente"
+                ? "text-green-700"
+                : instructor.licencia.estadoValidacion === "por_vencer"
+                  ? "text-yellow-700"
+                  : "text-red-700"
+            }`}
+          >
+            Licencia
+          </p>
+          <p
+            class={`text-lg font-semibold mt-1 ${
+              instructor.licencia.estadoValidacion === "vigente"
+                ? "text-green-900"
+                : instructor.licencia.estadoValidacion === "por_vencer"
+                  ? "text-yellow-900"
+                  : "text-red-900"
+            }`}
+          >
+            {licenciaBadge.text}
+          </p>
+          <p
+            class={`text-xs ${
+              instructor.licencia.estadoValidacion === "vigente"
+                ? "text-green-700"
+                : instructor.licencia.estadoValidacion === "por_vencer"
+                  ? "text-yellow-700"
+                  : "text-red-700"
+            }`}
+          >
+            Vence: {instructor.licencia.fechaVencimiento}
+          </p>
+        </div>
+        <div
+          class={`w-12 h-12 rounded-lg flex items-center justify-center ${
+            instructor.licencia.estadoValidacion === "vigente"
+              ? "bg-green-100"
+              : instructor.licencia.estadoValidacion === "por_vencer"
+                ? "bg-yellow-100"
+                : "bg-red-100"
+          }`}
+        >
+          <svg
+            class={`w-6 h-6 ${
+              instructor.licencia.estadoValidacion === "vigente"
+                ? "text-green-600"
+                : instructor.licencia.estadoValidacion === "por_vencer"
+                  ? "text-yellow-600"
+                  : "text-red-600"
+            }`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"
+            ></path>
+          </svg>
+        </div>
+      </div>
+    </Card>
+
+    <!-- Estado -->
+    <Card
+      class={`${
+        instructor.activo
+          ? "bg-green-50 border-green-200"
+          : "bg-gray-50 border-gray-200"
+      }`}
+    >
+      <div class="flex items-center justify-between">
+        <div>
+          <p
+            class={`text-sm font-medium ${
+              instructor.activo ? "text-green-700" : "text-gray-700"
+            }`}
+          >
+            Estado
+          </p>
+          <p
+            class={`text-lg font-semibold mt-1 ${
+              instructor.activo ? "text-green-900" : "text-gray-900"
+            }`}
+          >
+            {instructor.activo ? "Activo" : "Inactivo"}
+          </p>
+        </div>
+        <div
+          class={`w-12 h-12 rounded-lg flex items-center justify-center ${
+            instructor.activo ? "bg-green-100" : "bg-gray-100"
+          }`}
+        >
+          <svg
+            class={`w-6 h-6 ${instructor.activo ? "text-green-600" : "text-gray-600"}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+            ></path>
+          </svg>
+        </div>
+      </div>
+    </Card>
+  </div>
+
+  <!-- Main Content Grid -->
+  <div class="grid lg:grid-cols-3 gap-6">
+    <!-- Left Column: Profile Info -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Información Personal -->
+      <Card>
+        <h2 class="text-lg font-semibold text-gray-900 mb-6">
+          Información Personal
+        </h2>
+        <div class="grid grid-cols-2 gap-6">
+          <div>
+            <p class="text-sm text-gray-500 mb-1">Nombre completo</p>
+            <p class="text-sm font-medium text-gray-900">{instructor.nombre}</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500 mb-1">RUT</p>
+            <p class="text-sm font-medium text-gray-900">{instructor.rut}</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500 mb-1">Email</p>
+            <p class="text-sm font-medium text-gray-900">{instructor.email}</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500 mb-1">Teléfono</p>
+            <p class="text-sm font-medium text-gray-900">
+              {instructor.telefono}
+            </p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500 mb-1">Tipo</p>
+            <p class="text-sm font-medium text-gray-900 capitalize">
+              {instructor.tipo}
+            </p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500 mb-1">Fecha de registro</p>
+            <p class="text-sm font-medium text-gray-900">
+              {instructor.fechaRegistro}
+            </p>
+          </div>
+        </div>
+      </Card>
+
+      <!-- Información de Licencia -->
+      <Card>
+        <h2 class="text-lg font-semibold text-gray-900 mb-6">
+          Información de Licencia
+        </h2>
+        <div class="grid grid-cols-2 gap-6">
+          <div>
+            <p class="text-sm text-gray-500 mb-1">Número de licencia</p>
+            <p class="text-sm font-medium text-gray-900">
+              {instructor.licencia.numero}
+            </p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500 mb-1">Clase</p>
+            <p class="text-sm font-medium text-gray-900">
+              {instructor.licencia.clase}
+            </p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500 mb-1">Fecha de vencimiento</p>
+            <p class="text-sm font-medium text-gray-900">
+              {instructor.licencia.fechaVencimiento}
+            </p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500 mb-1">Estado de validación</p>
+            <span
+              class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${licenciaBadge.class}`}
+            >
+              {licenciaBadge.text}
+            </span>
+          </div>
+        </div>
+      </Card>
+
+      <!-- Historial de Vehículos (RF-042) -->
+      <Card>
+        <h2 class="text-lg font-semibold text-gray-900 mb-6">
+          Historial de Vehículos Asignados
+        </h2>
+        <VehicleAssignmentHistory
+          historialVehiculos={instructor.historialVehiculos}
+        />
+      </Card>
+    </div>
+
+    <!-- Right Column: Current Assignment & Schedule -->
+    <div class="space-y-6">
+      <!-- Asignación Actual -->
+      <Card>
+        <h3 class="text-sm font-semibold text-gray-900 mb-4">
+          Asignación Actual
+        </h3>
+        {
+          instructor.vehiculoAsignado ? (
+            <div>
+              <div class="mb-4">
+                <p class="text-xs text-gray-500 mb-1">Vehículo</p>
+                <p class="text-lg font-semibold text-gray-900">
+                  {instructor.vehiculoAsignado.patente}
+                </p>
+                <p class="text-sm text-gray-600">
+                  {instructor.vehiculoAsignado.modelo}
+                </p>
+              </div>
+              <div class="mb-4">
+                <p class="text-xs text-gray-500 mb-1">Fecha de asignación</p>
+                <p class="text-sm font-medium text-gray-900">
+                  {instructor.vehiculoAsignado.fechaAsignacion}
+                </p>
+              </div>
+              <a
+                href={`/flota/vehiculos/${instructor.vehiculoAsignado.id}`}
+                class="text-sm text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Ver ficha del vehículo →
+              </a>
+            </div>
+          ) : (
+            <div class="text-center py-8">
+              <svg
+                class="w-12 h-12 mx-auto text-gray-300 mb-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1.5"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+              <p class="text-sm text-gray-500">Sin vehículo asignado</p>
+            </div>
+          )
+        }
+      </Card>
+
+      <!-- Acciones Rápidas -->
+      <Card>
+        <h3 class="text-sm font-semibold text-gray-900 mb-4">
+          Acciones rápidas
+        </h3>
+        <div class="space-y-2">
+          <a
+            href={`/secretaria/instructores/${instructor.id}/editar`}
+            class="block w-full text-center px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+          >
+            Editar perfil
+          </a>
+          <a
+            href="/secretaria/agenda"
+            class="block w-full text-center px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+          >
+            Ver horario
+          </a>
+          {
+            instructor.clasesActivas > 0 && (
+              <a
+                href={`/instructor/clases`}
+                class="block w-full text-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors"
+              >
+                Ver clases activas ({instructor.clasesActivas})
+              </a>
+            )
+          }
+        </div>
+      </Card>
+    </div>
+  </div>
+</DashboardLayout>

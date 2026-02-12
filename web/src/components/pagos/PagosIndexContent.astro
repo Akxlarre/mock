@@ -15,11 +15,61 @@ const { basePath = "" } = Astro.props;
 
 // Mock data
 const pagosRecientes = [
-  { id: 1, fecha: "2026-02-03", alumno: "María González", concepto: "Matrícula Clase B", monto: 280000, metodo: "Transferencia", estado: "completado", boleta: true },
-  { id: 2, fecha: "2026-02-03", alumno: "Juan Pérez", concepto: "Mensualidad 1/4", monto: 70000, metodo: "Efectivo", estado: "completado", boleta: false },
-  { id: 3, fecha: "2026-02-02", alumno: "Ana Martínez", concepto: "Matrícula + Mensualidad", monto: 350000, metodo: "Débito", estado: "completado", boleta: true },
-  { id: 4, fecha: "2026-02-01", alumno: "Carlos Fernández", concepto: "Mensualidad 2/4", monto: 70000, metodo: "Transferencia", estado: "pendiente", boleta: false },
-  { id: 5, fecha: "2026-02-01", alumno: "Sofía Vargas", concepto: "Matrícula Clase B", monto: 280000, metodo: "WebPay", estado: "completado", boleta: true },
+  {
+    id: 1,
+    fecha: "2026-02-03",
+    alumno: "María González",
+    concepto: "Matrícula Clase B",
+    monto: 280000,
+    metodo: "Transferencia",
+    nroDocumento: "TRF-00482",
+    estado: "completado",
+    boleta: true,
+  },
+  {
+    id: 2,
+    fecha: "2026-02-03",
+    alumno: "Juan Pérez",
+    concepto: "Mensualidad 1/4",
+    monto: 70000,
+    metodo: "Efectivo",
+    nroDocumento: "REC-01234",
+    estado: "completado",
+    boleta: false,
+  },
+  {
+    id: 3,
+    fecha: "2026-02-02",
+    alumno: "Ana Martínez",
+    concepto: "Matrícula + Mensualidad",
+    monto: 350000,
+    metodo: "Débito",
+    nroDocumento: "POS-78901",
+    estado: "completado",
+    boleta: true,
+  },
+  {
+    id: 4,
+    fecha: "2026-02-01",
+    alumno: "Carlos Fernández",
+    concepto: "Mensualidad 2/4",
+    monto: 70000,
+    metodo: "Transferencia",
+    nroDocumento: "TRF-00479",
+    estado: "pendiente",
+    boleta: false,
+  },
+  {
+    id: 5,
+    fecha: "2026-02-01",
+    alumno: "Sofía Vargas",
+    concepto: "Matrícula Clase B",
+    monto: 280000,
+    metodo: "WebPay",
+    nroDocumento: "WBP-56234",
+    estado: "completado",
+    boleta: true,
+  },
 ];
 
 const metodoPago: Record<string, string> = {
@@ -31,10 +81,38 @@ const metodoPago: Record<string, string> = {
 };
 
 const alumnosSaldoPendiente = [
-  { id: 1, nombre: "Carlos Fernández", rut: "12.345.678-9", totalAPagar: 560000, pagado: 140000, saldo: 420000 },
-  { id: 2, nombre: "Patricia Soto", rut: "18.234.567-1", totalAPagar: 560000, pagado: 280000, saldo: 280000 },
-  { id: 3, nombre: "Roberto Muñoz", rut: "19.876.543-2", totalAPagar: 560000, pagado: 0, saldo: 560000 },
-  { id: 4, nombre: "Daniela Rojas", rut: "20.111.222-3", totalAPagar: 560000, pagado: 420000, saldo: 140000 },
+  {
+    id: 1,
+    nombre: "Carlos Fernández",
+    rut: "12.345.678-9",
+    totalAPagar: 560000,
+    pagado: 140000,
+    saldo: 420000,
+  },
+  {
+    id: 2,
+    nombre: "Patricia Soto",
+    rut: "18.234.567-1",
+    totalAPagar: 560000,
+    pagado: 280000,
+    saldo: 280000,
+  },
+  {
+    id: 3,
+    nombre: "Roberto Muñoz",
+    rut: "19.876.543-2",
+    totalAPagar: 560000,
+    pagado: 0,
+    saldo: 560000,
+  },
+  {
+    id: 4,
+    nombre: "Daniela Rojas",
+    rut: "20.111.222-3",
+    totalAPagar: 560000,
+    pagado: 420000,
+    saldo: 140000,
+  },
 ];
 ---
 
@@ -64,7 +142,7 @@ const alumnosSaldoPendiente = [
           stroke-linejoin="round"
           stroke-width="2"
           d="M12 4v16m8-8H4"></path>
-        </svg>
+      </svg>
       Registrar Pago
     </Button>
   </div>
@@ -106,7 +184,9 @@ const alumnosSaldoPendiente = [
 
 <!-- Alumnos con saldo pendiente -->
 <Card class="mb-6">
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+  <div
+    class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4"
+  >
     <h2 class="text-lg font-semibold text-gray-900">
       Alumnos con saldo pendiente
     </h2>
@@ -121,86 +201,76 @@ const alumnosSaldoPendiente = [
     Alumnos con saldo por pagar. Registrar abonos para actualizar el saldo y
     habilitar clase 7 cuando corresponda.
   </p>
-  {alumnosSaldoPendiente.length > 0 ? (
-    <div class="overflow-x-auto">
-      <table class="w-full">
-        <thead>
-          <tr class="border-b border-gray-200">
-            <th
-              class="text-left py-3 px-3 text-xs font-semibold text-gray-700 uppercase"
-            >
-              Alumno
-            </th>
-            <th
-              class="text-left py-3 px-3 text-xs font-semibold text-gray-700 uppercase"
-            >
-              RUT
-            </th>
-            <th
-              class="text-right py-3 px-3 text-xs font-semibold text-gray-700 uppercase"
-            >
-              Total a pagar
-            </th>
-            <th
-              class="text-right py-3 px-3 text-xs font-semibold text-gray-700 uppercase"
-            >
-              Pagado
-            </th>
-            <th
-              class="text-right py-3 px-3 text-xs font-semibold text-gray-700 uppercase"
-            >
-              Saldo
-            </th>
-            <th
-              class="text-right py-3 px-3 text-xs font-semibold text-gray-700 uppercase"
-            >
-              Acciones
-            </th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100">
-          {alumnosSaldoPendiente.map((a) => (
-            <tr class="hover:bg-gray-50 transition-colors">
-              <td class="py-3 px-3">
-                <p class="text-sm font-medium text-gray-900">{a.nombre}</p>
-              </td>
-              <td class="py-3 px-3 text-sm text-secondary">{a.rut}</td>
-              <td class="py-3 px-3 text-sm text-gray-700 text-right">
-                ${a.totalAPagar.toLocaleString("es-CL")}
-              </td>
-              <td class="py-3 px-3 text-sm text-green-700 text-right">
-                ${a.pagado.toLocaleString("es-CL")}
-              </td>
-              <td class="py-3 px-3 text-sm font-semibold text-orange-600 text-right">
-                ${a.saldo.toLocaleString("es-CL")}
-              </td>
-              <td class="py-3 px-3 text-right">
-                <div class="flex items-center justify-end gap-2">
-                  <a
-                    href={`${basePath}/pagos/estado-cuenta?alumno=${a.id}`}
-                    class="text-sm font-medium text-gray-700 hover:text-gray-900"
-                  >
-                    Ver detalle
-                  </a>
-                  <Button
-                    href={`${basePath}/pagos/registrar?alumno=${a.id}`}
-                    variant="primary"
-                    class="text-sm py-1.5 px-3"
-                  >
-                    Registrar pago
-                  </Button>
-                </div>
-              </td>
+  {
+    alumnosSaldoPendiente.length > 0 ? (
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="border-b border-gray-200">
+              <th class="text-left py-3 px-3 text-xs font-semibold text-gray-700 uppercase">
+                Alumno
+              </th>
+              <th class="text-left py-3 px-3 text-xs font-semibold text-gray-700 uppercase">
+                RUT
+              </th>
+              <th class="text-right py-3 px-3 text-xs font-semibold text-gray-700 uppercase">
+                Total a pagar
+              </th>
+              <th class="text-right py-3 px-3 text-xs font-semibold text-gray-700 uppercase">
+                Pagado
+              </th>
+              <th class="text-right py-3 px-3 text-xs font-semibold text-gray-700 uppercase">
+                Saldo
+              </th>
+              <th class="text-right py-3 px-3 text-xs font-semibold text-gray-700 uppercase">
+                Acciones
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  ) : (
-    <p class="py-6 text-center text-sm text-secondary">
-      No hay alumnos con saldo pendiente.
-    </p>
-  )}
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            {alumnosSaldoPendiente.map((a) => (
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="py-3 px-3">
+                  <p class="text-sm font-medium text-gray-900">{a.nombre}</p>
+                </td>
+                <td class="py-3 px-3 text-sm text-secondary">{a.rut}</td>
+                <td class="py-3 px-3 text-sm text-gray-700 text-right">
+                  ${a.totalAPagar.toLocaleString("es-CL")}
+                </td>
+                <td class="py-3 px-3 text-sm text-green-700 text-right">
+                  ${a.pagado.toLocaleString("es-CL")}
+                </td>
+                <td class="py-3 px-3 text-sm font-semibold text-orange-600 text-right">
+                  ${a.saldo.toLocaleString("es-CL")}
+                </td>
+                <td class="py-3 px-3 text-right">
+                  <div class="flex items-center justify-end gap-2">
+                    <a
+                      href={`${basePath}/pagos/estado-cuenta?alumno=${a.id}`}
+                      class="text-sm font-medium text-gray-700 hover:text-gray-900"
+                    >
+                      Ver detalle
+                    </a>
+                    <Button
+                      href={`${basePath}/pagos/registrar?alumno=${a.id}`}
+                      variant="primary"
+                      class="text-sm py-1.5 px-3"
+                    >
+                      Registrar pago
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    ) : (
+      <p class="py-6 text-center text-sm text-secondary">
+        No hay alumnos con saldo pendiente.
+      </p>
+    )
+  }
 </Card>
 
 <!-- Filtros -->
@@ -239,9 +309,7 @@ const alumnosSaldoPendiente = [
 <div class="grid lg:grid-cols-3 gap-6">
   <div class="lg:col-span-2">
     <Card>
-      <h2 class="text-lg font-semibold text-gray-900 mb-4">
-        Pagos Recientes
-      </h2>
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">Pagos Recientes</h2>
 
       <div class="overflow-x-auto">
         <table class="w-full">
@@ -268,6 +336,10 @@ const alumnosSaldoPendiente = [
                 >Método</th
               >
               <th
+                class="text-left py-3 px-3 text-xs font-semibold text-gray-700 uppercase"
+                >Nº Documento</th
+              >
+              <th
                 class="text-center py-3 px-3 text-xs font-semibold text-gray-700 uppercase"
                 >Estado</th
               >
@@ -281,9 +353,7 @@ const alumnosSaldoPendiente = [
             {
               pagosRecientes.map((pago) => (
                 <tr class="hover:bg-gray-50 transition-colors">
-                  <td class="py-3 px-3 text-sm text-secondary">
-                    {pago.fecha}
-                  </td>
+                  <td class="py-3 px-3 text-sm text-secondary">{pago.fecha}</td>
                   <td class="py-3 px-3">
                     <p class="text-sm font-medium text-gray-900">
                       {pago.alumno}
@@ -299,6 +369,11 @@ const alumnosSaldoPendiente = [
                     <span class="inline-flex items-center gap-1 text-sm text-gray-700">
                       <span>{metodoPago[pago.metodo]}</span>
                       <span>{pago.metodo}</span>
+                    </span>
+                  </td>
+                  <td class="py-3 px-3">
+                    <span class="text-xs font-mono text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                      {pago.nroDocumento}
                     </span>
                   </td>
                   <td class="py-3 px-3 text-center">
@@ -394,8 +469,7 @@ const alumnosSaldoPendiente = [
             <span class="font-medium text-gray-900">45%</span>
           </div>
           <div class="w-full bg-gray-200 rounded-full h-2">
-            <div class="bg-blue-600 h-2 rounded-full" style="width: 45%">
-            </div>
+            <div class="bg-blue-600 h-2 rounded-full" style="width: 45%"></div>
           </div>
         </div>
         <div>
@@ -404,8 +478,7 @@ const alumnosSaldoPendiente = [
             <span class="font-medium text-gray-900">30%</span>
           </div>
           <div class="w-full bg-gray-200 rounded-full h-2">
-            <div class="bg-green-600 h-2 rounded-full" style="width: 30%">
-            </div>
+            <div class="bg-green-600 h-2 rounded-full" style="width: 30%"></div>
           </div>
         </div>
         <div>
@@ -432,9 +505,7 @@ const alumnosSaldoPendiente = [
     </Card>
 
     <Card>
-      <h3 class="text-sm font-semibold text-gray-900 mb-3">
-        Accesos Rápidos
-      </h3>
+      <h3 class="text-sm font-semibold text-gray-900 mb-3">Accesos Rápidos</h3>
       <div class="space-y-2">
         <Button
           href={`${basePath}/pagos/nuevo`}
@@ -452,7 +523,7 @@ const alumnosSaldoPendiente = [
               stroke-linejoin="round"
               stroke-width="2"
               d="M12 4v16m8-8H4"></path>
-            </svg>
+          </svg>
           Registrar Pago
         </Button>
         <Button
@@ -500,7 +571,7 @@ const alumnosSaldoPendiente = [
     <Card class="bg-blue-50 border-blue-200">
       <div class="flex gap-3">
         <svg
-          class="w-5 h-5 text-blue-600 flex-shrink-0"
+          class="w-5 h-5 text-blue-600 shrink-0"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -529,6 +600,147 @@ const alumnosSaldoPendiente = [
     </Card>
   </div>
 </div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- RENTABILIDAD POR CURSO (RF-040) -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<Card class="mt-6">
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+      <span class="text-xl">📊</span>
+      Rentabilidad Estimada por Tipo de Curso (RF-040)
+    </h2>
+    <span class="text-xs text-secondary">Febrero 2026</span>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="w-full">
+      <thead>
+        <tr class="border-b border-gray-200">
+          <th
+            class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase"
+            >Tipo de Curso</th
+          >
+          <th
+            class="text-right py-3 px-4 text-xs font-semibold text-gray-700 uppercase"
+            >Ingresos</th
+          >
+          <th
+            class="text-right py-3 px-4 text-xs font-semibold text-gray-700 uppercase"
+            >Gastos Directos</th
+          >
+          <th
+            class="text-right py-3 px-4 text-xs font-semibold text-gray-700 uppercase"
+            >Margen Neto</th
+          >
+          <th
+            class="text-center py-3 px-4 text-xs font-semibold text-gray-700 uppercase"
+            >Rentabilidad</th
+          >
+          <th
+            class="text-center py-3 px-4 text-xs font-semibold text-gray-700 uppercase w-32"
+            >Visual</th
+          >
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {
+          [
+            {
+              curso: "Clase B",
+              ingresos: 4200000,
+              gastos: 1680000,
+              color: "bg-blue-500",
+            },
+            {
+              curso: "Clase Profesional",
+              ingresos: 2800000,
+              gastos: 1260000,
+              color: "bg-purple-500",
+            },
+            {
+              curso: "SENCE (Singulares)",
+              ingresos: 1350000,
+              gastos: 540000,
+              color: "bg-teal-500",
+            },
+            {
+              curso: "Psicotécnico",
+              ingresos: 200000,
+              gastos: 40000,
+              color: "bg-yellow-500",
+            },
+          ].map((item) => {
+            const margen = item.ingresos - item.gastos;
+            const pct = Math.round((margen / item.ingresos) * 100);
+            return (
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="py-3 px-4 text-sm font-medium text-gray-900">
+                  {item.curso}
+                </td>
+                <td class="py-3 px-4 text-right text-sm text-gray-700">
+                  ${item.ingresos.toLocaleString("es-CL")}
+                </td>
+                <td class="py-3 px-4 text-right text-sm text-red-600">
+                  -${item.gastos.toLocaleString("es-CL")}
+                </td>
+                <td
+                  class={`py-3 px-4 text-right text-sm font-bold ${margen >= 0 ? "text-green-700" : "text-red-700"}`}
+                >
+                  ${margen.toLocaleString("es-CL")}
+                </td>
+                <td class="py-3 px-4 text-center">
+                  <span
+                    class={`inline-flex px-2.5 py-1 rounded-full text-xs font-bold ${pct >= 50 ? "bg-green-100 text-green-800" : pct >= 30 ? "bg-yellow-100 text-yellow-800" : "bg-red-100 text-red-800"}`}
+                  >
+                    {pct}%
+                  </span>
+                </td>
+                <td class="py-3 px-4">
+                  <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      class={`${item.color} h-2 rounded-full transition-all`}
+                      style={`width: ${pct}%`}
+                    />
+                  </div>
+                </td>
+              </tr>
+            );
+          })
+        }
+      </tbody>
+      <tfoot>
+        <tr class="border-t-2 border-gray-300 bg-gray-50">
+          <td class="py-3 px-4 text-sm font-bold text-gray-900">TOTAL</td>
+          <td class="py-3 px-4 text-right text-sm font-bold text-gray-900"
+            >$8.550.000</td
+          >
+          <td class="py-3 px-4 text-right text-sm font-bold text-red-600"
+            >-$3.520.000</td
+          >
+          <td class="py-3 px-4 text-right text-sm font-bold text-green-700"
+            >$5.030.000</td
+          >
+          <td class="py-3 px-4 text-center">
+            <span
+              class="inline-flex px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800"
+              >59%</span
+            >
+          </td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <div class="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+    <p class="text-xs text-gray-600">
+      <strong>Nota:</strong> Los gastos directos incluyen bencina, horas instructor,
+      materiales y mantención asignables al tipo de curso. No incluyen gastos fijos
+      (arriendo, servicios, administración).
+    </p>
+  </div>
+</Card>
 
 <style>
   select,

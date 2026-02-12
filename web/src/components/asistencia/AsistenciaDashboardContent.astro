@@ -114,6 +114,60 @@ const currentDate = new Date().toLocaleDateString("es-CL", {
     </div>
   )}
 
+  <!-- Clases Teóricas (RF-016/017) -->
+  <Card class="mb-6 p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-semibold text-gray-900">
+        🎓 Clases Teóricas (Zoom Automático)
+      </h2>
+      <Button variant="secondary" size="sm">Configurar Zoom</Button>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead class="bg-gray-50 border-b border-gray-200">
+          <tr>
+            <th class="px-4 py-2 text-left text-sm font-semibold text-gray-900">Hora</th>
+            <th class="px-4 py-2 text-left text-sm font-semibold text-gray-900">Tema</th>
+            <th class="px-4 py-2 text-left text-sm font-semibold text-gray-900">Instructor</th>
+            <th class="px-4 py-2 text-left text-sm font-semibold text-gray-900">Inscritos</th>
+            <th class="px-4 py-2 text-left text-sm font-semibold text-gray-900">Estado Enlace</th>
+            <th class="px-4 py-2 text-right text-sm font-semibold text-gray-900">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr>
+            <td class="px-4 py-3 text-sm text-gray-900 font-medium">18:00 - 19:30</td>
+            <td class="px-4 py-3 text-sm text-gray-700">Legislación de Tránsito</td>
+            <td class="px-4 py-3 text-sm text-gray-700">Juan Vidal</td>
+            <td class="px-4 py-3 text-sm text-gray-700">15 alumnos</td>
+            <td class="px-4 py-3">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                ✅ Enviado Automáticamente
+              </span>
+            </td>
+            <td class="px-4 py-3 text-right">
+              <Button variant="ghost" size="sm">Ver Lista</Button>
+            </td>
+          </tr>
+          <tr>
+            <td class="px-4 py-3 text-sm text-gray-900 font-medium">19:30 - 21:00</td>
+            <td class="px-4 py-3 text-sm text-gray-700">Mecánica Básica</td>
+            <td class="px-4 py-3 text-sm text-gray-700">Carlos Rojas</td>
+            <td class="px-4 py-3 text-sm text-gray-700">12 alumnos</td>
+            <td class="px-4 py-3">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                ✅ Enviado Automáticamente
+              </span>
+            </td>
+            <td class="px-4 py-3 text-right">
+              <Button variant="ghost" size="sm">Ver Lista</Button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </Card>
+
   <Card class="p-6">
     <div class="flex items-center justify-between mb-4">
       <h2 class="text-xl font-semibold text-gray-900">📅 Asistencia del Día</h2>

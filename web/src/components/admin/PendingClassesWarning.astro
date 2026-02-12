@@ -1,0 +1,353 @@
+---
+/**
+ * PendingClassesWarning - Modal de advertencia antes de desactivar instructor
+ * RF-043: Muestra clases pendientes y permite confirmar o cancelar desactivación
+ */
+
+interface PendingClass {
+  id: number;
+  alumno: string;
+  fecha: string;
+  hora: string;
+}
+
+interface Props {
+  instructorName: string;
+  clasesActivas: number;
+  id?: string;
+}
+
+const {
+  instructorName,
+  clasesActivas,
+  id = "pendingClassesWarning",
+} = Astro.props;
+
+// Mock de clases pendientes (en un sistema real vendría del backend)
+const clasesPendientes: PendingClass[] = [
+  {
+    id: 1,
+    alumno: "Juan Pérez",
+    fecha: "2025-02-10",
+    hora: "09:00",
+  },
+  {
+    id: 2,
+    alumno: "María González",
+    fecha: "2025-02-10",
+    hora: "11:00",
+  },
+  {
+    id: 3,
+    alumno: "Pedro Soto",
+    fecha: "2025-02-11",
+    hora: "14:00",
+  },
+  {
+    id: 4,
+    alumno: "Ana Martínez",
+    fecha: "2025-02-12",
+    hora: "10:00",
+  },
+  {
+    id: 5,
+    alumno: "Carlos Rojas",
+    fecha: "2025-02-13",
+    hora: "15:00",
+  },
+].slice(0, clasesActivas);
+
+// Función helper para formatear fecha
+function formatearFecha(fecha: string): string {
+  const date = new Date(fecha);
+  return date.toLocaleDateString("es-CL", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+  });
+}
+---
+
+<!-- Backdrop -->
+<div
+  id={`${id}-backdrop`}
+  class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden transition-opacity duration-300"
+  data-modal-backdrop={id}
+>
+</div>
+
+<!-- Modal -->
+<div
+  id={id}
+  class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden"
+  data-modal={id}
+>
+  <div
+    class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-95 opacity-0"
+    data-modal-content
+  >
+    <!-- Header -->
+    <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+          <svg
+            class="w-6 h-6 text-yellow-600"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+            ></path>
+          </svg>
+        </div>
+        <div>
+          <h2 class="text-lg font-semibold text-gray-900">
+            Advertencia: Clases pendientes
+          </h2>
+          <p class="text-sm text-gray-500">
+            {instructorName} tiene {clasesActivas} clase(s) agendada(s)
+          </p>
+        </div>
+      </div>
+      <button
+        type="button"
+        class="text-gray-400 hover:text-gray-600 transition-colors"
+        data-modal-close
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="px-6 py-4">
+      <!-- Warning Message -->
+      <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+        <p class="text-sm text-yellow-800">
+          <strong>Importante:</strong> Si desactivas este instructor, las siguientes
+          clases quedarán sin instructor asignado y deberán ser reasignadas.
+        </p>
+      </div>
+
+      <!-- Lista de clases pendientes -->
+      <div class="mb-4">
+        <h3 class="text-sm font-semibold text-gray-900 mb-3">
+          Clases afectadas ({clasesActivas})
+        </h3>
+        <div class="space-y-2 max-h-64 overflow-y-auto">
+          {
+            clasesPendientes.map((clase) => (
+              <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
+                <div class="flex items-center justify-between">
+                  <div class="flex-1">
+                    <p class="text-sm font-medium text-gray-900">
+                      {clase.alumno}
+                    </p>
+                    <p class="text-xs text-gray-500">
+                      {formatearFecha(clase.fecha)} - {clase.hora}
+                    </p>
+                  </div>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    Pendiente
+                  </span>
+                </div>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+
+      <!-- Opciones -->
+      <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+        <p class="text-sm font-medium text-gray-900 mb-2">
+          ¿Qué deseas hacer?
+        </p>
+        <div class="space-y-2">
+          <label class="flex items-start gap-2 text-sm text-gray-700">
+            <input
+              type="radio"
+              name="deactivation_option"
+              value="reassign"
+              checked
+              class="mt-0.5 w-4 h-4 border-gray-300 text-gray-900 focus:ring-2 focus:ring-gray-900 focus:ring-offset-1"
+            />
+            <div>
+              <span class="font-medium">Reasignar clases automáticamente</span>
+              <p class="text-xs text-gray-500">
+                El sistema sugerirá instructores disponibles para cada clase
+              </p>
+            </div>
+          </label>
+          <label class="flex items-start gap-2 text-sm text-gray-700">
+            <input
+              type="radio"
+              name="deactivation_option"
+              value="cancel"
+              class="mt-0.5 w-4 h-4 border-gray-300 text-gray-900 focus:ring-2 focus:ring-gray-900 focus:ring-offset-1"
+            />
+            <div>
+              <span class="font-medium">Cancelar clases pendientes</span>
+              <p class="text-xs text-gray-500">
+                Se notificará a los alumnos de la cancelación
+              </p>
+            </div>
+          </label>
+          <label class="flex items-start gap-2 text-sm text-gray-700">
+            <input
+              type="radio"
+              name="deactivation_option"
+              value="manual"
+              class="mt-0.5 w-4 h-4 border-gray-300 text-gray-900 focus:ring-2 focus:ring-gray-900 focus:ring-offset-1"
+            />
+            <div>
+              <span class="font-medium">Reasignar manualmente después</span>
+              <p class="text-xs text-gray-500">
+                Las clases quedarán pendientes de reasignación
+              </p>
+            </div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="border-t border-gray-200 px-6 py-4 flex items-center justify-end gap-3">
+      <button
+        type="button"
+        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+        data-modal-close
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        id={`${id}-confirm`}
+        class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors"
+      >
+        Desactivar instructor
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Funciones para manejar el modal
+  function openModal(modalId: string) {
+    const modal = document.querySelector(`[data-modal="${modalId}"]`);
+    const backdrop = document.querySelector(`[data-modal-backdrop="${modalId}"]`);
+    const content = modal?.querySelector("[data-modal-content]");
+
+    if (modal && backdrop) {
+      modal.classList.remove("hidden");
+      backdrop.classList.remove("hidden");
+
+      // Animación de entrada
+      setTimeout(() => {
+        backdrop.classList.remove("opacity-0");
+        backdrop.classList.add("opacity-100");
+        content?.classList.remove("scale-95", "opacity-0");
+        content?.classList.add("scale-100", "opacity-100");
+      }, 10);
+
+      // Prevenir scroll del body
+      document.body.style.overflow = "hidden";
+    }
+  }
+
+  function closeModal(modalId: string) {
+    const modal = document.querySelector(`[data-modal="${modalId}"]`);
+    const backdrop = document.querySelector(`[data-modal-backdrop="${modalId}"]`);
+    const content = modal?.querySelector("[data-modal-content]");
+
+    // Animación de salida
+    backdrop?.classList.remove("opacity-100");
+    backdrop?.classList.add("opacity-0");
+    content?.classList.remove("scale-100", "opacity-100");
+    content?.classList.add("scale-95", "opacity-0");
+
+    setTimeout(() => {
+      modal?.classList.add("hidden");
+      backdrop?.classList.add("hidden");
+      document.body.style.overflow = "";
+    }, 300);
+  }
+
+  // Listeners de cerrar modal
+  document.querySelectorAll("[data-modal-close]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const modal = button.closest("[data-modal]");
+      const modalId = modal?.getAttribute("data-modal");
+      if (modalId) closeModal(modalId);
+    });
+  });
+
+  // Cerrar al hacer click en el backdrop
+  document.querySelectorAll("[data-modal-backdrop]").forEach((backdrop) => {
+    backdrop.addEventListener("click", () => {
+      const modalId = backdrop.getAttribute("data-modal-backdrop");
+      if (modalId) closeModal(modalId);
+    });
+  });
+
+  // Cerrar con tecla ESC
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      const openModal = document.querySelector("[data-modal]:not(.hidden)");
+      const modalId = openModal?.getAttribute("data-modal");
+      if (modalId) closeModal(modalId);
+    }
+  });
+
+  // Botón de confirmación
+  const confirmButton = document.getElementById("pendingClassesWarning-confirm");
+  confirmButton?.addEventListener("click", () => {
+    const selectedOption = document.querySelector(
+      'input[name="deactivation_option"]:checked'
+    ) as HTMLInputElement;
+
+    const option = selectedOption?.value || "reassign";
+    let message = "";
+
+    switch (option) {
+      case "reassign":
+        message =
+          "✓ Instructor desactivado\n\nLas clases han sido marcadas para reasignación automática.\nSe notificará a los instructores disponibles.";
+        break;
+      case "cancel":
+        message =
+          "✓ Instructor desactivado\n\nLas clases han sido canceladas.\nSe ha enviado notificación a los alumnos afectados.";
+        break;
+      case "manual":
+        message =
+          "✓ Instructor desactivado\n\nLas clases quedan pendientes de reasignación manual.\nRevisar en Gestión de Clases.";
+        break;
+    }
+
+    alert(message);
+    closeModal("pendingClassesWarning");
+    window.location.reload();
+  });
+
+  // Exponer función para abrir el modal (se llama desde otras páginas)
+  (window as any).openPendingClassesWarning = () =>
+    openModal("pendingClassesWarning");
+</script>
+
+<style>
+  /* Smooth transitions */
+  [data-modal-backdrop],
+  [data-modal-content] {
+    transition-property: opacity, transform;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
+  }
+</style>
