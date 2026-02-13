@@ -1,0 +1,242 @@
+---
+/**
+ * Relatores - Listado de relatores profesionales
+ * RF-058: CRUD de Relatores Profesionales
+ */
+import DashboardLayout from '../../../layouts/DashboardLayout.astro';
+import Card from '../../../components/ui/Card.astro';
+import Button from '../../../components/ui/Button.astro';
+import { ESCUELA_ACTUAL } from '../../../lib/mockData';
+import { RELATORES } from '../../../lib/mockRelatores';
+
+const totalRelatores = RELATORES.length;
+const activos = RELATORES.filter(r => r.activo).length;
+const conA2 = RELATORES.filter(r => r.especialidades.includes('A2')).length;
+const conA3 = RELATORES.filter(r => r.especialidades.includes('A3')).length;
+
+const especialidadColors: Record<string, string> = {
+  'A2': 'bg-blue-100 text-blue-800',
+  'A3': 'bg-purple-100 text-purple-800',
+  'A4': 'bg-orange-100 text-orange-800',
+  'A5': 'bg-teal-100 text-teal-800',
+};
+---
+
+<DashboardLayout title="Relatores - Clase Profesional" escuela={ESCUELA_ACTUAL}>
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex items-center gap-2 text-sm text-secondary mb-2">
+      <a href="/dashboard" class="hover:text-gray-900">Inicio</a>
+      <span>/</span>
+      <span class="text-gray-900 font-medium">Relatores</span>
+    </div>
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-semibold text-gray-900 tracking-tight">Gestión de Relatores</h1>
+        <p class="text-secondary mt-1">Relatores para cursos profesionales A2, A3, A4, A5</p>
+      </div>
+      <Button href="/profesional/relatores/crear" variant="primary">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        Nuevo Relator
+      </Button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <Card class="p-4">
+      <p class="text-xs text-secondary">Total Relatores</p>
+      <p class="text-2xl font-semibold text-gray-900 mt-1">{totalRelatores}</p>
+    </Card>
+    <Card class="p-4">
+      <p class="text-xs text-secondary">Activos</p>
+      <p class="text-2xl font-semibold text-green-600 mt-1">{activos}</p>
+    </Card>
+    <Card class="p-4">
+      <p class="text-xs text-secondary">Especialidad A2</p>
+      <p class="text-2xl font-semibold text-blue-600 mt-1">{conA2}</p>
+    </Card>
+    <Card class="p-4">
+      <p class="text-xs text-secondary">Especialidad A3</p>
+      <p class="text-2xl font-semibold text-purple-600 mt-1">{conA3}</p>
+    </Card>
+  </div>
+
+  <!-- Filtros -->
+  <Card class="mb-6">
+    <div class="flex flex-col md:flex-row gap-4">
+      <div class="flex-1">
+        <input
+          type="search"
+          placeholder="Buscar por nombre o RUT..."
+          class="h-11 px-4 w-full text-sm bg-white rounded-md border border-gray-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-900 placeholder:text-gray-400"
+        />
+      </div>
+      <div class="flex gap-2">
+        <select class="h-11 px-4 text-sm bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-900">
+          <option value="">Todas las especialidades</option>
+          <option value="A2">A2</option>
+          <option value="A3">A3</option>
+          <option value="A4">A4</option>
+          <option value="A5">A5</option>
+        </select>
+        <select class="h-11 px-4 text-sm bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-900">
+          <option value="">Todos los estados</option>
+          <option value="activo">Activos</option>
+          <option value="inactivo">Inactivos</option>
+        </select>
+      </div>
+    </div>
+  </Card>
+
+  <!-- Grid: Tabla + Sidebar -->
+  <div class="grid lg:grid-cols-3 gap-6">
+    <!-- Tabla -->
+    <div class="lg:col-span-2">
+      <Card class="overflow-hidden p-0">
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="bg-gray-50 border-b border-gray-200">
+                <th class="font-semibold text-sm py-3 px-4 text-left text-gray-900">Nombre</th>
+                <th class="font-semibold text-sm py-3 px-4 text-left text-gray-900">RUT</th>
+                <th class="font-semibold text-sm py-3 px-4 text-left text-gray-900">Especialidades</th>
+                <th class="font-semibold text-sm py-3 px-4 text-center text-gray-900">Promociones</th>
+                <th class="font-semibold text-sm py-3 px-4 text-left text-gray-900">Estado</th>
+                <th class="font-semibold text-sm py-3 px-4 text-right text-gray-900">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {RELATORES.map((relator) => (
+                <tr class="hover:bg-gray-50 border-b border-gray-200 transition-colors">
+                  <td class="py-4 px-4">
+                    <div>
+                      <div class="text-sm font-medium text-gray-900">{relator.nombre}</div>
+                      <div class="text-xs text-gray-500">{relator.email}</div>
+                    </div>
+                  </td>
+                  <td class="py-4 px-4 text-sm text-gray-700 font-mono">{relator.rut}</td>
+                  <td class="py-4 px-4">
+                    <div class="flex flex-wrap gap-1">
+                      {relator.especialidades.map((esp) => (
+                        <span class={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${especialidadColors[esp]}`}>
+                          {esp}
+                        </span>
+                      ))}
+                    </div>
+                  </td>
+                  <td class="py-4 px-4 text-center">
+                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-800 text-sm font-medium">
+                      {relator.promocionesAsignadas}
+                    </span>
+                  </td>
+                  <td class="py-4 px-4">
+                    {relator.activo ? (
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Activo
+                      </span>
+                    ) : (
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        Inactivo
+                      </span>
+                    )}
+                  </td>
+                  <td class="py-4 px-4 text-right">
+                    <div class="flex items-center justify-end gap-2">
+                      <a
+                        href={`/profesional/relatores/${relator.id}`}
+                        class="p-2 text-gray-600 hover:text-gray-900 hover:bg-white rounded transition-colors"
+                        title="Ver perfil"
+                      >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                      </a>
+                      <a
+                        href={`/profesional/relatores/${relator.id}/editar`}
+                        class="p-2 text-gray-600 hover:text-gray-900 hover:bg-white rounded transition-colors"
+                        title="Editar"
+                      >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="flex items-center justify-between px-4 py-4 border-t border-gray-200">
+          <p class="text-sm text-secondary">
+            Mostrando 1-{totalRelatores} de {totalRelatores} relatores
+          </p>
+          <div class="flex gap-2">
+            <Button variant="secondary" class="text-sm">Anterior</Button>
+            <Button variant="secondary" class="text-sm">Siguiente</Button>
+          </div>
+        </div>
+      </Card>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-4">
+      <Card>
+        <h3 class="text-sm font-semibold text-gray-900 mb-4">Especialidades Profesionales</h3>
+        <div class="space-y-3">
+          <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p class="text-sm font-semibold text-blue-900">A2 - Taxis y colectivos</p>
+            <p class="text-xs text-blue-800 mt-1">Transporte menor de pasajeros</p>
+          </div>
+          <div class="p-3 bg-purple-50 border border-purple-200 rounded-lg">
+            <p class="text-sm font-semibold text-purple-900">A3 - Buses</p>
+            <p class="text-xs text-purple-800 mt-1">Transporte mayor de pasajeros</p>
+          </div>
+          <div class="p-3 bg-orange-50 border border-orange-200 rounded-lg">
+            <p class="text-sm font-semibold text-orange-900">A4 - Carga simple</p>
+            <p class="text-xs text-orange-800 mt-1">Transporte de carga simple</p>
+          </div>
+          <div class="p-3 bg-teal-50 border border-teal-200 rounded-lg">
+            <p class="text-sm font-semibold text-teal-900">A5 - Carga</p>
+            <p class="text-xs text-teal-800 mt-1">Transporte de carga profesional</p>
+          </div>
+        </div>
+      </Card>
+
+      <Card>
+        <h3 class="text-sm font-semibold text-gray-900 mb-3">Accesos Rápidos</h3>
+        <div class="space-y-2">
+          <Button href="/profesional/relatores/crear" variant="secondary" class="w-full justify-start text-sm">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+            </svg>
+            Registrar Relator
+          </Button>
+          <Button href="/profesional/promociones" variant="secondary" class="w-full justify-start text-sm">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            Ver Promociones
+          </Button>
+        </div>
+      </Card>
+    </div>
+  </div>
+</DashboardLayout>
+
+<style>
+  select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+  }
+</style>

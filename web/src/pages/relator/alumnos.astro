@@ -1,0 +1,374 @@
+---
+/**
+ * Mis Alumnos — Vista Relator
+ * RF-069, RF-070, RF-079
+ * Lista de alumnos del relator filtrada por promoción y curso.
+ * Muestra semáforo de asistencia teoría (75%) y práctica (100%) de cada alumno.
+ * Click en alumno → /relator/alumno/[id] para detalle completo.
+ */
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import Card from "../../components/ui/Card.astro";
+import { PROMOCIONES, RELATORES } from "../../lib/mockRelatores";
+
+// Demo: relator Francisco Herrera (id=3)
+const relatorId = 3;
+const relator = RELATORES.find((r) => r.id === relatorId)!;
+
+// Cursos de este relator (todas las promos activas/planificadas)
+const misPromos = PROMOCIONES.filter(
+  (p) => p.estado !== "finalizada" && p.cursos.some((c) => c.relatorId === relatorId)
+);
+
+// Datos mock de alumnos por promo-curso (reutilizados de relator/asistencia)
+const ALUMNOS_MOCK: Record<string, {
+  id: number; nombre: string; rut: string; curso: string; promoId: number;
+  asistencias: Record<string, boolean>;
+  asistenciasTeoria: Record<string, boolean>;
+  firmasSemana: boolean[];
+  licMedica?: boolean;
+}[]> = {
+  "3-A2": [
+    { id: 1,  nombre: "Carlos Soto Muñoz",    rut: "15.432.198-7", curso: "A2", promoId: 3, asistenciasTeoria: {s1d1:true,s1d2:true,s1d3:true,s1d4:true,s1d5:true,s1d6:true,s2d1:true,s2d2:true,s2d3:false,s2d4:true,s2d5:true,s2d6:true,s3d1:true,s3d2:false,s3d3:true,s3d4:true,s3d5:true,s3d6:true,s4d1:true,s4d2:true,s4d3:true,s4d4:false,s4d5:false}, firmasSemana: [true,true,true,false], asistencias: { d1:true,d2:true,d3:false,d4:true,d5:true,d6:true,d7:false,d8:true,d9:true,d10:true,d11:true } },
+    { id: 2,  nombre: "Andrea Flores Vera",    rut: "16.789.234-5", curso: "A2", promoId: 3, asistenciasTeoria: {s1d1:true,s1d2:false,s1d3:false,s1d4:true,s1d5:false,s1d6:true,s2d1:true,s2d2:true,s2d3:true,s2d4:false,s2d5:false,s2d6:true,s3d1:false,s3d2:false,s3d3:false,s3d4:false,s3d5:false,s3d6:false,s4d1:true,s4d2:true,s4d3:false,s4d4:false,s4d5:false}, firmasSemana: [true,false,false,false], licMedica: true, asistencias: { d1:true,d2:false,d3:false,d4:true,d5:false,d6:true,d7:true,d8:true,d9:false,d10:true,d11:false } },
+    { id: 3,  nombre: "Luis Pérez Castro",     rut: "14.567.890-3", curso: "A2", promoId: 3, asistenciasTeoria: {s1d1:true,s1d2:true,s1d3:true,s1d4:true,s1d5:true,s1d6:true,s2d1:true,s2d2:true,s2d3:true,s2d4:true,s2d5:true,s2d6:true,s3d1:true,s3d2:true,s3d3:true,s3d4:true,s3d5:true,s3d6:true,s4d1:true,s4d2:true,s4d3:true,s4d4:true,s4d5:true}, firmasSemana: [true,true,true,true], asistencias: { d1:true,d2:true,d3:true,d4:true,d5:true,d6:true,d7:true,d8:true,d9:true,d10:true,d11:true } },
+    { id: 4,  nombre: "Mariana Torres Rojas",  rut: "17.234.567-K", curso: "A2", promoId: 3, asistenciasTeoria: {s1d1:true,s1d2:true,s1d3:false,s1d4:false,s1d5:false,s1d6:false,s2d1:false,s2d2:true,s2d3:false,s2d4:false,s2d5:false,s2d6:false,s3d1:false,s3d2:false,s3d3:false,s3d4:false,s3d5:false,s3d6:false,s4d1:true,s4d2:false,s4d3:false,s4d4:false,s4d5:false}, firmasSemana: [false,false,false,false], asistencias: { d1:true,d2:true,d3:false,d4:false,d5:false,d6:false,d7:false,d8:true,d9:false,d10:false,d11:false } },
+    { id: 5,  nombre: "Roberto Núñez Díaz",    rut: "13.456.789-1", curso: "A2", promoId: 3, asistenciasTeoria: {s1d1:true,s1d2:true,s1d3:true,s1d4:true,s1d5:true,s1d6:false,s2d1:true,s2d2:true,s2d3:true,s2d4:true,s2d5:false,s2d6:true,s3d1:true,s3d2:true,s3d3:false,s3d4:true,s3d5:true,s3d6:true,s4d1:true,s4d2:true,s4d3:true,s4d4:true,s4d5:false}, firmasSemana: [true,true,true,true], asistencias: { d1:true,d2:true,d3:true,d4:true,d5:true,d6:false,d7:true,d8:true,d9:true,d10:true,d11:true } },
+    { id: 6,  nombre: "Patricia Vargas Silva", rut: "15.678.901-2", curso: "A2", promoId: 3, asistenciasTeoria: {s1d1:false,s1d2:true,s1d3:true,s1d4:true,s1d5:true,s1d6:true,s2d1:true,s2d2:true,s2d3:true,s2d4:true,s2d5:true,s2d6:true,s3d1:true,s3d2:true,s3d3:true,s3d4:true,s3d5:true,s3d6:true,s4d1:true,s4d2:true,s4d3:true,s4d4:true,s4d5:true}, firmasSemana: [true,true,true,true], asistencias: { d1:false,d2:true,d3:true,d4:true,d5:true,d6:true,d7:true,d8:true,d9:true,d10:true,d11:true } },
+    { id: 7,  nombre: "Jorge Morales Reyes",   rut: "16.901.234-6", curso: "A2", promoId: 3, asistenciasTeoria: {s1d1:true,s1d2:true,s1d3:true,s1d4:true,s1d5:false,s1d6:true,s2d1:true,s2d2:false,s2d3:true,s2d4:true,s2d5:true,s2d6:true,s3d1:true,s3d2:true,s3d3:true,s3d4:true,s3d5:true,s3d6:false,s4d1:true,s4d2:true,s4d3:true,s4d4:false,s4d5:true}, firmasSemana: [true,true,true,true], asistencias: { d1:true,d2:true,d3:true,d4:true,d5:false,d6:true,d7:true,d8:false,d9:true,d10:true,d11:true } },
+    { id: 8,  nombre: "Valentina Ríos Lagos",  rut: "15.234.567-4", curso: "A2", promoId: 3, asistenciasTeoria: {s1d1:true,s1d2:true,s1d3:true,s1d4:true,s1d5:true,s1d6:true,s2d1:true,s2d2:true,s2d3:true,s2d4:true,s2d5:true,s2d6:true,s3d1:true,s3d2:true,s3d3:true,s3d4:true,s3d5:true,s3d6:true,s4d1:true,s4d2:true,s4d3:true,s4d4:true,s4d5:true}, firmasSemana: [true,true,true,true], asistencias: { d1:true,d2:true,d3:true,d4:true,d5:true,d6:true,d7:true,d8:true,d9:true,d10:true,d11:true } },
+  ],
+  "4-A2": [
+    { id: 9,  nombre: "Felipe Aguilar Pino",   rut: "17.345.678-9", curso: "A2", promoId: 4, asistenciasTeoria: {s1d1:true,s1d2:true,s1d3:true,s1d4:true,s1d5:true,s1d6:true,s2d1:true,s2d2:true}, firmasSemana: [true,true], asistencias: { d1:true,d2:true,d3:true,d4:true,d5:true,d6:true,d7:true,d8:true,d9:true,d10:true,d11:true } },
+    { id: 10, nombre: "Diego Meza Fuentes",     rut: "16.456.789-0", curso: "A2", promoId: 4, asistenciasTeoria: {s1d1:true,s1d2:false,s1d3:true,s1d4:true,s1d5:true,s1d6:true,s2d1:false,s2d2:true}, firmasSemana: [true,false], asistencias: { d1:true,d2:false,d3:true,d4:true,d5:true,d6:true,d7:false,d8:true,d9:true,d10:true,d11:true } },
+    { id: 11, nombre: "Camila Rojas Vega",      rut: "18.123.456-7", curso: "A2", promoId: 4, asistenciasTeoria: {s1d1:false,s1d2:false,s1d3:false,s1d4:true,s1d5:false,s1d6:false,s2d1:false,s2d2:false}, firmasSemana: [false,false], licMedica: true, asistencias: { d1:false,d2:false,d3:false,d4:true,d5:false,d6:false,d7:false,d8:false,d9:false,d10:false,d11:false } },
+    { id: 12, nombre: "Sebastián Mora Castro",  rut: "17.654.321-2", curso: "A2", promoId: 4, asistenciasTeoria: {s1d1:true,s1d2:true,s1d3:true,s1d4:true,s1d5:true,s1d6:true,s2d1:true,s2d2:true}, firmasSemana: [true,true], asistencias: { d1:true,d2:true,d3:true,d4:true,d5:true,d6:true,d7:true,d8:true,d9:false,d10:true,d11:true } },
+    { id: 13, nombre: "Claudia Herrera Díaz",   rut: "16.234.567-8", curso: "A2", promoId: 4, asistenciasTeoria: {s1d1:true,s1d2:true,s1d3:false,s1d4:true,s1d5:true,s1d6:true,s2d1:true,s2d2:true}, firmasSemana: [true,true], asistencias: { d1:true,d2:true,d3:false,d4:true,d5:true,d6:true,d7:true,d8:true,d9:true,d10:true,d11:false } },
+    { id: 14, nombre: "Gonzalo Pinto Muñoz",    rut: "15.321.654-3", curso: "A2", promoId: 4, asistenciasTeoria: {s1d1:true,s1d2:true,s1d3:true,s1d4:false,s1d5:true,s1d6:true,s2d1:true,s2d2:true}, firmasSemana: [true,true], asistencias: { d1:true,d2:true,d3:true,d4:false,d5:true,d6:true,d7:true,d8:true,d9:true,d10:true,d11:true } },
+  ],
+  "4-A3": [
+    { id: 15, nombre: "María Fernández López",  rut: "14.876.543-1", curso: "A3", promoId: 4, asistenciasTeoria: {s1d1:true,s1d2:true,s1d3:true,s1d4:true,s1d5:true,s1d6:true,s2d1:true,s2d2:true}, firmasSemana: [true,true], asistencias: { d1:true,d2:true,d3:true,d4:true,d5:true,d6:true,d7:true,d8:true,d9:true,d10:true,d11:true } },
+    { id: 16, nombre: "Nicolás Castillo Vera",  rut: "15.987.654-2", curso: "A3", promoId: 4, asistenciasTeoria: {s1d1:true,s1d2:true,s1d3:false,s1d4:true,s1d5:true,s1d6:true,s2d1:true,s2d2:false}, firmasSemana: [true,false], asistencias: { d1:true,d2:true,d3:false,d4:true,d5:true,d6:true,d7:true,d8:false,d9:true,d10:true,d11:true } },
+    { id: 17, nombre: "Javiera Soto Romero",    rut: "17.111.222-3", curso: "A3", promoId: 4, asistenciasTeoria: {s1d1:true,s1d2:true,s1d3:true,s1d4:true,s1d5:true,s1d6:true,s2d1:true,s2d2:true}, firmasSemana: [true,true], asistencias: { d1:true,d2:true,d3:true,d4:true,d5:true,d6:true,d7:true,d8:true,d9:true,d10:true,d11:true } },
+    { id: 18, nombre: "Mateo Salinas Riquelme", rut: "16.555.444-9", curso: "A3", promoId: 4, asistenciasTeoria: {s1d1:true,s1d2:false,s1d3:true,s1d4:false,s1d5:true,s1d6:false,s2d1:true,s2d2:false}, firmasSemana: [false,false], asistencias: { d1:true,d2:false,d3:true,d4:false,d5:true,d6:false,d7:true,d8:false,d9:true,d10:false,d11:true } },
+  ],
+};
+
+// Aplanar todos los alumnos
+const todosLosAlumnos = Object.values(ALUMNOS_MOCK).flat();
+
+// Helper semáforo
+function getSem(pct: number, min: number) {
+  if (pct >= min) return { dot: "bg-green-500", text: "text-green-700", label: "Cumple", badge: "bg-green-100 text-green-800" };
+  if (pct >= min - 10) return { dot: "bg-yellow-400", text: "text-yellow-700", label: "En límite", badge: "bg-yellow-100 text-yellow-800" };
+  return { dot: "bg-red-500", text: "text-red-700", label: "En riesgo", badge: "bg-red-100 text-red-800" };
+}
+
+// Calcular stats de cada alumno
+function calcStats(a: typeof todosLosAlumnos[0]) {
+  const diasPresentes = Object.values(a.asistencias).filter(Boolean).length;
+  const totalDias = Object.keys(a.asistencias).length;
+  const pctPractica = totalDias > 0 ? Math.round((diasPresentes / totalDias) * 100) : 0;
+
+  const sessionesTeoria = Object.values(a.asistenciasTeoria).length;
+  const sessionesAsistidas = Object.values(a.asistenciasTeoria).filter(Boolean).length;
+  const firmasDadas = a.firmasSemana.filter(Boolean).length;
+  const firmasTotal = a.firmasSemana.length;
+  const totalTeoria = sessionesTeoria + firmasTotal;
+  const totalTeoriaAsist = sessionesAsistidas + firmasDadas;
+  const pctTeoria = totalTeoria > 0 ? Math.round((totalTeoriaAsist / totalTeoria) * 100) : 0;
+
+  const promo = PROMOCIONES.find(p => p.id === a.promoId)!;
+  const cursoInfo = promo?.cursos.find(c => c.tipo === a.curso);
+
+  return {
+    pctPractica,
+    pctTeoria,
+    diasPresentes,
+    totalDias,
+    sessionesAsistidas,
+    sessionesTeoria,
+    semTeoria: getSem(pctTeoria, 75),
+    semPractica: getSem(pctPractica, 100),
+    promoNombre: promo?.nombre ?? "—",
+    promoId: a.promoId,
+    diaActual: promo?.diaActual ?? 0,
+    diasTotales: 30,
+  };
+}
+
+// Serializar para client-side
+const alumnosData = todosLosAlumnos.map(a => ({ ...a, ...calcStats(a) }));
+
+// Datos para los filtros
+const opcionesPromo = misPromos.map(p => ({
+  id: p.id,
+  nombre: p.nombre,
+  estado: p.estado,
+  diaActual: p.diaActual,
+  cursosDelRelator: p.cursos.filter(c => c.relatorId === relatorId).map(c => c.tipo),
+}));
+---
+
+<DashboardLayout title="Mis Alumnos" userRole="relator">
+  <!-- Header -->
+  <div class="mb-6">
+    <div class="flex items-center gap-2 text-sm text-gray-500 mb-2">
+      <a href="/relator/dashboard" class="hover:text-gray-900">Inicio</a>
+      <span>/</span>
+      <span class="text-gray-900 font-medium">Mis Alumnos</span>
+    </div>
+    <div class="flex flex-wrap items-start justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-semibold text-gray-900 tracking-tight text-balance">
+          Mis Alumnos
+        </h1>
+        <p class="text-gray-600 mt-1">
+          {relator.nombre} · Consulta de asistencia por promoción y curso
+        </p>
+      </div>
+      <a
+        href="/relator/asistencia"
+        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-800 shadow-sm transition-colors"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+        </svg>
+        Registrar asistencia
+      </a>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="border border-gray-200 rounded-lg bg-white p-4 shadow-sm mb-6">
+    <div class="grid sm:grid-cols-3 gap-4">
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1.5">Promoción</label>
+        <select id="fil-promo" class="h-10 px-3 w-full text-sm bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900">
+          <option value="">Todas las promociones</option>
+          {opcionesPromo.map(p => (
+            <option value={String(p.id)}>
+              {p.nombre} ({p.estado === "en_curso" ? `Día ${p.diaActual}/30` : "Planificada"})
+            </option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1.5">Curso</label>
+        <select id="fil-curso" class="h-10 px-3 w-full text-sm bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900">
+          <option value="">Todos los cursos</option>
+          <option value="A2">Curso A2</option>
+          <option value="A3">Curso A3</option>
+          <option value="A4">Curso A4</option>
+          <option value="A5">Curso A5</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1.5">Estado asistencia</label>
+        <select id="fil-estado" class="h-10 px-3 w-full text-sm bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900">
+          <option value="">Todos</option>
+          <option value="riesgo">En riesgo</option>
+          <option value="limite">En límite</option>
+          <option value="ok">Cumple</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resumen stats -->
+  <div id="stats-bar" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+    <!-- populated by JS -->
+  </div>
+
+  <!-- Tabla alumnos -->
+  <div class="border border-gray-200 rounded-lg bg-white shadow-sm overflow-hidden">
+    <div class="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
+      <div class="grid grid-cols-12 gap-3 flex-1 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+        <div class="col-span-3">Alumno</div>
+        <div class="col-span-2">RUT</div>
+        <div class="col-span-2">Promoción · Curso</div>
+        <div class="col-span-2 text-center">Teoría (75%)</div>
+        <div class="col-span-2 text-center">Práctica (100%)</div>
+        <div class="col-span-1"></div>
+      </div>
+    </div>
+    <div id="lista-alumnos" class="divide-y divide-gray-100">
+      <!-- populated by JS -->
+    </div>
+    <div id="sin-resultados" class="hidden py-12 text-center">
+      <svg class="w-10 h-10 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+      </svg>
+      <p class="text-gray-500 text-sm font-medium">Sin alumnos con ese filtro</p>
+    </div>
+  </div>
+
+  <!-- Leyenda semáforo -->
+  <div class="mt-4 flex flex-wrap gap-4 text-xs text-gray-500">
+    <div class="flex items-center gap-1.5">
+      <span class="w-2.5 h-2.5 rounded-full bg-green-500 shrink-0"></span>
+      Cumple mínimo requerido
+    </div>
+    <div class="flex items-center gap-1.5">
+      <span class="w-2.5 h-2.5 rounded-full bg-yellow-400 shrink-0"></span>
+      En límite (dentro del 10% del mínimo)
+    </div>
+    <div class="flex items-center gap-1.5">
+      <span class="w-2.5 h-2.5 rounded-full bg-red-500 shrink-0"></span>
+      En riesgo (bajo el mínimo requerido)
+    </div>
+    <div class="ml-auto flex items-center gap-1.5 text-blue-600">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      RF-069 Teoría mín. 75% · RF-070 Práctica 100%
+    </div>
+  </div>
+</DashboardLayout>
+
+<script define:vars={{ alumnosData, opcionesPromo }}>
+  let filtroPromo = "";
+  let filtroCurso = "";
+  let filtroEstado = "";
+
+  document.getElementById("fil-promo").addEventListener("change", e => { filtroPromo = e.target.value; renderTabla(); });
+  document.getElementById("fil-curso").addEventListener("change", e => { filtroCurso = e.target.value; renderTabla(); });
+  document.getElementById("fil-estado").addEventListener("change", e => { filtroEstado = e.target.value; renderTabla(); });
+
+  function getEstadoGlobal(a) {
+    // En riesgo si cualquiera falla; en límite si cualquiera está en límite; ok si ambos cumplen
+    if (a.semTeoria.label === "En riesgo" || a.semPractica.label === "En riesgo") return "riesgo";
+    if (a.semTeoria.label === "En límite" || a.semPractica.label === "En límite") return "limite";
+    return "ok";
+  }
+
+  function renderTabla() {
+    const filtered = alumnosData.filter(a => {
+      if (filtroPromo && String(a.promoId) !== filtroPromo) return false;
+      if (filtroCurso && a.curso !== filtroCurso) return false;
+      if (filtroEstado && getEstadoGlobal(a) !== filtroEstado) return false;
+      return true;
+    });
+
+    // Stats
+    const total = filtered.length;
+    const enRiesgo = filtered.filter(a => getEstadoGlobal(a) === "riesgo").length;
+    const enLimite = filtered.filter(a => getEstadoGlobal(a) === "limite").length;
+    const cumplen = filtered.filter(a => getEstadoGlobal(a) === "ok").length;
+
+    document.getElementById("stats-bar").innerHTML = `
+      <div class="border border-gray-200 rounded-lg bg-white p-4 shadow-sm text-center">
+        <p class="text-2xl font-bold text-gray-900">${total}</p>
+        <p class="text-xs text-gray-500 mt-0.5">Total alumnos</p>
+      </div>
+      <div class="border border-green-200 rounded-lg bg-green-50 p-4 shadow-sm text-center">
+        <p class="text-2xl font-bold text-green-700">${cumplen}</p>
+        <p class="text-xs text-green-600 mt-0.5">Cumplen asistencia</p>
+      </div>
+      <div class="border border-yellow-200 rounded-lg bg-yellow-50 p-4 shadow-sm text-center">
+        <p class="text-2xl font-bold text-yellow-700">${enLimite}</p>
+        <p class="text-xs text-yellow-600 mt-0.5">En límite</p>
+      </div>
+      <div class="border border-red-200 rounded-lg bg-red-50 p-4 shadow-sm text-center">
+        <p class="text-2xl font-bold text-red-700">${enRiesgo}</p>
+        <p class="text-xs text-red-600 mt-0.5">En riesgo</p>
+      </div>
+    `;
+
+    const lista = document.getElementById("lista-alumnos");
+    const sinRes = document.getElementById("sin-resultados");
+
+    if (filtered.length === 0) {
+      lista.innerHTML = "";
+      sinRes.classList.remove("hidden");
+      return;
+    }
+    sinRes.classList.add("hidden");
+
+    // Agrupar por promo-curso para header de grupo
+    const grupos = {};
+    filtered.forEach(a => {
+      const key = `${a.promoId}-${a.curso}`;
+      if (!grupos[key]) grupos[key] = { label: `${a.promoNombre} · Curso ${a.curso}`, alumnos: [] };
+      grupos[key].alumnos.push(a);
+    });
+
+    let html = "";
+    Object.values(grupos).forEach(g => {
+      html += `
+        <div class="px-4 py-2 bg-gray-50 border-b border-gray-200">
+          <p class="text-xs font-semibold text-gray-600 uppercase tracking-wide">${g.label}</p>
+        </div>
+      `;
+      g.alumnos.forEach(a => {
+        const estado = getEstadoGlobal(a);
+        const rowBg = estado === "riesgo" ? "hover:bg-red-50/30" : "hover:bg-gray-50";
+
+        html += `
+          <div class="grid grid-cols-12 gap-3 items-center px-4 py-3.5 transition-colors ${rowBg} cursor-pointer" onclick="window.location='/relator/alumno/${a.id}'">
+            <div class="col-span-3 flex items-center gap-3">
+              <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-xs font-bold text-gray-600 shrink-0">
+                ${a.nombre.charAt(0)}
+              </div>
+              <div>
+                <p class="text-sm font-medium text-gray-900">${a.nombre}</p>
+                ${a.licMedica ? '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-blue-100 text-blue-700">Lic. médica</span>' : ""}
+              </div>
+            </div>
+            <div class="col-span-2 text-xs text-gray-500">${a.rut}</div>
+            <div class="col-span-2 text-xs text-gray-600">
+              <span class="font-medium text-gray-800">Día ${a.diaActual}/${a.diasTotales}</span>
+            </div>
+
+            <!-- Teoría -->
+            <div class="col-span-2">
+              <div class="flex items-center justify-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full shrink-0 ${a.semTeoria.dot}"></span>
+                <div class="text-center">
+                  <p class="text-sm font-semibold ${a.semTeoria.text}">${a.pctTeoria}%</p>
+                  <div class="w-full bg-gray-100 rounded-full h-1 mt-0.5" style="min-width:60px">
+                    <div class="h-1 rounded-full ${a.pctTeoria >= 75 ? "bg-green-500" : a.pctTeoria >= 65 ? "bg-yellow-400" : "bg-red-500"}" style="width:${a.pctTeoria}%"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Práctica -->
+            <div class="col-span-2">
+              <div class="flex items-center justify-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full shrink-0 ${a.semPractica.dot}"></span>
+                <div class="text-center">
+                  <p class="text-sm font-semibold ${a.semPractica.text}">${a.pctPractica}%</p>
+                  <div class="w-full bg-gray-100 rounded-full h-1 mt-0.5" style="min-width:60px">
+                    <div class="h-1 rounded-full ${a.pctPractica >= 100 ? "bg-green-500" : a.pctPractica >= 90 ? "bg-yellow-400" : "bg-red-500"}" style="width:${a.pctPractica}%"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-span-1 flex justify-end">
+              <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </div>
+          </div>
+        `;
+      });
+    });
+
+    lista.innerHTML = html;
+  }
+
+  // Render inicial
+  renderTabla();
+</script>
+
+<style>
+  select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+  }
+</style>

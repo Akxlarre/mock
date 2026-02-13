@@ -1,0 +1,278 @@
+---
+/**
+ * Crear Promoción - RF-059, RF-061
+ * Formulario con fecha inicio (lunes c/2 semanas), duración 30 días, 4 cursos
+ */
+import DashboardLayout from '../../../layouts/DashboardLayout.astro';
+import Card from '../../../components/ui/Card.astro';
+import Input from '../../../components/ui/Input.astro';
+import Button from '../../../components/ui/Button.astro';
+import { ESCUELA_ACTUAL } from '../../../lib/mockData';
+import { RELATORES, getRelatoresByEspecialidad } from '../../../lib/mockRelatores';
+import type { EspecialidadProfesional } from '../../../lib/mockRelatores';
+
+// Generar próximos lunes disponibles cada 2 semanas (RF-061)
+const lunesDisponibles = [
+  { fecha: '2026-03-02', label: 'Lun 2 Mar 2026' },
+  { fecha: '2026-03-16', label: 'Lun 16 Mar 2026' },
+  { fecha: '2026-03-30', label: 'Lun 30 Mar 2026' },
+  { fecha: '2026-04-13', label: 'Lun 13 Abr 2026' },
+  { fecha: '2026-04-27', label: 'Lun 27 Abr 2026' },
+  { fecha: '2026-05-11', label: 'Lun 11 May 2026' },
+];
+
+// Relatores por especialidad para los selects
+const relatoresA2 = getRelatoresByEspecialidad('A2');
+const relatoresA3 = getRelatoresByEspecialidad('A3');
+const relatoresA4 = getRelatoresByEspecialidad('A4');
+const relatoresA5 = getRelatoresByEspecialidad('A5');
+
+const cursoConfig: { tipo: EspecialidadProfesional; label: string; color: string; relatores: typeof RELATORES }[] = [
+  { tipo: 'A2', label: 'A2 - Taxis y colectivos', color: 'blue', relatores: relatoresA2 },
+  { tipo: 'A3', label: 'A3 - Buses', color: 'purple', relatores: relatoresA3 },
+  { tipo: 'A4', label: 'A4 - Carga simple', color: 'orange', relatores: relatoresA4 },
+  { tipo: 'A5', label: 'A5 - Carga', color: 'teal', relatores: relatoresA5 },
+];
+
+const selectStyle = `background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.5rem center; background-size: 1.5em 1.5em; padding-right: 2.5rem;`;
+---
+
+<DashboardLayout title="Crear promoción - Clase Profesional" escuela={ESCUELA_ACTUAL}>
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex items-center gap-2 text-sm text-secondary mb-2">
+      <a href="/dashboard" class="hover:text-gray-900">Inicio</a>
+      <span>/</span>
+      <a href="/profesional/promociones" class="hover:text-gray-900">Promociones</a>
+      <span>/</span>
+      <span class="text-gray-900 font-medium">Crear promoción</span>
+    </div>
+    <h1 class="text-3xl font-semibold text-gray-900 tracking-tight">Crear promoción</h1>
+    <p class="text-secondary mt-1">Definir nueva cohorte de cursos profesionales</p>
+  </div>
+
+  <div class="grid lg:grid-cols-3 gap-6">
+    <!-- Formulario -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Info general -->
+      <Card>
+        <h2 class="text-lg font-semibold text-gray-900 mb-6">Información general</h2>
+        <form id="createPromoForm" class="space-y-5">
+          <!-- Nombre -->
+          <Input label="Nombre de la promoción" name="nombre" placeholder="Promoción Marzo I 2026" required />
+
+          <!-- Código -->
+          <Input label="Código" name="codigo" placeholder="PROM-2026-06" required />
+
+          <!-- Fecha de inicio (RF-061) -->
+          <div class="w-full">
+            <label class="block text-sm font-medium text-gray-700 mb-1.5">
+              Fecha de inicio *
+            </label>
+            <p class="text-xs text-secondary mb-3">Solo lunes disponibles cada 2 semanas (RF-061)</p>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-2" id="fechaSelector">
+              {lunesDisponibles.map((lunes, i) => (
+                <label class={`flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-colors text-sm font-medium
+                  ${i === 0
+                    ? 'bg-gray-900 text-white border-gray-900'
+                    : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-gray-300'
+                  }
+                `}>
+                  <input
+                    type="radio"
+                    name="fechaInicio"
+                    value={lunes.fecha}
+                    class="sr-only"
+                    checked={i === 0}
+                    required
+                  />
+                  <div class="text-center">
+                    <span class="block">{lunes.label}</span>
+                  </div>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <!-- Fecha fin (calculada) -->
+          <div class="w-full">
+            <label class="block text-sm font-medium text-gray-700 mb-1.5">
+              Fecha de término
+            </label>
+            <input
+              type="text"
+              id="fechaFin"
+              readonly
+              value="Sáb 04 Abr 2026"
+              class="h-11 px-4 w-full text-sm bg-gray-50 rounded-md border border-gray-200 text-gray-500 cursor-not-allowed"
+            />
+            <p class="text-xs text-secondary mt-1">Calculada automáticamente: sábado de la 5ta semana (30 días de clase, lun-sáb)</p>
+          </div>
+        </form>
+      </Card>
+
+      <!-- Cursos y Relatores -->
+      <Card>
+        <h2 class="text-lg font-semibold text-gray-900 mb-2">Cursos y asignación de relatores</h2>
+        <p class="text-sm text-secondary mb-6">Cada curso admite máximo 25 alumnos. Capacidad total: 100 alumnos.</p>
+
+        <div class="space-y-4">
+          {cursoConfig.map(curso => (
+            <div class={`p-4 border rounded-lg border-${curso.color === 'blue' ? 'blue' : curso.color === 'purple' ? 'purple' : curso.color === 'orange' ? 'orange' : 'teal'}-200 bg-${curso.color === 'blue' ? 'blue' : curso.color === 'purple' ? 'purple' : curso.color === 'orange' ? 'orange' : 'teal'}-50/30`}>
+              <div class="flex flex-col md:flex-row md:items-center gap-4">
+                <div class="flex items-center gap-3 md:w-48 shrink-0">
+                  <span class={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-${curso.color === 'blue' ? 'blue' : curso.color === 'purple' ? 'purple' : curso.color === 'orange' ? 'orange' : 'teal'}-100 text-${curso.color === 'blue' ? 'blue' : curso.color === 'purple' ? 'purple' : curso.color === 'orange' ? 'orange' : 'teal'}-800`}>
+                    {curso.tipo}
+                  </span>
+                  <span class="text-sm text-gray-700">{curso.label.split(' - ')[1]}</span>
+                </div>
+                <div class="flex-1">
+                  <label class="block text-xs font-medium text-gray-600 mb-1">Relator asignado</label>
+                  <select
+                    name={`relator_${curso.tipo}`}
+                    class="h-11 px-4 w-full text-sm bg-white rounded-md border border-gray-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-900 appearance-none"
+                    style={selectStyle}
+                  >
+                    <option value="">Seleccionar relator...</option>
+                    {curso.relatores.map(r => (
+                      <option value={r.id.toString()}>{r.nombre} ({r.especialidades.join(', ')})</option>
+                    ))}
+                  </select>
+                </div>
+                <div class="shrink-0 text-right">
+                  <p class="text-xs text-secondary">Capacidad</p>
+                  <p class="text-sm font-semibold text-gray-900">25 alumnos</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <!-- Botones -->
+        <div class="flex gap-3 pt-6 mt-6 border-t border-gray-200">
+          <a href="/profesional/promociones" class="inline-flex items-center justify-center h-11 px-4 text-sm font-medium rounded-md bg-white border border-gray-300 text-gray-900 hover:bg-gray-50 hover:border-gray-400 shadow-sm transition-all duration-200">
+            Cancelar
+          </a>
+          <Button type="button" variant="primary" id="btnCrear">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Crear promoción
+          </Button>
+        </div>
+      </Card>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-4">
+      <Card class="bg-gray-50 border-gray-200">
+        <h3 class="text-sm font-semibold text-gray-900 mb-3">Reglas de negocio</h3>
+        <ul class="space-y-2 text-xs text-gray-700">
+          <li class="flex items-start gap-2">
+            <span class="w-1.5 h-1.5 bg-gray-900 rounded-full shrink-0 mt-1.5"></span>
+            <span>Duración fija: <strong>30 días de clase</strong> (lun-sáb = 5 semanas)</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="w-1.5 h-1.5 bg-gray-900 rounded-full shrink-0 mt-1.5"></span>
+            <span>Inicio solo en <strong>lunes</strong>, cada 2 semanas</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="w-1.5 h-1.5 bg-gray-900 rounded-full shrink-0 mt-1.5"></span>
+            <span>Máximo <strong>100 alumnos</strong> por promoción (25 por curso)</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="w-1.5 h-1.5 bg-gray-900 rounded-full shrink-0 mt-1.5"></span>
+            <span>4 cursos: A2, A3, A4, A5</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="w-1.5 h-1.5 bg-gray-900 rounded-full shrink-0 mt-1.5"></span>
+            <span>Relator debe tener la especialidad del curso</span>
+          </li>
+        </ul>
+      </Card>
+
+      <Card>
+        <h3 class="text-sm font-semibold text-gray-900 mb-3">Sobre las fechas</h3>
+        <div class="space-y-3 text-xs text-gray-700">
+          <div class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            <span>Se sugieren los próximos lunes disponibles (cada 2 semanas)</span>
+          </div>
+          <div class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span>La fecha de término es el sábado de la 5ta semana (30 días de clase lun-sáb)</span>
+          </div>
+          <div class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-yellow-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+            <span>Si un feriado cae dentro del período, el sistema lo gestionará automáticamente (RF-061)</span>
+          </div>
+        </div>
+      </Card>
+
+      <Card>
+        <h3 class="text-sm font-semibold text-gray-900 mb-3">Estados de promoción</h3>
+        <div class="space-y-2">
+          <div class="flex items-center gap-2">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Planificada</span>
+            <span class="text-xs text-gray-600">Antes de la fecha inicio</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">En curso</span>
+            <span class="text-xs text-gray-600">Durante los 30 días</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Finalizada</span>
+            <span class="text-xs text-gray-600">Tras completar 30 días</span>
+          </div>
+        </div>
+      </Card>
+    </div>
+  </div>
+</DashboardLayout>
+
+<script>
+  // Selector de fecha: highlight radio seleccionado
+  const fechaSelector = document.getElementById('fechaSelector');
+  const fechaFinInput = document.getElementById('fechaFin') as HTMLInputElement;
+
+  const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
+  fechaSelector?.querySelectorAll('label').forEach(label => {
+    const radio = label.querySelector('input[type="radio"]') as HTMLInputElement;
+    radio?.addEventListener('change', () => {
+      // Reset all
+      fechaSelector.querySelectorAll('label').forEach(l => {
+        l.classList.remove('bg-gray-900', 'text-white', 'border-gray-900');
+        l.classList.add('bg-white', 'text-gray-700', 'border-gray-200');
+      });
+      // Activate
+      label.classList.add('bg-gray-900', 'text-white', 'border-gray-900');
+      label.classList.remove('bg-white', 'text-gray-700', 'border-gray-200');
+
+      // Calcular fecha fin: sábado de la 5ta semana (lunes + 33 días = 30 días de clase lun-sáb)
+      if (radio.value && fechaFinInput) {
+        const inicio = new Date(radio.value + 'T00:00:00');
+        const fin = new Date(inicio);
+        fin.setDate(fin.getDate() + 33);
+        const dias = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+        const diaSemana = dias[fin.getDay()];
+        const dia = fin.getDate().toString().padStart(2, '0');
+        const mes = meses[fin.getMonth()];
+        const anio = fin.getFullYear();
+        fechaFinInput.value = `${diaSemana} ${dia} ${mes} ${anio}`;
+      }
+    });
+  });
+
+  // Botón crear
+  document.getElementById('btnCrear')?.addEventListener('click', () => {
+    alert('Promoción creada exitosamente (mockup)');
+    window.location.href = '/profesional/promociones';
+  });
+</script>

@@ -1,0 +1,187 @@
+---
+/**
+ * Editar Relator - RF-058
+ * Formulario pre-rellenado con datos del relator
+ */
+import DashboardLayout from '../../../../layouts/DashboardLayout.astro';
+import Card from '../../../../components/ui/Card.astro';
+import Input from '../../../../components/ui/Input.astro';
+import Button from '../../../../components/ui/Button.astro';
+import { ESCUELA_ACTUAL } from '../../../../lib/mockData';
+import { RELATORES } from '../../../../lib/mockRelatores';
+
+export function getStaticPaths() {
+  return [
+    { params: { id: "1" } },
+    { params: { id: "2" } },
+    { params: { id: "3" } },
+    { params: { id: "4" } },
+    { params: { id: "5" } },
+  ];
+}
+
+const { id } = Astro.params;
+const relator = RELATORES.find(r => r.id === parseInt(id!)) || RELATORES[0];
+
+// Separar nombre y apellido (mock)
+const partes = relator.nombre.split(' ');
+const nombres = partes.slice(0, Math.ceil(partes.length / 2)).join(' ');
+const apellidos = partes.slice(Math.ceil(partes.length / 2)).join(' ');
+---
+
+<DashboardLayout title={`Editar ${relator.nombre} - Relatores`} escuela={ESCUELA_ACTUAL}>
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex items-center gap-2 text-sm text-secondary mb-2">
+      <a href="/dashboard" class="hover:text-gray-900">Inicio</a>
+      <span>/</span>
+      <a href="/profesional/relatores" class="hover:text-gray-900">Relatores</a>
+      <span>/</span>
+      <a href={`/profesional/relatores/${relator.id}`} class="hover:text-gray-900">{relator.nombre}</a>
+      <span>/</span>
+      <span class="text-gray-900 font-medium">Editar</span>
+    </div>
+    <h1 class="text-3xl font-semibold text-gray-900 tracking-tight">Editar relator</h1>
+    <p class="text-secondary mt-1">Modificar datos de {relator.nombre}</p>
+  </div>
+
+  <div class="grid lg:grid-cols-3 gap-6">
+    <!-- Formulario -->
+    <div class="lg:col-span-2">
+      <Card>
+        <h2 class="text-lg font-semibold text-gray-900 mb-6">Información del relator</h2>
+        <form id="editRelatorForm" class="space-y-5" action={`/profesional/relatores/${relator.id}`} method="get">
+          <!-- RUT (read-only) -->
+          <div class="w-full">
+            <label class="block text-sm font-medium text-gray-700 mb-1.5" for="rut">
+              RUT
+            </label>
+            <input
+              type="text"
+              id="rut"
+              name="rut"
+              value={relator.rut}
+              readonly
+              class="h-11 px-4 w-full text-sm bg-gray-50 rounded-md border border-gray-200 text-gray-500 cursor-not-allowed"
+            />
+            <p class="text-xs text-secondary mt-1">El RUT no puede ser modificado</p>
+          </div>
+
+          <!-- Nombres y Apellidos -->
+          <div class="grid md:grid-cols-2 gap-4">
+            <Input label="Nombres" name="nombres" value={nombres} required />
+            <Input label="Apellidos" name="apellidos" value={apellidos} required />
+          </div>
+
+          <!-- Email y Teléfono -->
+          <div class="grid md:grid-cols-2 gap-4">
+            <Input label="Correo electrónico" name="email" type="email" value={relator.email} required />
+            <Input label="Teléfono" name="telefono" type="tel" value={relator.telefono} required />
+          </div>
+
+          <!-- Especialidades -->
+          <div class="w-full">
+            <label class="block text-sm font-medium text-gray-700 mb-3">
+              Especialidades *
+            </label>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <label class="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-lg cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition-colors has-[:checked]:bg-blue-50 has-[:checked]:border-blue-400">
+                <input type="checkbox" name="especialidades" value="A2" class="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-900" checked={relator.especialidades.includes('A2')} />
+                <div>
+                  <span class="text-sm font-medium text-gray-900">A2</span>
+                  <p class="text-xs text-gray-500">Taxis</p>
+                </div>
+              </label>
+              <label class="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-lg cursor-pointer hover:bg-purple-50 hover:border-purple-300 transition-colors has-[:checked]:bg-purple-50 has-[:checked]:border-purple-400">
+                <input type="checkbox" name="especialidades" value="A3" class="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-900" checked={relator.especialidades.includes('A3')} />
+                <div>
+                  <span class="text-sm font-medium text-gray-900">A3</span>
+                  <p class="text-xs text-gray-500">Buses</p>
+                </div>
+              </label>
+              <label class="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-lg cursor-pointer hover:bg-orange-50 hover:border-orange-300 transition-colors has-[:checked]:bg-orange-50 has-[:checked]:border-orange-400">
+                <input type="checkbox" name="especialidades" value="A4" class="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-900" checked={relator.especialidades.includes('A4')} />
+                <div>
+                  <span class="text-sm font-medium text-gray-900">A4</span>
+                  <p class="text-xs text-gray-500">Escolar</p>
+                </div>
+              </label>
+              <label class="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-lg cursor-pointer hover:bg-teal-50 hover:border-teal-300 transition-colors has-[:checked]:bg-teal-50 has-[:checked]:border-teal-400">
+                <input type="checkbox" name="especialidades" value="A5" class="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-900" checked={relator.especialidades.includes('A5')} />
+                <div>
+                  <span class="text-sm font-medium text-gray-900">A5</span>
+                  <p class="text-xs text-gray-500">Carga</p>
+                </div>
+              </label>
+            </div>
+            <p id="espError" class="text-red-600 text-sm mt-1.5 hidden" role="alert">Seleccione al menos una especialidad</p>
+          </div>
+
+          <!-- Botones -->
+          <div class="flex gap-3 pt-4 border-t border-gray-200">
+            <a href={`/profesional/relatores/${relator.id}`} class="inline-flex items-center justify-center h-11 px-4 text-sm font-medium rounded-md bg-white border border-gray-300 text-gray-900 hover:bg-gray-50 hover:border-gray-400 shadow-sm transition-all duration-200">
+              Cancelar
+            </a>
+            <Button type="submit" variant="primary">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              Guardar cambios
+            </Button>
+          </div>
+        </form>
+      </Card>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-4">
+      <Card class="bg-gray-50 border-gray-200">
+        <h3 class="text-sm font-semibold text-gray-900 mb-3">Información</h3>
+        <div class="space-y-3 text-xs text-gray-700">
+          <div class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span>El RUT no puede ser modificado una vez creado</span>
+          </div>
+          <div class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span>Al cambiar especialidades, se verificará que no tenga cursos activos en las especialidades eliminadas</span>
+          </div>
+        </div>
+      </Card>
+
+      {relator.promocionesAsignadas > 0 && (
+        <Card class="border-yellow-200 bg-yellow-50">
+          <div class="flex gap-3">
+            <svg class="w-5 h-5 text-yellow-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+            <div>
+              <p class="text-sm font-medium text-yellow-900 mb-1">Relator con promociones activas</p>
+              <p class="text-xs text-yellow-800">Este relator tiene {relator.promocionesAsignadas} promociones asignadas. Los cambios de especialidad podrían afectar asignaciones actuales.</p>
+            </div>
+          </div>
+        </Card>
+      )}
+    </div>
+  </div>
+</DashboardLayout>
+
+<script>
+  const form = document.getElementById('editRelatorForm') as HTMLFormElement;
+  form?.addEventListener('submit', (e) => {
+    const checkboxes = form.querySelectorAll<HTMLInputElement>('input[name="especialidades"]:checked');
+    const espError = document.getElementById('espError');
+    if (checkboxes.length === 0) {
+      e.preventDefault();
+      espError?.classList.remove('hidden');
+    } else {
+      espError?.classList.add('hidden');
+      e.preventDefault();
+      alert('Cambios guardados exitosamente (mockup)');
+    }
+  });
+</script>

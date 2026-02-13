@@ -1,0 +1,260 @@
+---
+/**
+ * Dashboard Relator - RF-060
+ * Vista principal del Relator: promociones asignadas, alumnos, asistencia
+ */
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import Card from "../../components/ui/Card.astro";
+import Button from "../../components/ui/Button.astro";
+import { PROMOCIONES, RELATORES } from "../../lib/mockRelatores";
+
+// Demo: relator logueado es Francisco Herrera (id=3, tiene más promociones)
+const relatorId = 3;
+const relator = RELATORES.find((r) => r.id === relatorId)!;
+
+// Promociones en curso asignadas a este relator
+const misPromociones = PROMOCIONES.filter(
+  (p) =>
+    (p.estado === "en_curso" || p.estado === "planificada") &&
+    p.cursos.some((c) => c.relatorId === relatorId)
+);
+
+// Mock: alumnos de ejemplo para cada curso
+const alumnosMock: Record<string, { nombre: string; rut: string; asistencia: number }[]> = {
+  "4-A2": [
+    { nombre: "Carlos Soto Muñoz", rut: "15.432.198-7", asistencia: 11 },
+    { nombre: "Andrea Flores Vera", rut: "16.789.234-5", asistencia: 9 },
+    { nombre: "Luis Pérez Castro", rut: "14.567.890-3", asistencia: 11 },
+    { nombre: "Mariana Torres", rut: "17.234.567-K", asistencia: 7 },
+  ],
+  "4-A3": [
+    { nombre: "Roberto Núñez Díaz", rut: "13.456.789-1", asistencia: 10 },
+    { nombre: "Patricia Vargas", rut: "15.678.901-2", asistencia: 11 },
+    { nombre: "Jorge Morales Rojas", rut: "16.901.234-6", asistencia: 8 },
+  ],
+  "3-A2": [
+    { nombre: "Felipe Aguilar Pino", rut: "17.345.678-9", asistencia: 23 },
+    { nombre: "Valentina Ríos Lagos", rut: "15.234.567-4", asistencia: 21 },
+    { nombre: "Diego Meza Fuentes", rut: "16.456.789-0", asistencia: 22 },
+  ],
+};
+
+const estadoColors: Record<string, string> = {
+  en_curso: "bg-green-100 text-green-800",
+  planificada: "bg-blue-100 text-blue-800",
+  finalizada: "bg-gray-100 text-gray-600",
+};
+
+const estadoLabels: Record<string, string> = {
+  en_curso: "En curso",
+  planificada: "Planificada",
+  finalizada: "Finalizada",
+};
+---
+
+<DashboardLayout
+  title="Dashboard Relator"
+  userRole="relator"
+>
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-semibold text-gray-900 tracking-tight text-balance">
+      Bienvenido, {relator.nombre.split(" ")[0]}
+    </h1>
+    <p class="text-gray-600 mt-1">
+      Relator Clase Profesional · {relator.especialidades.join(", ")} ·
+      <span class="font-medium">{misPromociones.length} promociones activas</span>
+    </p>
+  </div>
+
+  <!-- KPI rápido -->
+  <div class="grid sm:grid-cols-3 gap-4 mb-8">
+    <div class="border border-gray-200 shadow-sm rounded-lg bg-white p-6">
+      <p class="text-sm text-gray-600">Promociones activas</p>
+      <p class="text-3xl font-bold text-gray-900 mt-1">{misPromociones.filter(p => p.estado === "en_curso").length}</p>
+      <p class="text-xs text-gray-500 mt-1">{misPromociones.filter(p => p.estado === "planificada").length} planificadas</p>
+    </div>
+    <div class="border border-gray-200 shadow-sm rounded-lg bg-white p-6">
+      <p class="text-sm text-gray-600">Cursos a cargo</p>
+      <p class="text-3xl font-bold text-gray-900 mt-1">
+        {misPromociones.reduce((acc, p) => acc + p.cursos.filter(c => c.relatorId === relatorId).length, 0)}
+      </p>
+      <p class="text-xs text-gray-500 mt-1">en promociones activas</p>
+    </div>
+    <div class="border border-gray-200 shadow-sm rounded-lg bg-white p-6">
+      <p class="text-sm text-gray-600">Alumnos totales</p>
+      <p class="text-3xl font-bold text-gray-900 mt-1">
+        {misPromociones.reduce((acc, p) => acc + p.cursos.filter(c => c.relatorId === relatorId).reduce((s, c) => s + c.alumnosInscritos, 0), 0)}
+      </p>
+      <p class="text-xs text-gray-500 mt-1">alumnos inscritos</p>
+    </div>
+  </div>
+
+  <!-- Promociones asignadas -->
+  <div class="space-y-6">
+    {misPromociones.map((promo) => {
+      const misCursos = promo.cursos.filter((c) => c.relatorId === relatorId);
+      const progresoPct = promo.diaActual ? Math.round((promo.diaActual / 30) * 100) : 0;
+
+      return (
+        <Card>
+          <!-- Cabecera promoción -->
+          <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
+            <div>
+              <div class="flex items-center gap-3">
+                <h2 class="text-xl font-semibold text-gray-900">{promo.nombre}</h2>
+                <span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${estadoColors[promo.estado]}`}>
+                  {promo.estado === "en_curso" && (
+                    <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5 animate-pulse"></span>
+                  )}
+                  {estadoLabels[promo.estado]}
+                </span>
+              </div>
+              <p class="text-sm text-gray-500 mt-1">
+                {promo.codigo} · {new Date(promo.fechaInicio + "T12:00:00").toLocaleDateString("es-CL", { day: "numeric", month: "long" })} →
+                {new Date(promo.fechaFin + "T12:00:00").toLocaleDateString("es-CL", { day: "numeric", month: "long", year: "numeric" })}
+              </p>
+            </div>
+
+            <!-- Día actual de 30 -->
+            {promo.diaActual && (
+              <div class="text-right">
+                <div class="text-3xl font-bold text-gray-900">
+                  {promo.diaActual}<span class="text-lg text-gray-400">/30</span>
+                </div>
+                <p class="text-xs text-gray-500">días de clase</p>
+              </div>
+            )}
+            {promo.estado === "planificada" && (
+              <div class="text-right">
+                <div class="text-sm font-medium text-blue-700 bg-blue-50 px-3 py-1.5 rounded-lg">
+                  Inicia {new Date(promo.fechaInicio + "T12:00:00").toLocaleDateString("es-CL", { weekday: "long", day: "numeric", month: "long" })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <!-- Barra de progreso -->
+          {promo.diaActual && (
+            <div class="mb-6">
+              <div class="flex justify-between text-xs text-gray-500 mb-1.5">
+                <span>Progreso de la promoción</span>
+                <span>{progresoPct}%</span>
+              </div>
+              <div class="w-full bg-gray-100 rounded-full h-2">
+                <div
+                  class="bg-gray-900 h-2 rounded-full transition-all duration-500"
+                  style={`width: ${progresoPct}%`}
+                ></div>
+              </div>
+            </div>
+          )}
+
+          <!-- Cursos de este relator en la promoción -->
+          <div class="space-y-4">
+            {misCursos.map((curso) => {
+              const keyAlumnos = `${promo.id}-${curso.tipo}`;
+              const alumnos = alumnosMock[keyAlumnos] ?? [];
+              const cupoLibre = curso.maxAlumnos - curso.alumnosInscritos;
+
+              return (
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                  <!-- Header del curso -->
+                  <div class="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-200">
+                    <div class="flex items-center gap-3">
+                      <span class="inline-flex items-center justify-center w-8 h-8 bg-gray-900 text-white text-sm font-bold rounded-md">
+                        {curso.tipo}
+                      </span>
+                      <div>
+                        <p class="text-sm font-semibold text-gray-900">
+                          Curso {curso.tipo} —
+                          {curso.tipo === "A2" && " Transporte público"}
+                          {curso.tipo === "A3" && " Vehículos pesados"}
+                          {curso.tipo === "A4" && " Transporte remunerado"}
+                          {curso.tipo === "A5" && " Vehículos articulados"}
+                        </p>
+                        <p class="text-xs text-gray-500">
+                          {curso.alumnosInscritos}/{curso.maxAlumnos} alumnos ·
+                          {cupoLibre > 0 ? `${cupoLibre} cupos disponibles` : "Sin cupo"}
+                        </p>
+                      </div>
+                    </div>
+                    {promo.estado === "en_curso" && (
+                      <Button
+                        href={`/relator/asistencia?promo=${promo.id}&curso=${curso.tipo}`}
+                        variant="primary"
+                      >
+                        <svg class="w-4 h-4 mr-1.5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Tomar asistencia
+                      </Button>
+                    )}
+                  </div>
+
+                  <!-- Lista de alumnos (preview) -->
+                  {alumnos.length > 0 ? (
+                    <div class="divide-y divide-gray-100">
+                      {alumnos.map((alumno) => {
+                        const diaReferencia = promo.diaActual ?? 0;
+                        const pctAsis = diaReferencia > 0 ? Math.round((alumno.asistencia / diaReferencia) * 100) : 0;
+                        const colorAsis = pctAsis >= 80 ? "text-green-700 bg-green-50" : pctAsis >= 60 ? "text-yellow-700 bg-yellow-50" : "text-red-700 bg-red-50";
+
+                        return (
+                          <div class="flex items-center justify-between px-4 py-3">
+                            <div class="flex items-center gap-3">
+                              <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-xs font-bold text-gray-600">
+                                {alumno.nombre.charAt(0)}
+                              </div>
+                              <div>
+                                <p class="text-sm font-medium text-gray-900">{alumno.nombre}</p>
+                                <p class="text-xs text-gray-500">{alumno.rut}</p>
+                              </div>
+                            </div>
+                            <div class="text-right">
+                              <span class={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${colorAsis}`}>
+                                {alumno.asistencia}/{diaReferencia > 0 ? diaReferencia : "—"} días
+                              </span>
+                              {diaReferencia > 0 && (
+                                <p class="text-xs text-gray-400 mt-0.5">{pctAsis}% asistencia</p>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                      <div class="px-4 py-2.5 bg-gray-50">
+                        <a
+                          href={`/relator/alumnos?promo=${promo.id}&curso=${curso.tipo}`}
+                          class="text-xs text-gray-600 hover:text-gray-900 hover:underline"
+                        >
+                          Ver lista completa ({curso.alumnosInscritos} alumnos) →
+                        </a>
+                      </div>
+                    </div>
+                  ) : (
+                    <div class="px-4 py-6 text-center">
+                      <p class="text-sm text-gray-500">
+                        {curso.alumnosInscritos} alumnos inscritos
+                        {promo.estado === "planificada" ? " (lista disponible al inicio)" : ""}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+      );
+    })}
+  </div>
+
+  {misPromociones.length === 0 && (
+    <Card class="text-center py-12">
+      <svg class="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+      </svg>
+      <p class="text-gray-500 font-medium">No tienes promociones asignadas</p>
+      <p class="text-sm text-gray-400 mt-1">Contacta al administrador para que te asigne cursos.</p>
+    </Card>
+  )}
+</DashboardLayout>

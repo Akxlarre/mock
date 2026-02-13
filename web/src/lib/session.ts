@@ -7,12 +7,12 @@
  * En producción reemplazar con autenticación real (Supabase Auth, JWT, etc.).
  */
 
-export type UserRole = "admin" | "instructor" | "secretaria" | "alumno";
+export type UserRole = "admin" | "instructor" | "secretaria" | "alumno" | "relator";
 
 /** Nombre de la cookie que guarda el rol en demo */
 export const DEMO_ROLE_COOKIE = "demo_role";
 
-const VALID_ROLES: UserRole[] = ["admin", "instructor", "secretaria", "alumno"];
+const VALID_ROLES: UserRole[] = ["admin", "instructor", "secretaria", "alumno", "relator"];
 
 /**
  * Interfaz mínima para leer cookies (evita acoplar lib a Astro).
@@ -40,6 +40,7 @@ export function getCurrentUserRole(path: string, cookies?: CookieReader): UserRo
   if (cleanPath === "/instructor" || cleanPath.startsWith("/instructor/")) return "instructor";
   if (cleanPath.startsWith("/alumno") && !cleanPath.startsWith("/alumnos")) return "alumno";
   if (cleanPath === "/alumnos" || cleanPath.startsWith("/alumnos/")) return "admin";
+  if (cleanPath === "/relator" || cleanPath.startsWith("/relator/")) return "relator";
 
   return "admin";
 }
@@ -56,6 +57,7 @@ export function getRoleToSetFromPath(path: string): UserRole | null {
   // /instructor (dashboard instructor) pero NO /instructores (gestión de instructores)
   if (cleanPath === "/instructor" || cleanPath.startsWith("/instructor/")) return "instructor";
   if (cleanPath.startsWith("/alumno") && !cleanPath.startsWith("/alumnos")) return "alumno";
+  if (cleanPath === "/relator" || cleanPath.startsWith("/relator/")) return "relator";
   // Admin: solo rutas que solo admin usa (no /matricula, /pagos, etc. que comparten con secretaria)
   if (cleanPath === "/dashboard" || cleanPath.startsWith("/dashboard/")) return "admin";
   if (cleanPath.startsWith("/usuarios")) return "admin";
@@ -79,7 +81,8 @@ export function getCurrentUserName(role: UserRole): string {
     admin: 'Jorge Administrador',
     instructor: 'Carlos Rojas',
     secretaria: 'Patricia Secretaria',
-    alumno: 'María González'
+    alumno: 'María González',
+    relator: 'Francisco Herrera'
   };
   
   return userNames[role];
@@ -94,7 +97,8 @@ export function getCurrentUserEmail(role: UserRole): string {
     admin: 'jadministrador@escuela.cl',
     instructor: 'crojas@escuela.cl',
     secretaria: 'psecretaria@escuela.cl',
-    alumno: 'mgonzalez@email.cl'
+    alumno: 'mgonzalez@email.cl',
+    relator: 'fherrera@conductores.cl'
   };
   
   return emails[role];

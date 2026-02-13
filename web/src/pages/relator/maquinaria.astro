@@ -1,0 +1,204 @@
+---
+/**
+ * Registro de Maquinaria — Vista Relator
+ * RF-073: Registrar si maquinaria es Propia/Arrendada por sesión práctica
+ */
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import Card from "../../components/ui/Card.astro";
+import Button from "../../components/ui/Button.astro";
+import { PROMOCIONES, RELATORES } from "../../lib/mockRelatores";
+
+const relatorId = 3;
+const relator = RELATORES.find((r) => r.id === relatorId)!;
+
+// Promo Enero II (id=3), 23 días cursados
+const promoActiva = PROMOCIONES.find(p => p.id === 3)!;
+const cursoActivo = "A2";
+const diasCursados = promoActiva.diaActual ?? 23;
+
+// Mock: registro de maquinaria por día
+// Valores: "propia" | "arrendada" | null (sin registrar)
+type TipoMaq = "propia" | "arrendada" | null;
+const MAQUINARIA_MOCK: TipoMaq[] = [
+  "propia","propia","arrendada","propia","propia","propia",        // semana 1
+  "propia","arrendada","arrendada","propia","propia","arrendada",  // semana 2
+  "propia","propia","propia","arrendada","propia","propia",        // semana 3
+  "arrendada","propia","arrendada","propia","propia",              // semana 4 (dia 23)
+  null,null,null,null,null,null,null                               // dias futuros
+];
+
+// Generar fechas (lunes 19 Ene 2026 = día 1 de promo Enero II)
+function getDiaLabel(diaNum: number): string {
+  const labels = [
+    "Lun 19 Ene","Mar 20 Ene","Mié 21 Ene","Jue 22 Ene","Vie 23 Ene","Sáb 24 Ene",
+    "Lun 26 Ene","Mar 27 Ene","Mié 28 Ene","Jue 29 Ene","Vie 30 Ene","Sáb 31 Ene",
+    "Lun 2 Feb","Mar 3 Feb","Mié 4 Feb","Jue 5 Feb","Vie 6 Feb","Sáb 7 Feb",
+    "Lun 9 Feb","Mar 10 Feb","Mié 11 Feb","Jue 12 Feb","Vie 13 Feb","Sáb 14 Feb",
+    "Lun 16 Feb","Mar 17 Feb","Mié 18 Feb","Jue 19 Feb","Vie 20 Feb","Sáb 21 Feb",
+  ];
+  return labels[diaNum - 1] ?? `Día ${diaNum}`;
+}
+
+const countPropia = MAQUINARIA_MOCK.filter(m => m === "propia").length;
+const countArrendada = MAQUINARIA_MOCK.filter(m => m === "arrendada").length;
+
+// Agrupar en semanas de 6 días
+const semanas: { dias: { num: number; fecha: string; tipo: TipoMaq; pasado: boolean; hoy: boolean }[] }[] = [];
+for (let i = 0; i < 30; i += 6) {
+  semanas.push({
+    dias: Array.from({ length: 6 }, (_, j) => {
+      const num = i + j + 1;
+      return {
+        num,
+        fecha: getDiaLabel(num),
+        tipo: MAQUINARIA_MOCK[i + j] ?? null,
+        pasado: num <= diasCursados,
+        hoy: num === diasCursados,
+      };
+    }),
+  });
+}
+---
+
+<DashboardLayout title="Registro de Maquinaria" userRole="relator">
+  <!-- Header -->
+  <div class="mb-6">
+    <div class="flex items-center gap-2 text-sm text-gray-500 mb-2">
+      <a href="/relator/dashboard" class="hover:text-gray-900">Inicio</a>
+      <span>/</span>
+      <span class="text-gray-900 font-medium">Registro de Maquinaria</span>
+    </div>
+    <div class="flex flex-wrap items-start justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-semibold text-gray-900 tracking-tight text-balance">Registro de Maquinaria</h1>
+        <p class="text-gray-600 mt-1">RF-073 — Tipo de maquinaria por sesión práctica (Propia / Arrendada)</p>
+      </div>
+      <Button variant="secondary" onClick="alert('Exportar registro maquinaria (mockup)')">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        Exportar
+      </Button>
+    </div>
+  </div>
+
+  <!-- Selector promo/curso -->
+  <Card class="mb-6">
+    <div class="grid sm:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Promoción</label>
+        <select class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1">
+          {PROMOCIONES.filter(p => p.estado !== "planificada").map(p => (
+            <option value={p.id} selected={p.id === 3}>{p.nombre} — Día {p.diaActual ?? 30}/30</option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Curso</label>
+        <select class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1">
+          <option value="A2" selected>A2 — Taxis y colectivos</option>
+          <option value="A3">A3 — Buses</option>
+          <option value="A4">A4 — Carga simple</option>
+          <option value="A5">A5 — Carga</option>
+        </select>
+      </div>
+    </div>
+  </Card>
+
+  <!-- Resumen -->
+  <div class="grid sm:grid-cols-3 gap-4 mb-6">
+    <div class="border border-gray-200 rounded-lg bg-white p-4 shadow-sm text-center">
+      <p class="text-3xl font-bold text-gray-900">{diasCursados}</p>
+      <p class="text-xs text-gray-500 mt-1">Días registrados</p>
+    </div>
+    <div class="border border-blue-100 rounded-lg bg-blue-50 p-4 text-center">
+      <p class="text-3xl font-bold text-blue-700">{countPropia}</p>
+      <p class="text-xs text-blue-600 mt-1">Días maquinaria propia</p>
+    </div>
+    <div class="border border-orange-100 rounded-lg bg-orange-50 p-4 text-center">
+      <p class="text-3xl font-bold text-orange-700">{countArrendada}</p>
+      <p class="text-xs text-orange-600 mt-1">Días maquinaria arrendada</p>
+    </div>
+  </div>
+
+  <!-- Leyenda -->
+  <div class="flex flex-wrap gap-3 mb-4 text-xs">
+    <span class="flex items-center gap-1.5 px-3 py-1 bg-blue-100 text-blue-800 rounded-full font-medium">
+      <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5"/></svg>
+      Propia
+    </span>
+    <span class="flex items-center gap-1.5 px-3 py-1 bg-orange-100 text-orange-800 rounded-full font-medium">
+      <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5"/></svg>
+      Arrendada
+    </span>
+    <span class="flex items-center gap-1.5 px-3 py-1 bg-gray-100 text-gray-500 rounded-full">
+      <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><circle cx="10" cy="10" r="5"/></svg>
+      Pendiente
+    </span>
+  </div>
+
+  <!-- Tabla por semanas -->
+  <div class="space-y-4">
+    {semanas.map((semana, si) => (
+      <Card>
+        <h3 class="text-sm font-semibold text-gray-700 mb-3">Semana {si + 1}</h3>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          {semana.dias.map((dia) => {
+            return (
+              <div class={`rounded-lg border p-3 text-center ${
+                !dia.pasado
+                  ? "bg-gray-50 border-gray-100 opacity-40"
+                  : dia.tipo === "propia"
+                  ? "bg-blue-50 border-blue-200"
+                  : dia.tipo === "arrendada"
+                  ? "bg-orange-50 border-orange-200"
+                  : "bg-yellow-50 border-yellow-200"
+              } ${dia.hoy ? "ring-2 ring-black ring-offset-1" : ""}`}>
+                <p class="text-xs text-gray-500 font-medium">{dia.fecha}</p>
+                <p class="text-xs text-gray-400 mb-2">Día {dia.num}</p>
+                {dia.pasado ? (
+                  <>
+                    <select
+                      class={`w-full text-xs rounded border px-1 py-1 font-medium focus:outline-none focus:ring-1 focus:ring-black ${
+                        dia.tipo === "propia"
+                          ? "bg-blue-100 border-blue-300 text-blue-800"
+                          : dia.tipo === "arrendada"
+                          ? "bg-orange-100 border-orange-300 text-orange-800"
+                          : "bg-white border-gray-300 text-gray-500"
+                      }`}
+                      onchange="alert('Guardando tipo maquinaria (mockup)')"
+                    >
+                      <option value="" selected={dia.tipo === null}>— Sin reg.</option>
+                      <option value="propia" selected={dia.tipo === "propia"}>Propia</option>
+                      <option value="arrendada" selected={dia.tipo === "arrendada"}>Arrendada</option>
+                    </select>
+                    {dia.hoy && <span class="inline-block mt-1.5 text-[10px] font-bold text-black bg-yellow-200 px-1.5 py-0.5 rounded">HOY</span>}
+                  </>
+                ) : (
+                  <p class="text-xs text-gray-300 mt-2">Próximo</p>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </Card>
+    ))}
+  </div>
+
+  <!-- Guardar -->
+  <div class="mt-6 flex justify-end gap-3">
+    <Button variant="secondary" onClick="alert('Guardado borrador (mockup)')">Guardar borrador</Button>
+    <Button variant="primary" onClick="alert('✓ Registro de maquinaria guardado.\nEl informe queda disponible para la secretaría.')">
+      Confirmar registro
+    </Button>
+  </div>
+
+  <!-- Info normativa -->
+  <div class="mt-6 border border-gray-200 rounded-lg bg-white p-4 shadow-sm">
+    <h3 class="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
+      <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      Normativa RF-073
+    </h3>
+    <p class="text-xs text-gray-600">
+      Por cada sesión práctica, el relator debe registrar si la maquinaria utilizada es de propiedad de la escuela (<strong>Propia</strong>) o contratada externamente (<strong>Arrendada</strong>). Este registro es requerido para el cálculo de costos operacionales y la emisión del acta final de la promoción.
+    </p>
+  </div>
+</DashboardLayout>

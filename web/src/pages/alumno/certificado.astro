@@ -62,7 +62,7 @@ if (alumnoData.certificadoDisponible) puedeHabilitar = true;
   </div>
 
   <!-- Datos Alumno -->
-  <Card class="mb-6 bg-gradient-to-r from-blue-50 to-blue-100 border-l-4 border-blue-500">
+  <Card class="mb-6 bg-linear-to-r from-blue-50 to-blue-100 border-l-4 border-blue-500">
     <div class="flex items-start justify-between">
       <div>
         <p class="text-sm text-blue-900 font-semibold mb-1">👤 Alumno</p>
@@ -86,7 +86,7 @@ if (alumnoData.certificadoDisponible) puedeHabilitar = true;
             <span class="font-bold text-gray-900">{alumnoData.clasesCompletadas} / {alumnoData.clasesTotales}</span>
           </div>
           <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
-            <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-full rounded-full transition-all duration-300 flex items-center justify-end pr-2" style={`width: ${progreso}%`}>
+            <div class="bg-linear-to-r from-blue-500 to-blue-600 h-full rounded-full transition-all duration-300 flex items-center justify-end pr-2" style={`width: ${progreso}%`}>
               <span class="text-xs font-bold text-white">{progreso}%</span>
             </div>
           </div>
@@ -211,9 +211,9 @@ if (alumnoData.certificadoDisponible) puedeHabilitar = true;
   ) : (
     <>
       <!-- Certificado Disponible -->
-      <Card class="mb-6 bg-gradient-to-r from-green-50 to-green-100 border-l-4 border-green-500">
+      <Card class="mb-6 bg-linear-to-r from-green-50 to-green-100 border-l-4 border-green-500">
         <div class="flex items-start gap-4">
-          <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+          <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center shrink-0">
             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
           </div>
           <div class="flex-1">
@@ -240,13 +240,13 @@ if (alumnoData.certificadoDisponible) puedeHabilitar = true;
 </DashboardLayout>
 
 <script>
-  window.generarCertificado = function() {
+  (window as any).generarCertificado = function() {
     alert('📜 Generando Certificado...\n\n✓ Todos los requisitos verificados\n✓ Certificado generado\n\nArchivo: certificado_CERT-2026-0248.pdf\nSe ha enviado copia por email.');
   };
-  window.descargarCertificado = function() {
+  (window as any).descargarCertificado = function() {
     alert('📄 Descargando certificado_CERT-2026-0123.pdf...\n\nContenido: datos alumno, curso, fechas, QR, firma digital.');
   };
-  window.verQR = function() {
+  (window as any).verQR = function() {
     alert('📱 QR de Validación\n\nURL: https://escuela.cl/validar/CERT-2026-0123\n\nAl escanear: nombre, curso, fecha, escuela, ✓ válido');
   };
 </script>

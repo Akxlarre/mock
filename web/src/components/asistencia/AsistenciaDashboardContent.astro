@@ -77,7 +77,7 @@ const currentDate = new Date().toLocaleDateString("es-CL", {
             <Card class="border-l-4 border-red-500 bg-red-50 p-4">
               <div class="flex items-start justify-between gap-4">
                 <div class="flex items-start gap-3 flex-1">
-                  <span class="text-2xl flex-shrink-0">🔴</span>
+                  <span class="text-2xl shrink-0">🔴</span>
                   <div class="min-w-0">
                     <h3 class="font-semibold text-red-900 mb-1">{alert.student.name} - 2 faltas consecutivas</h3>
                     <p class="text-sm text-red-700 mb-1">
@@ -86,7 +86,7 @@ const currentDate = new Date().toLocaleDateString("es-CL", {
                     <p class="text-xs text-red-600">Política: 2 inasistencias consecutivas resultan en eliminación automática del horario</p>
                   </div>
                 </div>
-                <div class="flex gap-2 flex-shrink-0">
+                <div class="flex gap-2 shrink-0">
                   <Button variant="primary">Reactivar Horario</Button>
                   <Button variant="ghost" href={`${basePath}/alumnos/${alert.student.id}`}>Ver Historial</Button>
                 </div>
@@ -96,13 +96,13 @@ const currentDate = new Date().toLocaleDateString("es-CL", {
             <Card class="border-l-4 border-yellow-500 bg-yellow-50 p-4">
               <div class="flex items-start justify-between gap-4">
                 <div class="flex items-start gap-3 flex-1">
-                  <span class="text-2xl flex-shrink-0">🟡</span>
+                  <span class="text-2xl shrink-0">🟡</span>
                   <div class="min-w-0">
                     <h3 class="font-semibold text-yellow-900 mb-1">{alert.student.name} - 1 falta consecutiva</h3>
                     <p class="text-sm text-yellow-700">Próxima inasistencia eliminará su horario automáticamente</p>
                   </div>
                 </div>
-                <div class="flex gap-2 flex-shrink-0">
+                <div class="flex gap-2 shrink-0">
 <Button variant="ghost">Enviar Recordatorio</Button>
                     <Button variant="ghost" href={`${basePath}/alumnos/${alert.student.id}`}>Ver Detalles</Button>
                 </div>
@@ -120,7 +120,7 @@ const currentDate = new Date().toLocaleDateString("es-CL", {
       <h2 class="text-xl font-semibold text-gray-900">
         🎓 Clases Teóricas (Zoom Automático)
       </h2>
-      <Button variant="secondary" size="sm">Configurar Zoom</Button>
+      <Button variant="secondary">Configurar Zoom</Button>
     </div>
     <div class="overflow-x-auto">
       <table class="w-full">
@@ -146,7 +146,7 @@ const currentDate = new Date().toLocaleDateString("es-CL", {
               </span>
             </td>
             <td class="px-4 py-3 text-right">
-              <Button variant="ghost" size="sm">Ver Lista</Button>
+              <Button variant="ghost">Ver Lista</Button>
             </td>
           </tr>
           <tr>
@@ -160,7 +160,7 @@ const currentDate = new Date().toLocaleDateString("es-CL", {
               </span>
             </td>
             <td class="px-4 py-3 text-right">
-              <Button variant="ghost" size="sm">Ver Lista</Button>
+              <Button variant="ghost">Ver Lista</Button>
             </td>
           </tr>
         </tbody>

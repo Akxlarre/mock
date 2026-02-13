@@ -2,7 +2,7 @@
 /**
  * Topbar - Barra superior con breadcrumbs, notificaciones y perfil de usuario
  */
-import type { UserRole } from "../lib/session";
+import type { UserRole } from "../../lib/session";
 
 interface Props {
   userName?: string;
@@ -95,6 +95,8 @@ if (currentPath !== "/" && currentPath !== "/dashboard") {
     homePath = "/secretaria/dashboard";
   } else if (userRole === "alumno") {
     homePath = "/alumno/dashboard";
+  } else if (userRole === "relator") {
+    homePath = "/relator/dashboard";
   }
 
   breadcrumbs.unshift({
@@ -109,6 +111,7 @@ const roleLabels: Record<UserRole, string> = {
   instructor: "Instructor",
   secretaria: "Secretaria",
   alumno: "Alumno",
+  relator: "Relator",
 };
 ---
 
@@ -144,7 +147,7 @@ const roleLabels: Record<UserRole, string> = {
               <div class="flex items-center gap-2 min-w-0">
                 {index > 0 && (
                   <svg
-                    class="w-4 h-4 text-gray-400 flex-shrink-0"
+                    class="w-4 h-4 text-gray-400 shrink-0"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"

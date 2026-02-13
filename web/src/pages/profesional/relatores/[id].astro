@@ -1,0 +1,243 @@
+---
+/**
+ * Detalle de Relator - RF-058
+ * Vista de perfil con promociones asignadas
+ */
+import DashboardLayout from '../../../layouts/DashboardLayout.astro';
+import Card from '../../../components/ui/Card.astro';
+import Button from '../../../components/ui/Button.astro';
+import { ESCUELA_ACTUAL } from '../../../lib/mockData';
+import { RELATORES, PROMOCIONES } from '../../../lib/mockRelatores';
+import type { Relator } from '../../../lib/mockRelatores';
+
+export function getStaticPaths() {
+  return [
+    { params: { id: "1" } },
+    { params: { id: "2" } },
+    { params: { id: "3" } },
+    { params: { id: "4" } },
+    { params: { id: "5" } },
+  ];
+}
+
+const { id } = Astro.params;
+const relator = RELATORES.find(r => r.id === parseInt(id!)) || RELATORES[0];
+
+const especialidadColors: Record<string, string> = {
+  'A2': 'bg-blue-100 text-blue-800',
+  'A3': 'bg-purple-100 text-purple-800',
+  'A4': 'bg-orange-100 text-orange-800',
+  'A5': 'bg-teal-100 text-teal-800',
+};
+
+// Promociones donde participa este relator
+const promocionesRelator = PROMOCIONES.filter(p =>
+  p.cursos.some(c => c.relatorId === relator.id)
+).map(p => ({
+  ...p,
+  cursosRelator: p.cursos.filter(c => c.relatorId === relator.id),
+}));
+
+const estadoBadge: Record<string, { text: string; class: string }> = {
+  'planificada': { text: 'Planificada', class: 'bg-yellow-100 text-yellow-800' },
+  'en_curso': { text: 'En curso', class: 'bg-blue-100 text-blue-800' },
+  'finalizada': { text: 'Finalizada', class: 'bg-green-100 text-green-800' },
+};
+---
+
+<DashboardLayout title={`${relator.nombre} - Relatores`} escuela={ESCUELA_ACTUAL}>
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex items-center gap-2 text-sm text-secondary mb-2">
+      <a href="/dashboard" class="hover:text-gray-900">Inicio</a>
+      <span>/</span>
+      <a href="/profesional/relatores" class="hover:text-gray-900">Relatores</a>
+      <span>/</span>
+      <span class="text-gray-900 font-medium">{relator.nombre}</span>
+    </div>
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <div class="w-16 h-16 rounded-full bg-gray-900 flex items-center justify-center text-white font-semibold text-lg">
+          {relator.nombre.split(' ').map(n => n[0]).join('').substring(0, 2)}
+        </div>
+        <div>
+          <h1 class="text-3xl font-semibold text-gray-900 tracking-tight">{relator.nombre}</h1>
+          <div class="flex items-center gap-2 mt-1 flex-wrap">
+            {relator.especialidades.map(esp => (
+              <span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${especialidadColors[esp]}`}>
+                {esp}
+              </span>
+            ))}
+            <span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+              relator.activo ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
+            }`}>
+              {relator.activo ? '\u2713 Activo' : '\u25CB Inactivo'}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <Button href={`/profesional/relatores/${relator.id}/editar`} variant="secondary">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+          </svg>
+          Editar
+        </Button>
+        <Button href="/profesional/relatores" variant="ghost">
+          &larr; Volver
+        </Button>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid lg:grid-cols-3 gap-6">
+    <!-- Main -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Info personal -->
+      <Card>
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Información personal</h2>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="space-y-1">
+            <p class="text-xs font-medium text-secondary uppercase tracking-wider">Nombre completo</p>
+            <p class="text-sm text-gray-900">{relator.nombre}</p>
+          </div>
+          <div class="space-y-1">
+            <p class="text-xs font-medium text-secondary uppercase tracking-wider">RUT</p>
+            <p class="text-sm text-gray-900 font-mono">{relator.rut}</p>
+          </div>
+          <div class="space-y-1">
+            <p class="text-xs font-medium text-secondary uppercase tracking-wider">Correo electrónico</p>
+            <p class="text-sm text-gray-900">{relator.email}</p>
+          </div>
+          <div class="space-y-1">
+            <p class="text-xs font-medium text-secondary uppercase tracking-wider">Teléfono</p>
+            <p class="text-sm text-gray-900">{relator.telefono}</p>
+          </div>
+          <div class="space-y-1">
+            <p class="text-xs font-medium text-secondary uppercase tracking-wider">Especialidades</p>
+            <div class="flex flex-wrap gap-1 mt-0.5">
+              {relator.especialidades.map(esp => (
+                <span class={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${especialidadColors[esp]}`}>
+                  {esp}
+                </span>
+              ))}
+            </div>
+          </div>
+          <div class="space-y-1">
+            <p class="text-xs font-medium text-secondary uppercase tracking-wider">Sede</p>
+            <p class="text-sm text-gray-900">Conductores Chillán</p>
+          </div>
+        </div>
+      </Card>
+
+      <!-- Promociones asignadas -->
+      <Card>
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold text-gray-900">Promociones asignadas</h2>
+          <span class="text-xs text-secondary">{promocionesRelator.length} promociones</span>
+        </div>
+        {promocionesRelator.length > 0 ? (
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="border-b border-gray-200">
+                  <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase tracking-wider">Promoción</th>
+                  <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase tracking-wider">Curso</th>
+                  <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase tracking-wider">Alumnos</th>
+                  <th class="text-left py-3 px-4 text-xs font-semibold text-gray-700 uppercase tracking-wider">Estado</th>
+                  <th class="text-right py-3 px-4 text-xs font-semibold text-gray-700 uppercase tracking-wider">Acción</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                {promocionesRelator.map(prom => (
+                  prom.cursosRelator.map(curso => (
+                    <tr class="hover:bg-gray-50 transition-colors">
+                      <td class="py-3 px-4">
+                        <div class="text-sm font-medium text-gray-900">{prom.nombre}</div>
+                        <div class="text-xs text-gray-500">{prom.codigo}</div>
+                      </td>
+                      <td class="py-3 px-4">
+                        <span class={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${especialidadColors[curso.tipo]}`}>
+                          {curso.tipo}
+                        </span>
+                      </td>
+                      <td class="py-3 px-4 text-sm text-gray-700">
+                        {curso.alumnosInscritos} / {curso.maxAlumnos}
+                      </td>
+                      <td class="py-3 px-4">
+                        <span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${estadoBadge[prom.estado].class}`}>
+                          {estadoBadge[prom.estado].text}
+                        </span>
+                      </td>
+                      <td class="py-3 px-4 text-right">
+                        <a href={`/profesional/promociones/${prom.id}`} class="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                          Ver &rarr;
+                        </a>
+                      </td>
+                    </tr>
+                  ))
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div class="text-center py-8">
+            <p class="text-sm text-secondary">Sin promociones asignadas</p>
+          </div>
+        )}
+      </Card>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-4">
+      <Card>
+        <h3 class="text-sm font-semibold text-gray-900 mb-3">Información del registro</h3>
+        <div class="space-y-3">
+          <div class="space-y-1">
+            <p class="text-xs text-secondary">Fecha de registro</p>
+            <p class="text-sm text-gray-900">{relator.fechaRegistro}</p>
+          </div>
+          <div class="space-y-1">
+            <p class="text-xs text-secondary">Promociones asignadas</p>
+            <p class="text-sm text-gray-900">{relator.promocionesAsignadas}</p>
+          </div>
+          <div class="space-y-1">
+            <p class="text-xs text-secondary">Estado</p>
+            <span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+              relator.activo ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
+            }`}>
+              {relator.activo ? 'Activo' : 'Inactivo'}
+            </span>
+          </div>
+        </div>
+      </Card>
+
+      <Card>
+        <h3 class="text-sm font-semibold text-gray-900 mb-3">Acciones</h3>
+        <div class="space-y-2">
+          <Button href={`/profesional/relatores/${relator.id}/editar`} variant="secondary" class="w-full justify-start text-sm">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+            </svg>
+            Editar relator
+          </Button>
+          {relator.activo ? (
+            <Button variant="ghost" class="w-full justify-start text-sm text-red-600 hover:text-red-700 hover:bg-red-50" onClick="alert('Relator desactivado (mockup)')">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+              </svg>
+              Desactivar relator
+            </Button>
+          ) : (
+            <Button variant="ghost" class="w-full justify-start text-sm text-green-600 hover:text-green-700 hover:bg-green-50" onClick="alert('Relator reactivado (mockup)')">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              Reactivar relator
+            </Button>
+          )}
+        </div>
+      </Card>
+    </div>
+  </div>
+</DashboardLayout>

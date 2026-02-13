@@ -1,0 +1,322 @@
+---
+/**
+ * Asistencia del Alumno - RF-069, RF-070
+ * Dashboard de asistencia con semáforo visual
+ * - RF-069: % asistencia teoría (mínimo 75%)
+ * - RF-070: % asistencia práctica (mínimo 100%)
+ * Semáforo: Verde (cumple), Amarillo (en límite), Rojo (reprobado por asistencia)
+ */
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import Card from '../../components/ui/Card.astro';
+import Button from '../../components/ui/Button.astro';
+
+// Mock: alumno en Clase Profesional A2 (Promoción Enero II, día 23/30)
+const alumno = {
+  nombre: "Carlos Soto Muñoz",
+  rut: "15.432.198-7",
+  curso: "Clase Profesional A2",
+  promocion: "Promoción Enero II",
+  diaActual: 23,
+  diasTotales: 30,
+};
+
+// RF-069: Asistencia teoría (Zoom + firma semanal)
+const teoriaStats = {
+  sesionesZoom: { realizadas: 18, asistidas: 16, pct: 89 },
+  firmasSemanal: { realizadas: 4, firmadas: 4, pct: 100 },
+  // Combinada para semáforo
+  totalSesiones: 22,
+  totalAsistidas: 20,
+  pctTotal: 91,
+};
+
+// RF-070: Asistencia práctica (100% obligatorio)
+const practicaStats = {
+  sesionesTotal: 11,
+  sesionesAsistidas: 10,
+  pct: 91,
+  faltasJustificadas: 1,  // con licencia médica
+  faltasInjustificadas: 0,
+};
+
+// Cálculo semáforo
+function getSemaforo(pct: number, minimo: number): { color: string; label: string; bg: string; ring: string; dot: string } {
+  if (pct >= minimo) {
+    return { color: "text-green-700", label: "Cumple", bg: "bg-green-50", ring: "ring-green-200", dot: "bg-green-500" };
+  } else if (pct >= minimo - 10) {
+    return { color: "text-yellow-700", label: "En límite", bg: "bg-yellow-50", ring: "ring-yellow-200", dot: "bg-yellow-500" };
+  } else {
+    return { color: "text-red-700", label: "En riesgo", bg: "bg-red-50", ring: "ring-red-200", dot: "bg-red-500" };
+  }
+}
+
+const semaforoTeoria = getSemaforo(teoriaStats.pctTotal, 75);
+const semaforoPractica = getSemaforo(practicaStats.pct, 100);
+
+// Historial detalle por día (últimas 4 semanas teoría)
+const historialTeoria = [
+  { semana: "Semana 1 (Ene 19-24)",  zoom: [true, true, true, true, true, true], firma: true },
+  { semana: "Semana 2 (Ene 26-31)",  zoom: [true, true, true, true, true, false], firma: true },
+  { semana: "Semana 3 (Feb 2-7)",    zoom: [true, true, false, true, true, true], firma: true },
+  { semana: "Semana 4 (Feb 9-14)",   zoom: [true, true, true, true, false, false], firma: false },
+];
+
+// Historial prácticos
+const historialPractica = [
+  { dia: 1,  fecha: "Lun 19 Ene", presente: true,  nota: "" },
+  { dia: 2,  fecha: "Mar 20 Ene", presente: true,  nota: "" },
+  { dia: 3,  fecha: "Mié 21 Ene", presente: true,  nota: "" },
+  { dia: 4,  fecha: "Jue 22 Ene", presente: true,  nota: "" },
+  { dia: 5,  fecha: "Vie 23 Ene", presente: true,  nota: "" },
+  { dia: 6,  fecha: "Sáb 24 Ene", presente: true,  nota: "" },
+  { dia: 7,  fecha: "Lun 26 Ene", presente: false, nota: "Licencia médica adjunta" },
+  { dia: 8,  fecha: "Mar 27 Ene", presente: true,  nota: "" },
+  { dia: 9,  fecha: "Mié 28 Ene", presente: true,  nota: "" },
+  { dia: 10, fecha: "Jue 29 Ene", presente: true,  nota: "" },
+  { dia: 11, fecha: "Vie 30 Ene", presente: true,  nota: "" },
+];
+---
+
+<DashboardLayout title="Mi Asistencia" userRole="alumno">
+  <!-- Header -->
+  <div class="mb-6">
+    <div class="flex items-center gap-2 text-sm text-gray-500 mb-2">
+      <a href="/alumno/dashboard" class="hover:text-gray-900">Inicio</a>
+      <span>/</span>
+      <span class="text-gray-900 font-medium">Mi Asistencia</span>
+    </div>
+    <h1 class="text-3xl font-semibold text-gray-900 tracking-tight text-balance">
+      Mi Asistencia
+    </h1>
+    <p class="text-gray-600 mt-1">
+      {alumno.curso} · {alumno.promocion} · Día {alumno.diaActual}/{alumno.diasTotales}
+    </p>
+  </div>
+
+  <!-- Semáforos principales RF-069 / RF-070 -->
+  <div class="grid sm:grid-cols-2 gap-4 mb-8">
+
+    <!-- Semáforo Teoría -->
+    <div class={`border rounded-xl p-6 ring-2 ${semaforoTeoria.ring} ${semaforoTeoria.bg} shadow-sm`}>
+      <div class="flex items-start justify-between mb-4">
+        <div>
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Asistencia Teoría</p>
+          <p class="text-4xl font-bold text-gray-900">{teoriaStats.pctTotal}%</p>
+          <p class="text-xs text-gray-500 mt-1">Mínimo requerido: <strong>75%</strong></p>
+        </div>
+        <!-- Dot semáforo -->
+        <div class="flex flex-col items-center gap-1.5">
+          <div class={`w-5 h-5 rounded-full ${semaforoTeoria.dot === "bg-green-500" ? "bg-green-500" : "bg-gray-200"} shadow-sm`}></div>
+          <div class={`w-5 h-5 rounded-full ${semaforoTeoria.dot === "bg-yellow-500" ? "bg-yellow-500" : "bg-gray-200"} shadow-sm`}></div>
+          <div class={`w-5 h-5 rounded-full ${semaforoTeoria.dot === "bg-red-500" ? "bg-red-500" : "bg-gray-200"} shadow-sm`}></div>
+        </div>
+      </div>
+      <!-- Barra progreso -->
+      <div class="mb-3">
+        <div class="w-full bg-white/60 rounded-full h-3 border border-white/80">
+          <div
+            class={`h-3 rounded-full transition-all duration-500 ${teoriaStats.pctTotal >= 75 ? "bg-green-500" : teoriaStats.pctTotal >= 65 ? "bg-yellow-400" : "bg-red-500"}`}
+            style={`width: ${teoriaStats.pctTotal}%`}
+          ></div>
+        </div>
+        <div class="flex justify-between text-xs text-gray-500 mt-1">
+          <span>0%</span>
+          <span class="font-medium text-orange-600">75% mín.</span>
+          <span>100%</span>
+        </div>
+      </div>
+      <div class={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ring-1 ${semaforoTeoria.ring} ${semaforoTeoria.color} bg-white/70`}>
+        <span class={`w-1.5 h-1.5 rounded-full ${semaforoTeoria.dot}`}></span>
+        {semaforoTeoria.label} (RF-069)
+      </div>
+      <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
+        <div class="bg-white/60 rounded-lg p-2.5 text-center">
+          <p class="font-bold text-gray-900">{teoriaStats.totalAsistidas}/{teoriaStats.totalSesiones}</p>
+          <p class="text-gray-500">sesiones totales</p>
+        </div>
+        <div class="bg-white/60 rounded-lg p-2.5 text-center">
+          <p class="font-bold text-gray-900">{teoriaStats.firmasSemanal.firmadas}/{teoriaStats.firmasSemanal.realizadas}</p>
+          <p class="text-gray-500">firmas presenciales</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Semáforo Práctica -->
+    <div class={`border rounded-xl p-6 ring-2 ${semaforoPractica.ring} ${semaforoPractica.bg} shadow-sm`}>
+      <div class="flex items-start justify-between mb-4">
+        <div>
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Asistencia Práctica</p>
+          <p class="text-4xl font-bold text-gray-900">{practicaStats.pct}%</p>
+          <p class="text-xs text-gray-500 mt-1">Mínimo requerido: <strong>100%</strong></p>
+        </div>
+        <div class="flex flex-col items-center gap-1.5">
+          <div class={`w-5 h-5 rounded-full ${semaforoPractica.dot === "bg-green-500" ? "bg-green-500" : "bg-gray-200"} shadow-sm`}></div>
+          <div class={`w-5 h-5 rounded-full ${semaforoPractica.dot === "bg-yellow-500" ? "bg-yellow-500" : "bg-gray-200"} shadow-sm`}></div>
+          <div class={`w-5 h-5 rounded-full ${semaforoPractica.dot === "bg-red-500" ? "bg-red-500" : "bg-gray-200"} shadow-sm`}></div>
+        </div>
+      </div>
+      <div class="mb-3">
+        <div class="w-full bg-white/60 rounded-full h-3 border border-white/80">
+          <div
+            class={`h-3 rounded-full transition-all duration-500 ${practicaStats.pct >= 100 ? "bg-green-500" : practicaStats.pct >= 90 ? "bg-yellow-400" : "bg-red-500"}`}
+            style={`width: ${practicaStats.pct}%`}
+          ></div>
+        </div>
+        <div class="flex justify-between text-xs text-gray-500 mt-1">
+          <span>0%</span>
+          <span class="font-medium text-red-600">100% oblig.</span>
+          <span>100%</span>
+        </div>
+      </div>
+      <div class={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ring-1 ${semaforoPractica.ring} ${semaforoPractica.color} bg-white/70`}>
+        <span class={`w-1.5 h-1.5 rounded-full ${semaforoPractica.dot}`}></span>
+        {semaforoPractica.label} (RF-070)
+      </div>
+      <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
+        <div class="bg-white/60 rounded-lg p-2.5 text-center">
+          <p class="font-bold text-gray-900">{practicaStats.sesionesAsistidas}/{practicaStats.sesionesTotal}</p>
+          <p class="text-gray-500">días asistidos</p>
+        </div>
+        <div class="bg-white/60 rounded-lg p-2.5 text-center">
+          <p class="font-bold text-gray-900">{practicaStats.faltasJustificadas}</p>
+          <p class="text-gray-500">falta(s) justificada(s)</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alerta si en riesgo -->
+  {practicaStats.pct < 100 && (
+    <div class="border border-yellow-300 bg-yellow-50 rounded-lg p-4 mb-6">
+      <div class="flex gap-3">
+        <svg class="w-5 h-5 text-yellow-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+        </svg>
+        <div>
+          <p class="text-sm font-semibold text-yellow-900">Atención: tienes una falta en prácticos</p>
+          <p class="text-xs text-yellow-700 mt-1">La asistencia a clases prácticas es obligatoria al 100%. Tu falta está cubierta con licencia médica, pero no puedes acumular más inasistencias injustificadas.</p>
+        </div>
+      </div>
+    </div>
+  )}
+
+  <div class="grid lg:grid-cols-2 gap-6">
+    <!-- Historial teoría -->
+    <Card>
+      <h2 class="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.069A1 1 0 0121 8.869v6.262a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+        </svg>
+        Teoría — Detalle por semana
+      </h2>
+      <div class="space-y-3">
+        {historialTeoria.map((semana) => {
+          const asistidas = semana.zoom.filter(Boolean).length;
+          const pctSem = Math.round((asistidas / semana.zoom.length) * 100);
+          return (
+            <div class="border border-gray-100 rounded-lg p-3">
+              <div class="flex items-center justify-between mb-2">
+                <p class="text-xs font-medium text-gray-700">{semana.semana}</p>
+                <div class="flex items-center gap-2">
+                  {semana.firma
+                    ? <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-orange-100 text-orange-700 font-medium">Firmó</span>
+                    : <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-red-100 text-red-700 font-medium">Sin firma</span>
+                  }
+                  <span class={`text-xs font-semibold ${pctSem >= 75 ? "text-green-700" : pctSem >= 60 ? "text-yellow-600" : "text-red-600"}`}>
+                    {pctSem}%
+                  </span>
+                </div>
+              </div>
+              <div class="flex gap-1">
+                {semana.zoom.map((presente, idx) => (
+                  <div
+                    title={`Día ${idx + 1}: ${presente ? "Presente" : "Ausente"}`}
+                    class={`flex-1 h-6 rounded text-xs flex items-center justify-center font-bold ${
+                      presente ? "bg-green-100 text-green-700" : "bg-red-100 text-red-500"
+                    }`}
+                  >
+                    {presente ? "✓" : "✗"}
+                  </div>
+                ))}
+              </div>
+              <p class="text-xs text-gray-400 mt-1.5">{asistidas}/{semana.zoom.length} sesiones Zoom asistidas</p>
+            </div>
+          );
+        })}
+      </div>
+    </Card>
+
+    <!-- Historial práctica -->
+    <Card>
+      <h2 class="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+        </svg>
+        Práctica — Detalle por día
+      </h2>
+      <div class="space-y-1.5">
+        {historialPractica.map((dia) => (
+          <div class={`flex items-center justify-between px-3 py-2 rounded-lg ${dia.presente ? "bg-green-50" : "bg-red-50"}`}>
+            <div class="flex items-center gap-3">
+              <div class={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${dia.presente ? "bg-green-500 text-white" : "bg-red-400 text-white"}`}>
+                {dia.presente ? "✓" : "✗"}
+              </div>
+              <div>
+                <p class="text-xs font-medium text-gray-800">Día {dia.dia} — {dia.fecha}</p>
+                {dia.nota && <p class="text-xs text-blue-600">{dia.nota}</p>}
+              </div>
+            </div>
+            <span class={`text-xs font-medium ${dia.presente ? "text-green-700" : "text-red-600"}`}>
+              {dia.presente ? "Presente" : "Ausente"}
+            </span>
+          </div>
+        ))}
+        {/* Días restantes */}
+        {Array.from({ length: 30 - historialPractica.length }, (_, i) => (
+          <div class="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-50 opacity-50">
+            <div class="flex items-center gap-3">
+              <div class="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-400">
+                {historialPractica.length + i + 1}
+              </div>
+              <p class="text-xs text-gray-400">Día {historialPractica.length + i + 1} — pendiente</p>
+            </div>
+            <span class="text-xs text-gray-300">—</span>
+          </div>
+        ))}
+      </div>
+    </Card>
+  </div>
+
+  <!-- Info reglamento -->
+  <div class="mt-6 border border-gray-200 rounded-lg bg-white p-4 shadow-sm">
+    <h3 class="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+      <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      Reglamento de Asistencia
+    </h3>
+    <div class="grid sm:grid-cols-3 gap-4 text-xs text-gray-600">
+      <div class="flex gap-2">
+        <span class="text-blue-500 text-base leading-tight shrink-0">📹</span>
+        <div>
+          <p class="font-medium text-gray-800">Teoría Zoom (RF-078)</p>
+          <p>Mínimo 75% de asistencia. Marcado manual por el relator en cada sesión.</p>
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <span class="text-orange-500 text-base leading-tight shrink-0">✍️</span>
+        <div>
+          <p class="font-medium text-gray-800">Firma Semanal (RF-067)</p>
+          <p>Una vez por semana debes firmar presencialmente el libro de clases.</p>
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <span class="text-green-500 text-base leading-tight shrink-0">🚗</span>
+        <div>
+          <p class="font-medium text-gray-800">Práctica 100% (RF-070)</p>
+          <p>Asistencia obligatoria. Solo licencia médica justifica ausencias.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</DashboardLayout>

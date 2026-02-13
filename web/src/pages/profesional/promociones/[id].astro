@@ -1,0 +1,349 @@
+---
+/**
+ * Detalle/Dashboard de Promoción - RF-059, RF-079
+ * Vista de avance con barra de progreso día X de 30
+ */
+import DashboardLayout from '../../../layouts/DashboardLayout.astro';
+import Card from '../../../components/ui/Card.astro';
+import Button from '../../../components/ui/Button.astro';
+import { ESCUELA_ACTUAL } from '../../../lib/mockData';
+import { PROMOCIONES, getRelatorById } from '../../../lib/mockRelatores';
+
+export function getStaticPaths() {
+  return [
+    { params: { id: "1" } },
+    { params: { id: "2" } },
+    { params: { id: "3" } },
+    { params: { id: "4" } },
+    { params: { id: "5" } },
+  ];
+}
+
+const { id } = Astro.params;
+const prom = PROMOCIONES.find(p => p.id === parseInt(id!)) || PROMOCIONES[0];
+
+const estadoBadge: Record<string, { text: string; class: string }> = {
+  'planificada': { text: 'Planificada', class: 'bg-yellow-100 text-yellow-800' },
+  'en_curso': { text: 'En curso', class: 'bg-blue-100 text-blue-800' },
+  'finalizada': { text: 'Finalizada', class: 'bg-green-100 text-green-800' },
+};
+
+const cursoColors: Record<string, { bg: string; text: string; border: string; light: string }> = {
+  'A2': { bg: 'bg-blue-600', text: 'text-blue-800', border: 'border-blue-200', light: 'bg-blue-50' },
+  'A3': { bg: 'bg-purple-600', text: 'text-purple-800', border: 'border-purple-200', light: 'bg-purple-50' },
+  'A4': { bg: 'bg-orange-600', text: 'text-orange-800', border: 'border-orange-200', light: 'bg-orange-50' },
+  'A5': { bg: 'bg-teal-600', text: 'text-teal-800', border: 'border-teal-200', light: 'bg-teal-50' },
+};
+
+const cursoLabels: Record<string, string> = {
+  'A2': 'Taxis y colectivos',
+  'A3': 'Buses',
+  'A4': 'Carga simple',
+  'A5': 'Carga',
+};
+
+const progreso = prom.diaActual !== undefined && prom.estado === 'en_curso'
+  ? Math.round((prom.diaActual / 30) * 100)
+  : prom.estado === 'finalizada' ? 100 : 0;
+
+const diasRestantes = prom.estado === 'en_curso' && prom.diaActual !== undefined
+  ? 30 - prom.diaActual
+  : prom.estado === 'finalizada' ? 0 : 30;
+
+const badge = estadoBadge[prom.estado];
+
+// Mock data: asistencia promedio por curso
+const mockAsistencia: Record<string, { teoria: number; practica: number }> = {
+  'A2': { teoria: 82, practica: 95 },
+  'A3': { teoria: 78, practica: 100 },
+  'A4': { teoria: 85, practica: 98 },
+  'A5': { teoria: 75, practica: 92 },
+};
+---
+
+<DashboardLayout title={`${prom.nombre} - Promociones`} escuela={ESCUELA_ACTUAL}>
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex items-center gap-2 text-sm text-secondary mb-2">
+      <a href="/dashboard" class="hover:text-gray-900">Inicio</a>
+      <span>/</span>
+      <a href="/profesional/promociones" class="hover:text-gray-900">Promociones</a>
+      <span>/</span>
+      <span class="text-gray-900 font-medium">{prom.nombre}</span>
+    </div>
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-3">
+          <h1 class="text-3xl font-semibold text-gray-900 tracking-tight">{prom.nombre}</h1>
+          <span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${badge.class}`}>
+            {badge.text}
+          </span>
+        </div>
+        <div class="flex items-center gap-3 mt-1">
+          <span class="font-mono text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-600">{prom.codigo}</span>
+          <span class="text-sm text-secondary">{prom.fechaInicio} → {prom.fechaFin}</span>
+        </div>
+      </div>
+      <div class="flex gap-2">
+        {prom.estado === 'planificada' && (
+          <Button variant="secondary" onClick="alert('Editar promoción (mockup)')">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+            </svg>
+            Editar
+          </Button>
+        )}
+        <Button href="/profesional/promociones" variant="ghost">
+          &larr; Volver
+        </Button>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid lg:grid-cols-3 gap-6">
+    <!-- Main -->
+    <div class="lg:col-span-2 space-y-6">
+
+      {/* RF-079: Dashboard de avance */}
+      {prom.estado === 'en_curso' && prom.diaActual !== undefined && (
+        <Card>
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Avance de la promoción</h2>
+          <div class="flex items-end gap-6 mb-4">
+            <div>
+              <p class="text-5xl font-bold text-gray-900">{prom.diaActual}</p>
+              <p class="text-sm text-secondary mt-1">de 30 días de clase</p>
+            </div>
+            <div class="flex-1 pb-2">
+              <div class="flex items-center justify-between text-sm mb-2">
+                <span class="text-secondary">Progreso</span>
+                <span class="font-medium text-gray-900">{progreso}%</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-3">
+                <div
+                  class="bg-blue-600 h-3 rounded-full transition-all duration-500"
+                  style={`width: ${progreso}%`}
+                ></div>
+              </div>
+            </div>
+          </div>
+          <div class="grid grid-cols-3 gap-4 pt-4 border-t border-gray-200">
+            <div class="text-center">
+              <p class="text-2xl font-semibold text-gray-900">{prom.totalAlumnos}</p>
+              <p class="text-xs text-secondary mt-1">Alumnos inscritos</p>
+            </div>
+            <div class="text-center">
+              <p class="text-2xl font-semibold text-blue-600">{diasRestantes}</p>
+              <p class="text-xs text-secondary mt-1">Días de clase restantes</p>
+            </div>
+            <div class="text-center">
+              <p class="text-2xl font-semibold text-green-600">4</p>
+              <p class="text-xs text-secondary mt-1">Cursos activos</p>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {prom.estado === 'finalizada' && (
+        <Card class="border-green-200 bg-green-50/50">
+          <div class="flex items-center gap-3 mb-2">
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <h2 class="text-lg font-semibold text-green-900">Promoción completada</h2>
+          </div>
+          <p class="text-sm text-green-800">
+            Esta promoción finalizó el {prom.fechaFin}. Se completaron los 30 días de clase (lun-sáb) con {prom.totalAlumnos} alumnos inscritos.
+          </p>
+        </Card>
+      )}
+
+      {prom.estado === 'planificada' && (
+        <Card class="border-yellow-200 bg-yellow-50/50">
+          <div class="flex items-center gap-3 mb-2">
+            <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <h2 class="text-lg font-semibold text-yellow-900">Promoción planificada</h2>
+          </div>
+          <p class="text-sm text-yellow-800">
+            Esta promoción comenzará el {prom.fechaInicio}. Se pueden editar los cursos y relatores asignados.
+          </p>
+        </Card>
+      )}
+
+      <!-- Cursos -->
+      <div>
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Cursos de la promoción</h2>
+        <div class="grid md:grid-cols-2 gap-4">
+          {prom.cursos.map(curso => {
+            const colors = cursoColors[curso.tipo];
+            const capacidad = Math.round((curso.alumnosInscritos / curso.maxAlumnos) * 100);
+            const relator = getRelatorById(curso.relatorId);
+            const asist = mockAsistencia[curso.tipo];
+
+            return (
+              <Card class={`${colors.light} ${colors.border}`}>
+                <div class="flex items-center justify-between mb-3">
+                  <span class={`inline-flex items-center px-3 py-1 rounded-full text-sm font-bold ${colors.text} bg-white border ${colors.border}`}>
+                    {curso.tipo}
+                  </span>
+                  <span class="text-xs text-secondary">{cursoLabels[curso.tipo]}</span>
+                </div>
+
+                <!-- Relator -->
+                <div class="mb-3">
+                  <p class="text-xs text-secondary mb-1">Relator</p>
+                  {relator ? (
+                    <a href={`/profesional/relatores/${relator.id}`} class="text-sm font-medium text-gray-900 hover:underline">
+                      {curso.relatorNombre}
+                    </a>
+                  ) : (
+                    <span class="text-sm text-gray-400 italic">Sin asignar</span>
+                  )}
+                </div>
+
+                <!-- Alumnos -->
+                <div class="mb-3">
+                  <div class="flex items-center justify-between text-sm mb-1">
+                    <span class="text-secondary">Alumnos</span>
+                    <span class="font-medium text-gray-900">{curso.alumnosInscritos} / {curso.maxAlumnos}</span>
+                  </div>
+                  <div class="w-full bg-white/60 rounded-full h-2">
+                    <div
+                      class={`h-2 rounded-full ${capacidad >= 100 ? 'bg-red-500' : capacidad >= 80 ? 'bg-yellow-500' : 'bg-green-500'}`}
+                      style={`width: ${Math.min(capacidad, 100)}%`}
+                    ></div>
+                  </div>
+                </div>
+
+                {/* Asistencia (solo para en_curso y finalizada) */}
+                {(prom.estado === 'en_curso' || prom.estado === 'finalizada') && (
+                  <div class="pt-3 border-t border-gray-200/50">
+                    <p class="text-xs text-secondary mb-2">Asistencia promedio</p>
+                    <div class="grid grid-cols-2 gap-2">
+                      <div class="text-center">
+                        <p class={`text-lg font-semibold ${asist.teoria >= 75 ? 'text-green-700' : 'text-red-700'}`}>
+                          {asist.teoria}%
+                        </p>
+                        <p class="text-xs text-secondary">Teoría</p>
+                      </div>
+                      <div class="text-center">
+                        <p class={`text-lg font-semibold ${asist.practica >= 100 ? 'text-green-700' : asist.practica >= 90 ? 'text-yellow-700' : 'text-red-700'}`}>
+                          {asist.practica}%
+                        </p>
+                        <p class="text-xs text-secondary">Práctica</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </Card>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-4">
+      <Card>
+        <h3 class="text-sm font-semibold text-gray-900 mb-3">Información general</h3>
+        <div class="space-y-3">
+          <div class="space-y-1">
+            <p class="text-xs text-secondary">Código</p>
+            <p class="text-sm text-gray-900 font-mono">{prom.codigo}</p>
+          </div>
+          <div class="space-y-1">
+            <p class="text-xs text-secondary">Fecha inicio</p>
+            <p class="text-sm text-gray-900">{prom.fechaInicio}</p>
+          </div>
+          <div class="space-y-1">
+            <p class="text-xs text-secondary">Fecha término</p>
+            <p class="text-sm text-gray-900">{prom.fechaFin}</p>
+          </div>
+          <div class="space-y-1">
+            <p class="text-xs text-secondary">Duración</p>
+            <p class="text-sm text-gray-900">30 días de clase (5 semanas, lun-sáb)</p>
+          </div>
+          <div class="space-y-1">
+            <p class="text-xs text-secondary">Total alumnos</p>
+            <p class="text-sm text-gray-900">{prom.totalAlumnos} / 100</p>
+          </div>
+          <div class="space-y-1">
+            <p class="text-xs text-secondary">Estado</p>
+            <span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${badge.class}`}>
+              {badge.text}
+            </span>
+          </div>
+        </div>
+      </Card>
+
+      <Card>
+        <h3 class="text-sm font-semibold text-gray-900 mb-3">Acciones</h3>
+        <div class="space-y-2">
+          {prom.estado === 'planificada' && (
+            <Button variant="secondary" class="w-full justify-start text-sm" onClick="alert('Editar promoción (mockup)')">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+              </svg>
+              Editar promoción
+            </Button>
+          )}
+          {prom.estado === 'finalizada' && (
+            <Button variant="secondary" class="w-full justify-start text-sm" onClick="alert('Generando reporte PDF (mockup)')">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              Descargar acta final
+            </Button>
+          )}
+          <Button href="/profesional/promociones" variant="ghost" class="w-full justify-start text-sm">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+            </svg>
+            Ver todas las promociones
+          </Button>
+        </div>
+      </Card>
+
+      {/* Requisitos certificación RF-093 */}
+      {(prom.estado === 'en_curso' || prom.estado === 'finalizada') && (
+        <Card class="bg-gray-50 border-gray-200">
+          <h3 class="text-sm font-semibold text-gray-900 mb-3">Requisitos certificación</h3>
+          <p class="text-xs text-secondary mb-3">RF-093: Condiciones para certificado profesional</p>
+          <div class="space-y-2">
+            <div class="flex items-center gap-2">
+              <svg class={`w-4 h-4 shrink-0 ${prom.estado === 'finalizada' ? 'text-green-600' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span class="text-xs text-gray-700">30 días de clase completados</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 shrink-0 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span class="text-xs text-gray-700">Asistencia teoría &ge; 75%</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 shrink-0 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span class="text-xs text-gray-700">Asistencia práctica 100%</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span class="text-xs text-gray-700">Notas módulos &ge; 4.0</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span class="text-xs text-gray-700">Estado contable: Pagado Total</span>
+            </div>
+          </div>
+        </Card>
+      )}
+    </div>
+  </div>
+</DashboardLayout>
