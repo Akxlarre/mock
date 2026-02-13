@@ -141,6 +141,7 @@ tramp
 /resources/
 
 # Markdown documentation files
+Lineamientos_de_Diseño.md
 /GUIA-VISUAL-MOCKUPS.md
 /MATRIZ-PRIORIZACION.md
 /PLAN-TRABAJO-HOY.md
@@ -148,6 +149,7 @@ tramp
 /README.md
 /reque.txt
 /requerimientos unificados.txt
+reunion30enero.txt
 
 # ============================================
 # TESTING

@@ -129,7 +129,7 @@ import Button from "../../components/ui/Button.astro";
               </div>
             </div>
 
-            <div class="grid grid-cols-3 gap-2">
+            <div class="grid grid-cols-4 gap-2">
               <Button
                 type="button"
                 variant="ghost"
@@ -153,6 +153,14 @@ import Button from "../../components/ui/Button.astro";
                 onClick="fillDemo('instructor')"
               >
                 Instructor
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                class="text-xs"
+                onClick="fillDemo('relator')"
+              >
+                Relator
               </Button>
             </div>
           </div>
@@ -180,6 +188,7 @@ import Button from "../../components/ui/Button.astro";
           <p><strong>Admin:</strong> admin@escuela.cl / admin123</p>
           <p><strong>Secretaria:</strong> secretaria@escuela.cl / sec123</p>
           <p><strong>Instructor:</strong> instructor@escuela.cl / inst123</p>
+          <p><strong>Relator:</strong> relator@conductores.cl / rel123</p>
         </div>
       </div>
     </div>
@@ -188,11 +197,12 @@ import Button from "../../components/ui/Button.astro";
 
 <script>
   // Demo quick fill
-  (window as any).fillDemo = function(role: "admin" | "secretaria" | "instructor") {
+  (window as any).fillDemo = function(role: "admin" | "secretaria" | "instructor" | "relator") {
     const credentials = {
       admin: { email: "admin@escuela.cl", password: "admin123" },
       secretaria: { email: "secretaria@escuela.cl", password: "sec123" },
       instructor: { email: "instructor@escuela.cl", password: "inst123" },
+      relator: { email: "relator@conductores.cl", password: "rel123" },
     };
 
     const creds = credentials[role];
@@ -271,6 +281,8 @@ import Button from "../../components/ui/Button.astro";
       window.location.href = "/dashboard";
     } else if (email?.toString().includes("instructor")) {
       window.location.href = "/dashboard/instructor";
+    } else if (email?.toString().includes("relator")) {
+      window.location.href = "/relator/dashboard";
     } else {
       // RF-014: Track failed attempt
       failedAttempts++;

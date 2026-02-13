@@ -1,0 +1,339 @@
+---
+/**
+ * Registro de Notas — Vista Relator
+ * RF-072: Ingresar notas por módulo técnico, plantillas de pruebas predefinidas
+ */
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import Card from "../../components/ui/Card.astro";
+import Button from "../../components/ui/Button.astro";
+import { PROMOCIONES, RELATORES } from "../../lib/mockRelatores";
+
+const relatorId = 3;
+const relator = RELATORES.find((r) => r.id === relatorId)!;
+
+// Plantillas de módulos predefinidas por tipo de curso RF-072
+const PLANTILLAS: Record<string, { id: string; nombre: string; descripcion: string }[]> = {
+  A2: [
+    { id: "m1", nombre: "Módulo 1", descripcion: "Legislación de Transporte" },
+    { id: "m2", nombre: "Módulo 2", descripcion: "Mecánica Básica" },
+    { id: "m3", nombre: "Módulo 3", descripcion: "Conducción Defensiva" },
+    { id: "m4", nombre: "Módulo 4", descripcion: "Primeros Auxilios" },
+    { id: "m5", nombre: "Examen Final", descripcion: "Evaluación Integrada A2" },
+  ],
+  A3: [
+    { id: "m1", nombre: "Módulo 1", descripcion: "Legislación Transporte Público" },
+    { id: "m2", nombre: "Módulo 2", descripcion: "Mecánica de Buses" },
+    { id: "m3", nombre: "Módulo 3", descripcion: "Conducción Urbana/Interurbana" },
+    { id: "m4", nombre: "Módulo 4", descripcion: "Atención al Pasajero" },
+    { id: "m5", nombre: "Examen Final", descripcion: "Evaluación Integrada A3" },
+  ],
+  A4: [
+    { id: "m1", nombre: "Módulo 1", descripcion: "Legislación Carga Simple" },
+    { id: "m2", nombre: "Módulo 2", descripcion: "Mecánica de Camiones" },
+    { id: "m3", nombre: "Módulo 3", descripcion: "Manejo de Carga" },
+    { id: "m4", nombre: "Módulo 4", descripcion: "Seguridad en Ruta" },
+    { id: "m5", nombre: "Examen Final", descripcion: "Evaluación Integrada A4" },
+  ],
+  A5: [
+    { id: "m1", nombre: "Módulo 1", descripcion: "Legislación Transporte de Carga" },
+    { id: "m2", nombre: "Módulo 2", descripcion: "Mecánica Avanzada" },
+    { id: "m3", nombre: "Módulo 3", descripcion: "Conducción con Remolque" },
+    { id: "m4", nombre: "Módulo 4", descripcion: "Mercancías Peligrosas" },
+    { id: "m5", nombre: "Examen Final", descripcion: "Evaluación Integrada A5" },
+  ],
+};
+
+// Mock: notas existentes por alumno-módulo
+const NOTAS_MOCK: Record<string, Record<string, number | null>> = {
+  "1":  { m1: 5.5, m2: 4.8, m3: null, m4: null, m5: null },
+  "2":  { m1: 3.8, m2: 4.2, m3: null, m4: null, m5: null },
+  "3":  { m1: 6.0, m2: 6.5, m3: null, m4: null, m5: null },
+  "4":  { m1: 3.5, m2: 3.2, m3: null, m4: null, m5: null },
+  "5":  { m1: 5.0, m2: 4.9, m3: null, m4: null, m5: null },
+  "6":  { m1: 5.8, m2: 5.5, m3: null, m4: null, m5: null },
+  "7":  { m1: 4.5, m2: 4.3, m3: null, m4: null, m5: null },
+  "8":  { m1: 6.2, m2: 6.0, m3: null, m4: null, m5: null },
+  "9":  { m1: 5.0, m2: null, m3: null, m4: null, m5: null },
+  "10": { m1: 4.8, m2: null, m3: null, m4: null, m5: null },
+  "11": { m1: 3.0, m2: null, m3: null, m4: null, m5: null },
+  "12": { m1: 5.5, m2: null, m3: null, m4: null, m5: null },
+};
+
+// Alumnos por promo-curso (mismo set que alumnos.astro)
+const ALUMNOS: Record<string, { id: number; nombre: string; rut: string; curso: string; promoId: number }[]> = {
+  "3-A2": [
+    { id: 1, nombre: "Carlos Soto Muñoz",    rut: "15.432.198-7", curso: "A2", promoId: 3 },
+    { id: 2, nombre: "Andrea Flores Vera",    rut: "16.789.234-5", curso: "A2", promoId: 3 },
+    { id: 3, nombre: "Luis Pérez Castro",     rut: "14.567.890-3", curso: "A2", promoId: 3 },
+    { id: 4, nombre: "Mariana Torres Rojas",  rut: "17.234.567-K", curso: "A2", promoId: 3 },
+    { id: 5, nombre: "Roberto Núñez Díaz",    rut: "13.456.789-1", curso: "A2", promoId: 3 },
+    { id: 6, nombre: "Patricia Vargas Silva", rut: "15.678.901-2", curso: "A2", promoId: 3 },
+    { id: 7, nombre: "Jorge Morales Reyes",   rut: "16.901.234-6", curso: "A2", promoId: 3 },
+    { id: 8, nombre: "Valentina Ríos Lagos",  rut: "15.234.567-4", curso: "A2", promoId: 3 },
+  ],
+  "4-A2": [
+    { id: 9,  nombre: "Felipe Aguilar Pino",   rut: "17.345.678-9", curso: "A2", promoId: 4 },
+    { id: 10, nombre: "Diego Meza Fuentes",     rut: "16.456.789-0", curso: "A2", promoId: 4 },
+    { id: 11, nombre: "Camila Rojas Vega",      rut: "18.123.456-7", curso: "A2", promoId: 4 },
+    { id: 12, nombre: "Sebastián Mora Castro",  rut: "17.654.321-2", curso: "A2", promoId: 4 },
+  ],
+  "4-A3": [
+    { id: 15, nombre: "María Fernández López",  rut: "14.876.543-1", curso: "A3", promoId: 4 },
+    { id: 16, nombre: "Nicolás Castillo Vera",  rut: "15.987.654-2", curso: "A3", promoId: 4 },
+    { id: 17, nombre: "Javiera Soto Romero",    rut: "17.111.222-3", curso: "A3", promoId: 4 },
+    { id: 18, nombre: "Mateo Salinas Riquelme", rut: "16.555.444-9", curso: "A3", promoId: 4 },
+  ],
+};
+
+// Promo activa para demostración (PROM-2026-02, A2)
+const promoActiva = PROMOCIONES.find(p => p.id === 3)!;
+const cursoActivo = "A2";
+const key = `${promoActiva.id}-${cursoActivo}`;
+const alumnos = ALUMNOS[key] ?? [];
+const modulos = PLANTILLAS[cursoActivo] ?? [];
+
+function calcPromedio(notas: Record<string, number | null>): number | null {
+  const vals = Object.values(notas).filter((v): v is number => v !== null);
+  if (vals.length === 0) return null;
+  return Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 10) / 10;
+}
+---
+
+<DashboardLayout title="Registro de Notas" userRole="relator">
+  <!-- Header -->
+  <div class="mb-6">
+    <div class="flex items-center gap-2 text-sm text-gray-500 mb-2">
+      <a href="/relator/dashboard" class="hover:text-gray-900">Inicio</a>
+      <span>/</span>
+      <span class="text-gray-900 font-medium">Registro de Notas</span>
+    </div>
+    <div class="flex flex-wrap items-start justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-semibold text-gray-900 tracking-tight text-balance">Registro de Notas</h1>
+        <p class="text-gray-600 mt-1">RF-072 — Ingreso de notas por módulo técnico con plantillas predefinidas</p>
+      </div>
+      <div class="flex gap-2">
+        <Button variant="secondary" onClick="alert('Exportar planilla de notas (mockup)')">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          Exportar
+        </Button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <Card class="mb-6">
+    <div class="grid sm:grid-cols-3 gap-4">
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Promoción</label>
+        <select class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1">
+          {PROMOCIONES.filter(p => p.estado !== "planificada").map(p => (
+            <option value={p.id} selected={p.id === 3}>{p.nombre}</option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Curso</label>
+        <select class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1">
+          <option value="A2" selected>A2 — Taxis y colectivos</option>
+          <option value="A3">A3 — Buses</option>
+          <option value="A4">A4 — Carga simple</option>
+          <option value="A5">A5 — Carga</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Plantilla de módulo</label>
+        <select id="modulo-selector" class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1">
+          {modulos.map(m => (
+            <option value={m.id}>{m.nombre} — {m.descripcion}</option>
+          ))}
+        </select>
+      </div>
+    </div>
+  </Card>
+
+  <!-- Info módulo seleccionado -->
+  <div class="mb-4 flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+    <svg class="w-4 h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+    <div>
+      <p class="text-sm font-semibold text-blue-900">Plantilla activa: {modulos[0]?.nombre} — {modulos[0]?.descripcion}</p>
+      <p class="text-xs text-blue-700">Escala 1.0 a 7.0 · Nota mínima de aprobación: 4.0 (RF-072)</p>
+    </div>
+  </div>
+
+  <!-- Tabla de notas -->
+  <Card>
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-base font-semibold text-gray-900">
+        {promoActiva.nombre} · Curso {cursoActivo} · {alumnos.length} alumnos
+      </h2>
+      <span class="text-xs text-gray-500">Módulo 1 — Legislación de Transporte</span>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-gray-200">
+            <th class="text-left py-3 pr-4 text-xs font-semibold text-gray-600 uppercase tracking-wide">Alumno</th>
+            {modulos.map(m => (
+              <th class="text-center py-3 px-2 text-xs font-semibold text-gray-600 uppercase tracking-wide min-w-20">
+                {m.nombre}
+              </th>
+            ))}
+            <th class="text-center py-3 px-2 text-xs font-semibold text-gray-600 uppercase tracking-wide min-w-20">Promedio</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {alumnos.map((alumno) => {
+            const notas = NOTAS_MOCK[String(alumno.id)] ?? {};
+            const promedio = calcPromedio(notas);
+            const algunaReprobada = Object.values(notas).some(n => n !== null && n < 4.0);
+            return (
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="py-3 pr-4">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-600 shrink-0">
+                      {alumno.nombre.split(' ').map(n => n[0]).slice(0,2).join('')}
+                    </div>
+                    <div>
+                      <p class="font-medium text-gray-900 text-sm">{alumno.nombre}</p>
+                      <p class="text-xs text-gray-500">{alumno.rut}</p>
+                    </div>
+                  </div>
+                </td>
+                {modulos.map(m => {
+                  const nota = notas[m.id];
+                  return (
+                    <td class="py-3 px-2 text-center">
+                      <input
+                        type="number"
+                        min="1"
+                        max="7"
+                        step="0.1"
+                        value={nota ?? ""}
+                        placeholder="—"
+                        class={`w-16 text-center rounded-md border px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1 font-medium ${
+                          nota === null
+                            ? "border-gray-200 bg-white text-gray-400"
+                            : nota < 4.0
+                            ? "border-red-300 bg-red-50 text-red-700"
+                            : "border-green-300 bg-green-50 text-green-800"
+                        }`}
+                        onchange="handleNotaChange(this)"
+                      />
+                    </td>
+                  );
+                })}
+                <td class="py-3 px-2 text-center">
+                  {promedio !== null ? (
+                    <span class={`inline-flex items-center justify-center w-14 h-7 rounded-full text-xs font-bold ${
+                      promedio >= 4.0
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                    }`}>
+                      {promedio.toFixed(1)}
+                    </span>
+                  ) : (
+                    <span class="text-gray-300 text-xs">—</span>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Acciones -->
+    <div class="mt-6 pt-4 border-t border-gray-200 flex flex-wrap items-center justify-between gap-3">
+      <p class="text-xs text-gray-500">
+        <span class="inline-block w-2 h-2 rounded-full bg-green-400 mr-1"></span>Verde: aprobado (≥4.0) &nbsp;
+        <span class="inline-block w-2 h-2 rounded-full bg-red-400 mr-1"></span>Rojo: reprobado (&lt;4.0)
+      </p>
+      <div class="flex gap-2">
+        <Button variant="secondary" onClick="alert('Guardado (mockup)')">
+          Guardar borrador
+        </Button>
+        <Button variant="primary" onClick="guardarNotas()">
+          Confirmar notas
+        </Button>
+      </div>
+    </div>
+  </Card>
+
+  <!-- Resumen estadístico -->
+  <div class="grid sm:grid-cols-3 gap-4 mt-6">
+    <div class="border border-gray-200 rounded-lg bg-white p-4 shadow-sm text-center">
+      <p class="text-2xl font-bold text-gray-900">
+        {alumnos.filter(a => {
+          const notas = NOTAS_MOCK[String(a.id)] ?? {};
+          const vals = Object.values(notas).filter((v): v is number => v !== null);
+          return vals.length > 0 && vals.every(v => v >= 4.0);
+        }).length}
+      </p>
+      <p class="text-xs text-gray-500 mt-1">Aprobados (todas ≥4.0)</p>
+    </div>
+    <div class="border border-gray-200 rounded-lg bg-white p-4 shadow-sm text-center">
+      <p class="text-2xl font-bold text-red-600">
+        {alumnos.filter(a => {
+          const notas = NOTAS_MOCK[String(a.id)] ?? {};
+          return Object.values(notas).some(v => v !== null && (v as number) < 4.0);
+        }).length}
+      </p>
+      <p class="text-xs text-gray-500 mt-1">Con nota reprobada</p>
+    </div>
+    <div class="border border-gray-200 rounded-lg bg-white p-4 shadow-sm text-center">
+      <p class="text-2xl font-bold text-gray-400">
+        {alumnos.filter(a => {
+          const notas = NOTAS_MOCK[String(a.id)] ?? {};
+          return Object.values(notas).some(v => v === null);
+        }).length}
+      </p>
+      <p class="text-xs text-gray-500 mt-1">Con módulos pendientes</p>
+    </div>
+  </div>
+
+  <!-- Plantillas de pruebas -->
+  <Card class="mt-6 bg-gray-50">
+    <h3 class="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+      <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      Plantillas de prueba — Curso {cursoActivo}
+    </h3>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      {modulos.map((m, i) => (
+        <div class="flex items-start gap-3 p-3 bg-white rounded-lg border border-gray-200">
+          <span class={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+            i < 4 ? "bg-blue-100 text-blue-700" : "bg-purple-100 text-purple-700"
+          }`}>{i + 1}</span>
+          <div>
+            <p class="text-sm font-medium text-gray-900">{m.nombre}</p>
+            <p class="text-xs text-gray-500">{m.descripcion}</p>
+            <button
+              onclick="alert('Descargando plantilla PDF (mockup)')"
+              class="mt-1.5 text-xs text-blue-600 hover:underline"
+            >
+              Descargar plantilla →
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  </Card>
+</DashboardLayout>
+
+<script>
+  (window as any).guardarNotas = function () {
+    alert('✓ Notas confirmadas\n\nLas notas han sido registradas en el sistema.\nLos alumnos serán notificados automáticamente.');
+  };
+  (window as any).handleNotaChange = function (input: HTMLInputElement) {
+    const val = parseFloat(input.value);
+    input.classList.remove('border-red-300','bg-red-50','text-red-700','border-green-300','bg-green-50','text-green-800','border-gray-200','text-gray-400','bg-white');
+    if (isNaN(val)) {
+      input.classList.add('border-gray-200','bg-white','text-gray-400');
+    } else if (val < 4.0) {
+      input.classList.add('border-red-300','bg-red-50','text-red-700');
+    } else {
+      input.classList.add('border-green-300','bg-green-50','text-green-800');
+    }
+  };
+</script>

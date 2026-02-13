@@ -1,0 +1,267 @@
+---
+/**
+ * Acta Final — Vista Relator
+ * RF-074: Al finalizar promoción, ingresar concepto Aprobado/Reprobado
+ *         tras examen práctico por alumno
+ */
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import Card from "../../components/ui/Card.astro";
+import Button from "../../components/ui/Button.astro";
+import { PROMOCIONES, RELATORES } from "../../lib/mockRelatores";
+
+const relatorId = 3;
+const relator = RELATORES.find((r) => r.id === relatorId)!;
+
+// Solo promociones finalizadas o en último día
+const promosFinalizadas = PROMOCIONES.filter(p => p.estado === "finalizada" || (p.estado === "en_curso" && (p.diaActual ?? 0) >= 28));
+
+// Demo: Promo Enero I (id=2, dia 28/30 - lista para acta)
+const promoActiva = PROMOCIONES.find(p => p.id === 2)!;
+const cursoActivo = "A2";
+
+// Mock: alumnos con datos para el acta final
+const ALUMNOS_ACTA: {
+  id: number; nombre: string; rut: string;
+  asistenciaTeoria: number; asistenciaPractica: number;
+  promedioNotas: number | null;
+  estadoPago: "total" | "parcial" | "pendiente";
+  conceptoExamen: "aprobado" | "reprobado" | null;
+  fechaExamen: string | null;
+}[] = [
+  { id: 1, nombre: "Carlos Soto Muñoz",    rut: "15.432.198-7", asistenciaTeoria: 88, asistenciaPractica: 95,  promedioNotas: 5.3, estadoPago: "total",    conceptoExamen: "aprobado",  fechaExamen: "12 Feb 2026" },
+  { id: 2, nombre: "Andrea Flores Vera",    rut: "16.789.234-5", asistenciaTeoria: 62, asistenciaPractica: 82,  promedioNotas: 3.9, estadoPago: "parcial",  conceptoExamen: "reprobado", fechaExamen: "12 Feb 2026" },
+  { id: 3, nombre: "Luis Pérez Castro",     rut: "14.567.890-3", asistenciaTeoria: 100, asistenciaPractica: 100, promedioNotas: 6.2, estadoPago: "total",    conceptoExamen: "aprobado",  fechaExamen: "12 Feb 2026" },
+  { id: 4, nombre: "Mariana Torres Rojas",  rut: "17.234.567-K", asistenciaTeoria: 40, asistenciaPractica: 45,  promedioNotas: 3.2, estadoPago: "pendiente", conceptoExamen: "reprobado", fechaExamen: "12 Feb 2026" },
+  { id: 5, nombre: "Roberto Núñez Díaz",    rut: "13.456.789-1", asistenciaTeoria: 87, asistenciaPractica: 97,  promedioNotas: 5.0, estadoPago: "total",    conceptoExamen: null,        fechaExamen: null },
+  { id: 6, nombre: "Patricia Vargas Silva", rut: "15.678.901-2", asistenciaTeoria: 95, asistenciaPractica: 100, promedioNotas: 5.8, estadoPago: "total",    conceptoExamen: null,        fechaExamen: null },
+  { id: 7, nombre: "Jorge Morales Reyes",   rut: "16.901.234-6", asistenciaTeoria: 82, asistenciaPractica: 93,  promedioNotas: 4.4, estadoPago: "total",    conceptoExamen: null,        fechaExamen: null },
+  { id: 8, nombre: "Valentina Ríos Lagos",  rut: "15.234.567-4", asistenciaTeoria: 100, asistenciaPractica: 100, promedioNotas: 6.0, estadoPago: "total",    conceptoExamen: null,        fechaExamen: null },
+];
+
+const aprobados = ALUMNOS_ACTA.filter(a => a.conceptoExamen === "aprobado").length;
+const reprobados = ALUMNOS_ACTA.filter(a => a.conceptoExamen === "reprobado").length;
+const pendientes = ALUMNOS_ACTA.filter(a => a.conceptoExamen === null).length;
+const actaCerrada = pendientes === 0;
+---
+
+<DashboardLayout title="Acta Final" userRole="relator">
+  <!-- Header -->
+  <div class="mb-6">
+    <div class="flex items-center gap-2 text-sm text-gray-500 mb-2">
+      <a href="/relator/dashboard" class="hover:text-gray-900">Inicio</a>
+      <span>/</span>
+      <span class="text-gray-900 font-medium">Acta Final</span>
+    </div>
+    <div class="flex flex-wrap items-start justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-semibold text-gray-900 tracking-tight text-balance">Acta Final de Examen</h1>
+        <p class="text-gray-600 mt-1">RF-074 — Registrar concepto del examen práctico final por alumno</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Selector -->
+  <Card class="mb-6">
+    <div class="grid sm:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Promoción</label>
+        <select class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1">
+          {promosFinalizadas.map(p => (
+            <option value={p.id} selected={p.id === 2}>{p.nombre} — {p.estado === "finalizada" ? "Finalizada" : `Día ${p.diaActual}/30`}</option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Curso</label>
+        <select class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1">
+          <option value="A2" selected>A2 — Taxis y colectivos</option>
+          <option value="A3">A3 — Buses</option>
+          <option value="A4">A4 — Carga simple</option>
+          <option value="A5">A5 — Carga</option>
+        </select>
+      </div>
+    </div>
+  </Card>
+
+  <!-- Info promoción -->
+  <div class="mb-6 p-4 rounded-lg border border-yellow-200 bg-yellow-50 flex items-start gap-3">
+    <svg class="w-5 h-5 text-yellow-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+    <div>
+      <p class="text-sm font-semibold text-yellow-900">{promoActiva.nombre} · Curso {cursoActivo} · Día {promoActiva.diaActual}/30</p>
+      <p class="text-xs text-yellow-700 mt-0.5">Examen práctico final programado. Ingrese el resultado (Aprobado / Reprobado) para cada alumno según el resultado del examen.</p>
+    </div>
+  </div>
+
+  <!-- Resumen estado del acta -->
+  <div class="grid sm:grid-cols-4 gap-4 mb-6">
+    <div class="border border-gray-200 rounded-lg bg-white p-4 shadow-sm text-center">
+      <p class="text-2xl font-bold text-gray-900">{ALUMNOS_ACTA.length}</p>
+      <p class="text-xs text-gray-500 mt-1">Total alumnos</p>
+    </div>
+    <div class="border border-green-200 rounded-lg bg-green-50 p-4 text-center">
+      <p class="text-2xl font-bold text-green-700">{aprobados}</p>
+      <p class="text-xs text-green-600 mt-1">Aprobados</p>
+    </div>
+    <div class="border border-red-200 rounded-lg bg-red-50 p-4 text-center">
+      <p class="text-2xl font-bold text-red-700">{reprobados}</p>
+      <p class="text-xs text-red-600 mt-1">Reprobados</p>
+    </div>
+    <div class="border border-yellow-200 rounded-lg bg-yellow-50 p-4 text-center">
+      <p class="text-2xl font-bold text-yellow-700">{pendientes}</p>
+      <p class="text-xs text-yellow-600 mt-1">Sin ingresar</p>
+    </div>
+  </div>
+
+  <!-- Tabla del acta -->
+  <Card>
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-base font-semibold text-gray-900">Ingreso de concepto por alumno</h2>
+      {actaCerrada && (
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
+          <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+          Acta completa
+        </span>
+      )}
+    </div>
+
+    <div class="space-y-3">
+      {ALUMNOS_ACTA.map((alumno) => {
+        const cumpleRequisitos =
+          alumno.asistenciaTeoria >= 75 &&
+          alumno.asistenciaPractica >= 100 &&
+          alumno.promedioNotas !== null &&
+          alumno.promedioNotas >= 4.0 &&
+          alumno.estadoPago === "total";
+        return (
+          <div class={`border rounded-lg p-4 ${
+            alumno.conceptoExamen === "aprobado"
+              ? "border-green-200 bg-green-50/50"
+              : alumno.conceptoExamen === "reprobado"
+              ? "border-red-200 bg-red-50/50"
+              : "border-gray-200 bg-white"
+          }`}>
+            <div class="flex flex-wrap items-start gap-4">
+              <!-- Info alumno -->
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap mb-2">
+                  <p class="text-sm font-semibold text-gray-900">{alumno.nombre}</p>
+                  <span class="text-xs text-gray-500 font-mono">{alumno.rut}</span>
+                  {!cumpleRequisitos && (
+                    <span class="inline-flex items-center px-2 py-0.5 bg-orange-100 text-orange-700 text-xs font-medium rounded-full">
+                      No cumple requisitos
+                    </span>
+                  )}
+                </div>
+                <!-- Stats rápidos -->
+                <div class="flex flex-wrap gap-3 text-xs">
+                  <span class={`${alumno.asistenciaTeoria >= 75 ? "text-green-700" : "text-red-600"}`}>
+                    Teoría: {alumno.asistenciaTeoria}%
+                  </span>
+                  <span class={`${alumno.asistenciaPractica >= 100 ? "text-green-700" : "text-red-600"}`}>
+                    Práctica: {alumno.asistenciaPractica}%
+                  </span>
+                  <span class={`${alumno.promedioNotas !== null && alumno.promedioNotas >= 4.0 ? "text-green-700" : "text-red-600"}`}>
+                    Prom. notas: {alumno.promedioNotas?.toFixed(1) ?? "—"}
+                  </span>
+                  <span class={`${alumno.estadoPago === "total" ? "text-green-700" : "text-orange-600"}`}>
+                    Pago: {alumno.estadoPago === "total" ? "Pagado" : alumno.estadoPago === "parcial" ? "Parcial" : "Pendiente"}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Selector concepto -->
+              <div class="flex flex-col items-end gap-2 shrink-0">
+                {alumno.conceptoExamen !== null ? (
+                  <div class="flex items-center gap-2">
+                    <span class={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold ${
+                      alumno.conceptoExamen === "aprobado"
+                        ? "bg-green-100 text-green-800 border border-green-300"
+                        : "bg-red-100 text-red-800 border border-red-300"
+                    }`}>
+                      {alumno.conceptoExamen === "aprobado" ? "✓ Aprobado" : "✗ Reprobado"}
+                    </span>
+                    <button
+                      onclick="alert('Editando concepto (mockup)')"
+                      class="text-xs text-gray-400 hover:text-gray-600 underline"
+                    >
+                      Editar
+                    </button>
+                  </div>
+                ) : (
+                  <div class="flex items-center gap-2">
+                    <button
+                      onclick="registrarConcepto(this, 'aprobado')"
+                      class="px-4 py-2 text-sm font-semibold bg-green-100 text-green-800 border border-green-300 rounded-lg hover:bg-green-200 transition-colors"
+                    >
+                      Aprobado
+                    </button>
+                    <button
+                      onclick="registrarConcepto(this, 'reprobado')"
+                      class="px-4 py-2 text-sm font-semibold bg-red-100 text-red-800 border border-red-300 rounded-lg hover:bg-red-200 transition-colors"
+                    >
+                      Reprobado
+                    </button>
+                  </div>
+                )}
+                {alumno.fechaExamen && (
+                  <p class="text-xs text-gray-400">Examen: {alumno.fechaExamen}</p>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+
+    <!-- Footer acta -->
+    <div class="mt-6 pt-4 border-t border-gray-200 flex flex-wrap items-center justify-between gap-3">
+      <p class="text-xs text-gray-500">
+        {actaCerrada
+          ? "✓ Todos los alumnos tienen concepto ingresado. El acta está lista para firmar."
+          : `Faltan ${pendientes} alumno(s) por ingresar concepto.`}
+      </p>
+      <div class="flex gap-2">
+        <Button variant="secondary" onClick="alert('Guardado borrador (mockup)')">
+          Guardar borrador
+        </Button>
+        <Button
+          variant="primary"
+          class={pendientes > 0 ? "opacity-50 cursor-not-allowed" : ""}
+          disabled={pendientes > 0}
+          onClick={pendientes === 0 ? "cerrarActa()" : undefined}
+        >
+          {pendientes > 0 ? `Faltan ${pendientes} conceptos` : "Cerrar y firmar acta"}
+        </Button>
+      </div>
+    </div>
+  </Card>
+
+  <!-- Info normativa -->
+  <div class="mt-6 border border-gray-200 rounded-lg bg-white p-4 shadow-sm">
+    <h3 class="text-sm font-semibold text-gray-900 mb-2">Reglamento — RF-074</h3>
+    <div class="grid sm:grid-cols-2 gap-4 text-xs text-gray-600">
+      <div>
+        <p class="font-medium text-gray-800 mb-1">Concepto Aprobado</p>
+        <p>El alumno completa satisfactoriamente el examen práctico final. Requisito para obtener el certificado profesional (junto a asistencia y notas).</p>
+      </div>
+      <div>
+        <p class="font-medium text-gray-800 mb-1">Concepto Reprobado</p>
+        <p>El alumno no supera el examen práctico final. Puede quedar en lista de espera para próxima promoción según disponibilidad.</p>
+      </div>
+    </div>
+  </div>
+</DashboardLayout>
+
+<script>
+  (window as any).registrarConcepto = function(btn: HTMLButtonElement, concepto: string) {
+    const alumnoDiv = btn.closest('[class*="border rounded-lg p-4"]') as HTMLElement;
+    const nombre = alumnoDiv?.querySelector('.font-semibold')?.textContent ?? 'el alumno';
+    const label = concepto === 'aprobado' ? '✓ Aprobado' : '✗ Reprobado';
+    if (confirm(`¿Registrar concepto "${label}" para ${nombre}?`)) {
+      alert(`✓ Concepto registrado: ${label}\nAlumno: ${nombre}`);
+    }
+  };
+  (window as any).cerrarActa = function() {
+    alert('✓ Acta final cerrada y firmada.\n\nEl acta queda disponible para descarga.\nLa secretaría será notificada para habilitar la emisión de certificados.');
+  };
+</script>

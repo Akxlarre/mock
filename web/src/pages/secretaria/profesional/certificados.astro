@@ -1,0 +1,204 @@
+---
+/**
+ * Certificados Profesionales — Vista Secretaría (wrapper con rol correcto)
+ * RF-075, RF-076, RF-093, RF-096
+ */
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+import Card from "../../../components/ui/Card.astro";
+import Button from "../../../components/ui/Button.astro";
+import { PROMOCIONES } from "../../../lib/mockRelatores";
+
+const promosFin = PROMOCIONES.filter(p => p.estado === "finalizada");
+
+const ALUMNOS_CERT: {
+  id: number; nombre: string; rut: string; curso: string; promocion: string; promoId: number;
+  fechaFin: string; diasDesdePromo: number;
+  asistenciaTeoria: number; asistenciaPractica: number;
+  promedioNotas: number; estadoPago: "total" | "parcial" | "pendiente";
+  examenFinal: "aprobado" | "reprobado" | null;
+  certificadoGenerado: boolean; numeroCertificado: string | null; fechaEmision: string | null;
+}[] = [
+  { id: 1, nombre: "Carlos Soto Muñoz",    rut: "15.432.198-7", curso: "A2", promocion: "Promoción Diciembre 2025", promoId: 1, fechaFin: "27 Dic 2025", diasDesdePromo: 47, asistenciaTeoria: 88,  asistenciaPractica: 100, promedioNotas: 5.3, estadoPago: "total",    examenFinal: "aprobado",  certificadoGenerado: true,  numeroCertificado: "CERT-PROF-2026-001", fechaEmision: "15 Ene 2026" },
+  { id: 2, nombre: "Andrea Flores Vera",    rut: "16.789.234-5", curso: "A2", promocion: "Promoción Diciembre 2025", promoId: 1, fechaFin: "27 Dic 2025", diasDesdePromo: 47, asistenciaTeoria: 62,  asistenciaPractica: 82,  promedioNotas: 3.9, estadoPago: "parcial",  examenFinal: "reprobado", certificadoGenerado: false, numeroCertificado: null,                  fechaEmision: null },
+  { id: 3, nombre: "Luis Pérez Castro",     rut: "14.567.890-3", curso: "A2", promocion: "Promoción Diciembre 2025", promoId: 1, fechaFin: "27 Dic 2025", diasDesdePromo: 47, asistenciaTeoria: 100, asistenciaPractica: 100, promedioNotas: 6.2, estadoPago: "total",    examenFinal: "aprobado",  certificadoGenerado: false, numeroCertificado: null,                  fechaEmision: null },
+  { id: 4, nombre: "Mariana Torres Rojas",  rut: "17.234.567-K", curso: "A2", promocion: "Promoción Diciembre 2025", promoId: 1, fechaFin: "27 Dic 2025", diasDesdePromo: 47, asistenciaTeoria: 40,  asistenciaPractica: 45,  promedioNotas: 3.2, estadoPago: "pendiente", examenFinal: "reprobado", certificadoGenerado: false, numeroCertificado: null,                  fechaEmision: null },
+  { id: 5, nombre: "Roberto Núñez Díaz",    rut: "13.456.789-1", curso: "A3", promocion: "Promoción Diciembre 2025", promoId: 1, fechaFin: "27 Dic 2025", diasDesdePromo: 47, asistenciaTeoria: 87,  asistenciaPractica: 100, promedioNotas: 5.0, estadoPago: "total",    examenFinal: "aprobado",  certificadoGenerado: true,  numeroCertificado: "CERT-PROF-2026-002", fechaEmision: "15 Ene 2026" },
+  { id: 6, nombre: "Patricia Vargas Silva", rut: "15.678.901-2", curso: "A3", promocion: "Promoción Diciembre 2025", promoId: 1, fechaFin: "27 Dic 2025", diasDesdePromo: 47, asistenciaTeoria: 95,  asistenciaPractica: 100, promedioNotas: 5.8, estadoPago: "total",    examenFinal: "aprobado",  certificadoGenerado: false, numeroCertificado: null,                  fechaEmision: null },
+];
+
+function cumpleRequisitos(a: typeof ALUMNOS_CERT[0]): { ok: boolean; detalles: { label: string; ok: boolean; valor: string }[] } {
+  const dias30   = { label: "30 días completados",       ok: a.diasDesdePromo >= 30,       valor: `${a.diasDesdePromo} días` };
+  const teoria   = { label: "Asistencia teoría ≥75%",   ok: a.asistenciaTeoria >= 75,      valor: `${a.asistenciaTeoria}%` };
+  const practica = { label: "Asistencia práctica 100%", ok: a.asistenciaPractica >= 100,   valor: `${a.asistenciaPractica}%` };
+  const notas    = { label: "Notas ≥4.0",               ok: a.promedioNotas >= 4.0,        valor: `Prom: ${a.promedioNotas.toFixed(1)}` };
+  const pago     = { label: "Pago total",               ok: a.estadoPago === "total",      valor: a.estadoPago === "total" ? "Pagado" : a.estadoPago === "parcial" ? "Parcial" : "Pendiente" };
+  const examen   = { label: "Examen práctico aprobado", ok: a.examenFinal === "aprobado",  valor: a.examenFinal ?? "Sin registro" };
+  const detalles = [dias30, teoria, practica, notas, pago, examen];
+  return { ok: detalles.every(d => d.ok), detalles };
+}
+
+const historialEmisiones = [
+  { fecha: "15 Ene 2026 10:23", accion: "Certificado generado", alumno: "Carlos Soto Muñoz",  usuario: "Ana Rodríguez", cert: "CERT-PROF-2026-001" },
+  { fecha: "15 Ene 2026 10:24", accion: "PDF descargado",       alumno: "Carlos Soto Muñoz",  usuario: "Ana Rodríguez", cert: "CERT-PROF-2026-001" },
+  { fecha: "15 Ene 2026 10:31", accion: "Certificado generado", alumno: "Roberto Núñez Díaz", usuario: "Ana Rodríguez", cert: "CERT-PROF-2026-002" },
+  { fecha: "15 Ene 2026 10:32", accion: "Enviado por email",    alumno: "Roberto Núñez Díaz", usuario: "Ana Rodríguez", cert: "CERT-PROF-2026-002" },
+  { fecha: "20 Ene 2026 14:10", accion: "PDF descargado",       alumno: "Carlos Soto Muñoz",  usuario: "Carlos Soto M.", cert: "CERT-PROF-2026-001" },
+];
+
+const totalGenerados = ALUMNOS_CERT.filter(a => a.certificadoGenerado).length;
+const totalAptos     = ALUMNOS_CERT.filter(a => cumpleRequisitos(a).ok && !a.certificadoGenerado).length;
+const totalNoAptos   = ALUMNOS_CERT.filter(a => !cumpleRequisitos(a).ok && !a.certificadoGenerado).length;
+---
+
+<DashboardLayout title="Certificados Profesionales" escuela="Conductores Chillán">
+  <!-- Header -->
+  <div class="mb-6">
+    <div class="flex items-center gap-2 text-sm text-gray-500 mb-2">
+      <a href="/secretaria/profesional/promociones" class="hover:text-gray-900">Promociones</a>
+      <span>/</span>
+      <span class="text-gray-900 font-medium">Certificados Profesionales</span>
+    </div>
+    <div class="flex flex-wrap items-start justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-semibold text-gray-900 tracking-tight text-balance">Certificados Profesionales</h1>
+        <p class="text-gray-600 mt-1">RF-075, RF-076, RF-093 — Emisión de certificados con QR · RF-096 — Historial de descargas</p>
+      </div>
+      <div class="flex gap-2">
+        <Button variant="secondary" onClick="alert('Generación masiva de certificados aptos (mockup)')">
+          Generar todos los aptos
+        </Button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtro por promoción -->
+  <Card class="mb-6">
+    <div class="grid sm:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Filtrar por promoción</label>
+        <select class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1">
+          <option value="">Todas las finalizadas</option>
+          {promosFin.map(p => <option value={p.id}>{p.nombre}</option>)}
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Estado</label>
+        <select class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1">
+          <option value="">Todos</option>
+          <option value="aptos">Solo aptos para certificar</option>
+          <option value="generados">Ya certificados</option>
+          <option value="no_aptos">No aptos</option>
+        </select>
+      </div>
+    </div>
+  </Card>
+
+  <!-- Resumen -->
+  <div class="grid sm:grid-cols-3 gap-4 mb-6">
+    <div class="border border-green-200 rounded-lg bg-green-50 p-4 shadow-sm text-center">
+      <p class="text-3xl font-bold text-green-700">{totalGenerados}</p>
+      <p class="text-xs text-green-600 mt-1">Certificados generados</p>
+    </div>
+    <div class="border border-blue-200 rounded-lg bg-blue-50 p-4 shadow-sm text-center">
+      <p class="text-3xl font-bold text-blue-700">{totalAptos}</p>
+      <p class="text-xs text-blue-600 mt-1">Pendientes de generar (aptos)</p>
+    </div>
+    <div class="border border-gray-200 rounded-lg bg-white p-4 shadow-sm text-center">
+      <p class="text-3xl font-bold text-gray-400">{totalNoAptos}</p>
+      <p class="text-xs text-gray-500 mt-1">No cumplen requisitos</p>
+    </div>
+  </div>
+
+  <!-- Lista alumnos -->
+  <div class="space-y-4 mb-8">
+    {ALUMNOS_CERT.map((alumno) => {
+      const { ok, detalles } = cumpleRequisitos(alumno);
+      return (
+        <Card>
+          <div class="flex flex-wrap items-start justify-between gap-4">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-3 flex-wrap mb-1">
+                <p class="font-semibold text-gray-900 text-sm">{alumno.nombre}</p>
+                <span class="text-xs text-gray-500 font-mono">{alumno.rut}</span>
+                <span class="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded-full font-medium">Curso {alumno.curso}</span>
+                <span class="text-xs text-gray-400">{alumno.promocion}</span>
+              </div>
+              <div class="flex flex-wrap gap-2 mt-2">
+                {detalles.map(d => (
+                  <span class={`inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-md font-medium ${d.ok ? "bg-green-100 text-green-800" : "bg-red-100 text-red-700"}`}>
+                    {d.ok ? "✓" : "✗"} {d.label}: {d.valor}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div class="flex flex-col items-end gap-2 shrink-0">
+              {alumno.certificadoGenerado ? (
+                <div class="flex flex-col items-end gap-1.5">
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-green-100 text-green-800 text-xs font-bold rounded-full border border-green-200">✓ Certificado emitido</span>
+                  <span class="text-xs text-gray-500 font-mono">{alumno.numeroCertificado}</span>
+                  <span class="text-xs text-gray-400">{alumno.fechaEmision}</span>
+                  <div class="flex gap-1.5 mt-1">
+                    <button onclick={`descargarPDF('${alumno.numeroCertificado}')`} class="px-2.5 py-1 text-xs font-medium bg-white border border-gray-200 text-gray-700 rounded-md hover:bg-gray-50 shadow-sm transition-colors">Descargar PDF</button>
+                    <button onclick={`verQR('${alumno.numeroCertificado}')`} class="px-2.5 py-1 text-xs font-medium bg-white border border-gray-200 text-gray-700 rounded-md hover:bg-gray-50 shadow-sm transition-colors">Ver QR</button>
+                  </div>
+                </div>
+              ) : ok ? (
+                <button onclick={`generarCertificado('${alumno.nombre}', '${alumno.rut}', '${alumno.curso}')`} class="px-4 py-2 bg-black text-white text-sm font-semibold rounded-lg hover:bg-gray-800 transition-colors">Generar Certificado</button>
+              ) : (
+                <button disabled class="px-4 py-2 bg-gray-100 text-gray-400 text-sm font-semibold rounded-lg cursor-not-allowed border border-gray-200">Requisitos pendientes</button>
+              )}
+            </div>
+          </div>
+        </Card>
+      );
+    })}
+  </div>
+
+  <!-- RF-096: Historial de emisiones -->
+  <Card>
+    <h2 class="text-base font-semibold text-gray-900 mb-1 flex items-center gap-2">
+      <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      Historial de Emisiones
+    </h2>
+    <p class="text-xs text-gray-500 mb-4">RF-096 — Registro automático de cada generación y descarga</p>
+    <div class="overflow-x-auto">
+      <table class="w-full text-xs">
+        <thead>
+          <tr class="border-b border-gray-200">
+            <th class="text-left py-2 pr-4 font-semibold text-gray-600 uppercase tracking-wide">Fecha/Hora</th>
+            <th class="text-left py-2 pr-4 font-semibold text-gray-600 uppercase tracking-wide">Acción</th>
+            <th class="text-left py-2 pr-4 font-semibold text-gray-600 uppercase tracking-wide">Alumno</th>
+            <th class="text-left py-2 pr-4 font-semibold text-gray-600 uppercase tracking-wide">Certificado</th>
+            <th class="text-left py-2 font-semibold text-gray-600 uppercase tracking-wide">Usuario</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {historialEmisiones.map(h => (
+            <tr class="hover:bg-gray-50">
+              <td class="py-2.5 pr-4 text-gray-500 font-mono">{h.fecha}</td>
+              <td class="py-2.5 pr-4">
+                <span class={`inline-flex items-center px-2 py-0.5 rounded-full font-medium ${h.accion.includes("generado") ? "bg-green-100 text-green-800" : h.accion.includes("descargado") ? "bg-blue-100 text-blue-800" : "bg-orange-100 text-orange-800"}`}>{h.accion}</span>
+              </td>
+              <td class="py-2.5 pr-4 text-gray-700">{h.alumno}</td>
+              <td class="py-2.5 pr-4 text-gray-500 font-mono">{h.cert}</td>
+              <td class="py-2.5 text-gray-600">{h.usuario}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </Card>
+</DashboardLayout>
+
+<script>
+  (window as any).generarCertificado = function(nombre: string, rut: string, curso: string) {
+    const num = 'CERT-PROF-2026-' + String(Math.floor(Math.random() * 900) + 100);
+    alert(`✓ Certificado Profesional generado\n\nAlumno: ${nombre}\nRUT: ${rut}\nCurso: Licencia ${curso}\nNúmero: ${num}\nQR: https://conductores.cl/validar/${num}\n\nEl certificado ha sido registrado en el historial (RF-096).`);
+  };
+  (window as any).descargarPDF = function(num: string) {
+    alert(`📄 Descargando certificado_${num}.pdf\n\nContenido: nombre, RUT, curso, escuela, fechas, firma digital, QR de verificación.\n\nDescarga registrada en historial (RF-096).`);
+  };
+  (window as any).verQR = function(num: string) {
+    alert(`📱 Código QR de verificación\n\nCertificado: ${num}\nURL: https://conductores.cl/validar/${num}\n\nAl escanear: nombre alumno, curso, fecha emisión, escuela, ✓ Válido.`);
+  };
+</script>

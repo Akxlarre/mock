@@ -53,7 +53,7 @@ const alumnoData = {
     >
       <div class="flex items-start gap-3">
         <svg
-          class="w-6 h-6 text-yellow-600 flex-shrink-0 mt-0.5"
+          class="w-6 h-6 text-yellow-600 shrink-0 mt-0.5"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -114,6 +114,82 @@ const alumnoData = {
         helperText="Si ya rendiste el examen psicotécnico municipal"
       />
 
+      <!-- RF-062/RF-063: Documentos obligatorios Clase Profesional -->
+      <div id="docs-profesional-wrap" class="hidden space-y-4">
+        <div class="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+          <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-orange-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+            <div>
+              <p class="text-sm font-bold text-orange-900">Clase Profesional — Documentos obligatorios</p>
+              <p class="text-xs text-orange-800 mt-1">Los siguientes documentos son requeridos para completar la matrícula profesional. Sin ellos el estado quedará como "Pendiente documentos".</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hoja de Vida del Conductor (RF-082.3) -->
+        <div class="p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300" id="hvc-wrap">
+          <label class="block mb-2">
+            <span class="text-sm font-medium text-gray-900">📋 Hoja de Vida del Conductor *</span>
+            <span class="ml-2 text-xs text-gray-500">(emitida por el Registro Civil)</span>
+          </label>
+          <input
+            type="file"
+            id="hoja-vida-conductor"
+            accept=".pdf,.jpg,.png"
+            class="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer"
+          />
+          <div class="mt-3">
+            <label class="block text-xs text-gray-600 mb-1">Fecha de emisión del documento <span class="text-red-500">*</span></label>
+            <input
+              type="date"
+              id="hvc-fecha-emision"
+              class="h-9 px-3 text-sm bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-1 w-48"
+            />
+          </div>
+          <!-- RF-082.3: Alerta si > 30 días -->
+          <div id="hvc-alert-30dias" class="hidden mt-2 p-3 bg-yellow-50 border border-yellow-300 rounded-lg">
+            <p class="text-xs font-semibold text-yellow-900">⚠️ Documento con más de 30 días de emisión</p>
+            <p class="text-xs text-yellow-800 mt-0.5">La Hoja de Vida tiene más de 30 días. Se requiere una versión más reciente (RF-082.3).</p>
+          </div>
+          <p id="hvc-feedback" class="text-xs text-red-600 mt-1 hidden">⚠️ Este documento es obligatorio para clase profesional</p>
+          <p class="text-xs text-gray-500 mt-2">Formatos: PDF, JPG, PNG · Máx: 5MB</p>
+        </div>
+
+        <!-- Resultado Examen Psicológico Interno -->
+        <div class="p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300" id="psico-interno-wrap">
+          <label class="block mb-2">
+            <span class="text-sm font-medium text-gray-900">🧠 Resultado Examen Psicológico Interno *</span>
+          </label>
+          <input
+            type="file"
+            id="psico-interno"
+            accept=".pdf"
+            class="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer"
+          />
+          <div class="mt-2 flex items-center gap-4">
+            <label class="block text-xs text-gray-600">Resultado:</label>
+            <div class="flex gap-4">
+              <label class="flex items-center gap-1.5 cursor-pointer">
+                <input type="radio" name="psico_resultado" value="apto" class="w-3.5 h-3.5" />
+                <span class="text-xs text-green-700 font-medium">Apto</span>
+              </label>
+              <label class="flex items-center gap-1.5 cursor-pointer">
+                <input type="radio" name="psico_resultado" value="no_apto" class="w-3.5 h-3.5" />
+                <span class="text-xs text-red-700 font-medium">No apto</span>
+              </label>
+            </div>
+          </div>
+          <div id="psico-no-apto-alert" class="hidden mt-2 p-3 bg-red-50 border border-red-300 rounded-lg">
+            <p class="text-xs font-semibold text-red-900">⛔ Alumno no apto</p>
+            <p class="text-xs text-red-800 mt-0.5">El alumno no puede continuar el proceso de matrícula con resultado "No apto".</p>
+          </div>
+          <p id="psico-feedback" class="text-xs text-red-600 mt-1 hidden">⚠️ Este documento es obligatorio para clase profesional</p>
+          <p class="text-xs text-gray-500 mt-2">Formato: PDF · Máx: 5MB</p>
+        </div>
+      </div>
+
       <!-- RF-082.1: Upload Autorización Notarial (condicional) -->
       <div id="autorizacion-notarial-wrap" class="hidden">
         <div
@@ -146,7 +222,7 @@ const alumnoData = {
       <div class="bg-gray-50 rounded-lg p-4">
         <div class="flex gap-3">
           <svg
-            class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5"
+            class="w-5 h-5 text-blue-600 shrink-0 mt-0.5"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -216,19 +292,53 @@ const alumnoData = {
           if (banner) banner.classList.remove("hidden");
           if (autWrap) autWrap.classList.remove("hidden");
         }
+        if (data.esProfesional === true) {
+          esProfesionalFlag = true;
+          const docsProfWrap = document.getElementById("docs-profesional-wrap");
+          if (docsProfWrap) docsProfWrap.classList.remove("hidden");
+        }
       }
     } catch (_) {}
   });
+
+  // RF-082.3: Alerta Hoja de Vida > 30 días
+  document.getElementById("hvc-fecha-emision")?.addEventListener("change", function() {
+    const alert30 = document.getElementById("hvc-alert-30dias");
+    if (!this.value) return;
+    const emision = new Date(this.value);
+    const hoy = new Date();
+    const dias = Math.floor((hoy - emision) / (24 * 60 * 60 * 1000));
+    if (alert30) alert30.classList.toggle("hidden", dias <= 30);
+  });
+
+  // Resultado psicológico
+  document.querySelectorAll('input[name="psico_resultado"]').forEach(r => {
+    r.addEventListener("change", function() {
+      const noAptoAlert = document.getElementById("psico-no-apto-alert");
+      psicoApto = this.value === "apto";
+      if (noAptoAlert) noAptoAlert.classList.toggle("hidden", psicoApto);
+      checkCanContinue();
+    });
+  });
+  let esProfesionalFlag = false;
+  let psicoApto = true;
+
   let uploaded = {
     carnet: false,
     fotoAlumno: false,
     autorizacion: false,
     semep: false,
+    hojaVida: false,
+    psicoInterno: false,
   };
   function checkCanContinue() {
     const btn = document.getElementById("btn-siguiente");
     let ok = uploaded.carnet && uploaded.fotoAlumno;
     if (esMenorFlag && !uploaded.autorizacion) ok = false;
+    if (esProfesionalFlag) {
+      if (!uploaded.hojaVida || !uploaded.psicoInterno) ok = false;
+      if (!psicoApto) ok = false;
+    }
     if (btn) {
       btn.disabled = !ok;
       btn.classList.toggle("opacity-50", !ok);
@@ -255,6 +365,18 @@ const alumnoData = {
       if (fb) fb.classList.toggle("hidden", uploaded.autorizacion);
       checkCanContinue();
     });
+  document.getElementById("hoja-vida-conductor")?.addEventListener("change", (e) => {
+    uploaded.hojaVida = (e.target.files?.length ?? 0) > 0;
+    const fb = document.getElementById("hvc-feedback");
+    if (fb) fb.classList.toggle("hidden", uploaded.hojaVida);
+    checkCanContinue();
+  });
+  document.getElementById("psico-interno")?.addEventListener("change", (e) => {
+    uploaded.psicoInterno = (e.target.files?.length ?? 0) > 0;
+    const fb = document.getElementById("psico-feedback");
+    if (fb) fb.classList.toggle("hidden", uploaded.psicoInterno);
+    checkCanContinue();
+  });
   window.continuarPaso3 = function () {
     if (esMenorFlag && !uploaded.autorizacion) {
       alert("⚠️ Debe adjuntar la Autorización Notarial.");

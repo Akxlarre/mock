@@ -1,0 +1,202 @@
+---
+/**
+ * Mis Notas — Portal Alumno
+ * RF-072: Vista de notas del alumno con promedio por módulo
+ */
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import Card from "../../components/ui/Card.astro";
+
+const alumnoData = {
+  nombre: "Carlos Soto Muñoz",
+  rut: "15.432.198-7",
+  curso: "A2 — Taxis y colectivos",
+  promocion: "Promoción Enero II",
+  relator: "Francisco Herrera López",
+};
+
+// Notas por módulo RF-072
+const modulos = [
+  { id: "m1", nombre: "Módulo 1", descripcion: "Legislación de Transporte",   nota: 5.5, fecha: "24 Ene 2026" },
+  { id: "m2", nombre: "Módulo 2", descripcion: "Mecánica Básica",              nota: 4.8, fecha: "31 Ene 2026" },
+  { id: "m3", nombre: "Módulo 3", descripcion: "Conducción Defensiva",         nota: null, fecha: null },
+  { id: "m4", nombre: "Módulo 4", descripcion: "Primeros Auxilios",            nota: null, fecha: null },
+  { id: "m5", nombre: "Examen Final", descripcion: "Evaluación Integrada A2",  nota: null, fecha: null },
+];
+
+const notasIngresadas = modulos.filter(m => m.nota !== null);
+const promedioActual = notasIngresadas.length > 0
+  ? Math.round((notasIngresadas.reduce((s, m) => s + (m.nota as number), 0) / notasIngresadas.length) * 10) / 10
+  : null;
+const todasAprobadas = notasIngresadas.length > 0 && notasIngresadas.every(m => (m.nota as number) >= 4.0);
+const algunaReprobada = notasIngresadas.some(m => (m.nota as number) < 4.0);
+const notaMinima = notasIngresadas.length > 0 ? Math.min(...notasIngresadas.map(m => m.nota as number)) : null;
+---
+
+<DashboardLayout title="Mis Notas" userRole="alumno">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-semibold text-gray-900 tracking-tight text-balance">Mis Notas</h1>
+    <p class="text-gray-600 mt-1">RF-072 — Registro de notas por módulo técnico · {alumnoData.curso}</p>
+  </div>
+
+  <!-- Info alumno -->
+  <div class="border border-gray-200 rounded-lg bg-white p-4 shadow-sm mb-6 flex flex-wrap gap-6">
+    <div>
+      <p class="text-xs text-gray-500 mb-0.5">Alumno</p>
+      <p class="text-sm font-semibold text-gray-900">{alumnoData.nombre} · {alumnoData.rut}</p>
+    </div>
+    <div>
+      <p class="text-xs text-gray-500 mb-0.5">Curso</p>
+      <p class="text-sm font-semibold text-gray-900">{alumnoData.curso}</p>
+    </div>
+    <div>
+      <p class="text-xs text-gray-500 mb-0.5">Promoción</p>
+      <p class="text-sm font-semibold text-gray-900">{alumnoData.promocion}</p>
+    </div>
+    <div>
+      <p class="text-xs text-gray-500 mb-0.5">Relator</p>
+      <p class="text-sm font-semibold text-gray-900">{alumnoData.relator}</p>
+    </div>
+  </div>
+
+  <!-- Resumen promedio -->
+  <div class="grid sm:grid-cols-3 gap-4 mb-8">
+    <div class={`border rounded-xl p-6 shadow-sm text-center ${promedioActual === null ? "border-gray-200 bg-white" : promedioActual >= 4.0 ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}`}>
+      <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Promedio Actual</p>
+      <p class={`text-5xl font-bold ${promedioActual === null ? "text-gray-300" : promedioActual >= 4.0 ? "text-green-700" : "text-red-700"}`}>
+        {promedioActual !== null ? promedioActual.toFixed(1) : "—"}
+      </p>
+      <p class="text-xs text-gray-500 mt-1">mínimo requerido: 4.0</p>
+    </div>
+    <div class="border border-gray-200 rounded-xl p-6 shadow-sm text-center bg-white">
+      <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Módulos Evaluados</p>
+      <p class="text-5xl font-bold text-gray-900">{notasIngresadas.length}<span class="text-2xl text-gray-400">/{modulos.length}</span></p>
+      <p class="text-xs text-gray-500 mt-1">{modulos.length - notasIngresadas.length} pendiente(s)</p>
+    </div>
+    <div class={`border rounded-xl p-6 shadow-sm text-center ${notaMinima === null ? "bg-white border-gray-200" : notaMinima >= 4.0 ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"}`}>
+      <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Nota Mínima</p>
+      <p class={`text-5xl font-bold ${notaMinima === null ? "text-gray-300" : notaMinima >= 4.0 ? "text-green-700" : "text-red-700"}`}>
+        {notaMinima !== null ? notaMinima.toFixed(1) : "—"}
+      </p>
+      <p class="text-xs text-gray-500 mt-1">
+        {notaMinima !== null ? (notaMinima >= 4.0 ? "Cumple mínimo" : "Bajo el mínimo") : "sin notas"}
+      </p>
+    </div>
+  </div>
+
+  <!-- Alerta nota reprobada -->
+  {algunaReprobada && (
+    <div class="border border-red-300 bg-red-50 rounded-lg p-4 mb-6 flex gap-3">
+      <svg class="w-5 h-5 text-red-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+      </svg>
+      <div>
+        <p class="text-sm font-semibold text-red-900">Tienes módulos con nota insuficiente</p>
+        <p class="text-xs text-red-700 mt-0.5">La nota mínima de aprobación es 4.0. Consulta con tu relator sobre las posibilidades de mejora o recuperación.</p>
+      </div>
+    </div>
+  )}
+
+  <!-- Detalle módulos -->
+  <Card>
+    <h2 class="text-base font-semibold text-gray-900 mb-4">Detalle por módulo</h2>
+    <div class="space-y-3">
+      {modulos.map((m, i) => {
+        const pendiente = m.nota === null;
+        const aprobado = !pendiente && (m.nota as number) >= 4.0;
+        return (
+          <div class={`flex items-center gap-4 p-4 rounded-lg border ${
+            pendiente
+              ? "bg-gray-50 border-gray-200"
+              : aprobado
+              ? "bg-green-50 border-green-200"
+              : "bg-red-50 border-red-200"
+          }`}>
+            <!-- Número -->
+            <div class={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${
+              pendiente ? "bg-gray-200 text-gray-400"
+              : aprobado ? "bg-green-500 text-white"
+              : "bg-red-400 text-white"
+            }`}>
+              {pendiente ? i + 1 : aprobado ? "✓" : "✗"}
+            </div>
+
+            <!-- Info -->
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <p class={`text-sm font-semibold ${pendiente ? "text-gray-600" : aprobado ? "text-green-900" : "text-red-900"}`}>
+                  {m.nombre}
+                </p>
+                <span class="text-xs text-gray-500">{m.descripcion}</span>
+              </div>
+              {m.fecha && (
+                <p class="text-xs text-gray-400 mt-0.5">Evaluado el {m.fecha}</p>
+              )}
+              {pendiente && (
+                <p class="text-xs text-gray-400 mt-0.5">Pendiente de evaluación</p>
+              )}
+            </div>
+
+            <!-- Nota -->
+            <div class="text-right shrink-0">
+              {pendiente ? (
+                <span class="text-2xl font-bold text-gray-300">—</span>
+              ) : (
+                <>
+                  <span class={`text-3xl font-bold ${aprobado ? "text-green-700" : "text-red-700"}`}>
+                    {(m.nota as number).toFixed(1)}
+                  </span>
+                  <p class={`text-xs font-medium mt-0.5 ${aprobado ? "text-green-600" : "text-red-600"}`}>
+                    {aprobado ? "Aprobado" : "Reprobado"}
+                  </p>
+                </>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+
+    <!-- Barra visual de progreso promedio -->
+    {promedioActual !== null && (
+      <div class="mt-6 pt-4 border-t border-gray-200">
+        <div class="flex items-center justify-between text-sm mb-2">
+          <span class="text-gray-600 font-medium">Promedio general</span>
+          <span class={`font-bold text-lg ${promedioActual >= 4.0 ? "text-green-700" : "text-red-700"}`}>
+            {promedioActual.toFixed(1)}
+          </span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-3">
+          <div
+            class={`h-3 rounded-full transition-all duration-500 ${promedioActual >= 4.0 ? "bg-green-500" : "bg-red-500"}`}
+            style={`width: ${(promedioActual / 7) * 100}%`}
+          ></div>
+        </div>
+        <div class="flex justify-between text-xs text-gray-400 mt-1">
+          <span>1.0</span>
+          <span class="text-orange-600 font-medium">4.0 mín.</span>
+          <span>7.0</span>
+        </div>
+      </div>
+    )}
+  </Card>
+
+  <!-- Requisito para certificado -->
+  <div class="mt-6 border border-gray-200 rounded-lg bg-white p-4 shadow-sm">
+    <h3 class="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
+      <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+      Relación con certificación (RF-093)
+    </h3>
+    <p class="text-xs text-gray-600">
+      Para obtener el certificado profesional, todas las notas deben ser ≥ 4.0.
+      {notasIngresadas.length < modulos.length
+        ? ` Aún quedan ${modulos.length - notasIngresadas.length} módulo(s) por evaluar.`
+        : todasAprobadas
+        ? " ✓ Requisito de notas cumplido."
+        : " ✗ Hay módulos con nota insuficiente."}
+    </p>
+    <a href="/alumno/certificado" class="inline-flex items-center gap-1 mt-2 text-xs text-blue-600 hover:underline font-medium">
+      Ver estado completo de certificación →
+    </a>
+  </div>
+</DashboardLayout>

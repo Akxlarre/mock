@@ -1,0 +1,489 @@
+---
+/**
+ * Detalle de Asistencia — Vista Relator
+ * RF-069: Asistencia teoría mínimo 75%
+ * RF-070: Asistencia práctica 100% obligatorio
+ * RF-071: Justificación con licencia médica
+ * RF-078: Marcado manual teoría Zoom
+ * Vista del relator para consultar asistencia individual de un alumno.
+ */
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+import Card from "../../../components/ui/Card.astro";
+import Button from "../../../components/ui/Button.astro";
+import { PROMOCIONES } from "../../../lib/mockRelatores";
+
+export function getStaticPaths() {
+  return [
+    { params: { id: "1" } },
+    { params: { id: "2" } },
+    { params: { id: "3" } },
+    { params: { id: "4" } },
+    { params: { id: "5" } },
+    { params: { id: "6" } },
+    { params: { id: "7" } },
+    { params: { id: "8" } },
+    { params: { id: "9" } },
+    { params: { id: "10" } },
+    { params: { id: "11" } },
+    { params: { id: "12" } },
+    { params: { id: "13" } },
+    { params: { id: "14" } },
+    { params: { id: "15" } },
+    { params: { id: "16" } },
+    { params: { id: "17" } },
+    { params: { id: "18" } },
+  ];
+}
+
+const { id } = Astro.params;
+
+// Datos mock de alumnos con historial completo
+const ALUMNOS: Record<string, {
+  id: number; nombre: string; rut: string; curso: string; promoId: number; licMedica?: boolean;
+  historialTeoria: { semana: string; zoom: boolean[]; firma: boolean }[];
+  historialPractica: { dia: number; fecha: string; presente: boolean; nota?: string }[];
+}> = {
+  "1": {
+    id: 1, nombre: "Carlos Soto Muñoz", rut: "15.432.198-7", curso: "A2", promoId: 3,
+    historialTeoria: [
+      { semana: "Semana 1 (Ene 19-24)", zoom: [true,true,true,true,true,true], firma: true },
+      { semana: "Semana 2 (Ene 26-31)", zoom: [true,true,true,true,true,false], firma: true },
+      { semana: "Semana 3 (Feb 2-7)",   zoom: [true,true,false,true,true,true], firma: true },
+      { semana: "Semana 4 (Feb 9-14)",  zoom: [true,true,true,true,false,false], firma: false },
+    ],
+    historialPractica: [
+      { dia: 1,  fecha: "Lun 19 Ene", presente: true },
+      { dia: 2,  fecha: "Mar 20 Ene", presente: true },
+      { dia: 3,  fecha: "Mié 21 Ene", presente: false, nota: "Inasistencia sin justificar" },
+      { dia: 4,  fecha: "Jue 22 Ene", presente: true },
+      { dia: 5,  fecha: "Vie 23 Ene", presente: true },
+      { dia: 6,  fecha: "Sáb 24 Ene", presente: true },
+      { dia: 7,  fecha: "Lun 26 Ene", presente: false, nota: "Licencia médica adjunta" },
+      { dia: 8,  fecha: "Mar 27 Ene", presente: true },
+      { dia: 9,  fecha: "Mié 28 Ene", presente: true },
+      { dia: 10, fecha: "Jue 29 Ene", presente: true },
+      { dia: 11, fecha: "Vie 30 Ene", presente: true },
+    ],
+  },
+  "2": {
+    id: 2, nombre: "Andrea Flores Vera", rut: "16.789.234-5", curso: "A2", promoId: 3, licMedica: true,
+    historialTeoria: [
+      { semana: "Semana 1 (Ene 19-24)", zoom: [true,false,false,true,false,true], firma: true },
+      { semana: "Semana 2 (Ene 26-31)", zoom: [true,true,true,false,false,true], firma: false },
+      { semana: "Semana 3 (Feb 2-7)",   zoom: [false,false,false,false,false,false], firma: false },
+      { semana: "Semana 4 (Feb 9-14)",  zoom: [true,true,false,false,false,false], firma: false },
+    ],
+    historialPractica: [
+      { dia: 1, fecha: "Lun 19 Ene", presente: true },
+      { dia: 2, fecha: "Mar 20 Ene", presente: false, nota: "Licencia médica" },
+      { dia: 3, fecha: "Mié 21 Ene", presente: false, nota: "Licencia médica" },
+      { dia: 4, fecha: "Jue 22 Ene", presente: true },
+      { dia: 5, fecha: "Vie 23 Ene", presente: false, nota: "Inasistencia" },
+      { dia: 6, fecha: "Sáb 24 Ene", presente: true },
+      { dia: 7, fecha: "Lun 26 Ene", presente: true },
+      { dia: 8, fecha: "Mar 27 Ene", presente: true },
+      { dia: 9, fecha: "Mié 28 Ene", presente: false, nota: "Inasistencia" },
+      { dia: 10, fecha: "Jue 29 Ene", presente: true },
+      { dia: 11, fecha: "Vie 30 Ene", presente: false, nota: "Inasistencia" },
+    ],
+  },
+  "3": {
+    id: 3, nombre: "Luis Pérez Castro", rut: "14.567.890-3", curso: "A2", promoId: 3,
+    historialTeoria: [
+      { semana: "Semana 1 (Ene 19-24)", zoom: [true,true,true,true,true,true], firma: true },
+      { semana: "Semana 2 (Ene 26-31)", zoom: [true,true,true,true,true,true], firma: true },
+      { semana: "Semana 3 (Feb 2-7)",   zoom: [true,true,true,true,true,true], firma: true },
+      { semana: "Semana 4 (Feb 9-14)",  zoom: [true,true,true,true,true,true], firma: true },
+    ],
+    historialPractica: [
+      { dia: 1, fecha: "Lun 19 Ene", presente: true },
+      { dia: 2, fecha: "Mar 20 Ene", presente: true },
+      { dia: 3, fecha: "Mié 21 Ene", presente: true },
+      { dia: 4, fecha: "Jue 22 Ene", presente: true },
+      { dia: 5, fecha: "Vie 23 Ene", presente: true },
+      { dia: 6, fecha: "Sáb 24 Ene", presente: true },
+      { dia: 7, fecha: "Lun 26 Ene", presente: true },
+      { dia: 8, fecha: "Mar 27 Ene", presente: true },
+      { dia: 9, fecha: "Mié 28 Ene", presente: true },
+      { dia: 10, fecha: "Jue 29 Ene", presente: true },
+      { dia: 11, fecha: "Vie 30 Ene", presente: true },
+    ],
+  },
+  "4": {
+    id: 4, nombre: "Mariana Torres Rojas", rut: "17.234.567-K", curso: "A2", promoId: 3,
+    historialTeoria: [
+      { semana: "Semana 1 (Ene 19-24)", zoom: [true,true,false,false,false,false], firma: false },
+      { semana: "Semana 2 (Ene 26-31)", zoom: [false,true,false,false,false,false], firma: false },
+      { semana: "Semana 3 (Feb 2-7)",   zoom: [false,false,false,false,false,false], firma: false },
+      { semana: "Semana 4 (Feb 9-14)",  zoom: [true,false,false,false,false,false], firma: false },
+    ],
+    historialPractica: [
+      { dia: 1, fecha: "Lun 19 Ene", presente: true },
+      { dia: 2, fecha: "Mar 20 Ene", presente: true },
+      { dia: 3, fecha: "Mié 21 Ene", presente: false, nota: "Inasistencia" },
+      { dia: 4, fecha: "Jue 22 Ene", presente: false, nota: "Inasistencia" },
+      { dia: 5, fecha: "Vie 23 Ene", presente: false, nota: "Inasistencia" },
+      { dia: 6, fecha: "Sáb 24 Ene", presente: false, nota: "Inasistencia" },
+      { dia: 7, fecha: "Lun 26 Ene", presente: false, nota: "Inasistencia" },
+      { dia: 8, fecha: "Mar 27 Ene", presente: true },
+      { dia: 9, fecha: "Mié 28 Ene", presente: false, nota: "Inasistencia" },
+      { dia: 10, fecha: "Jue 29 Ene", presente: false, nota: "Inasistencia" },
+      { dia: 11, fecha: "Vie 30 Ene", presente: false, nota: "Inasistencia" },
+    ],
+  },
+  "5": {
+    id: 5, nombre: "Roberto Núñez Díaz", rut: "13.456.789-1", curso: "A2", promoId: 3,
+    historialTeoria: [
+      { semana: "Semana 1 (Ene 19-24)", zoom: [true,true,true,true,true,false], firma: true },
+      { semana: "Semana 2 (Ene 26-31)", zoom: [true,true,true,true,false,true], firma: true },
+      { semana: "Semana 3 (Feb 2-7)",   zoom: [true,true,false,true,true,true], firma: true },
+      { semana: "Semana 4 (Feb 9-14)",  zoom: [true,true,true,true,false,false], firma: true },
+    ],
+    historialPractica: [
+      { dia: 1, fecha: "Lun 19 Ene", presente: true },
+      { dia: 2, fecha: "Mar 20 Ene", presente: true },
+      { dia: 3, fecha: "Mié 21 Ene", presente: true },
+      { dia: 4, fecha: "Jue 22 Ene", presente: true },
+      { dia: 5, fecha: "Vie 23 Ene", presente: true },
+      { dia: 6, fecha: "Sáb 24 Ene", presente: false, nota: "Inasistencia" },
+      { dia: 7, fecha: "Lun 26 Ene", presente: true },
+      { dia: 8, fecha: "Mar 27 Ene", presente: true },
+      { dia: 9, fecha: "Mié 28 Ene", presente: true },
+      { dia: 10, fecha: "Jue 29 Ene", presente: true },
+      { dia: 11, fecha: "Vie 30 Ene", presente: true },
+    ],
+  },
+};
+
+// Fallback genérico para IDs 6-18
+const fallback = (i: number, nombre: string, rut: string, curso: string, promoId: number) => ({
+  id: i, nombre, rut, curso, promoId,
+  historialTeoria: [
+    { semana: "Semana 1", zoom: [true,true,true,true,true,true], firma: true },
+    { semana: "Semana 2", zoom: [true,true,true,false,true,true], firma: true },
+  ],
+  historialPractica: Array.from({ length: 11 }, (_, k) => ({
+    dia: k + 1,
+    fecha: `Día ${k + 1}`,
+    presente: k !== 2,
+    nota: k === 2 ? "Inasistencia" : undefined,
+  })),
+});
+
+const EXTRA: Record<string, ReturnType<typeof fallback>> = {
+  "6":  fallback(6,  "Patricia Vargas Silva", "15.678.901-2", "A2", 3),
+  "7":  fallback(7,  "Jorge Morales Reyes",   "16.901.234-6", "A2", 3),
+  "8":  fallback(8,  "Valentina Ríos Lagos",  "15.234.567-4", "A2", 3),
+  "9":  fallback(9,  "Felipe Aguilar Pino",   "17.345.678-9", "A2", 4),
+  "10": fallback(10, "Diego Meza Fuentes",     "16.456.789-0", "A2", 4),
+  "11": fallback(11, "Camila Rojas Vega",      "18.123.456-7", "A2", 4),
+  "12": fallback(12, "Sebastián Mora Castro",  "17.654.321-2", "A2", 4),
+  "13": fallback(13, "Claudia Herrera Díaz",   "16.234.567-8", "A2", 4),
+  "14": fallback(14, "Gonzalo Pinto Muñoz",    "15.321.654-3", "A2", 4),
+  "15": fallback(15, "María Fernández López",  "14.876.543-1", "A3", 4),
+  "16": fallback(16, "Nicolás Castillo Vera",  "15.987.654-2", "A3", 4),
+  "17": fallback(17, "Javiera Soto Romero",    "17.111.222-3", "A3", 4),
+  "18": fallback(18, "Mateo Salinas Riquelme", "16.555.444-9", "A3", 4),
+};
+
+const alumno = ALUMNOS[id!] ?? EXTRA[id!] ?? ALUMNOS["1"];
+const promo = PROMOCIONES.find(p => p.id === alumno.promoId)!;
+const diaActual = promo?.diaActual ?? 11;
+const diasTotales = 30;
+
+// Calcular stats teoría
+const totalSesionesZoom = alumno.historialTeoria.reduce((s, sem) => s + sem.zoom.length, 0);
+const totalAsistZoom = alumno.historialTeoria.reduce((s, sem) => s + sem.zoom.filter(Boolean).length, 0);
+const totalFirmas = alumno.historialTeoria.length;
+const totalFirmasOk = alumno.historialTeoria.filter(s => s.firma).length;
+const totalTeoria = totalSesionesZoom + totalFirmas;
+const totalTeoriaAsist = totalAsistZoom + totalFirmasOk;
+const pctTeoria = totalTeoria > 0 ? Math.round((totalTeoriaAsist / totalTeoria) * 100) : 0;
+
+// Calcular stats práctica
+const diasPresentes = alumno.historialPractica.filter(d => d.presente).length;
+const totalDiasPractica = alumno.historialPractica.length;
+const pctPractica = totalDiasPractica > 0 ? Math.round((diasPresentes / totalDiasPractica) * 100) : 0;
+const faltasInjust = alumno.historialPractica.filter(d => !d.presente && d.nota && !d.nota.includes("médica") && !d.nota.includes("Licencia")).length;
+const faltasJust = alumno.historialPractica.filter(d => !d.presente && d.nota && (d.nota.includes("médica") || d.nota.includes("Licencia"))).length;
+
+// Semáforo
+function getSemaforo(pct: number, min: number) {
+  if (pct >= min) return { color: "text-green-700", label: "Cumple", bg: "bg-green-50", ring: "ring-green-200", dot: "bg-green-500" };
+  if (pct >= min - 10) return { color: "text-yellow-700", label: "En límite", bg: "bg-yellow-50", ring: "ring-yellow-200", dot: "bg-yellow-500" };
+  return { color: "text-red-700", label: "En riesgo", bg: "bg-red-50", ring: "ring-red-200", dot: "bg-red-500" };
+}
+
+const semTeoria = getSemaforo(pctTeoria, 75);
+const semPractica = getSemaforo(pctPractica, 100);
+
+const enRiesgo = semTeoria.label === "En riesgo" || semPractica.label === "En riesgo";
+---
+
+<DashboardLayout title={`Asistencia — ${alumno.nombre}`} userRole="relator">
+  <!-- Header -->
+  <div class="mb-6">
+    <div class="flex items-center gap-2 text-sm text-gray-500 mb-2">
+      <a href="/relator/dashboard" class="hover:text-gray-900">Inicio</a>
+      <span>/</span>
+      <a href="/relator/alumnos" class="hover:text-gray-900">Mis Alumnos</a>
+      <span>/</span>
+      <span class="text-gray-900 font-medium">{alumno.nombre}</span>
+    </div>
+    <div class="flex flex-wrap items-start justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-semibold text-gray-900 tracking-tight text-balance">
+          {alumno.nombre}
+        </h1>
+        <p class="text-gray-600 mt-1">
+          {alumno.rut} · Curso {alumno.curso} · {promo?.nombre ?? "—"} · Día {diaActual}/{diasTotales}
+        </p>
+      </div>
+      <div class="flex gap-2">
+        <a
+          href={`/relator/asistencia?promo=${alumno.promoId}&curso=${alumno.curso}`}
+          class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-md hover:bg-gray-50 shadow-sm transition-colors"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+          </svg>
+          Registrar asistencia
+        </a>
+        <Button variant="secondary" href="/relator/alumnos">← Volver</Button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alerta si en riesgo -->
+  {enRiesgo && (
+    <div class="border border-red-300 bg-red-50 rounded-lg p-4 mb-6">
+      <div class="flex gap-3">
+        <svg class="w-5 h-5 text-red-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+        </svg>
+        <div>
+          <p class="text-sm font-semibold text-red-900">Este alumno está en riesgo de reprobar por asistencia</p>
+          <p class="text-xs text-red-700 mt-1">Uno o más indicadores se encuentran bajo el mínimo requerido. Se recomienda notificar al alumno.</p>
+        </div>
+      </div>
+    </div>
+  )}
+
+  <!-- Semáforos RF-069 / RF-070 -->
+  <div class="grid sm:grid-cols-2 gap-4 mb-8">
+
+    <!-- Semáforo Teoría RF-069 -->
+    <div class={`border rounded-xl p-6 ring-2 ${semTeoria.ring} ${semTeoria.bg} shadow-sm`}>
+      <div class="flex items-start justify-between mb-4">
+        <div>
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Asistencia Teoría</p>
+          <p class="text-4xl font-bold text-gray-900">{pctTeoria}%</p>
+          <p class="text-xs text-gray-500 mt-1">Mínimo requerido: <strong>75%</strong></p>
+        </div>
+        <div class="flex flex-col items-center gap-1.5">
+          <div class={`w-5 h-5 rounded-full ${semTeoria.dot === "bg-green-500" ? "bg-green-500" : "bg-gray-200"} shadow-sm`}></div>
+          <div class={`w-5 h-5 rounded-full ${semTeoria.dot === "bg-yellow-500" ? "bg-yellow-500" : "bg-gray-200"} shadow-sm`}></div>
+          <div class={`w-5 h-5 rounded-full ${semTeoria.dot === "bg-red-500" ? "bg-red-500" : "bg-gray-200"} shadow-sm`}></div>
+        </div>
+      </div>
+      <div class="mb-3">
+        <div class="w-full bg-white/60 rounded-full h-3 border border-white/80">
+          <div
+            class={`h-3 rounded-full transition-all duration-500 ${pctTeoria >= 75 ? "bg-green-500" : pctTeoria >= 65 ? "bg-yellow-400" : "bg-red-500"}`}
+            style={`width: ${pctTeoria}%`}
+          ></div>
+        </div>
+        <div class="flex justify-between text-xs text-gray-500 mt-1">
+          <span>0%</span>
+          <span class="font-medium text-orange-600">75% mín.</span>
+          <span>100%</span>
+        </div>
+      </div>
+      <div class={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ring-1 ${semTeoria.ring} ${semTeoria.color} bg-white/70`}>
+        <span class={`w-1.5 h-1.5 rounded-full ${semTeoria.dot}`}></span>
+        {semTeoria.label} (RF-069)
+      </div>
+      <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
+        <div class="bg-white/60 rounded-lg p-2.5 text-center">
+          <p class="font-bold text-gray-900">{totalAsistZoom}/{totalSesionesZoom}</p>
+          <p class="text-gray-500">sesiones Zoom</p>
+        </div>
+        <div class="bg-white/60 rounded-lg p-2.5 text-center">
+          <p class="font-bold text-gray-900">{totalFirmasOk}/{totalFirmas}</p>
+          <p class="text-gray-500">firmas presenciales</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Semáforo Práctica RF-070 -->
+    <div class={`border rounded-xl p-6 ring-2 ${semPractica.ring} ${semPractica.bg} shadow-sm`}>
+      <div class="flex items-start justify-between mb-4">
+        <div>
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Asistencia Práctica</p>
+          <p class="text-4xl font-bold text-gray-900">{pctPractica}%</p>
+          <p class="text-xs text-gray-500 mt-1">Mínimo requerido: <strong>100%</strong></p>
+        </div>
+        <div class="flex flex-col items-center gap-1.5">
+          <div class={`w-5 h-5 rounded-full ${semPractica.dot === "bg-green-500" ? "bg-green-500" : "bg-gray-200"} shadow-sm`}></div>
+          <div class={`w-5 h-5 rounded-full ${semPractica.dot === "bg-yellow-500" ? "bg-yellow-500" : "bg-gray-200"} shadow-sm`}></div>
+          <div class={`w-5 h-5 rounded-full ${semPractica.dot === "bg-red-500" ? "bg-red-500" : "bg-gray-200"} shadow-sm`}></div>
+        </div>
+      </div>
+      <div class="mb-3">
+        <div class="w-full bg-white/60 rounded-full h-3 border border-white/80">
+          <div
+            class={`h-3 rounded-full transition-all duration-500 ${pctPractica >= 100 ? "bg-green-500" : pctPractica >= 90 ? "bg-yellow-400" : "bg-red-500"}`}
+            style={`width: ${pctPractica}%`}
+          ></div>
+        </div>
+        <div class="flex justify-between text-xs text-gray-500 mt-1">
+          <span>0%</span>
+          <span class="font-medium text-red-600">100% oblig.</span>
+          <span>100%</span>
+        </div>
+      </div>
+      <div class={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ring-1 ${semPractica.ring} ${semPractica.color} bg-white/70`}>
+        <span class={`w-1.5 h-1.5 rounded-full ${semPractica.dot}`}></span>
+        {semPractica.label} (RF-070)
+      </div>
+      <div class="mt-3 grid grid-cols-3 gap-2 text-xs">
+        <div class="bg-white/60 rounded-lg p-2.5 text-center">
+          <p class="font-bold text-gray-900">{diasPresentes}/{totalDiasPractica}</p>
+          <p class="text-gray-500">días asistidos</p>
+        </div>
+        <div class="bg-white/60 rounded-lg p-2.5 text-center">
+          <p class="font-bold text-green-700">{faltasJust}</p>
+          <p class="text-gray-500">falta(s) justif.</p>
+        </div>
+        <div class="bg-white/60 rounded-lg p-2.5 text-center">
+          <p class="font-bold text-red-700">{faltasInjust}</p>
+          <p class="text-gray-500">falta(s) injust.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detalle historial -->
+  <div class="grid lg:grid-cols-2 gap-6">
+
+    <!-- Historial teoría RF-078 -->
+    <Card>
+      <h2 class="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.069A1 1 0 0121 8.869v6.262a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+        </svg>
+        Teoría — Detalle por semana
+      </h2>
+      <div class="space-y-3">
+        {alumno.historialTeoria.map((semana) => {
+          const asistidas = semana.zoom.filter(Boolean).length;
+          const pctSem = Math.round((asistidas / semana.zoom.length) * 100);
+          return (
+            <div class="border border-gray-100 rounded-lg p-3">
+              <div class="flex items-center justify-between mb-2">
+                <p class="text-xs font-medium text-gray-700">{semana.semana}</p>
+                <div class="flex items-center gap-2">
+                  {semana.firma
+                    ? <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-orange-100 text-orange-700 font-medium">Firmó</span>
+                    : <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-red-100 text-red-700 font-medium">Sin firma</span>
+                  }
+                  <span class={`text-xs font-semibold ${pctSem >= 75 ? "text-green-700" : pctSem >= 60 ? "text-yellow-600" : "text-red-600"}`}>
+                    {pctSem}%
+                  </span>
+                </div>
+              </div>
+              <div class="flex gap-1">
+                {semana.zoom.map((presente, idx) => (
+                  <div
+                    title={`Sesión ${idx + 1}: ${presente ? "Presente" : "Ausente"}`}
+                    class={`flex-1 h-6 rounded text-xs flex items-center justify-center font-bold ${presente ? "bg-green-100 text-green-700" : "bg-red-100 text-red-500"}`}
+                  >
+                    {presente ? "✓" : "✗"}
+                  </div>
+                ))}
+              </div>
+              <p class="text-xs text-gray-400 mt-1.5">{asistidas}/{semana.zoom.length} sesiones Zoom asistidas</p>
+            </div>
+          );
+        })}
+      </div>
+    </Card>
+
+    <!-- Historial práctica RF-068 -->
+    <Card>
+      <h2 class="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+        </svg>
+        Práctica — Detalle por día
+      </h2>
+      <div class="space-y-1.5">
+        {alumno.historialPractica.map((dia) => (
+          <div class={`flex items-center justify-between px-3 py-2 rounded-lg ${dia.presente ? "bg-green-50" : "bg-red-50"}`}>
+            <div class="flex items-center gap-3">
+              <div class={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${dia.presente ? "bg-green-500 text-white" : "bg-red-400 text-white"}`}>
+                {dia.presente ? "✓" : "✗"}
+              </div>
+              <div>
+                <p class="text-xs font-medium text-gray-800">Día {dia.dia} — {dia.fecha}</p>
+                {dia.nota && (
+                  <p class={`text-xs ${dia.nota.includes("médica") || dia.nota.includes("Licencia") ? "text-blue-600" : "text-red-500"}`}>
+                    {dia.nota}
+                  </p>
+                )}
+              </div>
+            </div>
+            <span class={`text-xs font-medium ${dia.presente ? "text-green-700" : "text-red-600"}`}>
+              {dia.presente ? "Presente" : "Ausente"}
+            </span>
+          </div>
+        ))}
+        {/* Días restantes */}
+        {Array.from({ length: diasTotales - alumno.historialPractica.length }, (_, i) => (
+          <div class="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-50 opacity-50">
+            <div class="flex items-center gap-3">
+              <div class="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-400">
+                {alumno.historialPractica.length + i + 1}
+              </div>
+              <p class="text-xs text-gray-400">Día {alumno.historialPractica.length + i + 1} — pendiente</p>
+            </div>
+            <span class="text-xs text-gray-300">—</span>
+          </div>
+        ))}
+      </div>
+    </Card>
+  </div>
+
+  <!-- Reglamento -->
+  <div class="mt-6 border border-gray-200 rounded-lg bg-white p-4 shadow-sm">
+    <h3 class="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+      <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      Reglamento de Asistencia
+    </h3>
+    <div class="grid sm:grid-cols-3 gap-4 text-xs text-gray-600">
+      <div class="flex gap-2">
+        <span class="text-blue-500 text-base leading-tight shrink-0">📹</span>
+        <div>
+          <p class="font-medium text-gray-800">Teoría Zoom (RF-078)</p>
+          <p>Mínimo 75% de asistencia. Marcado manual por el relator en cada sesión.</p>
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <span class="text-orange-500 text-base leading-tight shrink-0">✍️</span>
+        <div>
+          <p class="font-medium text-gray-800">Firma Semanal (RF-067)</p>
+          <p>Una vez por semana el alumno firma presencialmente el libro de clases.</p>
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <span class="text-green-500 text-base leading-tight shrink-0">🚗</span>
+        <div>
+          <p class="font-medium text-gray-800">Práctica 100% (RF-070)</p>
+          <p>Asistencia obligatoria. Solo licencia médica justifica ausencias (RF-071).</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</DashboardLayout>

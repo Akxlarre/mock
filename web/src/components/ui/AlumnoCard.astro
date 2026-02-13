@@ -15,7 +15,7 @@ const { nombre, rut, estado = 'Activo', href, class: className = '' } = Astro.pr
 
 const badgeVariant = estado === 'Activo' ? 'success' : estado === 'Pendiente' ? 'warning' : 'error';
 ---
-<div class={`card card-bordered bg-base-100 rounded-lg shadow-sm w-full max-w-[400px] p-6 transition-all duration-200 hover:shadow-md ${className}`}>
+<div class={`card card-bordered bg-base-100 rounded-lg shadow-sm w-full max-w-100 p-6 transition-all duration-200 hover:shadow-md ${className}`}>
   <div class="flex flex-col gap-2">
     <h3 class="text-lg font-semibold text-base-content">{nombre}</h3>
     <p class="text-sm text-base-content/70">RUT: {rut}</p>

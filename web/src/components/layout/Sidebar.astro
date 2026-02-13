@@ -17,7 +17,7 @@ interface MenuItem {
   badge?: number;
 }
 
-const { currentPath = "", userRole = "admin" } = Astro.props;
+const { currentPath = "", userRole = "admin" } = Astro.props as { currentPath?: string; userRole?: "admin" | "instructor" | "secretaria" | "alumno" | "relator" };
 
 interface MenuGroup {
   group: string;
@@ -26,7 +26,7 @@ interface MenuGroup {
 
 // Menús por rol
 const menuItems: {
-  [K in "admin" | "instructor" | "secretaria" | "alumno"]: MenuGroup[];
+  [K in "admin" | "instructor" | "secretaria" | "alumno" | "relator"]: MenuGroup[];
 } = {
   admin: [
     {
@@ -93,6 +93,15 @@ const menuItems: {
         },
         { href: "/flota/vehiculos", label: "Flota", icon: "car" },
         { href: "/libro-de-clases", label: "Libro de Clases", icon: "clipboard" },
+      ],
+    },
+    {
+      group: "Clase Profesional",
+      items: [
+        { href: "/profesional/relatores", label: "Relatores", icon: "users" },
+        { href: "/profesional/promociones", label: "Promociones", icon: "calendar-check" },
+        { href: "/profesional/certificados", label: "Certificados Prof.", icon: "check" },
+        { href: "/profesional/archivo", label: "Archivo Histórico", icon: "clipboard" },
       ],
     },
     {
@@ -197,6 +206,28 @@ const menuItems: {
         { href: "/libro-de-clases", label: "Libro de Clases", icon: "clipboard" },
       ],
     },
+    {
+      group: "Clase Profesional",
+      items: [
+        { href: "/secretaria/profesional/relatores", label: "Relatores", icon: "users" },
+        { href: "/secretaria/profesional/promociones", label: "Promociones", icon: "calendar-check" },
+        { href: "/secretaria/profesional/certificados", label: "Certificados Prof.", icon: "check" },
+        { href: "/secretaria/profesional/archivo", label: "Archivo Histórico", icon: "clipboard" },
+      ],
+    },
+  ],
+  relator: [
+    {
+      group: "Mi Trabajo",
+      items: [
+        { href: "/relator/dashboard", label: "Inicio", icon: "home" },
+        { href: "/relator/asistencia", label: "Tomar Asistencia", icon: "check" },
+        { href: "/relator/alumnos", label: "Mis Alumnos", icon: "users" },
+        { href: "/relator/notas", label: "Registro de Notas", icon: "clipboard" },
+        { href: "/relator/maquinaria", label: "Maquinaria", icon: "car" },
+        { href: "/relator/acta-final", label: "Acta Final", icon: "check" },
+      ],
+    },
   ],
   alumno: [
     {
@@ -210,6 +241,7 @@ const menuItems: {
           badge: 2,
         },
         { href: "/alumno/certificado", label: "Mi Certificado", icon: "check" },
+        { href: "/alumno/notas", label: "Mis Notas", icon: "clipboard" },
       ],
     },
     {

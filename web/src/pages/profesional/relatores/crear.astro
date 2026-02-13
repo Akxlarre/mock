@@ -1,0 +1,235 @@
+---
+/**
+ * Crear Relator - RF-058
+ * Formulario: RUT, nombres, apellidos, email, teléfono, especialidades (A2-A5)
+ */
+import DashboardLayout from '../../../layouts/DashboardLayout.astro';
+import Card from '../../../components/ui/Card.astro';
+import Input from '../../../components/ui/Input.astro';
+import Button from '../../../components/ui/Button.astro';
+import { ESCUELA_ACTUAL } from '../../../lib/mockData';
+---
+
+<DashboardLayout title="Crear relator - Clase Profesional" escuela={ESCUELA_ACTUAL}>
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex items-center gap-2 text-sm text-secondary mb-2">
+      <a href="/dashboard" class="hover:text-gray-900">Inicio</a>
+      <span>/</span>
+      <a href="/profesional/relatores" class="hover:text-gray-900">Relatores</a>
+      <span>/</span>
+      <span class="text-gray-900 font-medium">Crear relator</span>
+    </div>
+    <h1 class="text-3xl font-semibold text-gray-900 tracking-tight">Crear relator</h1>
+    <p class="text-secondary mt-1">Registrar nuevo relator para cursos profesionales</p>
+  </div>
+
+  <div class="grid lg:grid-cols-3 gap-6">
+    <!-- Formulario -->
+    <div class="lg:col-span-2">
+      <Card>
+        <h2 class="text-lg font-semibold text-gray-900 mb-6">Información del relator</h2>
+        <form id="createRelatorForm" class="space-y-5" action="/profesional/relatores" method="get">
+          <!-- RUT -->
+          <div class="w-full">
+            <label class="block text-sm font-medium text-gray-700 mb-1.5" for="rut">
+              RUT *
+            </label>
+            <div class="relative">
+              <input
+                type="text"
+                id="rut"
+                name="rut"
+                placeholder="12.345.678-9"
+                required
+                maxlength="12"
+                class="h-11 px-4 w-full text-sm bg-white rounded-md border border-gray-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-900 placeholder:text-gray-400"
+              />
+              <span id="rutStatus" class="absolute right-3 top-1/2 -translate-y-1/2 text-sm hidden"></span>
+            </div>
+            <p id="rutError" class="text-red-600 text-sm mt-1.5 hidden" role="alert"></p>
+            <p id="rutSuccess" class="text-green-600 text-sm mt-1.5 hidden"></p>
+          </div>
+
+          <!-- Nombres y Apellidos -->
+          <div class="grid md:grid-cols-2 gap-4">
+            <Input label="Nombres" name="nombres" placeholder="Roberto" required />
+            <Input label="Apellidos" name="apellidos" placeholder="Muñoz Sánchez" required />
+          </div>
+
+          <!-- Email y Teléfono -->
+          <div class="grid md:grid-cols-2 gap-4">
+            <Input label="Correo electrónico" name="email" type="email" placeholder="rmunoz@conductores.cl" required />
+            <Input label="Teléfono" name="telefono" type="tel" placeholder="+56 9 1234 5678" required />
+          </div>
+
+          <!-- Especialidades -->
+          <div class="w-full">
+            <label class="block text-sm font-medium text-gray-700 mb-3">
+              Especialidades *
+            </label>
+            <p class="text-xs text-secondary mb-3">Seleccione las clases que el relator puede dictar</p>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <label class="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-lg cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition-colors has-[:checked]:bg-blue-50 has-[:checked]:border-blue-400">
+                <input type="checkbox" name="especialidades" value="A2" class="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-900" />
+                <div>
+                  <span class="text-sm font-medium text-gray-900">A2</span>
+                  <p class="text-xs text-gray-500">Taxis</p>
+                </div>
+              </label>
+              <label class="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-lg cursor-pointer hover:bg-purple-50 hover:border-purple-300 transition-colors has-[:checked]:bg-purple-50 has-[:checked]:border-purple-400">
+                <input type="checkbox" name="especialidades" value="A3" class="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-900" />
+                <div>
+                  <span class="text-sm font-medium text-gray-900">A3</span>
+                  <p class="text-xs text-gray-500">Buses</p>
+                </div>
+              </label>
+              <label class="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-lg cursor-pointer hover:bg-orange-50 hover:border-orange-300 transition-colors has-[:checked]:bg-orange-50 has-[:checked]:border-orange-400">
+                <input type="checkbox" name="especialidades" value="A4" class="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-900" />
+                <div>
+                  <span class="text-sm font-medium text-gray-900">A4</span>
+                  <p class="text-xs text-gray-500">Escolar</p>
+                </div>
+              </label>
+              <label class="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-lg cursor-pointer hover:bg-teal-50 hover:border-teal-300 transition-colors has-[:checked]:bg-teal-50 has-[:checked]:border-teal-400">
+                <input type="checkbox" name="especialidades" value="A5" class="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-900" />
+                <div>
+                  <span class="text-sm font-medium text-gray-900">A5</span>
+                  <p class="text-xs text-gray-500">Carga</p>
+                </div>
+              </label>
+            </div>
+            <p id="espError" class="text-red-600 text-sm mt-1.5 hidden" role="alert">Seleccione al menos una especialidad</p>
+          </div>
+
+          <!-- Botones -->
+          <div class="flex gap-3 pt-4 border-t border-gray-200">
+            <a href="/profesional/relatores" class="inline-flex items-center justify-center h-11 px-4 text-sm font-medium rounded-md bg-white border border-gray-300 text-gray-900 hover:bg-gray-50 hover:border-gray-400 shadow-sm transition-all duration-200">
+              Cancelar
+            </a>
+            <Button type="submit" variant="primary">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+              </svg>
+              Crear relator
+            </Button>
+          </div>
+        </form>
+      </Card>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-4">
+      <Card class="bg-gray-50 border-gray-200">
+        <h3 class="text-sm font-semibold text-gray-900 mb-3">Campos obligatorios</h3>
+        <ul class="space-y-2 text-xs text-gray-700">
+          <li class="flex items-center gap-2">
+            <span class="w-1.5 h-1.5 bg-gray-900 rounded-full shrink-0"></span>
+            RUT (formato chileno válido)
+          </li>
+          <li class="flex items-center gap-2">
+            <span class="w-1.5 h-1.5 bg-gray-900 rounded-full shrink-0"></span>
+            Nombres y apellidos
+          </li>
+          <li class="flex items-center gap-2">
+            <span class="w-1.5 h-1.5 bg-gray-900 rounded-full shrink-0"></span>
+            Correo electrónico
+          </li>
+          <li class="flex items-center gap-2">
+            <span class="w-1.5 h-1.5 bg-gray-900 rounded-full shrink-0"></span>
+            Teléfono de contacto
+          </li>
+          <li class="flex items-center gap-2">
+            <span class="w-1.5 h-1.5 bg-gray-900 rounded-full shrink-0"></span>
+            Al menos una especialidad
+          </li>
+        </ul>
+      </Card>
+
+      <Card>
+        <h3 class="text-sm font-semibold text-gray-900 mb-3">Sobre las especialidades</h3>
+        <div class="space-y-3 text-xs text-gray-700">
+          <div class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span>Un relator puede tener múltiples especialidades</span>
+          </div>
+          <div class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span>Solo podrá ser asignado a cursos de sus especialidades</span>
+          </div>
+          <div class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span>Las especialidades se pueden modificar posteriormente</span>
+          </div>
+        </div>
+      </Card>
+    </div>
+  </div>
+</DashboardLayout>
+
+<script>
+  // RF-058: Validación RUT
+  const rutInput = document.getElementById('rut') as HTMLInputElement;
+  const rutError = document.getElementById('rutError');
+  const rutSuccess = document.getElementById('rutSuccess');
+  const rutStatus = document.getElementById('rutStatus');
+
+  rutInput?.addEventListener('input', () => {
+    let value = rutInput.value.replace(/[^0-9kK-]/g, '');
+    const clean = value.replace(/\./g, '').replace(/-/g, '');
+    if (clean.length > 1) {
+      const body = clean.slice(0, -1);
+      const dv = clean.slice(-1);
+      const formatted = body.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      value = `${formatted}-${dv}`;
+    }
+    rutInput.value = value;
+
+    if (rutError && rutSuccess && rutStatus) {
+      if (value.length >= 11) {
+        rutSuccess.textContent = '\u2713 RUT válido y disponible';
+        rutSuccess.classList.remove('hidden');
+        rutError.classList.add('hidden');
+        rutStatus.textContent = '\u2713';
+        rutStatus.className = 'absolute right-3 top-1/2 -translate-y-1/2 text-sm text-green-500';
+        rutInput.classList.add('border-green-300');
+        rutInput.classList.remove('border-red-300', 'border-gray-300');
+      } else if (value.length > 0) {
+        rutError.textContent = 'Formato incompleto (ej: 12.345.678-9)';
+        rutError.classList.remove('hidden');
+        rutSuccess.classList.add('hidden');
+        rutStatus.className = 'absolute right-3 top-1/2 -translate-y-1/2 text-sm hidden';
+        rutInput.classList.remove('border-green-300', 'border-red-300');
+        rutInput.classList.add('border-gray-300');
+      } else {
+        rutError.classList.add('hidden');
+        rutSuccess.classList.add('hidden');
+        rutStatus.className = 'absolute right-3 top-1/2 -translate-y-1/2 text-sm hidden';
+        rutInput.classList.remove('border-green-300', 'border-red-300');
+        rutInput.classList.add('border-gray-300');
+      }
+    }
+  });
+
+  // Validar al menos una especialidad
+  const form = document.getElementById('createRelatorForm') as HTMLFormElement;
+  form?.addEventListener('submit', (e) => {
+    const checkboxes = form.querySelectorAll<HTMLInputElement>('input[name="especialidades"]:checked');
+    const espError = document.getElementById('espError');
+    if (checkboxes.length === 0) {
+      e.preventDefault();
+      espError?.classList.remove('hidden');
+    } else {
+      espError?.classList.add('hidden');
+      e.preventDefault();
+      alert('Relator creado exitosamente (mockup)');
+      window.location.href = '/profesional/relatores';
+    }
+  });
+</script>
