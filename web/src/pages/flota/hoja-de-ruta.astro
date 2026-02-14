@@ -1,0 +1,110 @@
+---
+/**
+ * Hoja de Ruta Diaria (Imprimible)
+ * RF-091: Diseño minimalista para impresión A4
+ */
+import { ESCUELA_ACTUAL } from "../../lib/mockData";
+
+// Horarios pre-impresos 08:00 a 18:00
+const horarios = Array.from({ length: 11 }, (_, i) => {
+  const hora = i + 8;
+  return `${hora.toString().padStart(2, "0")}:00`;
+});
+---
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hoja de Ruta Diaria - {ESCUELA_ACTUAL.nombre}</title>
+    <style>
+        @media print {
+            @page { margin: 1cm; size: A4; }
+            body { -webkit-print-color-adjust: exact; }
+            .no-print { display: none; }
+        }
+        body { font-family: sans-serif; font-size: 12px; line-height: 1.4; color: #000; }
+        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; border-bottom: 2px solid #000; padding-bottom: 1rem; }
+        .logo { font-size: 1.5rem; font-weight: bold; }
+        .title { text-align: center; font-size: 1.25rem; font-weight: bold; text-transform: uppercase; }
+        .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+        .info-item { display: flex; gap: 0.5rem; }
+        .label { font-weight: bold; }
+        .value { border-bottom: 1px dotted #000; flex: 1; min-height: 1.2em; }
+        
+        table { width: 100%; border-collapse: collapse; margin-bottom: 2rem; }
+        th, td { border: 1px solid #000; padding: 0.5rem; text-align: left; vertical-align: middle; }
+        th { background-color: #f0f0f0; font-weight: bold; text-align: center; }
+        
+        .footer { margin-top: 2rem; border: 1px solid #000; padding: 1rem; min-height: 100px; }
+        .footer-title { font-weight: bold; margin-bottom: 0.5rem; border-bottom: 1px solid #000; display: inline-block; }
+    </style>
+</head>
+<body onload="window.print()">
+
+    <div class="no-print" style="margin-bottom: 20px; text-align: center;">
+        <p>🖨️ Se abrirá el diálogo de impresión automáticamente.</p>
+    </div>
+
+    <div class="header">
+        <div class="logo">
+            {ESCUELA_ACTUAL.nombre}
+        </div>
+        <div style="text-align: right;">
+            <div><strong>Sede:</strong> Chillán Centro</div>
+            <div><strong>Fecha:</strong> ____/____/____</div>
+        </div>
+    </div>
+
+    <div class="title" style="margin-bottom: 1.5rem;">HOJA DE RUTA DIARIA</div>
+
+    <div class="info-grid">
+        <div class="info-item">
+            <span class="label">Vehículo / Patente:</span>
+            <span class="value">ABCD-12 (Toyota Yaris)</span>
+        </div>
+        <div class="info-item">
+            <span class="label">Kilometraje Inicial:</span>
+            <span class="value"></span>
+        </div>
+        <div class="info-item">
+            <span class="label">Instructor a cargo:</span>
+            <span class="value">Juan Pérez</span>
+        </div>
+        <div class="info-item">
+            <span class="label">Kilometraje Final:</span>
+            <span class="value"></span>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 60px;">HORA</th>
+                <th style="width: 25%;">ALUMNO</th>
+                <th>RUTINA / ACTIVIDAD RECIENTE</th>
+                <th style="width: 80px;">KM FINAL</th>
+                <th style="width: 15%;">FIRMA ALUMNO</th>
+            </tr>
+        </thead>
+        <tbody>
+            {horarios.map(hora => (
+                <tr style="height: 45px;">
+                    <td style="text-align: center; font-weight: bold;">{hora}</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            ))}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        <div class="footer-title">OBSERVACIONES / FALLAS MECÁNICAS DETECTADAS:</div>
+        <!-- Espacio libre para escribir -->
+    </div>
+
+</body>
+</html>
