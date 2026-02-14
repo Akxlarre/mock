@@ -47,7 +47,7 @@ const certificadosHref = basePath ? `${basePath}/certificados` : "/certificados"
   )}
 </div>
 
-<div class="grid sm:grid-cols-4 gap-4 mb-6">
+<div class="grid sm:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
   <Card class="border-l-4 border-blue-500">
     <div class="flex items-center justify-between">
       <div>
@@ -90,6 +90,33 @@ const certificadosHref = basePath ? `${basePath}/certificados` : "/certificados"
       </div>
     </div>
   </Card>
+  <!-- Tarjeta Stock Físico (Alpine.js Logic) -->
+  <div
+    x-data="{ stock: 32, lowStockThreshold: 10 }"
+    :class="{ '!bg-red-600': stock < lowStockThreshold }"
+    class="relative overflow-hidden rounded-lg p-6 bg-slate-800 text-white shadow-[0_1px_2px_rgba(0,0,0,0.05)] border border-transparent transition-colors duration-300 group"
+  >
+    <!-- Contenido Principal -->
+    <div class="relative z-10 flex flex-col h-full justify-between">
+      <div>
+        <p class="text-xs font-bold uppercase tracking-wider opacity-70 mb-1">Stock Físico</p>
+        <p class="text-4xl font-extrabold leading-none" x-text="stock">32</p>
+      </div>
+      
+      <div class="mt-4">
+        <span class="inline-block font-mono text-xs opacity-80 bg-white/10 px-2 py-1 rounded">
+          Siguiente: #14598
+        </span>
+      </div>
+    </div>
+
+    <!-- Icono Decorativo (Watermark) -->
+    <div class="absolute -right-6 -bottom-6 opacity-10 transform -rotate-12 pointer-events-none">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-32 w-32" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+    </div>
+  </div>
 </div>
 
 <div class="flex flex-wrap gap-3 mb-6">
