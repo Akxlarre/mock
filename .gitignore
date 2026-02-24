@@ -147,6 +147,10 @@ Lineamientos_de_Diseño.md
 /PLAN-TRABAJO-HOY.md
 /QUICK-START.md
 /README.md
+/api_routes.md
+/api_routes_order.md
+/db_analysis.md
+/db_analysis2.md
 /reque.txt
 /requerimientos unificados.txt
 reunion30enero.txt
@@ -161,6 +165,9 @@ coverage/
 htmlcov/
 .pytest_cache/
 .tox/
+generate_api_routes_pdf.py
+generate_db_analysis_pdf.py
+db_schema.sql
 
 # ============================================
 # MISC

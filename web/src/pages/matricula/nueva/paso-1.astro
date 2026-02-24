@@ -107,7 +107,7 @@ const basePath = "";
           >
             <div class="flex items-start gap-3">
               <svg
-                class="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5"
+                class="w-6 h-6 text-red-600 shrink-0 mt-0.5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -137,7 +137,7 @@ const basePath = "";
           >
             <div class="flex items-start gap-3">
               <svg
-                class="w-6 h-6 text-yellow-600 flex-shrink-0 mt-0.5"
+                class="w-6 h-6 text-yellow-600 shrink-0 mt-0.5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -242,7 +242,7 @@ const basePath = "";
             </label>
             <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
               <label
-                class="flex items-center gap-3 p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors has-[:checked]:border-gray-900 has-[:checked]:bg-gray-50"
+                class="flex items-center gap-3 p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors has-checked:border-gray-900 has-checked:bg-gray-50"
               >
                 <input
                   type="radio"
@@ -257,7 +257,7 @@ const basePath = "";
                 </div>
               </label>
               <label
-                class="flex items-center gap-3 p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors has-[:checked]:border-gray-900 has-[:checked]:bg-gray-50"
+                class="flex items-center gap-3 p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors has-checked:border-gray-900 has-checked:bg-gray-50"
               >
                 <input
                   type="radio"
@@ -271,7 +271,7 @@ const basePath = "";
                 </div>
               </label>
               <label
-                class="flex items-center gap-3 p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors has-[:checked]:border-gray-900 has-[:checked]:bg-gray-50"
+                class="flex items-center gap-3 p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors has-checked:border-gray-900 has-checked:bg-gray-50"
               >
                 <input
                   type="radio"
@@ -287,7 +287,7 @@ const basePath = "";
                 </div>
               </label>
               <label
-                class="flex items-center gap-3 p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors has-[:checked]:border-gray-900 has-[:checked]:bg-gray-50"
+                class="flex items-center gap-3 p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors has-checked:border-gray-900 has-checked:bg-gray-50"
               >
                 <input
                   type="radio"
@@ -303,7 +303,7 @@ const basePath = "";
                 </div>
               </label>
               <label
-                class="flex items-center gap-3 p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors has-[:checked]:border-gray-900 has-[:checked]:bg-gray-50"
+                class="flex items-center gap-3 p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors has-checked:border-gray-900 has-checked:bg-gray-50"
               >
                 <input
                   type="radio"
@@ -319,7 +319,7 @@ const basePath = "";
                 </div>
               </label>
               <label
-                class="flex items-center gap-3 p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors has-[:checked]:border-gray-900 has-[:checked]:bg-gray-50"
+                class="flex items-center gap-3 p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 transition-colors has-checked:border-gray-900 has-checked:bg-gray-50"
               >
                 <input
                   type="radio"
@@ -412,7 +412,7 @@ const basePath = "";
       <Card class="bg-blue-50 border-blue-200">
         <div class="flex gap-3">
           <svg
-            class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5"
+            class="w-5 h-5 text-blue-600 shrink-0 mt-0.5"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -442,10 +442,10 @@ const basePath = "";
 </DashboardLayout>
 
 <script define:vars={{ basePath }}>
-  let edadValida = true; // tracks whether age allows enrollment
-  let esMenor = false; // tracks whether student is 17 (needs notarial auth)
+  let edadValida = true;
+  let esMenor = false;
 
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("astro:page-load", () => {
     const senceWrap = document.getElementById("sence-codigo-wrap");
     const radios = document.querySelectorAll(
       'input[name="tipo_curso"].curso-radio',
@@ -465,16 +465,14 @@ const basePath = "";
     toggleSence();
 
     // RF-082.1: Age detection on fecha_nacimiento change
-    const fechaNacInput = document.getElementById(
-      "fecha_nacimiento",
-    ) as HTMLInputElement | null;
+    const fechaNacInput = document.getElementById("fecha_nacimiento");
     const alertBlock = document.getElementById("edad-alert-block");
     const alertMenor = document.getElementById("edad-alert-menor");
     const alertOk = document.getElementById("edad-alert-ok");
     const edadLabel = document.getElementById("edad-label");
     const btnSiguiente = document.querySelector(
       'button[onclick="nextStep()"], [onclick="nextStep()"]',
-    ) as HTMLElement | null;
+    );
 
     fechaNacInput?.addEventListener("change", () => {
       const fechaNac = new Date(fechaNacInput.value);
@@ -493,7 +491,7 @@ const basePath = "";
         edadValida = false;
         esMenor = false;
         if (btnSiguiente) {
-          (btnSiguiente as any).disabled = true;
+          btnSiguiente.disabled = true;
           btnSiguiente.classList.add("opacity-50", "pointer-events-none");
         }
       } else if (edad === 17) {
@@ -501,7 +499,7 @@ const basePath = "";
         edadValida = true;
         esMenor = true;
         if (btnSiguiente) {
-          (btnSiguiente as any).disabled = false;
+          btnSiguiente.disabled = false;
           btnSiguiente.classList.remove("opacity-50", "pointer-events-none");
         }
       } else {
@@ -511,7 +509,7 @@ const basePath = "";
         edadValida = true;
         esMenor = false;
         if (btnSiguiente) {
-          (btnSiguiente as any).disabled = false;
+          btnSiguiente.disabled = false;
           btnSiguiente.classList.remove("opacity-50", "pointer-events-none");
         }
       }
@@ -541,57 +539,27 @@ const basePath = "";
       "";
 
     const formData = {
-      nombres:
-        (document.getElementById("nombres") as HTMLInputElement | null)
-          ?.value ?? "",
-      apellidos:
-        (document.getElementById("apellidos") as HTMLInputElement | null)
-          ?.value ?? "",
-      rut:
-        (document.getElementById("rut") as HTMLInputElement | null)?.value ??
-        "",
-      fechaNacimiento:
-        (document.getElementById("fecha_nacimiento") as HTMLInputElement | null)
-          ?.value ?? "",
-      email:
-        (document.getElementById("email") as HTMLInputElement | null)?.value ??
-        "",
-      telefono:
-        (document.getElementById("telefono") as HTMLInputElement | null)
-          ?.value ?? "",
-      direccion:
-        (document.getElementById("direccion") as HTMLInputElement | null)
-          ?.value ?? "",
-      region:
-        (
-          document.querySelector(
-            'select[name="region"]',
-          ) as HTMLSelectElement | null
-        )?.value ?? "",
-      comuna:
-        (
-          document.querySelector(
-            'select[name="comuna"]',
-          ) as HTMLSelectElement | null
-        )?.value ?? "",
+      nombres: document.getElementById("nombres")?.value ?? "",
+      apellidos: document.getElementById("apellidos")?.value ?? "",
+      rut: document.getElementById("rut")?.value ?? "",
+      fechaNacimiento: document.getElementById("fecha_nacimiento")?.value ?? "",
+      email: document.getElementById("email")?.value ?? "",
+      telefono: document.getElementById("telefono")?.value ?? "",
+      direccion: document.getElementById("direccion")?.value ?? "",
+      region: document.querySelector('select[name="region"]')?.value ?? "",
+      comuna: document.querySelector('select[name="comuna"]')?.value ?? "",
       tipo_curso: tipoCurso,
       codigo_sence: tipoCurso === "clase_b_sence" ? codigoSence : "",
-      sexo:
-        (
-          document.querySelector(
-            'select[name="sexo"]',
-          ) as HTMLSelectElement | null
-        )?.value ?? "",
+      sexo: document.querySelector('select[name="sexo"]')?.value ?? "",
       esMenor: esMenor,
+      esProfesional: tipoCurso.startsWith("profesional"),
       timestamp: new Date().toISOString(),
     };
 
     sessionStorage.setItem("matricula_paso1", JSON.stringify(formData));
-    window.location.href =
-      (typeof basePath !== "undefined" ? basePath : "") +
-      "/matricula/nueva/paso-2";
+    window.location.href = (basePath ?? "") + "/matricula/nueva/paso-2";
   }
-  (window as unknown as { nextStep: () => void }).nextStep = nextStep;
+  window.nextStep = nextStep;
 </script>
 
 <style>

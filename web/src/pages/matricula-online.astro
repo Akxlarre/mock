@@ -274,9 +274,9 @@ const pasoActual = 1; // En producción vendría de query params o estado
                           isChecked 
                             ? `${styles.border} ${styles.bg} shadow-sm` 
                             : `border-gray-200 hover:border-gray-300 bg-white`
-                        } has-[:checked]:${styles.border} has-[:checked]:${styles.bg} has-[:checked]:shadow-sm`}>
+                        } has-[:checked]:${styles.border} has-[:checked]:${styles.bg} has-checked:shadow-sm`}>
                           <div class="flex items-start gap-3 mb-3">
-                            <div class={`w-10 h-10 rounded-lg flex items-center justify-center text-xl flex-shrink-0 ${
+                            <div class={`w-10 h-10 rounded-lg flex items-center justify-center text-xl shrink-0 ${
                               isChecked ? styles.bg : "bg-gray-100"
                             } group-hover:${styles.bg} transition-colors`}>
                               {curso.icono}
@@ -334,9 +334,9 @@ const pasoActual = 1; // En producción vendría de query params o estado
                     {cursosProfesionales.map((curso) => {
                       const styles = cursoStyles[curso.color];
                       return (
-                        <label class={`group relative flex flex-col p-5 border-2 rounded-lg cursor-pointer transition-all hover:shadow-md border-gray-200 hover:border-gray-300 bg-white has-[:checked]:${styles.border} has-[:checked]:${styles.bg} has-[:checked]:shadow-sm`}>
+                        <label class={`group relative flex flex-col p-5 border-2 rounded-lg cursor-pointer transition-all hover:shadow-md border-gray-200 hover:border-gray-300 bg-white has-[:checked]:${styles.border} has-[:checked]:${styles.bg} has-checked:shadow-sm`}>
                           <div class="flex items-start gap-3 mb-3">
-                            <div class={`w-10 h-10 rounded-lg flex items-center justify-center text-xl flex-shrink-0 bg-gray-100 group-hover:${styles.bg} transition-colors`}>
+                            <div class={`w-10 h-10 rounded-lg flex items-center justify-center text-xl shrink-0 bg-gray-100 group-hover:${styles.bg} transition-colors`}>
                               {curso.icono}
                             </div>
                             <div class="flex-1 min-w-0">
@@ -475,6 +475,106 @@ const pasoActual = 1; // En producción vendría de query params o estado
                 </div>
               </div>
 
+              <!-- Foto para Carnet (Módulo 2) -->
+              <div class="border-t border-gray-200 pt-8">
+                <h3 class="text-lg font-semibold text-gray-900 mb-1">
+                  Foto para tu Carnet
+                </h3>
+                <p class="text-sm text-gray-600 mb-6">
+                  Para que tu carnet esté listo al llegar a tu primera clase, necesitamos una foto tuya.
+                </p>
+
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                  <div class="px-4 py-3 border-b border-gray-200 bg-gray-50 flex items-center gap-2">
+                    <span class="text-sm font-medium text-gray-900">Foto para Carnet</span>
+                    <span class="text-xs font-medium text-red-500">*</span>
+                    <span class="ml-auto text-xs text-gray-500">Frontal, fondo blanco</span>
+                  </div>
+                  <div class="p-4 space-y-4">
+                    <!-- Tabs -->
+                    <div class="flex gap-2">
+                      <button type="button" id="foto-tab-camara"
+                        class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md border border-gray-900 bg-gray-900 text-white transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+                        </svg>
+                        Tomar foto
+                      </button>
+                      <button type="button" id="foto-tab-subir"
+                        class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                        </svg>
+                        Subir foto
+                      </button>
+                    </div>
+
+                    <!-- Sección cámara -->
+                    <div id="foto-seccion-camara">
+                      <div id="foto-camara-idle" class="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
+                        <svg class="w-10 h-10 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+                        </svg>
+                        <p class="text-sm text-gray-500 mb-3">Usa la cámara de tu dispositivo para tomarte la foto</p>
+                        <button type="button" id="foto-btn-activar"
+                          class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-700 transition-colors">
+                          Activar cámara
+                        </button>
+                        <p class="text-xs text-gray-400 mt-2">Se solicitará permiso para acceder a la cámara</p>
+                      </div>
+                      <div id="foto-camara-activa" class="hidden space-y-3">
+                        <div class="relative rounded-lg overflow-hidden bg-black max-w-xs mx-auto">
+                          <video id="foto-camara-video" class="w-full object-cover" autoplay playsinline muted style="aspect-ratio:4/3"></video>
+                          <div class="absolute inset-0 border-2 border-dashed border-white/30 rounded-lg pointer-events-none m-2"></div>
+                        </div>
+                        <div class="text-center">
+                          <button type="button" id="foto-btn-capturar"
+                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-700 transition-colors">
+                            📸 Capturar foto
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Sección subir -->
+                    <div id="foto-seccion-subir" class="hidden">
+                      <div class="border-2 border-dashed border-gray-200 rounded-lg p-8 text-center hover:border-gray-300 transition-colors">
+                        <svg class="w-8 h-8 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                        </svg>
+                        <p class="text-sm text-gray-600 mb-3">Selecciona o arrastra una foto tuya</p>
+                        <input type="file" id="foto-upload-input" accept=".jpg,.jpeg,.png" class="hidden" />
+                        <label for="foto-upload-input"
+                          class="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-md shadow-sm hover:bg-gray-50 transition-colors">
+                          Elegir archivo
+                        </label>
+                        <p class="text-xs text-gray-400 mt-2">JPG, PNG · Máx: 2MB</p>
+                      </div>
+                    </div>
+
+                    <!-- Preview -->
+                    <div id="foto-preview-wrap" class="hidden">
+                      <div class="flex items-start gap-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <img id="foto-preview-img" class="w-20 h-20 object-cover rounded-lg border border-gray-200 shrink-0" alt="Foto carnet" />
+                        <div class="flex-1 min-w-0">
+                          <p class="text-sm font-medium text-green-800">✓ Foto lista para el carnet</p>
+                          <p class="text-xs text-green-700 mt-1">Tu foto quedará registrada y el carnet estará listo al llegar a tu primera clase.</p>
+                          <button type="button" id="foto-btn-reset"
+                            class="mt-2 text-xs text-gray-500 underline hover:text-gray-700">
+                            Volver a tomar o cambiar
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <canvas id="foto-camara-canvas" class="hidden"></canvas>
+                    <p id="foto-feedback" class="text-xs text-red-600 hidden">⚠️ La foto para el carnet es obligatoria</p>
+                  </div>
+                </div>
+              </div>
+
               <!-- Términos -->
               <div class="border-t border-gray-200 pt-6">
                 <label class="flex items-start gap-3 cursor-pointer group">
@@ -587,37 +687,37 @@ const pasoActual = 1; // En producción vendría de query params o estado
             </h3>
             <ul class="space-y-2.5 text-sm text-gray-700">
               <li class="flex items-start gap-2">
-                <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 text-green-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                 </svg>
                 <span>Material de estudio digital</span>
               </li>
               <li class="flex items-start gap-2">
-                <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 text-green-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                 </svg>
                 <span>Acceso a simulador online</span>
               </li>
               <li class="flex items-start gap-2">
-                <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 text-green-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                 </svg>
                 <span>Vehículos con doble mando</span>
               </li>
               <li class="flex items-start gap-2">
-                <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 text-green-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                 </svg>
                 <span>Instructores certificados</span>
               </li>
               <li class="flex items-start gap-2">
-                <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 text-green-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                 </svg>
                 <span>Horarios flexibles</span>
               </li>
               <li class="flex items-start gap-2">
-                <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 text-green-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                 </svg>
                 <span>Portal de alumno con seguimiento</span>
@@ -628,7 +728,7 @@ const pasoActual = 1; // En producción vendría de query params o estado
           <!-- Garantía -->
           <Card class="bg-green-50 border-green-200">
             <div class="flex gap-3">
-              <svg class="w-6 h-6 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-6 h-6 text-green-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
               </svg>
               <div>
@@ -809,6 +909,15 @@ const pasoActual = 1; // En producción vendría de query params o estado
     panelBasico?.classList.add("hidden");
   });
 
+  const cursosData = [
+    { id: "clase-b", nombre: "Clase B", precio: 280000, duracion: "8 semanas", clasesPracticas: 12, clasesTeoricas: 12 },
+    { id: "clase-b-sence", nombre: "Clase B + SENCE", precio: 280000, duracion: "8 semanas", clasesPracticas: 12, clasesTeoricas: 12 },
+    { id: "a2", nombre: "Clase A2 - Transporte Público", precio: 450000, duracion: "30 días hábiles", clasesPracticas: 60, clasesTeoricas: 90 },
+    { id: "a4", nombre: "Clase A4 - Transporte Remunerado", precio: 450000, duracion: "30 días hábiles", clasesPracticas: 60, clasesTeoricas: 90 },
+    { id: "a3", nombre: "Clase A3 - Vehículos Pesados", precio: 500000, duracion: "30 días hábiles", clasesPracticas: 60, clasesTeoricas: 90 },
+    { id: "a5", nombre: "Clase A5 - Vehículos Articulados", precio: 500000, duracion: "30 días hábiles", clasesPracticas: 60, clasesTeoricas: 90 },
+  ];
+
   document.querySelectorAll('input[name="curso"]').forEach((radio) => {
     radio.addEventListener("change", (e) => {
       const cursoId = (e.target as HTMLInputElement).value;
@@ -816,11 +925,94 @@ const pasoActual = 1; // En producción vendría de query params o estado
       if (curso) {
         document.getElementById("resumen-curso")!.textContent = curso.nombre;
         document.getElementById("resumen-duracion")!.textContent = curso.duracion;
-        document.getElementById("resumen-practicas")!.textContent = curso.practicas + " horas";
-        document.getElementById("resumen-teoricas")!.textContent = curso.teoricas + " horas";
+        document.getElementById("resumen-practicas")!.textContent = curso.clasesPracticas + " horas";
+        document.getElementById("resumen-teoricas")!.textContent = curso.clasesTeoricas + " horas";
         document.getElementById("resumen-total")!.textContent = `$${curso.precio.toLocaleString("es-CL")}`;
       }
     });
+  });
+
+  // ─── Foto carnet widget ──────────────────────────────────────────────────
+  let fotoStream: MediaStream | null = null;
+  let fotoTab = "camara";
+  let fotoCapturada = false;
+
+  function fotoSwitchTab(tab: string) {
+    fotoTab = tab;
+    const base = "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md border transition-colors";
+    const active = base + " border-gray-900 bg-gray-900 text-white";
+    const inactive = base + " border-gray-200 bg-white text-gray-600 hover:bg-gray-50";
+    const tabCam = document.getElementById("foto-tab-camara");
+    const tabSub = document.getElementById("foto-tab-subir");
+    if (tabCam) tabCam.className = tab === "camara" ? active : inactive;
+    if (tabSub) tabSub.className = tab === "subir" ? active : inactive;
+    document.getElementById("foto-seccion-camara")?.classList.toggle("hidden", tab !== "camara");
+    document.getElementById("foto-seccion-subir")?.classList.toggle("hidden", tab !== "subir");
+    if (tab !== "camara" && fotoStream) {
+      fotoStream.getTracks().forEach(t => t.stop());
+      fotoStream = null;
+      document.getElementById("foto-camara-idle")?.classList.remove("hidden");
+      document.getElementById("foto-camara-activa")?.classList.add("hidden");
+    }
+  }
+
+  function fotoMostrarPreview(dataUrl: string) {
+    const img = document.getElementById("foto-preview-img") as HTMLImageElement | null;
+    if (img) img.src = dataUrl;
+    document.getElementById("foto-preview-wrap")?.classList.remove("hidden");
+    document.getElementById("foto-camara-activa")?.classList.add("hidden");
+    document.getElementById("foto-camara-idle")?.classList.add("hidden");
+    document.getElementById("foto-seccion-subir")?.classList.add("hidden");
+    document.getElementById("foto-feedback")?.classList.add("hidden");
+    fotoCapturada = true;
+  }
+
+  document.getElementById("foto-tab-camara")?.addEventListener("click", () => fotoSwitchTab("camara"));
+  document.getElementById("foto-tab-subir")?.addEventListener("click", () => fotoSwitchTab("subir"));
+
+  document.getElementById("foto-btn-activar")?.addEventListener("click", () => {
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: { ideal: 640 } } })
+      .then(stream => {
+        fotoStream = stream;
+        const video = document.getElementById("foto-camara-video") as HTMLVideoElement | null;
+        if (video) video.srcObject = stream;
+        document.getElementById("foto-camara-idle")?.classList.add("hidden");
+        document.getElementById("foto-camara-activa")?.classList.remove("hidden");
+      })
+      .catch(() => alert('No se pudo acceder a la cámara. Usa la opción "Subir foto" en su lugar.'));
+  });
+
+  document.getElementById("foto-btn-capturar")?.addEventListener("click", () => {
+    const video = document.getElementById("foto-camara-video") as HTMLVideoElement;
+    const canvas = document.getElementById("foto-camara-canvas") as HTMLCanvasElement;
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+    canvas.getContext("2d")?.drawImage(video, 0, 0);
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
+    if (fotoStream) { fotoStream.getTracks().forEach(t => t.stop()); fotoStream = null; }
+    fotoMostrarPreview(dataUrl);
+  });
+
+  document.getElementById("foto-upload-input")?.addEventListener("change", (e) => {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => fotoMostrarPreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
+  });
+
+  document.getElementById("foto-btn-reset")?.addEventListener("click", () => {
+    document.getElementById("foto-preview-wrap")?.classList.add("hidden");
+    fotoCapturada = false;
+    if (fotoTab === "camara") {
+      document.getElementById("foto-camara-idle")?.classList.remove("hidden");
+      document.getElementById("foto-seccion-camara")?.classList.remove("hidden");
+      document.getElementById("foto-seccion-subir")?.classList.add("hidden");
+    } else {
+      document.getElementById("foto-seccion-subir")?.classList.remove("hidden");
+      const input = document.getElementById("foto-upload-input") as HTMLInputElement | null;
+      if (input) input.value = "";
+    }
   });
 
   // Submit del formulario (demo - sin validaciones bloqueantes)
