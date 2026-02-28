@@ -1,0 +1,315 @@
+---
+import DashboardLayout from '../../../layouts/DashboardLayout.astro';
+import Card from '../../../components/ui/Card.astro';
+import Button from '../../../components/ui/Button.astro';
+
+// Configuraciones mock del mes para la grilla
+const daysOfWeek = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+
+// Generación de un mes de ejemplo (ej. Febrero 2026)
+// El mes inicia en domingo (índice 6) por facilidad de representación, ajustamos para que parta en Lunes.
+const blankDays = 6; // Días vacíos previos (febrero empezaría domingo, o depende del mes real).
+const daysInMonth = Array.from({ length: 28 }, (_, i) => {
+  const dayNum = i + 1;
+  const hoyStr = new Date().toISOString().split('T')[0]; // Hoy real simulado
+  const isPast = dayNum < 28; // Simulando que estamos en el 28
+
+  // Dummy logic: asignar descuadre aleatorio a algunos días
+  const hasDescuadre = dayNum === 15 || dayNum === 20;
+  
+  // Dummy logic para "hace más de 48 horas"
+  const isLocked = dayNum <= 25; // Si hoy es 28, del 25 hacia atrás está bloqueado (>48h appx)
+
+  return {
+    dayNum,
+    closedBy: isPast ? (dayNum % 2 === 0 ? 'Ana M.' : 'Pedro S.') : null,
+    status: isPast ? (hasDescuadre ? 'descuadre' : 'ok') : 'pending',
+    monto: hasDescuadre ? -5000 : 150000,
+    isLocked,
+    isToday: dayNum === 28
+  };
+});
+---
+
+<DashboardLayout title="Historial - Cuadraturas">
+  <!-- Header -->
+  <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+      <div class="flex items-center gap-2 text-sm text-slate-500 mb-2">
+        <a href="/dashboard" class="hover:text-slate-900 transition-colors">Inicio</a>
+        <span>/</span>
+        <a href="/contabilidad/cuadratura" class="hover:text-slate-900 transition-colors">Contabilidad</a>
+        <span>/</span>
+        <span class="text-slate-900 font-medium">Historial</span>
+      </div>
+      <h1 class="text-3xl font-bold text-slate-800 tracking-tight">Historial de Cuadraturas</h1>
+    </div>
+
+    <div class="flex items-center gap-3">
+       <!-- Selector de mes/año (Visual) -->
+      <div class="flex items-center bg-white border border-slate-300 rounded-lg shadow-sm h-10 px-2">
+        <button class="p-1 text-slate-400 hover:text-slate-700 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        </button>
+        <span class="px-3 font-semibold text-slate-700 text-sm w-32 text-center">Febrero 2026</span>
+        <button class="p-1 text-slate-400 hover:text-slate-700 transition disabled:opacity-50" disabled>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+
+      <Button href="/contabilidad/cuadratura" variant="primary" class="shadow-sm bg-indigo-600 hover:bg-indigo-700 text-white">
+        Volver a Hoy
+      </Button>
+    </div>
+  </div>
+
+  <!-- Calendario Contable -->
+  <Card class="mb-8 p-0 overflow-hidden border border-slate-200 shadow-sm">
+    <!-- Header Días -->
+    <div class="grid grid-cols-7 bg-slate-50 border-b border-slate-200">
+      {daysOfWeek.map(day => (
+        <div class="py-3 text-center text-xs font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 last:border-0">
+          {day}
+        </div>
+      ))}
+    </div>
+
+    <!-- Grilla -->
+    <div class="grid grid-cols-7 auto-rows-[120px]">
+      <!-- Espacios vacíos antes del primer día del mes -->
+      {Array.from({ length: blankDays }).map(() => (
+        <div class="border-b border-r border-slate-100 bg-slate-50/50"></div>
+      ))}
+
+      <!-- Días del Mes -->
+      {daysInMonth.map(day => (
+        <div 
+          class={`relative border-b border-r border-slate-200 p-2 flex flex-col transition-colors group ${
+            day.status !== 'pending' ? 'cursor-pointer hover:bg-slate-50' : 'bg-slate-50/30'
+          } ${day.isToday ? 'bg-indigo-50/30' : ''}`}
+          onclick={day.status !== 'pending' ? `openModal(${JSON.stringify(day)})` : undefined}
+        >
+          <!-- Número de día -->
+          <div class="flex justify-between items-start mb-2">
+            <span class={`text-sm font-semibold ${day.isToday ? 'bg-indigo-600 text-white w-6 h-6 rounded-full flex items-center justify-center -ml-1 -mt-1 shadow-sm' : 'text-slate-500 rounded'}`}>
+              {day.dayNum}
+            </span>
+            {day.isLocked && day.status !== 'pending' && (
+              <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" title="Bloqueado (>48h)"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            )}
+          </div>
+
+          <!-- Contenido del día -->
+          {day.status !== 'pending' ? (
+            <div class="flex-1 flex flex-col justify-between">
+              <div>
+                 <span class={`inline-block w-full text-center text-xs font-bold px-1.5 py-1 rounded border shadow-sm truncate ${
+                  day.status === 'ok' 
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                    : 'bg-rose-50 text-rose-700 border-rose-200'
+                }`}>
+                  {day.status === 'ok' ? 'Cuadrado' : `Descuadre`}
+                </span>
+                
+                {day.status === 'ok' ? (
+                  <p class="text-[10px] text-center text-emerald-600 font-mono mt-1 font-semibold truncate">+ $150k</p>
+                ) : (
+                  <p class="text-[10px] text-center text-rose-600 font-mono mt-1 font-bold truncate">- $5.000</p>
+                )}
+              </div>
+
+              <div class="mt-auto flex items-center gap-1 text-[10px] text-slate-500">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                <span class="truncate">{day.closedBy}</span>
+              </div>
+            </div>
+          ) : (
+            <div class="flex-1 flex items-center justify-center">
+              {day.isToday ? (
+                 <span class="text-xs font-medium text-indigo-500 bg-indigo-50 px-2 py-1 rounded-full absolute bottom-2">En curso</span>
+              ) : (
+                 <span class="w-1.5 h-1.5 rounded-full bg-slate-200"></span>
+              )}
+            </div>
+          )}
+        </div>
+      ))}
+      
+      <!-- Relleno final -->
+       {Array.from({ length: 42 - (28 + blankDays) }).map(() => (
+        <div class="border-b border-r border-slate-100 bg-slate-50/50"></div>
+      ))}
+    </div>
+  </Card>
+
+  <!-- Slide-over Modal para el Detalle y Bloqueo 48h (Oculto por defecto) -->
+  <div id="slideover" class="fixed inset-0 z-50 hidden" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity opacity-0" id="slideover-backdrop" aria-hidden="true"></div>
+
+    <div class="fixed inset-y-0 right-0 flex max-w-full pl-10">
+       <div class="pointer-events-auto w-screen max-w-md transform transition ease-in-out duration-300 translate-x-full" id="slideover-panel">
+          <div class="flex h-full flex-col bg-white shadow-xl">
+            <!-- Modal Header -->
+            <div class="px-6 py-6 border-b border-slate-200 bg-slate-50">
+              <div class="flex items-center justify-between">
+                <h2 class="text-xl font-bold text-slate-800" id="modal-title">Cuadratura</h2>
+                <button type="button" class="rounded-md bg-transparent text-slate-400 hover:text-slate-600 focus:outline-none" onclick="closeModal()">
+                  <span class="sr-only">Cerrar panel</span>
+                  <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+              </div>
+              <p class="text-sm text-slate-500 mt-1" id="modal-subtitle">Detalle del cierre de caja.</p>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+              
+              <!-- Banner 48h Lock (Dinámico) -->
+              <div id="modal-lock-banner" class="rounded-lg bg-yellow-50 border border-yellow-200 p-4 hidden">
+                <div class="flex items-start gap-3">
+                  <svg class="w-6 h-6 text-yellow-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                  <div>
+                    <h3 class="text-sm font-bold text-yellow-800">Documento bloqueado</h3>
+                    <p class="text-sm text-yellow-700 mt-1">
+                      Han pasado más de 48 horas desde su cierre. Este documento es de solo lectura por políticas de contabilidad.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Resumen Financiero Dummy -->
+              <div>
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Resumen del Día</h3>
+                <div class="space-y-3">
+                  <div class="flex justify-between items-center text-sm border-b border-dashed border-slate-200 pb-2">
+                    <span class="text-slate-600">Total Ingresos</span>
+                    <span class="font-bold text-indigo-700 font-mono" id="modal-ingresos">$160.000</span>
+                  </div>
+                  <div class="flex justify-between items-center text-sm border-b border-dashed border-slate-200 pb-2">
+                    <span class="text-slate-600">Total Egresos</span>
+                    <span class="font-bold text-orange-600 font-mono" id="modal-egresos">$10.000</span>
+                  </div>
+                  <div class="flex justify-between items-center text-sm border-b border-slate-200 pb-3">
+                    <span class="text-slate-700 font-semibold">Efectivo Arqueado</span>
+                    <span class="font-black text-emerald-700 text-lg font-mono" id="modal-efectivo">$150.000</span>
+                  </div>
+                  
+                  <!-- Bloque Descuadre (Solo muestra si hay) -->
+                  <div id="modal-descuadre-block" class="rounded-lg bg-rose-50 border border-rose-100 p-3 mt-4 hidden">
+                    <div class="flex justify-between items-center text-sm mb-2">
+                      <span class="text-rose-700 font-bold">Descuadre Reportado</span>
+                      <span class="font-black text-rose-700 font-mono" id="modal-descuadre-monto">-$5.000</span>
+                    </div>
+                    <div>
+                      <span class="text-xs font-semibold text-rose-500 uppercase">Justificación:</span>
+                      <p class="text-sm text-rose-800 italic mt-0.5">"Se entregó mal vuelto a alumno al pagar matrícula."</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Detalles de Operación</h3>
+                <div class="bg-slate-50 rounded-lg border border-slate-200 p-3 text-sm space-y-2">
+                  <div class="flex justify-between">
+                    <span class="text-slate-500">Cerrado por:</span>
+                    <span class="font-medium text-slate-800" id="modal-user">Ana M.</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-slate-500">Hora de cierre:</span>
+                    <span class="font-medium text-slate-800">18:45 hrs</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Modal Footer (Acciones) -->
+            <div class="px-6 py-4 border-t border-slate-200 bg-slate-50 space-y-3">
+              <Button variant="secondary" class="w-full justify-center shadow-sm bg-white border-slate-300">
+                <span class="mr-2">📄</span> Exportar PDF
+              </Button>
+              <Button variant="primary" id="btn-modal-edit" class="w-full justify-center shadow-sm bg-indigo-600 hover:bg-indigo-700 text-white">
+                Editar Cuadratura
+              </Button>
+            </div>
+          </div>
+       </div>
+    </div>
+  </div>
+</DashboardLayout>
+
+<!-- Script para el UI del Slideover y Lógica Visual -->
+<script is:inline>
+  const slideover = document.getElementById('slideover');
+  const slideoverBackdrop = document.getElementById('slideover-backdrop');
+  const slideoverPanel = document.getElementById('slideover-panel');
+
+  const modalTitle = document.getElementById('modal-title');
+  const modalSubtitle = document.getElementById('modal-subtitle');
+  const modalLockBanner = document.getElementById('modal-lock-banner');
+  const btnModalEdit = document.getElementById('btn-modal-edit');
+  const modalUser = document.getElementById('modal-user');
+  
+  const descuadreBlock = document.getElementById('modal-descuadre-block');
+
+  function openModal(dayData) {
+    if (!slideover || !slideoverBackdrop || !slideoverPanel) return;
+
+    // Poblar datos estáticos de ejemplo
+    if(modalTitle) modalTitle.textContent = `Cuadratura: ${dayData.dayNum} Feb 2026`;
+    if(modalUser) modalUser.textContent = dayData.closedBy;
+    
+    // Lógica visual del descuadre
+    if(dayData.status === 'descuadre') {
+      descuadreBlock?.classList.remove('hidden');
+    } else {
+      descuadreBlock?.classList.add('hidden');
+    }
+
+    // Regla de Negocio: Bloqueo de 48 hrs
+    if (dayData.isLocked) {
+      modalLockBanner?.classList.remove('hidden');
+      if (btnModalEdit) btnModalEdit.style.display = 'none'; // ocultar botón editar
+    } else {
+      modalLockBanner?.classList.add('hidden');
+      if (btnModalEdit) btnModalEdit.style.display = 'flex'; // mostrar botón editar
+    }
+
+    // Mostrar modal con animaciones de Tailwind
+    slideover.classList.remove('hidden');
+    // peq timeout para trigger de las transiciones CSS
+    setTimeout(() => {
+      slideoverBackdrop.classList.remove('opacity-0');
+      slideoverBackdrop.classList.add('opacity-100');
+      
+      slideoverPanel.classList.remove('translate-x-full');
+      slideoverPanel.classList.add('translate-x-0');
+    }, 10);
+  }
+
+  function closeModal() {
+    if (!slideover || !slideoverBackdrop || !slideoverPanel) return;
+
+    // Revertir animaciones
+    slideoverBackdrop.classList.add('opacity-0');
+    slideoverBackdrop.classList.remove('opacity-100');
+    
+    slideoverPanel.classList.add('translate-x-full');
+    slideoverPanel.classList.remove('translate-x-0');
+
+    // Ocultar wrapper tras completarse la animación
+    setTimeout(() => {
+      slideover.classList.add('hidden');
+    }, 300);
+  }
+
+  // Cerrar al clickear el backdrop
+  if (slideoverBackdrop) {
+    slideoverBackdrop.addEventListener('click', closeModal);
+  }
+
+  // Exponer a formato global para el onclick desde JSX/Astro
+  window.openModal = openModal;
+  window.closeModal = closeModal;
+</script>
