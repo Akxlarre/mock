@@ -1,0 +1,94 @@
+---
+/**
+ * Documentos de un alumno - DMS (Vista Secretaria)
+ * Sin botón Eliminar (solo admin puede eliminar)
+ */
+import DashboardLayout from "../../../../layouts/DashboardLayout.astro";
+import Card from "../../../../components/ui/Card.astro";
+import Button from "../../../../components/ui/Button.astro";
+import UploadDocumentoModal from "../../../../components/documentos/UploadDocumentoModal.astro";
+import { ESCUELA_ACTUAL } from "../../../../lib/mockData";
+import {
+  getDocumentosByAlumno,
+  LABELS_TIPO_ALUMNO,
+} from "../../../../lib/mockDocumentos";
+
+export function getStaticPaths() {
+  return [
+    { params: { id: "1" } },
+    { params: { id: "2" } },
+    { params: { id: "3" } },
+  ];
+}
+
+const { id } = Astro.params;
+const alumnoId = parseInt(id ?? "1");
+const documentos = getDocumentosByAlumno(alumnoId);
+
+const alumno = documentos[0]
+  ? { nombre: documentos[0].alumnoNombre, rut: documentos[0].alumnoRut }
+  : { nombre: "Alumno", rut: "—" };
+---
+
+<DashboardLayout title={`Documentos - ${alumno.nombre}`} escuela={ESCUELA_ACTUAL} userRole="secretaria">
+  <div class="mb-8">
+    <div class="flex items-center gap-2 text-sm text-secondary mb-2">
+      <a href="/secretaria/documentos" class="hover:text-gray-900">Repositorio DMS</a>
+      <span>/</span>
+      <a href="/secretaria/documentos" class="hover:text-gray-900">Documentos del alumno</a>
+      <span>/</span>
+      <span class="text-gray-900 font-medium">{alumno.nombre}</span>
+    </div>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-semibold text-gray-900 tracking-tight">{alumno.nombre}</h1>
+        <p class="text-secondary mt-1">{alumno.rut}</p>
+      </div>
+      <a href="#modal-subir" class="inline-flex items-center justify-center h-11 px-4 text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+        </svg>
+        Subir documento
+      </a>
+    </div>
+  </div>
+
+  <Card>
+    {documentos.length === 0 ? (
+      <div class="text-center py-12">
+        <svg class="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        <p class="text-gray-600 font-medium">Sin documentos</p>
+        <p class="text-sm text-secondary mt-1">Este alumno aún no tiene documentos en el repositorio.</p>
+      </div>
+    ) : (
+      <ul class="divide-y divide-gray-200">
+        {documentos.map((doc) => (
+          <li class="flex items-center justify-between py-4 hover:bg-gray-50 -mx-4 px-4 rounded-lg">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+              </div>
+              <div>
+                <p class="font-medium text-gray-900">{doc.nombreArchivo}</p>
+                <p class="text-xs text-secondary">
+                  {LABELS_TIPO_ALUMNO[doc.tipo]} · Subido el {doc.fechaSubida} por {doc.subidoPor}
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <Button variant="ghost" class="text-sm" onClick="alert('Ver documento (mockup)')">
+                Ver
+              </Button>
+            </div>
+          </li>
+        ))}
+      </ul>
+    )}
+  </Card>
+
+  <UploadDocumentoModal id="modal-subir" titulo="Subir documento" tipo="alumno" alumnoId={alumnoId} alumnoNombre={alumno.nombre} />
+</DashboardLayout>

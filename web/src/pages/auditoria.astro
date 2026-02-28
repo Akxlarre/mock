@@ -8,11 +8,28 @@ import Card from "../components/ui/Card.astro";
 import Button from "../components/ui/Button.astro";
 import Input from "../components/ui/Input.astro";
 
+/**
+ * Política de correos en auditoría:
+ * Se registra el correo PERSONAL de cada usuario para trazabilidad inequívoca.
+ * El correo institucional (alias) es compartido y no identifica a la persona.
+ */
 const logs = [
+    {
+        id: 1,
+        timestamp: "2026-02-03 15:10:33",
+        user: "jadmin@gmail.com",
+        userName: "Jorge Administrador",
+        action: "update",
+        module: "Usuarios",
+        entity: "Secretaria #3",
+        details: "Cambió estado de Carmen Silva a 'activo'",
+        ip: "192.168.1.100",
+    },
     {
         id: 2,
         timestamp: "2026-02-03 14:25:08",
-        user: "secretaria@escuela.cl",
+        user: "patsecretaria@gmail.com",
+        userName: "Patricia Secretaria",
         action: "update",
         module: "Matrículas",
         entity: "Matrícula #45",
@@ -22,28 +39,30 @@ const logs = [
     {
         id: 4,
         timestamp: "2026-02-03 12:08:19",
-        user: "secretaria@escuela.cl",
+        user: "patsecretaria@gmail.com",
+        userName: "Patricia Secretaria",
         action: "force_override",
         module: "Agenda",
         entity: "Clase #789",
-        details:
-            "Canceló clase con menos de 24hrs - Motivo: Emergencia vehículo",
+        details: "Canceló clase con menos de 24hrs - Motivo: Emergencia vehículo",
         ip: "192.168.1.105",
     },
     {
         id: 6,
         timestamp: "2026-02-03 10:22:55",
-        user: "secretaria@escuela.cl",
+        user: "mgonzalez.sec@gmail.com",
+        userName: "María González",
         action: "update",
         module: "Alumnos",
         entity: "Alumno #123",
         details: "Actualizó teléfono de contacto",
-        ip: "192.168.1.105",
+        ip: "192.168.1.112",
     },
     {
         id: 8,
         timestamp: "2026-02-02 16:45:22",
-        user: "secretaria@escuela.cl",
+        user: "patsecretaria@gmail.com",
+        userName: "Patricia Secretaria",
         action: "create",
         module: "Matrículas",
         entity: "Matrícula",
@@ -53,12 +72,13 @@ const logs = [
     {
         id: 10,
         timestamp: "2026-02-02 14:12:44",
-        user: "secretaria@escuela.cl",
+        user: "mgonzalez.sec@gmail.com",
+        userName: "María González",
         action: "update",
         module: "Agenda",
         entity: "Clase #567",
         details: "Reagendó clase del 05/02 al 07/02",
-        ip: "192.168.1.105",
+        ip: "192.168.1.112",
     },
 ];
 
@@ -123,10 +143,10 @@ const actionIcons: Record<string, string> = {
                     Usuario
                 </label>
                 <select class="h-11 px-4 w-full text-sm bg-white rounded-md border border-gray-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-900 appearance-none" style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E&quot;); background-repeat: no-repeat; background-position: right 0.5rem center; background-size: 1.5em 1.5em; padding-right: 2.5rem;">
-                    <option value="">Todas las secretarias</option>
-                    <option value="secretaria@escuela.cl"
-                        >secretaria@escuela.cl</option
-                    >
+                    <option value="">Todos los usuarios</option>
+                    <option value="jadmin@gmail.com">jadmin@gmail.com — Jorge Administrador</option>
+                    <option value="patsecretaria@gmail.com">patsecretaria@gmail.com — Patricia Secretaria</option>
+                    <option value="mgonzalez.sec@gmail.com">mgonzalez.sec@gmail.com — María González</option>
                 </select>
             </div>
 
@@ -261,8 +281,9 @@ const actionIcons: Record<string, string> = {
                                 <td class="py-3 px-4 text-sm text-gray-700 whitespace-nowrap">
                                     {log.timestamp}
                                 </td>
-                                <td class="py-3 px-4 text-sm text-gray-900 font-medium">
-                                    {log.user}
+                                <td class="py-3 px-4">
+                                    <p class="text-sm text-gray-900 font-medium">{log.userName}</p>
+                                    <p class="text-xs text-secondary">{log.user}</p>
                                 </td>
                                 <td class="py-3 px-4">
                                     <span
@@ -330,6 +351,18 @@ const actionIcons: Record<string, string> = {
             </div>
         </div>
     </Card>
+
+    <!-- Política de correos -->
+    <div class="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-2">
+        <svg class="w-4 h-4 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <p class="text-xs text-amber-800">
+            <span class="font-semibold">Política de correos:</span>
+            El log registra el <strong>correo personal</strong> de cada usuario (no el alias institucional) para garantizar trazabilidad inequívoca.
+            El alias público (ej. <code class="bg-amber-100 px-1 rounded">secretaria@autoescuela-chillan.cl</code>) puede ser compartido; el correo personal identifica a la persona real.
+        </p>
+    </div>
 
     <!-- Información adicional -->
     <div class="grid md:grid-cols-2 gap-4 mt-6">

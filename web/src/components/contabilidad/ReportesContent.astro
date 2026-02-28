@@ -3,6 +3,7 @@
  * Reportes Contables — Componente compartido admin/secretaria
  * RF-030: Reporte contable mensual exportable a PDF y Excel con resumen por sección
  * RF-031: Cálculo de Total Neto (Total Ingresos - Total Gastos) por rango de fechas
+ * RF-xxx: Separación de datos por escuela (Autoescuela Chillán / Conductores Chillán)
  */
 import Card from "../ui/Card.astro";
 import Button from "../ui/Button.astro";
@@ -13,19 +14,55 @@ interface Props {
 
 const { basePath = "" } = Astro.props;
 
-// ── DATOS MOCK: Resumen mensual ────────────────────────────
-const meses = [
-    { mes: "Enero 2026", ingresos: 4850000, gastos: 1230000 },
-    { mes: "Febrero 2026", ingresos: 3620000, gastos: 980000 },
-];
+// ── DATOS MOCK POR ESCUELA ──────────────────────────────────
+// Cada empresa es una entidad independiente con sus propios números.
+// "Autoescuela Chillán" → solo Clase B
+// "Conductores Chillán" → Clase B + Profesional
 
-const ingresosPorCategoria = [
-    { categoria: "Clase B", cantidad: 18, total: 5040000, porcentaje: 59.5 },
-    { categoria: "Profesional", cantidad: 6, total: 2280000, porcentaje: 26.9 },
-    { categoria: "Psicotécnico", cantidad: 12, total: 480000, porcentaje: 5.7 },
-    { categoria: "Clases Extra", cantidad: 15, total: 375000, porcentaje: 4.4 },
-    { categoria: "Certificados", cantidad: 20, total: 300000, porcentaje: 3.5 },
-];
+const datosPorEscuela = {
+    "autoescuela-chillan": {
+        nombre: "Autoescuela Chillán",
+        meses: [
+            { mes: "Enero 2026", ingresos: 3100000, gastos: 820000 },
+            { mes: "Febrero 2026", ingresos: 2400000, gastos: 640000 },
+        ],
+        ingresosPorCategoria: [
+            { categoria: "Clase B", cantidad: 18, total: 5040000, porcentaje: 73.5 },
+            { categoria: "Psicotécnico", cantidad: 12, total: 480000, porcentaje: 7.0 },
+            { categoria: "Clases Extra", cantidad: 15, total: 375000, porcentaje: 5.5 },
+            { categoria: "Certificados", cantidad: 20, total: 960000, porcentaje: 14.0 },
+        ],
+    },
+    "conductores-chillan": {
+        nombre: "Conductores Chillán",
+        meses: [
+            { mes: "Enero 2026", ingresos: 1750000, gastos: 410000 },
+            { mes: "Febrero 2026", ingresos: 1220000, gastos: 340000 },
+        ],
+        ingresosPorCategoria: [
+            { categoria: "Clase B", cantidad: 5, total: 1400000, porcentaje: 38.0 },
+            { categoria: "Profesional", cantidad: 6, total: 2280000, porcentaje: 61.9 },
+        ],
+    },
+    "ambas": {
+        nombre: "Ambas escuelas",
+        meses: [
+            { mes: "Enero 2026", ingresos: 4850000, gastos: 1230000 },
+            { mes: "Febrero 2026", ingresos: 3620000, gastos: 980000 },
+        ],
+        ingresosPorCategoria: [
+            { categoria: "Clase B (A. Chillán)", cantidad: 18, total: 5040000, porcentaje: 59.5 },
+            { categoria: "Profesional (C. Chillán)", cantidad: 6, total: 2280000, porcentaje: 26.9 },
+            { categoria: "Psicotécnico", cantidad: 12, total: 480000, porcentaje: 5.7 },
+            { categoria: "Clases Extra", cantidad: 15, total: 375000, porcentaje: 4.4 },
+            { categoria: "Certificados", cantidad: 20, total: 300000, porcentaje: 3.5 },
+        ],
+    },
+};
+
+// Usar datos consolidados como default SSR (el filtro real es client-side)
+const meses = datosPorEscuela["ambas"].meses;
+const ingresosPorCategoria = datosPorEscuela["ambas"].ingresosPorCategoria;
 
 const egresosPorCategoria = [
     { categoria: "Bencina", cantidad: 45, total: 850000, porcentaje: 38.5 },
@@ -72,9 +109,40 @@ const detallesDiarios = [
     <div>
         <h1 class="text-3xl font-semibold text-gray-900">Reportes Contables</h1>
         <p class="text-secondary mt-1">
-            RF-030 / RF-031 · Resumen financiero y Total Neto por rango de
-            fechas
+            RF-030 / RF-031 · Resumen financiero y Total Neto por rango de fechas
         </p>
+    </div>
+    <!-- Selector de escuela (dropdown) -->
+    <div class="relative self-start sm:self-auto" data-reportes-escuela-selector>
+        <button
+            type="button"
+            id="badge-escuela"
+            aria-haspopup="listbox"
+            aria-expanded="false"
+            aria-label="Cambiar escuela para el reporte"
+            class="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-300 text-sm font-medium text-gray-700 transition-colors cursor-pointer"
+        >
+            <span id="badge-dot" class="w-2.5 h-2.5 rounded-full bg-gray-400 shrink-0"></span>
+            <span id="badge-nombre">Ambas escuelas</span>
+            <svg class="w-4 h-4 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+        </button>
+        <div
+            id="reportes-escuela-dropdown"
+            role="listbox"
+            class="hidden absolute right-0 top-full mt-1.5 min-w-[180px] bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-50"
+        >
+            <button type="button" role="option" class="reportes-escuela-option block w-full text-left px-3 py-2.5 text-sm text-gray-900 hover:bg-gray-100 first:rounded-t-lg transition-colors" data-escuela-id="ambas">
+                Ambas escuelas
+            </button>
+            <button type="button" role="option" class="reportes-escuela-option block w-full text-left px-3 py-2.5 text-sm text-gray-900 hover:bg-gray-100 transition-colors" data-escuela-id="autoescuela-chillan">
+                Autoescuela Chillán
+            </button>
+            <button type="button" role="option" class="reportes-escuela-option block w-full text-left px-3 py-2.5 text-sm text-gray-900 hover:bg-gray-100 last:rounded-b-lg transition-colors" data-escuela-id="conductores-chillan">
+                Conductores Chillán
+            </button>
+        </div>
     </div>
 </div>
 
@@ -83,6 +151,7 @@ const detallesDiarios = [
 <!-- ═══════════════════════════════════════════════════════════ -->
 <Card class="mb-6">
     <div class="flex flex-wrap items-end gap-4">
+
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
                 >Rango</label
@@ -195,7 +264,7 @@ const detallesDiarios = [
             <span class="text-2xl">📈</span>
             <p class="text-sm font-semibold text-gray-900">Total Ingresos</p>
         </div>
-        <p class="text-3xl font-bold text-green-700">
+        <p id="kpi-ingresos" class="text-3xl font-bold text-green-700">
             ${totalIngresos.toLocaleString("es-CL")}
         </p>
         <p class="text-xs text-green-600 mt-2">
@@ -211,7 +280,7 @@ const detallesDiarios = [
             <span class="text-2xl">📉</span>
             <p class="text-sm font-semibold text-gray-900">Total Gastos</p>
         </div>
-        <p class="text-3xl font-bold text-red-700">
+        <p id="kpi-gastos" class="text-3xl font-bold text-red-700">
             ${totalGastos.toLocaleString("es-CL")}
         </p>
         <p class="text-xs text-red-600 mt-2">
@@ -229,6 +298,7 @@ const detallesDiarios = [
             </p>
         </div>
         <p
+            id="kpi-neto"
             class={`text-3xl font-bold ${totalNeto >= 0 ? "text-blue-700" : "text-orange-700"}`}
         >
             ${totalNeto.toLocaleString("es-CL")}
@@ -256,8 +326,9 @@ const detallesDiarios = [
                 </p>
             </div>
             <div class="text-right">
+                <p id="banner-escuela" class="text-xs text-gray-300 mb-1">Ambas escuelas</p>
                 <p class="text-xs text-gray-400">Margen de ganancia</p>
-                <p class="text-3xl font-bold text-green-400">
+                <p id="kpi-margen" class="text-3xl font-bold text-green-400">
                     {
                         totalIngresos > 0
                             ? ((totalNeto / totalIngresos) * 100).toFixed(1)
@@ -281,7 +352,7 @@ const detallesDiarios = [
             Ingresos por Categoría
         </h2>
 
-        <div class="space-y-3">
+        <div id="tbody-ingresos" class="space-y-3">
             {
                 ingresosPorCategoria.map((item) => (
                     <div class="flex items-center gap-3">
@@ -316,7 +387,7 @@ const detallesDiarios = [
 
         <div class="mt-4 pt-3 border-t border-gray-200 flex justify-between">
             <span class="text-sm font-bold text-gray-900">Total Ingresos</span>
-            <span class="text-sm font-bold text-green-700"
+            <span id="total-ingresos" class="text-sm font-bold text-green-700"
                 >${totalIngresos.toLocaleString("es-CL")}</span
             >
         </div>
@@ -567,6 +638,148 @@ const detallesDiarios = [
         </table>
     </div>
 </Card>
+
+<script is:inline>
+// ── DATOS POR ESCUELA (client-side) ───────────────────────
+const DATOS_ESCUELA = {
+    "ambas": {
+        nombre: "Ambas escuelas",
+        dotColor: "bg-gray-400",
+        ingresos: 8475000,
+        gastos: 2210000,
+        categorias: [
+            { nombre: "Clase B (A. Chillán)", monto: 5040000, pct: 59.5, ops: 18, color: "bg-blue-500" },
+            { nombre: "Profesional (C. Chillán)", monto: 2280000, pct: 26.9, ops: 6, color: "bg-purple-500" },
+            { nombre: "Psicotécnico", monto: 480000, pct: 5.7, ops: 12, color: "bg-green-500" },
+            { nombre: "Clases Extra", monto: 375000, pct: 4.4, ops: 15, color: "bg-green-500" },
+            { nombre: "Certificados", monto: 300000, pct: 3.5, ops: 20, color: "bg-green-500" },
+        ],
+    },
+    "autoescuela-chillan": {
+        nombre: "Autoescuela Chillán",
+        dotColor: "bg-blue-500",
+        ingresos: 6855000,
+        gastos: 1460000,
+        categorias: [
+            { nombre: "Clase B", monto: 5040000, pct: 73.5, ops: 18, color: "bg-green-500" },
+            { nombre: "Psicotécnico", monto: 480000, pct: 7.0, ops: 12, color: "bg-green-500" },
+            { nombre: "Clases Extra", monto: 375000, pct: 5.5, ops: 15, color: "bg-green-500" },
+            { nombre: "Certificados", monto: 960000, pct: 14.0, ops: 20, color: "bg-green-500" },
+        ],
+    },
+    "conductores-chillan": {
+        nombre: "Conductores Chillán",
+        dotColor: "bg-purple-500",
+        ingresos: 3680000,
+        gastos: 750000,
+        categorias: [
+            { nombre: "Clase B", monto: 1400000, pct: 38.0, ops: 5, color: "bg-green-500" },
+            { nombre: "Profesional", monto: 2280000, pct: 62.0, ops: 6, color: "bg-green-500" },
+        ],
+    },
+};
+
+function fmt(n) { return n.toLocaleString("es-CL"); }
+
+function actualizarReporte(escuelaId) {
+    const d = DATOS_ESCUELA[escuelaId];
+    if (!d) return;
+    const neto = d.ingresos - d.gastos;
+    const margen = d.ingresos > 0 ? ((neto / d.ingresos) * 100).toFixed(1) : "0";
+
+    // Badge escuela
+    const dot = document.getElementById("badge-dot");
+    const nombre = document.getElementById("badge-nombre");
+    if (dot) dot.className = "w-2.5 h-2.5 rounded-full shrink-0 " + d.dotColor;
+    if (nombre) nombre.textContent = d.nombre;
+
+    // KPIs
+    const elIngresos = document.getElementById("kpi-ingresos");
+    const elGastos = document.getElementById("kpi-gastos");
+    const elNeto = document.getElementById("kpi-neto");
+    const elMargen = document.getElementById("kpi-margen");
+    if (elIngresos) elIngresos.textContent = "$" + fmt(d.ingresos);
+    if (elGastos) elGastos.textContent = "$" + fmt(d.gastos);
+    if (elNeto) elNeto.textContent = "$" + fmt(neto);
+    if (elMargen) elMargen.textContent = margen + "%";
+
+    // Banner del período
+    const elBannerEscuela = document.getElementById("banner-escuela");
+    if (elBannerEscuela) elBannerEscuela.textContent = "Escuela: " + d.nombre;
+
+    // Tabla de ingresos por categoría
+    const tbody = document.getElementById("tbody-ingresos");
+    const totalRow = document.getElementById("total-ingresos");
+    if (tbody) {
+        tbody.innerHTML = d.categorias.map(c => `
+            <div class="flex items-center gap-3">
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-sm font-medium text-gray-900">${c.nombre}</span>
+                        <span class="text-sm font-bold text-green-700">$${fmt(c.monto)}</span>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-2.5">
+                        <div class="${c.color} h-2.5 rounded-full" style="width:${c.pct}%"></div>
+                    </div>
+                    <div class="flex justify-between mt-1">
+                        <span class="text-xs text-gray-500">${c.ops} operaciones</span>
+                        <span class="text-xs text-gray-500">${c.pct}%</span>
+                    </div>
+                </div>
+            </div>
+        `).join("");
+    }
+    if (totalRow) totalRow.textContent = "$" + fmt(d.ingresos);
+}
+
+function initReportesEscuelaSelector() {
+    const btn = document.getElementById("badge-escuela");
+    const dropdown = document.getElementById("reportes-escuela-dropdown");
+
+    if (!btn || !dropdown) return;
+
+    // Toggle dropdown al hacer clic en el botón
+    btn.onclick = function (e) {
+        e.stopPropagation();
+        const isHidden = dropdown.classList.contains("hidden");
+        if (isHidden) {
+            dropdown.classList.remove("hidden");
+            btn.setAttribute("aria-expanded", "true");
+        } else {
+            dropdown.classList.add("hidden");
+            btn.setAttribute("aria-expanded", "false");
+        }
+    };
+
+    document.querySelectorAll(".reportes-escuela-option").forEach(function (opt) {
+        opt.onclick = function (e) {
+            e.stopPropagation();
+            const id = opt.getAttribute("data-escuela-id");
+            if (id) {
+                actualizarReporte(id);
+                dropdown.classList.add("hidden");
+                btn.setAttribute("aria-expanded", "false");
+            }
+        };
+    });
+
+    document.addEventListener("click", function (e) {
+        if (!dropdown.contains(e.target) && !btn.contains(e.target)) {
+            dropdown.classList.add("hidden");
+            btn.setAttribute("aria-expanded", "false");
+        }
+    });
+
+    actualizarReporte("ambas");
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initReportesEscuelaSelector);
+} else {
+    initReportesEscuelaSelector();
+}
+document.addEventListener("astro:page-load", initReportesEscuelaSelector);
+</script>
 
 <script is:inline>
     window.aplicarFiltro = function () {

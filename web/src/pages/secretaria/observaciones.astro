@@ -1,0 +1,273 @@
+---
+/**
+ * Observaciones al Administrador — Vista Secretaria
+ * Bitácora interna: la secretaria deja observaciones y recordatorios dirigidos al admin.
+ * El admin las ve en su panel; la secretaria puede ver el estado (pendiente/visto/resuelto).
+ */
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import Card from "../../components/ui/Card.astro";
+import Button from "../../components/ui/Button.astro";
+import { ESCUELA_ACTUAL } from "../../lib/mockData";
+
+type TipoObservacion = "observacion" | "recordatorio" | "urgente";
+type EstadoObservacion = "pendiente" | "visto" | "resuelto";
+
+interface Observacion {
+  id: number;
+  tipo: TipoObservacion;
+  texto: string;
+  fechaLimite?: string;
+  creadaEn: string;
+  estado: EstadoObservacion;
+  respuestaAdmin?: string;
+}
+
+// Mock: historial de observaciones enviadas
+const OBSERVACIONES: Observacion[] = [
+  {
+    id: 1,
+    tipo: "urgente",
+    texto: "Faltaron $15.000 en la caja del día 24/02. Revisé dos veces. Podría ser error del vuelto de la mañana con el alumno Pérez.",
+    creadaEn: "24/02/2026 18:41",
+    estado: "resuelto",
+    respuestaAdmin: "Revisado. El error fue en el vuelto de $15.000. Corregido en cuadratura.",
+  },
+  {
+    id: 2,
+    tipo: "recordatorio",
+    texto: "El seguro del vehículo DEF-456 vence el 05/03. Hay que renovarlo antes de esa fecha.",
+    fechaLimite: "03/03/2026",
+    creadaEn: "25/02/2026 09:15",
+    estado: "visto",
+  },
+  {
+    id: 3,
+    tipo: "observacion",
+    texto: "El alumno Sebastián Mora (ficha 17.654.321-2) solicitó fraccionamiento de pago fuera del plan estándar. ¿Se autoriza excepción?",
+    creadaEn: "26/02/2026 11:30",
+    estado: "pendiente",
+  },
+  {
+    id: 4,
+    tipo: "recordatorio",
+    texto: "Reunión con MTT agendada para el 10/03. Preparar carpeta de documentación de la flota.",
+    fechaLimite: "08/03/2026",
+    creadaEn: "27/02/2026 08:05",
+    estado: "pendiente",
+  },
+];
+
+const pendientes = OBSERVACIONES.filter(o => o.estado === "pendiente").length;
+const vistas = OBSERVACIONES.filter(o => o.estado === "visto").length;
+const resueltas = OBSERVACIONES.filter(o => o.estado === "resuelto").length;
+
+const tipoBadge: Record<TipoObservacion, { label: string; class: string; dot: string }> = {
+  urgente:      { label: "Urgente",       class: "bg-red-100 text-red-800",    dot: "bg-red-500" },
+  recordatorio: { label: "Recordatorio",  class: "bg-blue-100 text-blue-800",  dot: "bg-blue-500" },
+  observacion:  { label: "Observación",   class: "bg-gray-100 text-gray-800",  dot: "bg-gray-400" },
+};
+
+const estadoBadge: Record<EstadoObservacion, { label: string; class: string }> = {
+  pendiente: { label: "Pendiente",  class: "bg-yellow-100 text-yellow-800" },
+  visto:     { label: "Visto",      class: "bg-blue-100 text-blue-700" },
+  resuelto:  { label: "Resuelto",   class: "bg-green-100 text-green-800" },
+};
+---
+
+<DashboardLayout
+  title="Observaciones al Admin"
+  escuela={ESCUELA_ACTUAL}
+  userRole="secretaria"
+>
+  <!-- Header -->
+  <div class="mb-6">
+    <div class="flex items-center gap-2 text-sm text-secondary mb-2">
+      <a href="/secretaria/dashboard" class="hover:text-gray-900">Inicio</a>
+      <span>/</span>
+      <span class="text-gray-900 font-medium">Observaciones al Admin</span>
+    </div>
+    <div>
+      <h1 class="text-3xl font-semibold text-gray-900 tracking-tight">
+        Observaciones al Administrador
+      </h1>
+      <p class="text-secondary mt-1">
+        Deja notas, recordatorios y alertas para que el administrador las revise.
+      </p>
+    </div>
+  </div>
+
+  <div class="grid lg:grid-cols-3 gap-6">
+
+    <!-- Columna izquierda: formulario + KPIs -->
+    <div class="space-y-4">
+
+      <!-- KPIs -->
+      <div class="grid grid-cols-3 gap-3">
+        <Card class="p-3 text-center">
+          <p class="text-xl font-bold text-yellow-600">{pendientes}</p>
+          <p class="text-[11px] text-secondary mt-0.5">Pendientes</p>
+        </Card>
+        <Card class="p-3 text-center">
+          <p class="text-xl font-bold text-blue-600">{vistas}</p>
+          <p class="text-[11px] text-secondary mt-0.5">Vistas</p>
+        </Card>
+        <Card class="p-3 text-center">
+          <p class="text-xl font-bold text-green-600">{resueltas}</p>
+          <p class="text-[11px] text-secondary mt-0.5">Resueltas</p>
+        </Card>
+      </div>
+
+      <!-- Formulario nueva observación -->
+      <Card>
+        <h2 class="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+          </svg>
+          Nueva observación
+        </h2>
+
+        <form onsubmit="enviarObservacion(event)" class="space-y-4">
+          <!-- Tipo -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Tipo</label>
+            <div class="grid grid-cols-3 gap-2">
+              <label class="flex flex-col items-center gap-1 p-2 rounded-lg border-2 border-gray-200 cursor-pointer hover:border-gray-400 has-[:checked]:border-gray-900 has-[:checked]:bg-gray-900 transition-colors group">
+                <input type="radio" name="tipo" value="observacion" class="sr-only" checked/>
+                <svg class="w-4 h-4 text-gray-400 group-has-[:checked]:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+                <span class="text-[10px] font-medium text-gray-600 group-has-[:checked]:text-white">Obs.</span>
+              </label>
+              <label class="flex flex-col items-center gap-1 p-2 rounded-lg border-2 border-blue-200 cursor-pointer hover:border-blue-400 has-[:checked]:border-blue-600 has-[:checked]:bg-blue-600 transition-colors group">
+                <input type="radio" name="tipo" value="recordatorio" class="sr-only"/>
+                <svg class="w-4 h-4 text-blue-400 group-has-[:checked]:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <span class="text-[10px] font-medium text-blue-500 group-has-[:checked]:text-white">Record.</span>
+              </label>
+              <label class="flex flex-col items-center gap-1 p-2 rounded-lg border-2 border-red-200 cursor-pointer hover:border-red-400 has-[:checked]:border-red-600 has-[:checked]:bg-red-600 transition-colors group">
+                <input type="radio" name="tipo" value="urgente" class="sr-only"/>
+                <svg class="w-4 h-4 text-red-400 group-has-[:checked]:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                <span class="text-[10px] font-medium text-red-500 group-has-[:checked]:text-white">Urgente</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Texto -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Mensaje</label>
+            <textarea
+              id="obs-texto"
+              rows="4"
+              placeholder="Describe la observación o recordatorio con el mayor detalle posible..."
+              required
+              class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1 resize-none placeholder:text-gray-400"
+            ></textarea>
+          </div>
+
+          <!-- Fecha límite (opcional, para recordatorios) -->
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">
+              Fecha límite
+              <span class="font-normal text-gray-400 ml-1">(opcional, para recordatorios)</span>
+            </label>
+            <input
+              type="date"
+              id="obs-fecha"
+              class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1"
+            />
+          </div>
+
+          <Button variant="primary" class="w-full" type="submit">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+            </svg>
+            Enviar al administrador
+          </Button>
+        </form>
+      </Card>
+
+      <!-- Aviso informativo -->
+      <div class="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+        <p class="text-xs text-gray-500 leading-relaxed">
+          Las observaciones son visibles solo para el administrador.
+          Recibirás una notificación cuando sea leída o resuelta.
+        </p>
+      </div>
+    </div>
+
+    <!-- Columna derecha: historial -->
+    <div class="lg:col-span-2 space-y-3">
+      <div class="flex items-center justify-between mb-1">
+        <h2 class="text-sm font-semibold text-gray-900">Historial enviado</h2>
+        <span class="text-xs text-secondary">{OBSERVACIONES.length} registros</span>
+      </div>
+
+      {OBSERVACIONES.map(obs => {
+        const tipo = tipoBadge[obs.tipo];
+        const estado = estadoBadge[obs.estado];
+        return (
+          <Card class={`${obs.tipo === 'urgente' && obs.estado === 'pendiente' ? 'border-red-200 bg-red-50/40' : ''}`}>
+            <div class="flex items-start gap-3">
+              <!-- Dot indicador -->
+              <div class={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${tipo.dot}`}></div>
+
+              <div class="flex-1 min-w-0">
+                <!-- Cabecera -->
+                <div class="flex items-center gap-2 flex-wrap mb-2">
+                  <span class={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${tipo.class}`}>
+                    {tipo.label}
+                  </span>
+                  <span class={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${estado.class}`}>
+                    {estado.label}
+                  </span>
+                  {obs.fechaLimite && (
+                    <span class="inline-flex items-center gap-1 text-xs text-gray-500">
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                      </svg>
+                      Límite: {obs.fechaLimite}
+                    </span>
+                  )}
+                  <span class="ml-auto text-xs text-gray-400 shrink-0">{obs.creadaEn}</span>
+                </div>
+
+                <!-- Texto -->
+                <p class="text-sm text-gray-700 leading-relaxed">{obs.texto}</p>
+
+                <!-- Respuesta del admin (si existe) -->
+                {obs.respuestaAdmin && (
+                  <div class="mt-3 pl-3 border-l-2 border-green-400">
+                    <p class="text-xs font-semibold text-green-700 mb-0.5 flex items-center gap-1">
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                      Respuesta del administrador
+                    </p>
+                    <p class="text-xs text-gray-600">{obs.respuestaAdmin}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </Card>
+        );
+      })}
+    </div>
+  </div>
+</DashboardLayout>
+
+<script>
+  (window as any).enviarObservacion = function (e: Event) {
+    e.preventDefault();
+    const texto = (document.getElementById("obs-texto") as HTMLTextAreaElement).value.trim();
+    const tipo = (document.querySelector('input[name="tipo"]:checked') as HTMLInputElement)?.value;
+    if (!texto) return;
+    alert(
+      `✓ Observación enviada al administrador\n\nTipo: ${tipo}\nEl administrador recibirá una notificación.`
+    );
+    (document.getElementById("obs-texto") as HTMLTextAreaElement).value = "";
+    (document.getElementById("obs-fecha") as HTMLInputElement).value = "";
+  };
+</script>

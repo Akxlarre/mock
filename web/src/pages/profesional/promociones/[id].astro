@@ -6,8 +6,10 @@
 import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 import Card from '../../../components/ui/Card.astro';
 import Button from '../../../components/ui/Button.astro';
+import PromocionKPIs from '../../../components/profesional/PromocionKPIs.astro';
 import { ESCUELA_ACTUAL } from '../../../lib/mockData';
-import { PROMOCIONES, getRelatorById } from '../../../lib/mockRelatores';
+import { PROMOCIONES, MODULOS_POR_CURSO, NOTAS_MOCK, ALUMNOS_POR_CURSO, getRelatorById } from '../../../lib/mockRelatores';
+import type { EspecialidadProfesional } from '../../../lib/mockRelatores';
 
 export function getStaticPaths() {
   return [
@@ -59,6 +61,19 @@ const mockAsistencia: Record<string, { teoria: number; practica: number }> = {
   'A4': { teoria: 85, practica: 98 },
   'A5': { teoria: 75, practica: 92 },
 };
+
+// Carga concurrente de cada relator (para mostrar advertencia en cards)
+const relatorCargaMap = new Map<number, number>();
+for (const curso of prom.cursos) {
+  if (!relatorCargaMap.has(curso.relatorId)) {
+    relatorCargaMap.set(
+      curso.relatorId,
+      PROMOCIONES.filter(p =>
+        p.estado !== 'finalizada' && p.cursos.some(c => c.relatorId === curso.relatorId)
+      ).length
+    );
+  }
+}
 ---
 
 <DashboardLayout title={`${prom.nombre} - Promociones`} escuela={ESCUELA_ACTUAL}>
@@ -171,6 +186,9 @@ const mockAsistencia: Record<string, { teoria: number; practica: number }> = {
         </Card>
       )}
 
+      {/* KPIs: Alumnos por categoría */}
+      <PromocionKPIs prom={prom} variant="card" />
+
       <!-- Cursos -->
       <div>
         <h2 class="text-lg font-semibold text-gray-900 mb-4">Cursos de la promoción</h2>
@@ -194,9 +212,31 @@ const mockAsistencia: Record<string, { teoria: number; practica: number }> = {
                 <div class="mb-3">
                   <p class="text-xs text-secondary mb-1">Relator</p>
                   {relator ? (
-                    <a href={`/profesional/relatores/${relator.id}`} class="text-sm font-medium text-gray-900 hover:underline">
-                      {curso.relatorNombre}
-                    </a>
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <a href={`/profesional/relatores/${relator.id}`} class="text-sm font-medium text-gray-900 hover:underline">
+                        {curso.relatorNombre}
+                      </a>
+                      {(() => {
+                        const carga = relatorCargaMap.get(curso.relatorId) ?? 0;
+                        if (carga >= 3) return (
+                          <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700" title={`Relator en ${carga} promociones simultáneas`}>
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            {carga} promos
+                          </span>
+                        );
+                        if (carga >= 2) return (
+                          <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-700" title={`Relator en ${carga} promociones simultáneas`}>
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            {carga} promos
+                          </span>
+                        );
+                        return null;
+                      })()}
+                    </div>
                   ) : (
                     <span class="text-sm text-gray-400 italic">Sin asignar</span>
                   )}
@@ -236,6 +276,55 @@ const mockAsistencia: Record<string, { teoria: number; practica: number }> = {
                     </div>
                   </div>
                 )}
+
+                {/* Calificaciones RF-072 */}
+                {(prom.estado === 'en_curso' || prom.estado === 'finalizada') && (() => {
+                  const cursoTipo = curso.tipo as EspecialidadProfesional;
+                  const modulos = MODULOS_POR_CURSO[cursoTipo] ?? [];
+                  const alumnosCurso = ALUMNOS_POR_CURSO[`${prom.id}-${cursoTipo}`] ?? [];
+                  const modulosCompletos = modulos.filter(m =>
+                    alumnosCurso.length > 0 &&
+                    alumnosCurso.every(a => (NOTAS_MOCK[String(a.id)] ?? {})[m.id] !== null)
+                  ).length;
+                  const total = modulos.length;
+                  return (
+                    <div class="pt-3 border-t border-gray-200/50">
+                      <div class="flex items-center justify-between mb-2">
+                        <p class="text-xs text-secondary">Calificaciones</p>
+                        <a
+                          href="/secretaria/profesional/notas"
+                          class="text-xs text-blue-600 hover:underline"
+                        >
+                          Ingresar notas →
+                        </a>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <div class="flex gap-1">
+                          {modulos.map((m, i) => {
+                            const completo = alumnosCurso.length > 0 &&
+                              alumnosCurso.every(a => (NOTAS_MOCK[String(a.id)] ?? {})[m.id] !== null);
+                            return (
+                              <div
+                                class={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                                  completo ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-400'
+                                }`}
+                                title={`${m.nombre} — ${completo ? 'Completo' : 'Pendiente'}`}
+                              >
+                                {i + 1}
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <span class={`text-xs font-medium ${
+                          modulosCompletos === total ? 'text-green-700' :
+                          modulosCompletos > 0 ? 'text-yellow-700' : 'text-gray-400'
+                        }`}>
+                          {alumnosCurso.length === 0 ? 'Sin datos' : `${modulosCompletos}/${total} módulos`}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })()}
               </Card>
             );
           })}

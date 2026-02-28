@@ -61,6 +61,9 @@ export interface Instructor {
     activo: boolean;
     fechaRegistro: string;
 
+    // Remuneración (visible para secretaria: tarifa. Acumulado mensual: solo admin)
+    tarifaPorClase: number; // $ por sesión práctica o por hora teórica
+
     // Historial de horas trabajadas por mes
     horasMensuales: {
         [key: string]: { // formato: "febrero2026", "enero2026", etc.
@@ -103,6 +106,7 @@ export const INSTRUCTORES: Instructor[] = [
         },
         activo: true,
         fechaRegistro: "2024-01-15",
+        tarifaPorClase: 8500,
         horasMensuales: {
             "febrero2026": { teoricas: 0, practicas: 30, totalEquivalente: 45 },
             "enero2026": { teoricas: 0, practicas: 28, totalEquivalente: 42 },
@@ -166,6 +170,7 @@ export const INSTRUCTORES: Instructor[] = [
         },
         activo: true,
         fechaRegistro: "2024-01-20",
+        tarifaPorClase: 8500,
         horasMensuales: {
             "febrero2026": { teoricas: 0, practicas: 25, totalEquivalente: 37.5 },
             "enero2026": { teoricas: 0, practicas: 30, totalEquivalente: 45 },
@@ -216,6 +221,7 @@ export const INSTRUCTORES: Instructor[] = [
         },
         activo: false,
         fechaRegistro: "2024-02-01",
+        tarifaPorClase: 8000,
         horasMensuales: {
             "febrero2026": { teoricas: 0, practicas: 0, totalEquivalente: 0 },
             "enero2026": { teoricas: 0, practicas: 18, totalEquivalente: 27 },
@@ -254,6 +260,7 @@ export const INSTRUCTORES: Instructor[] = [
         },
         activo: true,
         fechaRegistro: "2024-03-15",
+        tarifaPorClase: 7500,
         horasMensuales: {
             "febrero2026": { teoricas: 0, practicas: 20, totalEquivalente: 30 },
             "enero2026": { teoricas: 0, practicas: 22, totalEquivalente: 33 },
@@ -333,6 +340,7 @@ export const INSTRUCTORES: Instructor[] = [
         },
         activo: true,
         fechaRegistro: "2024-01-10",
+        tarifaPorClase: 9500,
         horasMensuales: {
             "febrero2026": { teoricas: 35, practicas: 28, totalEquivalente: 77 },
             "enero2026": { teoricas: 32, practicas: 30, totalEquivalente: 77 },
@@ -340,6 +348,13 @@ export const INSTRUCTORES: Instructor[] = [
         },
     },
 ];
+
+// Helper: Calcular acumulado mensual (solo para admin — secretaria no puede ver esto)
+export function calcularAcumuladoMes(instructor: Instructor, mes: string): number {
+    const horas = instructor.horasMensuales[mes];
+    if (!horas) return 0;
+    return horas.totalEquivalente * instructor.tarifaPorClase;
+}
 
 // Helper: Obtener instructor por ID
 export function getInstructorById(id: number): Instructor | undefined {

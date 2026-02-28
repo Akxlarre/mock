@@ -1,8 +1,7 @@
 ---
 /**
- * Repositorio de Documentos (DMS)
- * RF-012: Centralizar documentos legales - Alumnos y Escuela
- * Seguridad: Admin elimina; Secretaria solo sube y visualiza
+ * Repositorio de Documentos (DMS) - Vista Secretaria
+ * Mismo contenido que /documentos pero path /secretaria/documentos → rol secretaria (no puede eliminar)
  */
 import DashboardLayout from "../../layouts/DashboardLayout.astro";
 import Card from "../../components/ui/Card.astro";
@@ -26,7 +25,7 @@ const session = getCurrentSession(Astro.url.pathname);
 const puedeEliminar = session.role === "admin";
 ---
 
-<DashboardLayout title="Repositorio de Documentos (DMS)" escuela={ESCUELA_ACTUAL}>
+<DashboardLayout title="Repositorio de Documentos (DMS)" escuela={ESCUELA_ACTUAL} userRole="secretaria">
   <div class="mb-8">
     <h1 class="text-3xl font-semibold text-gray-900 tracking-tight">
       Repositorio de Documentos
@@ -58,17 +57,12 @@ const puedeEliminar = session.role === "admin";
   <!-- Panel: Documentos del Alumno -->
   <div id="panel-alumnos" class="space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-      <p class="text-sm text-secondary">
-        Contratos firmados, fotos de licencias, hojas de vida, cédulas
-      </p>
+      <p class="text-sm text-secondary">Contratos firmados, fotos de licencias, hojas de vida, cédulas</p>
       <a href="#modal-subir-alumno" class="inline-flex items-center justify-center h-11 px-4 text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors">
-        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
-        </svg>
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
         Subir documento
       </a>
     </div>
-
     <Card>
       <h2 class="text-lg font-semibold text-gray-900 mb-4">Alumnos con documentos</h2>
       <div class="overflow-x-auto">
@@ -87,17 +81,10 @@ const puedeEliminar = session.role === "admin";
                 <td class="py-3 px-4 font-medium text-gray-900">{a.nombre}</td>
                 <td class="py-3 px-4 text-gray-600">{a.rut}</td>
                 <td class="py-3 px-4 text-center">
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    {a.cantidad} documento(s)
-                  </span>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">{a.cantidad} documento(s)</span>
                 </td>
                 <td class="py-3 px-4 text-right">
-                  <a
-                    href={`/documentos/alumnos/${a.alumnoId}`}
-                    class="text-blue-600 hover:text-blue-800 font-medium text-sm"
-                  >
-                    Ver →
-                  </a>
+                  <a href={`/secretaria/documentos/alumnos/${a.alumnoId}`} class="text-blue-600 hover:text-blue-800 font-medium text-sm">Ver →</a>
                 </td>
               </tr>
             ))}
@@ -105,8 +92,6 @@ const puedeEliminar = session.role === "admin";
         </table>
       </div>
     </Card>
-
-    <!-- Lista reciente de documentos -->
     <Card>
       <h2 class="text-lg font-semibold text-gray-900 mb-4">Últimos documentos subidos</h2>
       <ul class="divide-y divide-gray-200">
@@ -114,30 +99,15 @@ const puedeEliminar = session.role === "admin";
           <li class="flex items-center justify-between py-3">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center shrink-0">
-                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
+                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
               </div>
               <div>
                 <p class="font-medium text-gray-900">{doc.nombreArchivo}</p>
-                <p class="text-xs text-secondary">
-                  {doc.alumnoNombre} · {LABELS_TIPO_ALUMNO[doc.tipo]} · {doc.fechaSubida}
-                </p>
+                <p class="text-xs text-secondary">{doc.alumnoNombre} · {LABELS_TIPO_ALUMNO[doc.tipo]} · {doc.fechaSubida}</p>
               </div>
             </div>
             <div class="flex items-center gap-2">
-              <Button variant="ghost" class="text-sm" onClick="alert('Ver documento (mockup)')">
-                Ver
-              </Button>
-              {puedeEliminar && (
-                <button
-                  type="button"
-                  class="btn-eliminar-doc text-sm text-red-600 hover:text-red-800 font-medium"
-                  onclick="if(confirm('¿Eliminar este documento?')) alert('Documento eliminado (mockup)')"
-                >
-                  Eliminar
-                </button>
-              )}
+              <Button variant="ghost" class="text-sm" onClick="alert('Ver documento (mockup)')">Ver</Button>
             </div>
           </li>
         ))}
@@ -148,17 +118,12 @@ const puedeEliminar = session.role === "admin";
   <!-- Panel: Documentos de la Escuela -->
   <div id="panel-escuela" class="hidden space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-      <p class="text-sm text-secondary">
-        Facturas de folios, resoluciones MTT, decretos
-      </p>
+      <p class="text-sm text-secondary">Facturas de folios, resoluciones MTT, decretos</p>
       <a href="#modal-subir-escuela" class="inline-flex items-center justify-center h-11 px-4 text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors">
-        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
-        </svg>
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
         Subir documento
       </a>
     </div>
-
     <Card>
       <h2 class="text-lg font-semibold text-gray-900 mb-4">Documentos institucionales</h2>
       <ul class="divide-y divide-gray-200">
@@ -166,32 +131,16 @@ const puedeEliminar = session.role === "admin";
           <li class="flex items-center justify-between py-4">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center shrink-0">
-                <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
+                <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
               </div>
               <div>
                 <p class="font-medium text-gray-900">{doc.nombreArchivo}</p>
-                <p class="text-xs text-secondary">
-                  {LABELS_TIPO_ESCUELA[doc.tipo]}
-                  {doc.descripcion ? ` · ${doc.descripcion}` : ""}
-                </p>
+                <p class="text-xs text-secondary">{LABELS_TIPO_ESCUELA[doc.tipo]}{doc.descripcion ? ` · ${doc.descripcion}` : ""}</p>
                 <p class="text-xs text-gray-500 mt-0.5">Subido el {doc.fechaSubida} por {doc.subidoPor}</p>
               </div>
             </div>
             <div class="flex items-center gap-2">
-              <Button variant="ghost" class="text-sm" onClick="alert('Ver documento (mockup)')">
-                Ver
-              </Button>
-              {puedeEliminar && (
-                <button
-                  type="button"
-                  class="btn-eliminar-doc text-sm text-red-600 hover:text-red-800 font-medium"
-                  onclick="if(confirm('¿Eliminar este documento?')) alert('Documento eliminado (mockup)')"
-                >
-                  Eliminar
-                </button>
-              )}
+              <Button variant="ghost" class="text-sm" onClick="alert('Ver documento (mockup)')">Ver</Button>
             </div>
           </li>
         ))}
@@ -203,14 +152,6 @@ const puedeEliminar = session.role === "admin";
   <div id="panel-plantillas" class="hidden space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <p class="text-sm text-secondary">Formularios y contratos estándar listos para descargar, completar y subir al expediente del alumno</p>
-      {puedeEliminar && (
-        <a href="#modal-subir-plantilla" class="inline-flex items-center justify-center h-11 px-4 text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors">
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
-          </svg>
-          Nueva plantilla
-        </a>
-      )}
     </div>
 
     <!-- Filtro por categoría -->
@@ -245,21 +186,13 @@ const puedeEliminar = session.role === "admin";
                 <span class="mx-1">·</span>
                 <span>{pl.descargas} descargas</span>
               </div>
-              <div class="flex items-center gap-2">
-                {puedeEliminar && (
-                  <button type="button" class="text-xs text-red-500 hover:text-red-700 font-medium"
-                    onclick="if(confirm('¿Eliminar esta plantilla?')) alert('Plantilla eliminada (mockup)')">
-                    Eliminar
-                  </button>
-                )}
-                <button type="button" class="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800"
-                  onclick="alert('Descargando plantilla (mockup)')">
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                  </svg>
-                  Descargar
-                </button>
-              </div>
+              <button type="button" class="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800"
+                onclick="alert('Descargando plantilla (mockup)')">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                </svg>
+                Descargar
+              </button>
             </div>
           </div>
         );
@@ -280,30 +213,15 @@ const puedeEliminar = session.role === "admin";
     </Card>
   </div>
 
-  <!-- Modales de subida -->
-  <UploadDocumentoModal
-    id="modal-subir-alumno"
-    titulo="Subir documento de alumno"
-    tipo="alumno"
-    alumnosOpciones={alumnosConDocs.map((a) => ({ id: a.alumnoId, nombre: a.nombre }))}
-  />
-  <UploadDocumentoModal
-    id="modal-subir-escuela"
-    titulo="Subir documento de la escuela"
-    tipo="escuela"
-  />
+  <UploadDocumentoModal id="modal-subir-alumno" titulo="Subir documento de alumno" tipo="alumno" alumnosOpciones={alumnosConDocs.map((a) => ({ id: a.alumnoId, nombre: a.nombre }))} />
+  <UploadDocumentoModal id="modal-subir-escuela" titulo="Subir documento de la escuela" tipo="escuela" />
 
-  <!-- Info de permisos -->
   <Card class="mb-6 border-blue-50 bg-blue-50/30">
     <div class="flex items-start gap-3">
-      <svg class="w-5 h-5 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-      </svg>
+      <svg class="w-5 h-5 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
       <div>
         <p class="text-sm font-medium text-blue-900">Permisos DMS</p>
-        <p class="text-xs text-blue-800 mt-1">
-          <strong>Admin:</strong> Subir, visualizar y eliminar documentos. <strong>Secretaria:</strong> Solo subir y visualizar (no puede eliminar).
-        </p>
+        <p class="text-xs text-blue-800 mt-1"><strong>Secretaria:</strong> Solo subir y visualizar (no puede eliminar documentos).</p>
       </div>
     </div>
   </Card>
@@ -335,9 +253,8 @@ const puedeEliminar = session.role === "admin";
     tabs.escuela.link?.addEventListener("click",    (e) => { e.preventDefault(); showTab("escuela"); });
     tabs.plantillas.link?.addEventListener("click", (e) => { e.preventDefault(); showTab("plantillas"); });
 
-    // Hash inicial
     const hash = window.location.hash;
-    if (hash === "#tab-escuela")    showTab("escuela");
+    if (hash === "#tab-escuela")         showTab("escuela");
     else if (hash === "#tab-plantillas") showTab("plantillas");
 
     // Filtro por categoría

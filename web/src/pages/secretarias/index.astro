@@ -8,12 +8,16 @@ import Card from '../../components/ui/Card.astro';
 import Button from '../../components/ui/Button.astro';
 import Input from '../../components/ui/Input.astro';
 
-// Mock data - solo secretarias
+/**
+ * Política de correos:
+ * emailInstitucional → alias público usado con alumnos y proveedores (externo)
+ * emailPersonal      → correo real de la persona, usado para login y auditoría (interno)
+ */
 const secretarias = [
-  { id: 1, nombre: 'Patricia Secretaria', email: 'psecretaria@escuela.cl', telefono: '+56 9 8765 4321', sede: 'Autoescuela Chillán', estado: 'activo', ultimoAcceso: '2026-02-03 08:15' },
-  { id: 2, nombre: 'María González', email: 'mgonzalez@escuela.cl', telefono: '+56 9 7654 3210', sede: 'Conductores Chillán', estado: 'activo', ultimoAcceso: '2026-02-03 09:30' },
-  { id: 3, nombre: 'Carmen Silva', email: 'csilva@escuela.cl', telefono: '+56 9 6543 2109', sede: 'Autoescuela Chillán', estado: 'activo', ultimoAcceso: '2026-02-02 16:45' },
-  { id: 4, nombre: 'Rosa Pérez', email: 'rperez@escuela.cl', telefono: '+56 9 5432 1098', sede: 'Conductores Chillán', estado: 'inactivo', ultimoAcceso: '2026-01-28 14:20' },
+  { id: 1, nombre: 'Patricia Secretaria', emailInstitucional: 'psecretaria@autoescuela-chillan.cl', emailPersonal: 'patsecretaria@gmail.com', telefono: '+56 9 8765 4321', sede: 'Autoescuela Chillán', estado: 'activo', ultimoAcceso: '2026-02-03 08:15' },
+  { id: 2, nombre: 'María González',       emailInstitucional: 'mgonzalez@conductores-chillan.cl',  emailPersonal: 'mgonzalez.sec@gmail.com',   telefono: '+56 9 7654 3210', sede: 'Conductores Chillán', estado: 'activo', ultimoAcceso: '2026-02-03 09:30' },
+  { id: 3, nombre: 'Carmen Silva',         emailInstitucional: 'csilva@autoescuela-chillan.cl',      emailPersonal: 'carmen.silva@hotmail.com',  telefono: '+56 9 6543 2109', sede: 'Autoescuela Chillán', estado: 'activo', ultimoAcceso: '2026-02-02 16:45' },
+  { id: 4, nombre: 'Rosa Pérez',           emailInstitucional: 'rperez@conductores-chillan.cl',      emailPersonal: 'rosa.perez.v@gmail.com',    telefono: '+56 9 5432 1098', sede: 'Conductores Chillán', estado: 'inactivo', ultimoAcceso: '2026-01-28 14:20' },
 ];
 ---
 
@@ -108,7 +112,10 @@ const secretarias = [
                         {secretaria.estado === 'activo' ? '✓ Activa' : '○ Inactiva'}
                       </span>
                     </div>
-                    <p class="text-xs text-secondary truncate">{secretaria.email}</p>
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                      <p class="text-xs text-secondary truncate">{secretaria.emailInstitucional}</p>
+                      <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-600 border border-blue-100 shrink-0">alias público</span>
+                    </div>
                     <div class="flex items-center gap-3 mt-1">
                       <span class="text-xs text-gray-600">
                         📍 {secretaria.sede}

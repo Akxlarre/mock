@@ -21,12 +21,14 @@ export function getStaticPaths() {
 const { id } = Astro.params;
 
 // Mock data
+// Política de correos: emailInstitucional = alias externo (alumnos/proveedores),
+//                      emailPersonal = correo real de login y trazabilidad interna
 const secretarias: Record<string, any> = {
-  '1': { id: 1, nombre: 'Patricia Secretaria', rut: '15.234.567-8', email: 'psecretaria@escuela.cl', telefono: '+56 9 8765 4321', sede: 'Autoescuela Chillán', estado: 'activo', fechaIngreso: '2025-01-15', ultimoAcceso: '2026-02-03 08:15' },
-  '2': { id: 2, nombre: 'María González', rut: '16.789.012-3', email: 'mgonzalez@escuela.cl', telefono: '+56 9 7654 3210', sede: 'Conductores Chillán', estado: 'activo', fechaIngreso: '2025-03-20', ultimoAcceso: '2026-02-03 09:30' },
-  '3': { id: 3, nombre: 'Carmen Silva', rut: '14.567.890-1', email: 'csilva@escuela.cl', telefono: '+56 9 6543 2109', sede: 'Autoescuela Chillán', estado: 'activo', fechaIngreso: '2024-11-10', ultimoAcceso: '2026-02-02 16:45' },
-  '4': { id: 4, nombre: 'Rosa Pérez', rut: '17.123.456-7', email: 'rperez@escuela.cl', telefono: '+56 9 5432 1098', sede: 'Conductores Chillán', estado: 'inactivo', fechaIngreso: '2024-08-05', ultimoAcceso: '2026-01-28 14:20' },
-  '5': { id: 5, nombre: 'Ana Torres', rut: '18.345.678-9', email: 'atorres@escuela.cl', telefono: '+56 9 4321 0987', sede: 'Autoescuela Chillán', estado: 'activo', fechaIngreso: '2025-06-12', ultimoAcceso: '2026-02-01 11:00' },
+  '1': { id: 1, nombre: 'Patricia Secretaria', rut: '15.234.567-8', emailInstitucional: 'psecretaria@autoescuela-chillan.cl', emailPersonal: 'patsecretaria@gmail.com', telefono: '+56 9 8765 4321', sede: 'Autoescuela Chillán', estado: 'activo', fechaIngreso: '2025-01-15', ultimoAcceso: '2026-02-03 08:15' },
+  '2': { id: 2, nombre: 'María González',       rut: '16.789.012-3', emailInstitucional: 'mgonzalez@conductores-chillan.cl',  emailPersonal: 'mgonzalez.sec@gmail.com',   telefono: '+56 9 7654 3210', sede: 'Conductores Chillán', estado: 'activo', fechaIngreso: '2025-03-20', ultimoAcceso: '2026-02-03 09:30' },
+  '3': { id: 3, nombre: 'Carmen Silva',         rut: '14.567.890-1', emailInstitucional: 'csilva@autoescuela-chillan.cl',      emailPersonal: 'carmen.silva@hotmail.com',  telefono: '+56 9 6543 2109', sede: 'Autoescuela Chillán', estado: 'activo', fechaIngreso: '2024-11-10', ultimoAcceso: '2026-02-02 16:45' },
+  '4': { id: 4, nombre: 'Rosa Pérez',           rut: '17.123.456-7', emailInstitucional: 'rperez@conductores-chillan.cl',      emailPersonal: 'rosa.perez.v@gmail.com',    telefono: '+56 9 5432 1098', sede: 'Conductores Chillán', estado: 'inactivo', fechaIngreso: '2024-08-05', ultimoAcceso: '2026-01-28 14:20' },
+  '5': { id: 5, nombre: 'Ana Torres',           rut: '18.345.678-9', emailInstitucional: 'atorres@autoescuela-chillan.cl',     emailPersonal: 'ana.torres.sc@gmail.com',   telefono: '+56 9 4321 0987', sede: 'Autoescuela Chillán', estado: 'activo', fechaIngreso: '2025-06-12', ultimoAcceso: '2026-02-01 11:00' },
 };
 
 const secretaria = secretarias[id!] || secretarias['1'];
@@ -74,8 +76,20 @@ const secretaria = secretarias[id!] || secretarias['1'];
             <p class="text-sm font-medium text-gray-900">{secretaria.rut}</p>
           </div>
           <div>
-            <p class="text-xs text-secondary mb-1">Correo electrónico</p>
-            <p class="text-sm font-medium text-gray-900">{secretaria.email}</p>
+            <p class="text-xs text-secondary mb-1 flex items-center gap-1">
+              Correo institucional
+              <span class="px-1 py-0.5 rounded text-[10px] bg-blue-50 text-blue-600 border border-blue-100 font-medium">alias público</span>
+            </p>
+            <p class="text-sm font-medium text-gray-900">{secretaria.emailInstitucional}</p>
+            <p class="text-xs text-gray-400 mt-0.5">Usado con alumnos y proveedores</p>
+          </div>
+          <div>
+            <p class="text-xs text-secondary mb-1 flex items-center gap-1">
+              Correo personal
+              <span class="px-1 py-0.5 rounded text-[10px] bg-gray-100 text-gray-500 border border-gray-200 font-medium">login / auditoría</span>
+            </p>
+            <p class="text-sm font-medium text-gray-900">{secretaria.emailPersonal}</p>
+            <p class="text-xs text-gray-400 mt-0.5">Trazabilidad interna</p>
           </div>
           <div>
             <p class="text-xs text-secondary mb-1">Teléfono</p>

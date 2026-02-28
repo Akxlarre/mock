@@ -13,6 +13,7 @@ interface Props {
   class?: string;
   onClick?: string;
   id?: string;
+  target?: string;
 }
 
 const {
@@ -23,6 +24,7 @@ const {
   class: className = "",
   onClick,
   id,
+  target,
 } = Astro.props;
 
 // Geist-style: minimal, monocromático + acción
@@ -44,7 +46,7 @@ const allClasses = [baseClasses, variantClass, className]
 
 {
   href && !disabled ? (
-    <a href={href} class={allClasses} id={id}>
+    <a href={href} class={allClasses} id={id} target={target}>
       <slot />
     </a>
   ) : (

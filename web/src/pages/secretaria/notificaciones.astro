@@ -32,7 +32,21 @@ const notifications = [
         action: { label: "Validar", href: "/matricula" },
     },
 
-    // MATRÍCULAS ONLINE
+    // MATRÍCULAS ONLINE Y PRE-INSCRIPCIONES
+    {
+        id: 103, // Nuevo requerimiento (Leads)
+        priority: "high",
+        title: "Nueva Pre-inscripción Profesional",
+        message:
+            "Juan Pablo González - Curso A3 - Test Completado (Vence en 6 días)",
+        time: "Hace 10 minutos",
+        unread: true,
+        icon: "📝",
+        action: {
+            label: "Gestionar Pre-inscritos",
+            href: "/secretaria/alumnos/pre-inscritos",
+        },
+    },
     {
         id: 3,
         priority: "high",

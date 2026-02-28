@@ -6,6 +6,7 @@
 import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 import Card from '../../../components/ui/Card.astro';
 import Button from '../../../components/ui/Button.astro';
+import PromocionKPIs from '../../../components/profesional/PromocionKPIs.astro';
 import { ESCUELA_ACTUAL } from '../../../lib/mockData';
 import { PROMOCIONES } from '../../../lib/mockRelatores';
 
@@ -142,6 +143,9 @@ const cursoColors: Record<string, string> = {
                   </div>
                 </div>
               )}
+
+              <!-- KPIs: Alumnos por categoría -->
+              <PromocionKPIs prom={prom} variant="compact" />
 
               <!-- Cursos -->
               <div class="grid grid-cols-2 md:grid-cols-4 gap-3">

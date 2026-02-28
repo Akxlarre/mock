@@ -17,7 +17,7 @@ const horarios = Array.from({ length: 11 }, (_, i) => {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hoja de Ruta Diaria - {ESCUELA_ACTUAL.nombre}</title>
+    <title>Hoja de Ruta Diaria - {ESCUELA_ACTUAL}</title>
     <style>
         @media print {
             @page { margin: 1cm; size: A4; }
@@ -49,7 +49,7 @@ const horarios = Array.from({ length: 11 }, (_, i) => {
 
     <div class="header">
         <div class="logo">
-            {ESCUELA_ACTUAL.nombre}
+            {ESCUELA_ACTUAL}
         </div>
         <div style="text-align: right;">
             <div><strong>Sede:</strong> Chillán Centro</div>

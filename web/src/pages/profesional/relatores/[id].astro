@@ -43,6 +43,16 @@ const estadoBadge: Record<string, { text: string; class: string }> = {
   'en_curso': { text: 'En curso', class: 'bg-blue-100 text-blue-800' },
   'finalizada': { text: 'Finalizada', class: 'bg-green-100 text-green-800' },
 };
+
+// Carga horaria: solo promociones activas/planificadas (concurrentes)
+const promocionesConcurrentes = PROMOCIONES.filter(p =>
+  p.estado !== 'finalizada' && p.cursos.some(c => c.relatorId === relator.id)
+);
+const totalCursosConcurrentes = promocionesConcurrentes.reduce(
+  (sum, p) => sum + p.cursos.filter(c => c.relatorId === relator.id).length, 0
+);
+const promosNoFinalizadas = PROMOCIONES.filter(p => p.estado !== 'finalizada');
+const cargaCnt = promocionesConcurrentes.length;
 ---
 
 <DashboardLayout title={`${relator.nombre} - Relatores`} escuela={ESCUELA_ACTUAL}>
@@ -198,8 +208,15 @@ const estadoBadge: Record<string, { text: string; class: string }> = {
             <p class="text-sm text-gray-900">{relator.fechaRegistro}</p>
           </div>
           <div class="space-y-1">
-            <p class="text-xs text-secondary">Promociones asignadas</p>
-            <p class="text-sm text-gray-900">{relator.promocionesAsignadas}</p>
+            <p class="text-xs text-secondary">Promociones activas</p>
+            <div class="flex items-center gap-2">
+              <p class="text-sm text-gray-900">{promocionesRelator.filter(p => p.estado !== 'finalizada').length}</p>
+              {promocionesRelator.length > promocionesRelator.filter(p => p.estado !== 'finalizada').length && (
+                <span class="text-xs text-secondary">
+                  ({promocionesRelator.length} total incl. finalizadas)
+                </span>
+              )}
+            </div>
           </div>
           <div class="space-y-1">
             <p class="text-xs text-secondary">Estado</p>

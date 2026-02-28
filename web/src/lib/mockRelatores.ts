@@ -191,6 +191,102 @@ export const PROMOCIONES: Promocion[] = [
   },
 ];
 
+// --- Módulos por curso (plantillas de evaluación) RF-072 ---
+
+export const MODULOS_POR_CURSO: Record<EspecialidadProfesional, { id: string; nombre: string; descripcion: string }[]> = {
+  A2: [
+    { id: "m1", nombre: "Módulo 1", descripcion: "Legislación de Transporte" },
+    { id: "m2", nombre: "Módulo 2", descripcion: "Mecánica Básica" },
+    { id: "m3", nombre: "Módulo 3", descripcion: "Conducción Defensiva" },
+    { id: "m4", nombre: "Módulo 4", descripcion: "Primeros Auxilios" },
+    { id: "m5", nombre: "Examen Final", descripcion: "Evaluación Integrada A2" },
+  ],
+  A3: [
+    { id: "m1", nombre: "Módulo 1", descripcion: "Legislación Transporte Público" },
+    { id: "m2", nombre: "Módulo 2", descripcion: "Mecánica de Buses" },
+    { id: "m3", nombre: "Módulo 3", descripcion: "Conducción Urbana/Interurbana" },
+    { id: "m4", nombre: "Módulo 4", descripcion: "Atención al Pasajero" },
+    { id: "m5", nombre: "Examen Final", descripcion: "Evaluación Integrada A3" },
+  ],
+  A4: [
+    { id: "m1", nombre: "Módulo 1", descripcion: "Legislación Carga Simple" },
+    { id: "m2", nombre: "Módulo 2", descripcion: "Mecánica de Camiones" },
+    { id: "m3", nombre: "Módulo 3", descripcion: "Manejo de Carga" },
+    { id: "m4", nombre: "Módulo 4", descripcion: "Seguridad en Ruta" },
+    { id: "m5", nombre: "Examen Final", descripcion: "Evaluación Integrada A4" },
+  ],
+  A5: [
+    { id: "m1", nombre: "Módulo 1", descripcion: "Legislación Transporte de Carga" },
+    { id: "m2", nombre: "Módulo 2", descripcion: "Mecánica Avanzada" },
+    { id: "m3", nombre: "Módulo 3", descripcion: "Conducción con Remolque" },
+    { id: "m4", nombre: "Módulo 4", descripcion: "Mercancías Peligrosas" },
+    { id: "m5", nombre: "Examen Final", descripcion: "Evaluación Integrada A5" },
+  ],
+};
+
+// --- Alumnos por promo-curso (clave: "promoId-curso") ---
+
+export const ALUMNOS_POR_CURSO: Record<string, { id: number; nombre: string; rut: string; curso: string; promoId: number }[]> = {
+  "3-A2": [
+    { id: 1,  nombre: "Carlos Soto Muñoz",      rut: "15.432.198-7", curso: "A2", promoId: 3 },
+    { id: 2,  nombre: "Andrea Flores Vera",      rut: "16.789.234-5", curso: "A2", promoId: 3 },
+    { id: 3,  nombre: "Luis Pérez Castro",       rut: "14.567.890-3", curso: "A2", promoId: 3 },
+    { id: 4,  nombre: "Mariana Torres Rojas",    rut: "17.234.567-K", curso: "A2", promoId: 3 },
+    { id: 5,  nombre: "Roberto Núñez Díaz",      rut: "13.456.789-1", curso: "A2", promoId: 3 },
+    { id: 6,  nombre: "Patricia Vargas Silva",   rut: "15.678.901-2", curso: "A2", promoId: 3 },
+    { id: 7,  nombre: "Jorge Morales Reyes",     rut: "16.901.234-6", curso: "A2", promoId: 3 },
+    { id: 8,  nombre: "Valentina Ríos Lagos",    rut: "15.234.567-4", curso: "A2", promoId: 3 },
+  ],
+  "4-A2": [
+    { id: 9,  nombre: "Felipe Aguilar Pino",     rut: "17.345.678-9", curso: "A2", promoId: 4 },
+    { id: 10, nombre: "Diego Meza Fuentes",      rut: "16.456.789-0", curso: "A2", promoId: 4 },
+    { id: 11, nombre: "Camila Rojas Vega",       rut: "18.123.456-7", curso: "A2", promoId: 4 },
+    { id: 12, nombre: "Sebastián Mora Castro",   rut: "17.654.321-2", curso: "A2", promoId: 4 },
+  ],
+  "4-A3": [
+    { id: 15, nombre: "María Fernández López",   rut: "14.876.543-1", curso: "A3", promoId: 4 },
+    { id: 16, nombre: "Nicolás Castillo Vera",   rut: "15.987.654-2", curso: "A3", promoId: 4 },
+    { id: 17, nombre: "Javiera Soto Romero",     rut: "17.111.222-3", curso: "A3", promoId: 4 },
+    { id: 18, nombre: "Mateo Salinas Riquelme",  rut: "16.555.444-9", curso: "A3", promoId: 4 },
+  ],
+};
+
+// --- Notas mock por alumnoId: { moduloId: nota | null } ---
+// "ingresadoPor" solo aplica a notas ya cargadas (no nulas)
+
+export type IngresadoPor = "secretaria" | "relator";
+
+export const NOTAS_MOCK: Record<string, Record<string, number | null>> = {
+  "1":  { m1: 5.5, m2: 4.8, m3: null, m4: null, m5: null },
+  "2":  { m1: 3.8, m2: 4.2, m3: null, m4: null, m5: null },
+  "3":  { m1: 6.0, m2: 6.5, m3: null, m4: null, m5: null },
+  "4":  { m1: 3.5, m2: 3.2, m3: null, m4: null, m5: null },
+  "5":  { m1: 5.0, m2: 4.9, m3: null, m4: null, m5: null },
+  "6":  { m1: 5.8, m2: 5.5, m3: null, m4: null, m5: null },
+  "7":  { m1: 4.5, m2: 4.3, m3: null, m4: null, m5: null },
+  "8":  { m1: 6.2, m2: 6.0, m3: null, m4: null, m5: null },
+  "9":  { m1: 5.0, m2: null, m3: null, m4: null, m5: null },
+  "10": { m1: 4.8, m2: null, m3: null, m4: null, m5: null },
+  "11": { m1: 3.0, m2: null, m3: null, m4: null, m5: null },
+  "12": { m1: 5.5, m2: null, m3: null, m4: null, m5: null },
+};
+
+// Quién ingresó cada nota (solo las que tienen valor)
+export const NOTAS_AUTOR: Record<string, Record<string, IngresadoPor>> = {
+  "1":  { m1: "relator",   m2: "relator" },
+  "2":  { m1: "relator",   m2: "secretaria" },
+  "3":  { m1: "relator",   m2: "relator" },
+  "4":  { m1: "relator",   m2: "secretaria" },
+  "5":  { m1: "relator",   m2: "relator" },
+  "6":  { m1: "relator",   m2: "relator" },
+  "7":  { m1: "relator",   m2: "secretaria" },
+  "8":  { m1: "relator",   m2: "relator" },
+  "9":  { m1: "secretaria" },
+  "10": { m1: "secretaria" },
+  "11": { m1: "secretaria" },
+  "12": { m1: "secretaria" },
+};
+
 // --- Helpers ---
 
 export function getRelatorById(id: number): Relator | undefined {
@@ -211,4 +307,16 @@ export function getPromocionById(id: number): Promocion | undefined {
 
 export function getPromocionesByEstado(estado: Promocion["estado"]): Promocion[] {
   return PROMOCIONES.filter((p) => p.estado === estado);
+}
+
+/** Retorna las promociones activas (no finalizadas) donde participa un relator */
+export function getPromocionesActivasByRelator(relatorId: number): Promocion[] {
+  return PROMOCIONES.filter(
+    (p) => p.estado !== "finalizada" && p.cursos.some((c) => c.relatorId === relatorId)
+  );
+}
+
+/** Retorna el conteo de promociones activas de un relator (para badges y KPIs) */
+export function countPromocionesActivasByRelator(relatorId: number): number {
+  return getPromocionesActivasByRelator(relatorId).length;
 }

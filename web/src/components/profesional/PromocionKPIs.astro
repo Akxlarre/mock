@@ -1,0 +1,72 @@
+---
+/**
+ * KPIs de Promoción - Alumnos por categoría (A2, A3, A4, A5)
+ * docs/cambios a realizar.md: Mostrar cuántos alumnos hay por categoría dentro de cada promoción
+ */
+import Card from "../ui/Card.astro";
+import type { Promocion } from "../../lib/mockRelatores";
+
+export interface Props {
+  prom: Promocion;
+  variant?: "compact" | "card";
+}
+
+const { prom, variant = "compact" } = Astro.props;
+
+const cursoColors: Record<string, { bg: string; text: string; border: string; light: string }> = {
+  A2: { bg: "bg-blue-600", text: "text-blue-800", border: "border-blue-200", light: "bg-blue-50" },
+  A3: { bg: "bg-purple-600", text: "text-purple-800", border: "border-purple-200", light: "bg-purple-50" },
+  A4: { bg: "bg-orange-600", text: "text-orange-800", border: "border-orange-200", light: "bg-orange-50" },
+  A5: { bg: "bg-teal-600", text: "text-teal-800", border: "border-teal-200", light: "bg-teal-50" },
+};
+
+const cursoLabels: Record<string, string> = {
+  A2: "Taxis y colectivos",
+  A3: "Buses",
+  A4: "Carga simple",
+  A5: "Carga",
+};
+
+const cursoColorsCompact: Record<string, string> = {
+  A2: "bg-blue-100 text-blue-800",
+  A3: "bg-purple-100 text-purple-800",
+  A4: "bg-orange-100 text-orange-800",
+  A5: "bg-teal-100 text-teal-800",
+};
+---
+
+{variant === "compact" ? (
+  <div class="mb-4">
+    <p class="text-xs font-medium text-secondary mb-2">Alumnos por categoría</p>
+    <div class="flex flex-wrap gap-2">
+      {prom.cursos.map((curso) => (
+        <div
+          class="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-200"
+          title={`${cursoLabels[curso.tipo]}: ${curso.alumnosInscritos} de ${curso.maxAlumnos} cupos`}
+        >
+          <span class={`inline-flex px-2 py-0.5 rounded text-xs font-semibold ${cursoColorsCompact[curso.tipo]}`}>
+            {curso.tipo}
+          </span>
+          <span class="text-sm font-semibold text-gray-900">{curso.alumnosInscritos}</span>
+          <span class="text-xs text-secondary">/ {curso.maxAlumnos}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+) : (
+  <Card>
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Alumnos por categoría</h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {prom.cursos.map((curso) => {
+        const colors = cursoColors[curso.tipo];
+        return (
+          <div class={`p-4 rounded-lg ${colors.light} border ${colors.border} text-center`}>
+            <p class="text-xs text-secondary mb-1">{cursoLabels[curso.tipo]}</p>
+            <p class="text-2xl font-bold text-gray-900">{curso.alumnosInscritos}</p>
+            <p class="text-xs text-secondary">de {curso.maxAlumnos} cupos</p>
+          </div>
+        );
+      })}
+    </div>
+  </Card>
+)}

@@ -5,37 +5,57 @@
  * basePath: prefijo para rutas (ej. "" admin, "/secretaria" secretaria).
  */
 interface Props {
-  pasoActual: 1 | 2 | 3 | 4;
+  pasoActual: 1 | 2 | 3 | 4 | 5 | 6;
   basePath?: string;
 }
 
 const { pasoActual, basePath = "" } = Astro.props;
 
 const pasos = [
-  { num: 1, label: "Datos personales", path: `${basePath}/matricula/nueva/paso-1` },
-  { num: 2, label: "Documentación", path: `${basePath}/matricula/nueva/paso-2` },
-  { num: 3, label: "Pago", path: `${basePath}/matricula/nueva/paso-3` },
-  { num: 4, label: "Confirmación", path: `${basePath}/matricula/nueva/paso-4` },
+  {
+    num: 1,
+    label: "Datos personales",
+    path: `${basePath}/matricula/nueva/paso-1`,
+  },
+  {
+    num: 2,
+    label: "Asignación",
+    path: `${basePath}/matricula/nueva/paso-2`,
+  },
+  {
+    num: 3,
+    label: "Documentos",
+    path: `${basePath}/matricula/nueva/paso-3`,
+  },
+  { num: 4, label: "Pago", path: `${basePath}/matricula/nueva/paso-4` },
+  { num: 5, label: "Contrato", path: `${basePath}/matricula/nueva/paso-5` },
+  { num: 6, label: "Confirmación", path: `${basePath}/matricula/nueva/paso-6` },
 ];
 ---
+
 <nav class="flex flex-wrap gap-2 mb-8" aria-label="Pasos de matrícula">
-  {pasos.map((paso) => {
-    const isActive = paso.num === pasoActual;
-    const isCompleted = paso.num < pasoActual;
-    return (
-      <a
-        href={paso.path}
-        class={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm min-h-11 transition-colors
-          ${isActive ? 'bg-primary text-primary-content' : ''}
-          ${isCompleted ? 'bg-base-300 text-base-content' : ''}
-          ${!isActive && !isCompleted ? 'bg-base-200 text-base-content/70 hover:bg-base-300' : ''}`}
-        aria-current={isActive ? 'step' : undefined}
-      >
-        <span class="flex items-center justify-center w-6 h-6 rounded-full bg-current/20 shrink-0" aria-hidden="true">
-          {paso.num}
-        </span>
-        {paso.label}
-      </a>
-    );
-  })}
+  {
+    pasos.map((paso) => {
+      const isActive = paso.num === pasoActual;
+      const isCompleted = paso.num < pasoActual;
+      return (
+        <a
+          href={paso.path}
+          class={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm min-h-11 transition-colors
+          ${isActive ? "bg-primary text-primary-content" : ""}
+          ${isCompleted ? "bg-base-300 text-base-content" : ""}
+          ${!isActive && !isCompleted ? "bg-base-200 text-base-content/70 hover:bg-base-300" : ""}`}
+          aria-current={isActive ? "step" : undefined}
+        >
+          <span
+            class="flex items-center justify-center w-6 h-6 rounded-full bg-current/20 shrink-0"
+            aria-hidden="true"
+          >
+            {paso.num}
+          </span>
+          {paso.label}
+        </a>
+      );
+    })
+  }
 </nav>

@@ -3,6 +3,47 @@
  * Coherentes con PLAN-TRABAJO-HOY y mockups; reemplazar por API cuando exista backend.
  */
 
+// ── MULTI-ESCUELA ─────────────────────────────────────────────────────────────
+// Dos empresas separadas con el mismo dueño.
+// Solo "Conductores Chillán" opera cursos Profesionales.
+// El admin puede ver/cambiar ambas. La secretaria ve solo la suya
+// (a menos que el admin le otorgue acceso cruzado).
+
+export type EscuelaId = 'autoescuela-chillan' | 'conductores-chillan';
+
+export interface Escuela {
+  id: EscuelaId;
+  nombre: string;
+  programas: string;
+  colorDot: string;
+  colorActive: string;
+  colorCheck: string;
+}
+
+export const ESCUELAS: Escuela[] = [
+  {
+    id: 'autoescuela-chillan',
+    nombre: 'Autoescuela Chillán',
+    programas: 'Solo Clase B',
+    colorDot: 'bg-blue-500',
+    colorActive: 'bg-blue-50/50',
+    colorCheck: 'text-blue-500',
+  },
+  {
+    id: 'conductores-chillan',
+    nombre: 'Conductores Chillán',
+    programas: 'Clase B + Profesional',
+    colorDot: 'bg-purple-500',
+    colorActive: 'bg-purple-50/50',
+    colorCheck: 'text-purple-500',
+  },
+];
+
+export function getEscuela(id: EscuelaId): Escuela {
+  return ESCUELAS.find(e => e.id === id) ?? ESCUELAS[0];
+}
+
+/** @deprecated usar ESCUELAS + EscuelaId */
 export const ESCUELA_ACTUAL = 'Autoescuela Chillán';
 
 export const statsAdmin = {
