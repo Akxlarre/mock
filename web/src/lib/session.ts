@@ -72,6 +72,15 @@ export function getRoleToSetFromPath(path: string): UserRole | null {
 /** Clave de localStorage para rol en demo (cuando no hay SSR/cookies) */
 export const DEMO_ROLE_STORAGE_KEY = "demo_role";
 
+/** ID de la escuela a la que pertenece cada rol mock */
+const SCHOOL_BY_ROLE: Record<UserRole, string> = {
+  admin: 'autoescuela-chillan',      // admin ve ambas, pero su base es Autoescuela
+  instructor: 'autoescuela-chillan',
+  secretaria: 'autoescuela-chillan',
+  alumno: 'autoescuela-chillan',
+  relator: 'conductores-chillan',    // Relatores pertenecen a la escuela Profesional
+};
+
 /**
  * Obtiene el nombre del usuario según su rol
  * En producción, esto vendría de la base de datos
@@ -90,17 +99,19 @@ export function getCurrentUserName(role: UserRole): string {
 
 /**
  * Obtiene el email del usuario según su rol
- * Mock data - en producción vendría de la sesión
+ * Política: se devuelve el correo institucional (alias) para display en UI.
+ * El correo personal queda solo en logs de auditoría.
+ * Mock data - en producción vendría de la sesión.
  */
 export function getCurrentUserEmail(role: UserRole): string {
   const emails: Record<UserRole, string> = {
-    admin: 'jadministrador@escuela.cl',
-    instructor: 'crojas@escuela.cl',
-    secretaria: 'psecretaria@escuela.cl',
+    admin: 'jadmin@autoescuela-chillan.cl',
+    instructor: 'crojas@autoescuela-chillan.cl',
+    secretaria: 'psecretaria@autoescuela-chillan.cl',   // alias institucional
     alumno: 'mgonzalez@email.cl',
-    relator: 'fherrera@conductores.cl'
+    relator: 'fherrera@conductores-chillan.cl'
   };
-  
+
   return emails[role];
 }
 
@@ -120,15 +131,25 @@ export interface UserSession {
   name: string;
   email: string;
   school: string;
+  /** ID de la escuela base del usuario */
+  schoolId: string;
+  /**
+   * true → puede cambiar entre escuelas (admin siempre; secretaria si el admin
+   * le otorgó permiso de acceso cruzado).
+   */
+  hasMultiSchoolAccess: boolean;
 }
 
 export function getCurrentSession(path: string, cookies?: CookieReader): UserSession {
   const role = getCurrentUserRole(path, cookies);
+  const schoolId = SCHOOL_BY_ROLE[role] ?? 'autoescuela-chillan';
 
   return {
     role,
     name: getCurrentUserName(role),
     email: getCurrentUserEmail(role),
     school: getCurrentSchoolName(),
+    schoolId,
+    hasMultiSchoolAccess: role === 'admin',
   };
 }

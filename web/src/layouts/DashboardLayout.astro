@@ -17,6 +17,7 @@ interface Props {
   title?: string;
   userRole?: UserRole;
   userName?: string;
+  /** @deprecated usar el selector de escuela del Sidebar */
   escuela?: string;
 }
 
@@ -42,7 +43,7 @@ import "../assets/app.css";
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <ViewTransitions />
   </head>
-  <body class="min-h-screen bg-gray-50">
+  <body class="min-h-screen bg-gray-50" data-user-role={userRole}>
     <Sidebar currentPath={currentPath} userRole={userRole} />
 
     <div class="lg:pl-64 min-h-screen">

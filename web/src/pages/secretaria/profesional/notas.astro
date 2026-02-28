@@ -1,0 +1,508 @@
+---
+/**
+ * Calificaciones — Vista Secretaria
+ * RF-072: Ingreso manual de notas por módulo técnico (secretaria ingresa basándose en pruebas físicas)
+ * Alcance: acceso a TODAS las promociones y cursos (a diferencia del relator, que solo ve los suyos)
+ */
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+import Card from "../../../components/ui/Card.astro";
+import Button from "../../../components/ui/Button.astro";
+import { ESCUELA_ACTUAL } from "../../../lib/mockData";
+import {
+  PROMOCIONES,
+  MODULOS_POR_CURSO,
+  ALUMNOS_POR_CURSO,
+  NOTAS_MOCK,
+  NOTAS_AUTOR,
+} from "../../../lib/mockRelatores";
+import type { EspecialidadProfesional } from "../../../lib/mockRelatores";
+
+// Contexto de demostración: Promo Enero II, curso A2
+const promoActiva = PROMOCIONES.find((p) => p.id === 3)!;
+const cursoActivo: EspecialidadProfesional = "A2";
+const key = `${promoActiva.id}-${cursoActivo}`;
+const alumnos = ALUMNOS_POR_CURSO[key] ?? [];
+const modulos = MODULOS_POR_CURSO[cursoActivo] ?? [];
+
+// Solo promociones con notas ingresables (en_curso o finalizada)
+const promosConNotas = PROMOCIONES.filter((p) => p.estado !== "planificada");
+
+function calcPromedio(notas: Record<string, number | null>): number | null {
+  const vals = Object.values(notas).filter((v): v is number => v !== null);
+  if (vals.length === 0) return null;
+  return Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 10) / 10;
+}
+
+function contarModulosEvaluados(notas: Record<string, number | null>): number {
+  return Object.values(notas).filter((v) => v !== null).length;
+}
+
+// KPIs globales para la promo+curso seleccionados
+const totalAlumnos = alumnos.length;
+const aprobados = alumnos.filter((a) => {
+  const notas = NOTAS_MOCK[String(a.id)] ?? {};
+  const vals = Object.values(notas).filter((v): v is number => v !== null);
+  return vals.length === modulos.length && vals.every((v) => v >= 4.0);
+}).length;
+const conReprobada = alumnos.filter((a) =>
+  Object.values(NOTAS_MOCK[String(a.id)] ?? {}).some(
+    (v) => v !== null && (v as number) < 4.0
+  )
+).length;
+const conPendiente = alumnos.filter((a) =>
+  Object.values(NOTAS_MOCK[String(a.id)] ?? {}).some((v) => v === null)
+).length;
+
+const modulosEvaluados = modulos.filter((m) =>
+  alumnos.every((a) => (NOTAS_MOCK[String(a.id)] ?? {})[m.id] !== null)
+).length;
+---
+
+<DashboardLayout
+  title="Calificaciones — Clase Profesional"
+  escuela={ESCUELA_ACTUAL}
+  userRole="secretaria"
+>
+  <!-- Header -->
+  <div class="mb-6">
+    <div class="flex items-center gap-2 text-sm text-secondary mb-2">
+      <a href="/secretaria/dashboard" class="hover:text-gray-900">Inicio</a>
+      <span>/</span>
+      <span class="text-gray-900 font-medium">Calificaciones</span>
+    </div>
+    <div class="flex flex-wrap items-start justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-semibold text-gray-900 tracking-tight">
+          Calificaciones
+        </h1>
+        <p class="text-secondary mt-1">
+          Ingreso manual de notas basándose en pruebas físicas corregidas ·
+          Escala 1.0 – 7.0
+        </p>
+      </div>
+      <div class="flex gap-2">
+        <Button
+          variant="secondary"
+          onClick="alert('Exportar planilla Excel (mockup)')"
+        >
+          <svg
+            class="w-4 h-4 mr-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.5"
+              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+            ></path></svg
+          >
+          Exportar
+        </Button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <Card class="mb-6">
+    <div class="grid sm:grid-cols-3 gap-4">
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1"
+          >Promoción</label
+        >
+        <select
+          class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1"
+        >
+          {
+            promosConNotas.map((p) => (
+              <option value={p.id} selected={p.id === 3}>
+                {p.nombre}{" "}
+                {p.estado === "en_curso" ? `(Día ${p.diaActual}/30)` : "(Finalizada)"}
+              </option>
+            ))
+          }
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1"
+          >Curso</label
+        >
+        <select
+          class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1"
+        >
+          <option value="A2" selected>A2 — Taxis y colectivos</option>
+          <option value="A3">A3 — Buses</option>
+          <option value="A4">A4 — Carga simple</option>
+          <option value="A5">A5 — Carga</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1"
+          >Módulo</label
+        >
+        <select
+          class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1"
+        >
+          <option value="todos">Todos los módulos</option>
+          {modulos.map((m) => <option value={m.id}>{m.nombre} — {m.descripcion}</option>)}
+        </select>
+      </div>
+    </div>
+  </Card>
+
+  <!-- KPIs -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <Card class="p-4 text-center">
+      <p class="text-2xl font-bold text-gray-900">{totalAlumnos}</p>
+      <p class="text-xs text-secondary mt-1">Total alumnos</p>
+    </Card>
+    <Card class="p-4 text-center">
+      <p class="text-2xl font-bold text-green-600">{aprobados}</p>
+      <p class="text-xs text-secondary mt-1">Todos módulos ≥4.0</p>
+    </Card>
+    <Card class="p-4 text-center">
+      <p class="text-2xl font-bold text-red-600">{conReprobada}</p>
+      <p class="text-xs text-secondary mt-1">Con nota reprobada</p>
+    </Card>
+    <Card class="p-4 text-center">
+      <p class="text-2xl font-bold text-gray-400">{conPendiente}</p>
+      <p class="text-xs text-secondary mt-1">Con módulos pendientes</p>
+    </Card>
+  </div>
+
+  <!-- Banner estado módulos -->
+  <div class="mb-4 flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+    <svg
+      class="w-4 h-4 text-blue-600 shrink-0"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      ><path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="1.5"
+        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+      ></path></svg
+    >
+    <div class="flex-1">
+      <p class="text-sm font-semibold text-blue-900">
+        {promoActiva.nombre} · Curso {cursoActivo} ·{" "}
+        <span class="font-normal"
+          >{modulosEvaluados}/5 módulos completos</span
+        >
+      </p>
+      <p class="text-xs text-blue-700">
+        Escala 1.0 a 7.0 · Nota mínima de aprobación: 4.0 (RF-072) ·
+        Nota verde = aprobado · rojo = reprobado
+      </p>
+    </div>
+    <!-- Barra de progreso de módulos -->
+    <div class="hidden sm:flex items-center gap-1.5">
+      {
+        modulos.map((m, i) => {
+          const completo = alumnos.every(
+            (a) => (NOTAS_MOCK[String(a.id)] ?? {})[m.id] !== null
+          );
+          return (
+            <div
+              class={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2 ${
+                completo
+                  ? "bg-blue-600 border-blue-600 text-white"
+                  : "bg-white border-blue-300 text-blue-400"
+              }`}
+              title={`${m.nombre} — ${m.descripcion}${completo ? " ✓" : " (pendiente)"}`}
+            >
+              {i + 1}
+            </div>
+          );
+        })
+      }
+    </div>
+  </div>
+
+  <!-- Tabla principal de notas -->
+  <Card>
+    <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+      <h2 class="text-base font-semibold text-gray-900">
+        {promoActiva.nombre} · Curso {cursoActivo} · {alumnos.length} alumnos
+      </h2>
+      <div class="flex items-center gap-3">
+        <span class="text-xs text-secondary">
+          Relator asignado:{" "}
+          <span class="font-medium text-gray-900">
+            {promoActiva.cursos.find((c) => c.tipo === cursoActivo)
+              ?.relatorNombre ?? "—"}
+          </span>
+        </span>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-gray-200">
+            <th
+              class="text-left py-3 pr-4 text-xs font-semibold text-gray-600 uppercase tracking-wide"
+              >Alumno</th
+            >
+            {
+              modulos.map((m) => (
+                <th class="text-center py-3 px-2 text-xs font-semibold text-gray-600 uppercase tracking-wide min-w-[5rem]">
+                  <div>{m.nombre}</div>
+                  <div class="text-[10px] font-normal text-gray-400 normal-case">
+                    {m.descripcion}
+                  </div>
+                </th>
+              ))
+            }
+            <th
+              class="text-center py-3 px-2 text-xs font-semibold text-gray-600 uppercase tracking-wide min-w-[5rem]"
+              >Promedio</th
+            >
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {
+            alumnos.map((alumno) => {
+              const notas = NOTAS_MOCK[String(alumno.id)] ?? {};
+              const autores = NOTAS_AUTOR[String(alumno.id)] ?? {};
+              const promedio = calcPromedio(notas);
+              const algunaReprobada = Object.values(notas).some(
+                (n) => n !== null && (n as number) < 4.0
+              );
+              return (
+                <tr class="hover:bg-gray-50 transition-colors">
+                  <td class="py-3 pr-4">
+                    <div class="flex items-center gap-2.5">
+                      <div
+                        class={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+                          algunaReprobada
+                            ? "bg-red-100 text-red-700"
+                            : promedio !== null && promedio >= 4.0
+                              ? "bg-green-100 text-green-700"
+                              : "bg-gray-100 text-gray-600"
+                        }`}
+                      >
+                        {alumno.nombre
+                          .split(" ")
+                          .map((n: string) => n[0])
+                          .slice(0, 2)
+                          .join("")}
+                      </div>
+                      <div>
+                        <p class="font-medium text-gray-900 text-sm">
+                          {alumno.nombre}
+                        </p>
+                        <p class="text-xs text-gray-500">{alumno.rut}</p>
+                      </div>
+                    </div>
+                  </td>
+                  {modulos.map((m) => {
+                    const nota = notas[m.id];
+                    const autor = autores[m.id];
+                    return (
+                      <td class="py-3 px-2 text-center">
+                        <div class="flex flex-col items-center gap-0.5">
+                          <input
+                            type="number"
+                            min="1"
+                            max="7"
+                            step="0.1"
+                            value={nota ?? ""}
+                            placeholder="—"
+                            class={`w-16 text-center rounded-md border px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1 font-medium ${
+                              nota === null
+                                ? "border-gray-200 bg-white text-gray-400"
+                                : nota < 4.0
+                                  ? "border-red-300 bg-red-50 text-red-700"
+                                  : "border-green-300 bg-green-50 text-green-800"
+                            }`}
+                            onchange="handleNotaChange(this)"
+                          />
+                          {/* Indicador de quién ingresó */}
+                          {nota !== null && (
+                            <span
+                              class={`text-[10px] font-medium ${
+                                autor === "secretaria"
+                                  ? "text-purple-500"
+                                  : "text-blue-400"
+                              }`}
+                              title={`Ingresado por: ${autor}`}
+                            >
+                              {autor === "secretaria" ? "Sec." : "Rel."}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                    );
+                  })}
+                  <td class="py-3 px-2 text-center">
+                    {promedio !== null ? (
+                      <span
+                        class={`inline-flex items-center justify-center w-14 h-7 rounded-full text-xs font-bold ${
+                          promedio >= 4.0
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                        }`}
+                      >
+                        {promedio.toFixed(1)}
+                      </span>
+                    ) : (
+                      <span class="text-gray-300 text-xs">—</span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Leyenda + Acciones -->
+    <div
+      class="mt-6 pt-4 border-t border-gray-200 flex flex-wrap items-center justify-between gap-3"
+    >
+      <div class="flex items-center gap-4 text-xs text-gray-500">
+        <span>
+          <span class="inline-block w-2 h-2 rounded-full bg-green-400 mr-1"
+          ></span>Verde: aprobado (≥4.0)
+        </span>
+        <span>
+          <span class="inline-block w-2 h-2 rounded-full bg-red-400 mr-1"
+          ></span>Rojo: reprobado (&lt;4.0)
+        </span>
+        <span>
+          <span class="text-purple-500 font-medium mr-1">Sec.</span>= secretaria
+        </span>
+        <span>
+          <span class="text-blue-400 font-medium mr-1">Rel.</span>= relator
+        </span>
+      </div>
+      <div class="flex gap-2">
+        <Button
+          variant="secondary"
+          onClick="alert('Guardado como borrador (mockup)')"
+        >
+          Guardar borrador
+        </Button>
+        <Button variant="primary" onClick="confirmarNotas()">
+          Confirmar notas
+        </Button>
+      </div>
+    </div>
+  </Card>
+
+  <!-- Plantillas de pruebas -->
+  <Card class="mt-6 bg-gray-50">
+    <h3 class="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+      <svg
+        class="w-4 h-4 text-gray-500"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        ><path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="1.5"
+          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+        ></path></svg
+      >
+      Plantillas de prueba — Curso {cursoActivo}
+    </h3>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      {
+        modulos.map((m, i) => {
+          const completo = alumnos.every(
+            (a) => (NOTAS_MOCK[String(a.id)] ?? {})[m.id] !== null
+          );
+          return (
+            <div
+              class={`flex items-start gap-3 p-3 rounded-lg border ${
+                completo
+                  ? "bg-green-50 border-green-200"
+                  : "bg-white border-gray-200"
+              }`}
+            >
+              <span
+                class={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+                  completo
+                    ? "bg-green-500 text-white"
+                    : i < 4
+                      ? "bg-blue-100 text-blue-700"
+                      : "bg-purple-100 text-purple-700"
+                }`}
+              >
+                {completo ? "✓" : i + 1}
+              </span>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-gray-900">{m.nombre}</p>
+                <p class="text-xs text-gray-500">{m.descripcion}</p>
+                <div class="flex items-center gap-3 mt-1.5">
+                  <button
+                    onclick="alert('Descargando plantilla PDF (mockup)')"
+                    class="text-xs text-blue-600 hover:underline"
+                  >
+                    Descargar →
+                  </button>
+                  {completo && (
+                    <span class="text-xs text-green-600 font-medium">
+                      Completo
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })
+      }
+    </div>
+  </Card>
+</DashboardLayout>
+
+<script>
+  (window as any).confirmarNotas = function () {
+    const inputs = document.querySelectorAll(
+      'input[type="number"]'
+    ) as NodeListOf<HTMLInputElement>;
+    const vacias = Array.from(inputs).filter((i) => i.value === "").length;
+    if (vacias > 0) {
+      if (
+        !confirm(
+          `Hay ${vacias} nota(s) sin completar. ¿Confirmar igualmente como borrador parcial?`
+        )
+      )
+        return;
+    }
+    alert(
+      "✓ Notas confirmadas\n\nLas notas han sido registradas en el sistema.\nQuedarán visibles para el relator y los alumnos."
+    );
+  };
+
+  (window as any).handleNotaChange = function (input: HTMLInputElement) {
+    const val = parseFloat(input.value);
+    input.classList.remove(
+      "border-red-300",
+      "bg-red-50",
+      "text-red-700",
+      "border-green-300",
+      "bg-green-50",
+      "text-green-800",
+      "border-gray-200",
+      "text-gray-400",
+      "bg-white"
+    );
+    if (isNaN(val)) {
+      input.classList.add("border-gray-200", "bg-white", "text-gray-400");
+    } else if (val < 1 || val > 7) {
+      input.classList.add("border-red-300", "bg-red-50", "text-red-700");
+      input.title = "La nota debe estar entre 1.0 y 7.0";
+    } else if (val < 4.0) {
+      input.classList.add("border-red-300", "bg-red-50", "text-red-700");
+      input.title = "";
+    } else {
+      input.classList.add("border-green-300", "bg-green-50", "text-green-800");
+      input.title = "";
+    }
+  };
+</script>

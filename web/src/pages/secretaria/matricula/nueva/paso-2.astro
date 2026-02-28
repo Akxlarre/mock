@@ -1,589 +1,680 @@
 ---
-/**
- * Wizard Matrícula - Paso 2: Documentos (secretaria)
- * Módulo 2: No se solicita foto de cédula, certificado médico ni SEMEP.
- * Solo se requiere foto para carnet (cámara o subir archivo).
- * RF-082.1: Upload Autorización Notarial condicional (menores 17)
- * Clase Profesional: Hoja de Vida obligatoria; cédula y licencia opcionales (se permite
- * comenzar el curso aunque no tengan la licencia físicamente).
- */
 import DashboardLayout from "../../../../layouts/DashboardLayout.astro";
 import Card from "../../../../components/ui/Card.astro";
 import Button from "../../../../components/ui/Button.astro";
 import MatriculaWizardSteps from "../../../../components/matricula/MatriculaWizardSteps.astro";
 import { ESCUELA_ACTUAL } from "../../../../lib/mockData";
+import { BOOKINGS } from "../../../../lib/mockBookings";
+import { getAvailableBlocksForDay } from "../../../../lib/mockAvailability";
+
+// Data simulada Promociones
+const promocionesDisponibles = [
+  {
+    id: 1,
+    nombre: "Promoción Marzo 2026",
+    tipo: "A3",
+    estado: "planificada",
+    totalAlumnos: 15,
+    maxAlumnos: 25,
+  },
+  {
+    id: 2,
+    nombre: "Promoción Abril 2026",
+    tipo: "A3",
+    estado: "planificada",
+    totalAlumnos: 5,
+    maxAlumnos: 25,
+  },
+  {
+    id: 3,
+    nombre: "Promoción Express Verano",
+    tipo: "A2",
+    estado: "en_curso",
+    totalAlumnos: 24,
+    maxAlumnos: 25,
+  },
+  {
+    id: 101,
+    nombre: "Promoción Enero 2025",
+    tipo: "A3",
+    estado: "finalizada",
+    totalAlumnos: 25,
+    maxAlumnos: 25,
+  },
+  {
+    id: 102,
+    nombre: "Promoción Diciembre 2024",
+    tipo: "A2",
+    estado: "finalizada",
+    totalAlumnos: 20,
+    maxAlumnos: 25,
+  },
+];
+
+// --- Calendario Clase B: bloques con estados de conflicto ---
+type EstadoSlot = "disponible" | "instructor_ocupado" | "vehiculo_ocupado" | "ocupado" | "no_habil";
+
+interface SlotCalendario {
+  fecha: string;
+  diaNombre: string;
+  hora: string;
+  horaRango: string;
+  estado: EstadoSlot;
+  cupos?: number;
+  instructorNombre?: string;
+  vehiculoPatente?: string;
+}
+
+// Semana demo: Lun 3 - Vie 7 Feb 2026 (incluye bookings reales del mock)
+const nombresDias = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+const lunesDemo = new Date(2026, 1, 3); // Feb 3, 2026
+
+// Bookings programados para la semana (scheduled)
+const bookingsSemana = BOOKINGS.filter(
+  (b) => b.status === "scheduled" && b.bookingDate >= "2026-02-03" && b.bookingDate <= "2026-02-07"
+);
+
+// Generar slots de la semana (Lun-Vie, 08:00-18:00)
+const slotsCalendario: SlotCalendario[] = [];
+for (let d = 0; d < 5; d++) {
+  const fecha = new Date(lunesDemo);
+  fecha.setDate(lunesDemo.getDate() + d);
+  const fechaStr = fecha.toISOString().split("T")[0];
+  const diaNombre = nombresDias[fecha.getDay()];
+  const bloques = getAvailableBlocksForDay(fecha.getDay());
+
+  for (const hora of bloques) {
+    const horaFin = `${(parseInt(hora.split(":")[0]) + 1).toString().padStart(2, "0")}:00`;
+    const horaRango = `${hora} - ${horaFin}`;
+
+    // Buscar si hay booking en este slot
+    const booking = bookingsSemana.find(
+      (b) => b.bookingDate === fechaStr && b.startTime === hora
+    );
+
+    // Mock: algunos slots con conflictos parciales para demostración visual
+    const hash = (fechaStr + hora).split("").reduce((a, c) => a + c.charCodeAt(0), 0);
+
+    let estado: EstadoSlot = "disponible";
+    let cupos = 1;
+    let instructorNombre: string | undefined;
+    let vehiculoPatente: string | undefined;
+
+    if (booking) {
+      estado = "ocupado";
+      instructorNombre = booking.instructorName;
+      vehiculoPatente = booking.vehiclePatente;
+    } else if (hash % 9 === 1) {
+      estado = "instructor_ocupado";
+      instructorNombre = "Carlos Rojas";
+    } else if (hash % 9 === 2) {
+      estado = "vehiculo_ocupado";
+      vehiculoPatente = "ABC-123";
+    } else if (hash % 9 === 3) {
+      estado = "ocupado";
+      instructorNombre = "Ana Martínez";
+      vehiculoPatente = "XYZ-789";
+    } else if (hash % 9 === 4) {
+      estado = "no_habil";
+    } else if (hash % 7 === 0) {
+      estado = "disponible";
+      cupos = 2;
+    }
+
+    slotsCalendario.push({
+      fecha: fechaStr,
+      diaNombre,
+      hora,
+      horaRango,
+      estado,
+      cupos,
+      instructorNombre,
+      vehiculoPatente,
+    });
+  }
+}
+
+// Agrupar por día para el grid: { "Lun": [...], "Mar": [...], ... }
+const slotsPorDia = slotsCalendario.reduce(
+  (acc, s) => {
+    if (!acc[s.diaNombre]) acc[s.diaNombre] = [];
+    acc[s.diaNombre].push(s);
+    return acc;
+  },
+  {} as Record<string, SlotCalendario[]>
+);
+
+const diasOrden = ["Lun", "Mar", "Mié", "Jue", "Vie"];
+const horasUnicas = [...new Set(slotsCalendario.map((s) => s.horaRango))].sort();
 
 const basePath = "/secretaria";
-const alumnoData = {
-  nombre: "María González Pérez",
-  rut: "18.234.567-8",
-  curso: "Clase B",
-};
 ---
 
 <DashboardLayout
-  title="Matrícula - Documentación"
+  title="Matrícula - Asignación Académica"
   escuela={ESCUELA_ACTUAL}
   userRole="secretaria"
 >
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-900">Nueva Matrícula</h1>
+    <p class="text-secondary mt-1">
+      Paso 2: Configuración y Asignación Académica
+    </p>
+  </div>
+
   <MatriculaWizardSteps pasoActual={2} basePath={basePath} />
 
   <Card class="max-w-4xl mx-auto">
-    <div
-      id="alumno-info"
-      class="bg-blue-50 rounded-lg p-4 mb-6 flex items-center gap-3"
-    >
-      <div
-        id="alumno-inicial"
-        class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold"
-      >
-        {alumnoData.nombre.charAt(0)}
-      </div>
-      <div>
-        <p id="alumno-nombre" class="text-sm font-semibold text-gray-900">
-          {alumnoData.nombre}
-        </p>
-        <p id="alumno-rut-curso" class="text-xs text-secondary">
-          {alumnoData.rut} • {alumnoData.curso}
-        </p>
-      </div>
-    </div>
-
-    <!-- RF-082.1: Banner menor de edad -->
-    <div
-      id="menor-edad-banner"
-      class="hidden mb-6 p-4 rounded-lg border-2 border-yellow-300 bg-yellow-50"
-    >
-      <div class="flex items-start gap-3">
-        <svg
-          class="w-6 h-6 text-yellow-600 shrink-0 mt-0.5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          ><path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-          ></path></svg
+    <!-- Resumen del Alumno -->
+    <div class="bg-blue-50 -mx-6 -mt-6 px-6 py-4 border-b border-gray-200 mb-6">
+      <div class="flex items-center gap-3">
+        <div
+          class="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold"
         >
+          <span id="resumen-iniciales">--</span>
+        </div>
         <div>
-          <p class="text-sm font-bold text-yellow-900">
-            ⚠️ Alumno menor de edad — Documentación adicional requerida
-          </p>
-          <p class="text-xs text-yellow-800 mt-1">
-            Se requiere <strong>Autorización Notarial firmada</strong> por el apoderado.
+          <h3 class="font-medium text-gray-900" id="resumen-nombre">
+            Cargando datos...
+          </h3>
+          <p class="text-sm text-secondary" id="resumen-curso">
+            Determinando curso...
           </p>
         </div>
       </div>
     </div>
 
-    <h2 class="text-xl font-semibold text-gray-900 mb-6">
-      Documentos Requeridos
-    </h2>
-
-    <form id="documentos-form" class="space-y-6">
-
-      <!-- Módulo 2: Foto para Carnet (cámara o subir archivo) -->
-      <div class="border border-gray-200 rounded-lg overflow-hidden">
-        <div class="px-4 py-3 border-b border-gray-200 bg-gray-50 flex items-center gap-2">
-          <span class="text-sm font-medium text-gray-900">Foto para Carnet</span>
-          <span class="text-xs font-medium text-red-500">*</span>
-          <span class="ml-auto text-xs text-gray-500">Frontal, fondo blanco</span>
+    <div class="p-6">
+      <!-- VISTA PROFESIONAL: Asignación a Cohorte -->
+      <div id="vista-profesional" class="hidden space-y-6">
+        <div class="p-4 rounded-lg bg-purple-50 border border-purple-200">
+          <h4 class="font-semibold text-purple-900 mb-1">
+            Asignación a Promoción (Cohorte)
+          </h4>
+          <p class="text-sm text-purple-700">
+            El alumno de curso profesional debe ser asignado obligatoriamente a
+            un grupo de estudios.
+          </p>
         </div>
-        <div class="p-4 space-y-4">
 
-          <!-- Tabs -->
-          <div class="flex gap-2">
-            <button
-              type="button"
-              id="tab-camara"
-              class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md border border-gray-900 bg-gray-900 text-white transition-colors"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
-              </svg>
-              Tomar foto
-            </button>
-            <button
-              type="button"
-              id="tab-subir"
-              class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-              </svg>
-              Subir foto
-            </button>
-          </div>
-
-          <!-- Sección cámara -->
-          <div id="seccion-camara">
-            <div id="camara-idle" class="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
-              <svg class="w-10 h-10 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
-              </svg>
-              <p class="text-sm text-gray-500 mb-3">Usa la cámara del dispositivo para tomar la foto</p>
-              <button
-                type="button"
-                id="btn-activar-camara"
-                class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-700 transition-colors"
-              >
-                Activar cámara
-              </button>
-              <p class="text-xs text-gray-400 mt-2">Se solicitará permiso para acceder a la cámara</p>
-            </div>
-            <div id="camara-activa" class="hidden space-y-3">
-              <div class="relative rounded-lg overflow-hidden bg-black max-w-xs mx-auto">
-                <video
-                  id="camara-video"
-                  class="w-full object-cover"
-                  autoplay
-                  playsinline
-                  muted
-                  style="aspect-ratio:4/3"
-                ></video>
-                <div class="absolute inset-0 border-2 border-dashed border-white/30 rounded-lg pointer-events-none m-2"></div>
-              </div>
-              <div class="text-center">
-                <button
-                  type="button"
-                  id="btn-capturar"
-                  class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-700 transition-colors"
-                >
-                  📸 Capturar foto
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Sección subir archivo -->
-          <div id="seccion-subir" class="hidden">
-            <div class="border-2 border-dashed border-gray-200 rounded-lg p-8 text-center hover:border-gray-300 transition-colors">
-              <svg class="w-8 h-8 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-              </svg>
-              <p class="text-sm text-gray-600 mb-3">Selecciona o arrastra una foto</p>
-              <input
-                type="file"
-                id="foto-upload-input"
-                accept=".jpg,.jpeg,.png"
-                class="hidden"
-              />
-              <label
-                for="foto-upload-input"
-                class="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-md shadow-sm hover:bg-gray-50 transition-colors"
-              >
-                Elegir archivo
-              </label>
-              <p class="text-xs text-gray-400 mt-2">JPG, PNG · Máx: 2MB</p>
-            </div>
-          </div>
-
-          <!-- Preview compartido -->
-          <div id="foto-preview-wrap" class="hidden">
-            <div class="flex items-start gap-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-              <img
-                id="foto-preview-img"
-                class="w-20 h-20 object-cover rounded-lg border border-gray-200 shrink-0"
-                alt="Foto carnet"
-              />
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-green-800">✓ Foto lista para el carnet</p>
-                <p class="text-xs text-green-700 mt-1">La foto fue capturada/subida correctamente.</p>
-                <button
-                  type="button"
-                  id="btn-reset-foto"
-                  class="mt-2 text-xs text-gray-500 underline hover:text-gray-700"
-                >
-                  Volver a tomar o cambiar
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <canvas id="camara-canvas" class="hidden"></canvas>
-          <p id="foto-feedback" class="text-xs text-red-600 hidden">⚠️ La foto para el carnet es obligatoria</p>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">
+            Seleccione Promoción Abierta <span class="text-red-500">*</span>
+          </label>
+          <select
+            id="select-promocion"
+            class="h-11 px-4 w-full text-sm bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-1"
+            onchange="validarPasoProfesional()"
+          >
+            <option value="">Seleccionar...</option>
+            <optgroup label="Promociones Abiertas">
+              {
+                promocionesDisponibles
+                  .filter((p) => p.estado !== "finalizada")
+                  .map((p) => (
+                    <option value={String(p.id)}>
+                      {p.nombre} ({p.tipo}) — {p.totalAlumnos}/{p.maxAlumnos}{" "}
+                      Inscritos
+                    </option>
+                  ))
+              }
+            </optgroup>
+            <optgroup label="Promociones Pasadas (Registro Histórico)">
+              {
+                promocionesDisponibles
+                  .filter((p) => p.estado === "finalizada")
+                  .map((p) => (
+                    <option value={String(p.id)}>
+                      {p.nombre} ({p.tipo}) — FINALIZADA
+                    </option>
+                  ))
+              }
+            </optgroup>
+          </select>
         </div>
       </div>
 
-      <!-- RF-062/RF-063: Documentos Clase Profesional -->
-      <div id="docs-profesional-wrap" class="hidden space-y-4">
-        <div class="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+      <!-- VISTA SINGULAR: Sin gestión de horario -->
+      <div id="vista-singular" class="hidden space-y-6">
+        <div class="p-4 rounded-lg bg-teal-50 border border-teal-200">
           <div class="flex items-start gap-3">
-            <svg class="w-5 h-5 text-orange-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            <svg
+              class="w-6 h-6 text-teal-600 shrink-0 mt-0.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
+              ></path>
             </svg>
             <div>
-              <p class="text-sm font-bold text-orange-900">Clase Profesional — Documentación requerida</p>
-              <p class="text-xs text-orange-800 mt-1">Solo la <strong>Hoja de Vida del Conductor</strong> es obligatoria. La cédula y licencia pueden adjuntarse si están disponibles — el alumno puede comenzar el curso aunque no las tenga físicamente.</p>
+              <h4 class="font-semibold text-teal-900 mb-1">
+                Curso Singular — Sin asignación de horario
+              </h4>
+              <p class="text-sm text-teal-800">
+                Los <strong>Cursos Singulares</strong> no requieren asignación de
+                horario individual ni inscripción en una promoción. El alumno queda
+                inscrito directamente en el curso seleccionado.
+              </p>
             </div>
           </div>
         </div>
 
-        <!-- Hoja de Vida del Conductor (RF-082.3) — OBLIGATORIA -->
-        <div class="p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300" id="hvc-wrap">
-          <label class="block mb-2">
-            <span class="text-sm font-medium text-gray-900">📋 Hoja de Vida del Conductor *</span>
-            <span class="ml-2 text-xs text-gray-500">(emitida por el Registro Civil)</span>
-          </label>
-          <div class="flex items-center gap-3">
-            <input type="file" id="hoja-vida-conductor" accept=".pdf,.jpg,.png" class="hidden" />
-            <label for="hoja-vida-conductor" class="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-md shadow-sm hover:bg-gray-50 transition-colors">
-              Elegir archivo
-            </label>
-            <span id="hvc-nombre" class="text-sm text-gray-500 truncate max-w-xs">Ningún archivo seleccionado</span>
-          </div>
-          <div class="mt-3">
-            <label class="block text-xs text-gray-600 mb-1">Fecha de emisión del documento <span class="text-red-500">*</span></label>
-            <input
-              type="date"
-              id="hvc-fecha-emision"
-              class="h-9 px-3 text-sm bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-1 w-48"
-            />
-          </div>
-          <!-- RF-082.3: Alerta si > 30 días -->
-          <div id="hvc-alert-30dias" class="hidden mt-2 p-3 bg-yellow-50 border border-yellow-300 rounded-lg">
-            <p class="text-xs font-semibold text-yellow-900">⚠️ Documento con más de 30 días de emisión</p>
-            <p class="text-xs text-yellow-800 mt-0.5">La Hoja de Vida tiene más de 30 días. Se requiere una versión más reciente (RF-082.3).</p>
-          </div>
-          <p id="hvc-feedback" class="text-xs text-red-600 mt-1 hidden">⚠️ Este documento es obligatorio para clase profesional</p>
-          <p class="text-xs text-gray-500 mt-2">Formatos: PDF, JPG, PNG · Máx: 5MB</p>
+        <div class="bg-gray-50 rounded-lg p-5 border border-gray-200">
+          <h5 class="text-sm font-semibold text-gray-900 mb-3">
+            ¿Qué incluye este tipo de alumno?
+          </h5>
+          <ul class="space-y-2 text-sm text-gray-700">
+            <li class="flex items-center gap-2">
+              <svg
+                class="w-4 h-4 text-teal-600 shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M5 13l4 4L19 7"></path>
+              </svg>
+              Pago total al inicio del curso
+            </li>
+            <li class="flex items-center gap-2">
+              <svg
+                class="w-4 h-4 text-teal-600 shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M5 13l4 4L19 7"></path>
+              </svg>
+              Foto de carnet para identificación
+            </li>
+            <li class="flex items-center gap-2">
+              <svg
+                class="w-4 h-4 text-teal-600 shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M5 13l4 4L19 7"></path>
+              </svg>
+              Diploma, certificado y carnet al finalizar
+            </li>
+            <li class="flex items-center gap-2">
+              <svg
+                class="w-4 h-4 text-gray-400 shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+              <span class="text-gray-400"
+                >Sin asignación de instructor ni vehículo</span
+              >
+            </li>
+            <li class="flex items-center gap-2">
+              <svg
+                class="w-4 h-4 text-gray-400 shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+              <span class="text-gray-400"
+                >Sin calendario de clases prácticas</span
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- VISTA CLASE B: Agendamiento de Calendario Base -->
+      <div id="vista-clase-b" class="hidden space-y-6">
+        <div class="p-4 rounded-lg bg-green-50 border border-green-200">
+          <h4 class="font-semibold text-green-900 mb-1">
+            Reserva de Horario Inicial
+          </h4>
+          <p class="text-sm text-green-800">
+            Selecciona el primer bloque disponible para el alumno. Su cupo y
+            progreso se anclará a este horario.
+          </p>
         </div>
 
-        <!-- Cédula de Identidad — opcional -->
-        <div class="p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300" id="cedula-wrap">
-          <label class="block mb-2">
-            <span class="text-sm font-medium text-gray-900">🪪 Cédula de Identidad</span>
-            <span class="ml-2 text-xs text-gray-400">opcional</span>
-          </label>
-          <div class="flex items-center gap-3">
-            <input type="file" id="cedula-identidad" accept=".pdf,.jpg,.png" class="hidden" />
-            <label for="cedula-identidad" class="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-md shadow-sm hover:bg-gray-50 transition-colors">
-              Elegir archivo
-            </label>
-            <span id="cedula-nombre" class="text-sm text-gray-500 truncate max-w-xs">Ningún archivo seleccionado</span>
+        <!-- Leyenda de conflictos -->
+        <div class="flex flex-wrap gap-4 p-3 bg-gray-50 rounded-lg border border-gray-200 text-xs">
+          <div class="flex items-center gap-2">
+            <div class="w-4 h-4 rounded bg-green-200 border border-green-400 shrink-0"></div>
+            <span class="text-gray-700">Disponible</span>
           </div>
-          <p class="text-xs text-gray-500 mt-2">Formatos: PDF, JPG, PNG · Máx: 5MB</p>
+          <div class="flex items-center gap-2">
+            <div class="w-4 h-4 rounded bg-amber-200 border border-amber-500 shrink-0"></div>
+            <span class="text-gray-700">Instructor ocupado</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="w-4 h-4 rounded bg-red-200 border border-red-500 shrink-0"></div>
+            <span class="text-gray-700">Vehículo ocupado</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="w-4 h-4 rounded bg-red-300 border border-red-600 shrink-0"></div>
+            <span class="text-gray-700">Instructor y vehículo ocupados</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="w-4 h-4 rounded bg-gray-200 border border-gray-300 shrink-0"></div>
+            <span class="text-gray-500">No hábil</span>
+          </div>
         </div>
 
-        <!-- Licencia de Conducir — opcional -->
-        <div class="p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300" id="licencia-wrap">
-          <label class="block mb-2">
-            <span class="text-sm font-medium text-gray-900">🚗 Licencia de Conducir</span>
-            <span class="ml-2 text-xs text-gray-400">opcional</span>
-          </label>
-          <div class="mb-3 p-2 bg-blue-50 border border-blue-200 rounded-md">
-            <p class="text-xs text-blue-800">ℹ️ El alumno puede realizar el curso aunque no disponga de la licencia físicamente.</p>
-          </div>
-          <div class="flex items-center gap-3">
-            <input type="file" id="licencia-conducir" accept=".pdf,.jpg,.png" class="hidden" />
-            <label for="licencia-conducir" class="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-md shadow-sm hover:bg-gray-50 transition-colors">
-              Elegir archivo
-            </label>
-            <span id="licencia-nombre" class="text-sm text-gray-500 truncate max-w-xs">Ningún archivo seleccionado</span>
-          </div>
-          <p class="text-xs text-gray-500 mt-2">Formatos: PDF, JPG, PNG · Máx: 5MB</p>
-        </div>
-
-        <!-- Resultado Examen Psicológico Interno — PENDIENTE DE DEFINICIÓN -->
-        <!--
-        <div class="p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300" id="psico-interno-wrap">
-          <label class="block mb-2">
-            <span class="text-sm font-medium text-gray-900">🧠 Resultado Examen Psicológico Interno *</span>
-          </label>
-          <input
-            type="file"
-            id="psico-interno"
-            accept=".pdf"
-            class="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer"
-          />
-          <div class="mt-2 flex items-center gap-4">
-            <label class="block text-xs text-gray-600">Resultado:</label>
-            <div class="flex gap-4">
-              <label class="flex items-center gap-1.5 cursor-pointer">
-                <input type="radio" name="psico_resultado" value="apto" class="w-3.5 h-3.5" />
-                <span class="text-xs text-green-700 font-medium">Apto</span>
-              </label>
-              <label class="flex items-center gap-1.5 cursor-pointer">
-                <input type="radio" name="psico_resultado" value="no_apto" class="w-3.5 h-3.5" />
-                <span class="text-xs text-red-700 font-medium">No apto</span>
-              </label>
+        <div class="border border-gray-200 rounded-xl overflow-hidden">
+          <!-- Cabecera Calendario -->
+          <div
+            class="bg-gray-50 px-4 py-3 flex items-center justify-between border-b border-gray-200"
+          >
+            <h3 class="font-medium text-gray-900">
+              Agenda Semanal — Disponibilidad en tiempo real
+            </h3>
+            <div class="flex space-x-2">
+              <button type="button" class="text-gray-500 hover:text-gray-900 px-2 py-1" aria-label="Semana anterior">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+              </button>
+              <span class="text-sm font-semibold text-gray-700 py-1">3 - 7 Feb 2026</span>
+              <button type="button" class="text-gray-500 hover:text-gray-900 px-2 py-1" aria-label="Siguiente semana">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+              </button>
             </div>
           </div>
-          <div id="psico-no-apto-alert" class="hidden mt-2 p-3 bg-red-50 border border-red-300 rounded-lg">
-            <p class="text-xs font-semibold text-red-900">⛔ Alumno no apto</p>
-            <p class="text-xs text-red-800 mt-0.5">El alumno no puede continuar el proceso de matrícula con resultado "No apto".</p>
-          </div>
-          <p id="psico-feedback" class="text-xs text-red-600 mt-1 hidden">⚠️ Este documento es obligatorio para clase profesional</p>
-          <p class="text-xs text-gray-500 mt-2">Formato: PDF · Máx: 5MB</p>
-        </div>
-        -->
-      </div>
 
-      <!-- RF-082.1: Upload Autorización Notarial (condicional) -->
-      <div id="autorizacion-notarial-wrap" class="hidden">
-        <div class="p-4 bg-yellow-50 rounded-lg border-2 border-dashed border-yellow-400">
-          <label class="block mb-2"
-            ><span class="text-sm font-medium text-yellow-900">📋 Autorización Notarial Firmada *</span></label
+          <!-- Body Calendario: grid por hora (filas) x día (columnas) -->
+          <div class="p-4 overflow-x-auto">
+            <table class="w-full text-sm border-collapse">
+              <thead>
+                <tr>
+                  <th class="text-left py-2 px-2 text-xs font-semibold text-gray-500 w-24">Hora</th>
+                  {diasOrden.map((dia) => (
+                    <th class="text-center py-2 px-2 text-xs font-semibold text-gray-600" key={dia}>{dia}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {horasUnicas.map((horaRango) => (
+                  <tr key={horaRango}>
+                    <td class="py-1 px-2 text-xs text-gray-500 font-medium align-top">{horaRango}</td>
+                    {diasOrden.map((dia) => {
+                      const slot = (slotsPorDia[dia] ?? []).find((s) => s.horaRango === horaRango);
+                      if (!slot) return <td key={dia} class="p-1"></td>;
+
+                      const isDisponible = slot.estado === "disponible";
+                      const isInstructorOcupado = slot.estado === "instructor_ocupado";
+                      const isVehiculoOcupado = slot.estado === "vehiculo_ocupado";
+                      const isOcupado = slot.estado === "ocupado";
+                      const isNoHabil = slot.estado === "no_habil";
+
+                      const baseClass = "p-2 rounded min-h-[4rem] flex flex-col items-center justify-center text-center";
+                      const disponClass = "border border-green-300 bg-green-50 cursor-pointer hover:bg-green-100 transition-colors";
+                      const instructorClass = "border border-amber-400 bg-amber-50 cursor-not-allowed opacity-90";
+                      const vehiculoClass = "border border-red-400 bg-red-50 cursor-not-allowed opacity-90";
+                      const ocupadoClass = "border border-red-500 bg-red-100 cursor-not-allowed opacity-90";
+                      const noHabilClass = "border border-gray-200 bg-gray-100 opacity-60";
+
+                      const cellClass = isDisponible
+                        ? `${baseClass} ${disponClass} slot-disponible`
+                        : isInstructorOcupado
+                          ? `${baseClass} ${instructorClass}`
+                          : isVehiculoOcupado
+                            ? `${baseClass} ${vehiculoClass}`
+                            : isOcupado
+                              ? `${baseClass} ${ocupadoClass}`
+                              : `${baseClass} ${noHabilClass}`;
+
+                      return (
+                        <td key={dia} class="p-1 align-top">
+                          <div
+                            class={cellClass}
+                            data-slot-id={slot.fecha + "_" + slot.hora}
+                            data-disponible={isDisponible}
+                            onclick={isDisponible ? "seleccionarHorario(this)" : undefined}
+                            role={isDisponible ? "button" : undefined}
+                            tabindex={isDisponible ? 0 : undefined}
+                            title={
+                              isInstructorOcupado
+                                ? `Instructor ocupado: ${slot.instructorNombre}`
+                                : isVehiculoOcupado
+                                  ? `Vehículo ocupado: ${slot.vehiculoPatente}`
+                                  : isOcupado
+                                    ? `Instructor ${slot.instructorNombre} y vehículo ${slot.vehiculoPatente} ocupados`
+                                    : isNoHabil
+                                      ? "Fuera de horario"
+                                      : `${slot.cupos} cupo(s) libre(s)`
+                            }
+                          >
+                            {isDisponible && (
+                              <>
+                                <span class="text-green-800 font-bold text-xs">{slot.horaRango}</span>
+                                <span class="bg-white text-green-700 text-[10px] px-2 py-0.5 rounded-full border border-green-300 mt-1">
+                                  {slot.cupos} cupo(s)
+                                </span>
+                              </>
+                            )}
+                            {isInstructorOcupado && (
+                              <>
+                                <span class="text-amber-800 font-semibold text-xs">Instructor ocupado</span>
+                                <span class="text-amber-700 text-[10px] mt-0.5">{slot.instructorNombre}</span>
+                              </>
+                            )}
+                            {isVehiculoOcupado && (
+                              <>
+                                <span class="text-red-800 font-semibold text-xs">Vehículo ocupado</span>
+                                <span class="text-red-700 text-[10px] mt-0.5">{slot.vehiculoPatente}</span>
+                              </>
+                            )}
+                            {isOcupado && (
+                              <>
+                                <span class="text-red-900 font-semibold text-xs">Ocupado</span>
+                                <span class="text-red-800 text-[10px] mt-0.5">
+                                  {slot.instructorNombre} · {slot.vehiculoPatente}
+                                </span>
+                              </>
+                            )}
+                            {isNoHabil && (
+                              <span class="text-gray-400 text-xs">No hábil</span>
+                            )}
+                          </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div
+          id="horario-feedback"
+          class="hidden p-3 rounded-lg border border-blue-200 bg-blue-50 mt-4"
+        >
+          <p
+            class="text-sm font-semibold text-blue-800 flex items-center gap-2"
           >
-          <div class="flex items-center gap-3">
-            <input type="file" id="autorizacion-notarial" accept=".jpg,.png,.pdf" class="hidden" />
-            <label for="autorizacion-notarial" class="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-yellow-700 bg-yellow-50 border border-yellow-300 rounded-md shadow-sm hover:bg-yellow-100 transition-colors">
-              Elegir archivo
-            </label>
-            <span id="autorizacion-nombre" class="text-sm text-gray-500 truncate max-w-xs">Ningún archivo seleccionado</span>
-          </div>
-          <p class="text-xs text-yellow-800 mt-2">
-            Documento notarial que autoriza al menor. Formatos: JPG, PNG, PDF · Máx: 5MB
-          </p>
-          <p id="autorizacion-feedback" class="text-xs text-red-600 mt-1 hidden">
-            ⚠️ Este documento es obligatorio para menores de edad
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            ¡Horario reservado temporalmente para esta matrícula!
           </p>
         </div>
       </div>
+    </div>
 
-      <div class="bg-gray-50 rounded-lg p-4">
-        <div class="flex gap-3">
-          <svg
-            class="w-5 h-5 text-blue-600 shrink-0 mt-0.5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            ><path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            ></path></svg
-          >
-          <div>
-            <p class="text-sm font-medium text-gray-900 mb-1">💡 Consejos para la foto</p>
-            <ul class="text-xs text-gray-700 space-y-1">
-              <li>• Usa buena iluminación y fondo blanco o claro</li>
-              <li>• El rostro debe estar completamente visible y frontal</li>
-              <li>• Formato JPEG o PNG · Máximo 2MB</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </form>
-
-    <div class="flex gap-3 pt-6 mt-6 border-t border-gray-200">
-      <a
-        href={`${basePath}/matricula/nueva/paso-1`}
-        class="btn btn-ghost min-h-11">← Anterior</a
+    <!-- Acciones Inferiores -->
+    <div
+      class="flex items-center justify-between pt-6 border-t border-gray-200 mt-8"
+    >
+      <Button variant="ghost" href={`${basePath}/matricula/nueva/paso-1`}>
+        ← Volver atrás
+      </Button>
+      <Button
+        id="btn-continuar"
+        variant="primary"
+        onClick="nextStep()"
+        disabled
       >
-      <Button id="btn-siguiente" variant="primary" onClick="continuarPaso3()"
-        >Siguiente</Button
-      >
+        Guardar y continuar a Documentos →
+      </Button>
     </div>
   </Card>
 </DashboardLayout>
 
 <script is:inline define:vars={{ basePath }}>
-  // ─── Estado ───────────────────────────────────────────────────────────────
-  var streamActivo = null;
-  var tabActual = "camara";
-  var esMenorFlag = false;
-  var esProfesionalFlag = false;
-  /* var psicoApto = true; */ // pendiente de definición
-  var uploaded = { fotoAlumno: false, autorizacion: false, hojaVida: false, cedula: false, licencia: false /*, psicoInterno: false */ };
+  let esProfesionalState = false;
+  let esSingularState = false;
+  let horarioSeleccionado = false;
 
-  // ─── Tabs foto ────────────────────────────────────────────────────────────
-  function switchTab(tab) {
-    tabActual = tab;
-    var base = "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md border transition-colors";
-    var active = base + " border-gray-900 bg-gray-900 text-white";
-    var inactive = base + " border-gray-200 bg-white text-gray-600 hover:bg-gray-50";
-    document.getElementById("tab-camara").className = tab === "camara" ? active : inactive;
-    document.getElementById("tab-subir").className = tab === "subir" ? active : inactive;
-    document.getElementById("seccion-camara").classList.toggle("hidden", tab !== "camara");
-    document.getElementById("seccion-subir").classList.toggle("hidden", tab !== "subir");
-    if (tab !== "camara" && streamActivo) {
-      streamActivo.getTracks().forEach(function(t) { t.stop(); });
-      streamActivo = null;
-      document.getElementById("camara-idle").classList.remove("hidden");
-      document.getElementById("camara-activa").classList.add("hidden");
+  document.addEventListener("astro:page-load", () => {
+    // 1. Recuperar contexto del paso 1
+    const p1 = sessionStorage.getItem("matricula_paso1");
+    if (!p1) {
+      window.location.href = "/secretaria/matricula/nueva/paso-1";
+      return;
     }
-  }
 
-  // ─── Cámara ───────────────────────────────────────────────────────────────
-  function iniciarCamara() {
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: { ideal: 640 } } })
-      .then(function(stream) {
-        streamActivo = stream;
-        var video = document.getElementById("camara-video");
-        video.srcObject = stream;
-        document.getElementById("camara-idle").classList.add("hidden");
-        document.getElementById("camara-activa").classList.remove("hidden");
-      })
-      .catch(function() {
-        alert('No se pudo acceder a la cámara. Usa la opción "Subir foto" en su lugar.');
-      });
-  }
+    const data = JSON.parse(p1);
 
-  function capturarFoto() {
-    var video = document.getElementById("camara-video");
-    var canvas = document.getElementById("camara-canvas");
-    canvas.width = video.videoWidth || 640;
-    canvas.height = video.videoHeight || 480;
-    canvas.getContext("2d").drawImage(video, 0, 0);
-    var dataUrl = canvas.toDataURL("image/jpeg", 0.9);
-    if (streamActivo) { streamActivo.getTracks().forEach(function(t) { t.stop(); }); streamActivo = null; }
-    mostrarPreviewFoto(dataUrl);
-  }
+    // Fallbacks of UI Texts
+    const fallbackName = data.nombres || "Alumno";
+    const fallbackLastName = data.apellidos || "Nuevo";
 
-  function mostrarPreviewFoto(dataUrl) {
-    document.getElementById("foto-preview-img").src = dataUrl;
-    document.getElementById("foto-preview-wrap").classList.remove("hidden");
-    document.getElementById("camara-activa").classList.add("hidden");
-    document.getElementById("camara-idle").classList.add("hidden");
-    document.getElementById("seccion-subir").classList.add("hidden");
-    document.getElementById("foto-feedback").classList.add("hidden");
-    uploaded.fotoAlumno = true;
-    checkCanContinue();
-  }
+    const nameEl = document.getElementById("resumen-nombre");
+    if (nameEl) nameEl.textContent = fallbackName + " " + fallbackLastName;
 
-  function resetFoto() {
-    document.getElementById("foto-preview-wrap").classList.add("hidden");
-    uploaded.fotoAlumno = false;
-    checkCanContinue();
-    if (tabActual === "camara") {
-      document.getElementById("camara-idle").classList.remove("hidden");
-      document.getElementById("seccion-camara").classList.remove("hidden");
-      document.getElementById("seccion-subir").classList.add("hidden");
+    const in1 = fallbackName.charAt(0).toUpperCase();
+    const in2 = fallbackLastName.charAt(0).toUpperCase();
+    const initEl = document.getElementById("resumen-iniciales");
+    if (initEl) initEl.textContent = in1 + in2;
+
+    esProfesionalState = data.esProfesional;
+    esSingularState = data.esSingular;
+    let cursoLabel = data.tipo_curso;
+    if (cursoLabel === "clase_b") cursoLabel = "Clase B (Particular)";
+    if (cursoLabel === "clase_b_sence")
+      cursoLabel = "Clase B (Franquicia SENCE)";
+    if (data.esProfesional) cursoLabel = "Curso Profesional " + data.tipo_curso;
+    if (data.esSingular)
+      cursoLabel = "Curso Singular — " + (data.cursoSingularNombre || "");
+    const cursoEl = document.getElementById("resumen-curso");
+    if (cursoEl) cursoEl.textContent = cursoLabel;
+
+    if (esSingularState) {
+      document.getElementById("vista-singular")?.classList.remove("hidden");
+      // Singular no necesita selección: habilitar botón de inmediato
+      const btn = document.getElementById("btn-continuar");
+      if (btn) btn.disabled = false;
+    } else if (esProfesionalState) {
+      document.getElementById("vista-profesional")?.classList.remove("hidden");
     } else {
-      document.getElementById("seccion-subir").classList.remove("hidden");
-      var input = document.getElementById("foto-upload-input");
-      if (input) input.value = "";
+      document.getElementById("vista-clase-b")?.classList.remove("hidden");
     }
-  }
+  });
 
-  // ─── Validación continuar ─────────────────────────────────────────────────
-  function checkCanContinue() {
-    var btn = document.getElementById("btn-siguiente");
-    var ok = uploaded.fotoAlumno;
-    if (esMenorFlag && !uploaded.autorizacion) ok = false;
-    if (esProfesionalFlag) {
-      if (!uploaded.hojaVida) ok = false;
-      /* pendiente de definición:
-      if (!uploaded.psicoInterno) ok = false;
-      if (!psicoApto) ok = false;
-      */
-    }
-    if (btn) { btn.disabled = !ok; btn.classList.toggle("opacity-50", !ok); }
-  }
+  // Exportar Funciones UI
+  window.seleccionarHorario = function (el) {
+    document
+      .querySelectorAll("#vista-clase-b .slot-disponible")
+      .forEach((node) => {
+        node.classList.remove("ring-4", "ring-blue-300", "border-blue-500");
+      });
 
-  window.continuarPaso3 = function () {
-    if (!uploaded.fotoAlumno) { document.getElementById("foto-feedback").classList.remove("hidden"); return; }
-    if (esMenorFlag && !uploaded.autorizacion) { alert("⚠️ Debe adjuntar la Autorización Notarial."); return; }
-    if (esProfesionalFlag && !uploaded.hojaVida) { alert("⚠️ Debe adjuntar la Hoja de Vida del Conductor."); return; }
-    sessionStorage.setItem("matricula_paso2", "ok");
-    window.location.href = (basePath || "") + "/matricula/nueva/paso-3";
+    el.classList.add("ring-4", "ring-blue-300", "border-blue-500");
+
+    document.getElementById("horario-feedback")?.classList.remove("hidden");
+    horarioSeleccionado = true;
+    validarPasoFinal();
   };
 
-  // ─── Init ─────────────────────────────────────────────────────────────────
-  document.addEventListener("astro:page-load", function() {
-    checkCanContinue();
+  window.validarPasoProfesional = function () {
+    validarPasoFinal();
+  };
 
-    // Widget foto: event listeners
-    document.getElementById("tab-camara").addEventListener("click", function() { switchTab("camara"); });
-    document.getElementById("tab-subir").addEventListener("click", function() { switchTab("subir"); });
-    document.getElementById("btn-activar-camara").addEventListener("click", iniciarCamara);
-    document.getElementById("btn-capturar").addEventListener("click", capturarFoto);
-    document.getElementById("btn-reset-foto").addEventListener("click", resetFoto);
-    document.getElementById("foto-upload-input").addEventListener("change", function(e) {
-      var file = e.target.files && e.target.files[0];
-      if (!file) return;
-      var reader = new FileReader();
-      reader.onload = function(ev) { mostrarPreviewFoto(ev.target.result); };
-      reader.readAsDataURL(file);
-    });
-
-    // Cargar datos del paso 1
-    try {
-      var raw = sessionStorage.getItem("matricula_paso1");
-      if (raw) {
-        var data = JSON.parse(raw);
-        var nombreCompleto = [data.nombres, data.apellidos].filter(Boolean).join(" ") || "Alumno";
-        var cursoLabels = { clase_b:"Clase B", clase_b_sence:"Clase B + SENCE", profesional_a2:"Profesional A2", profesional_a3:"Profesional A3", profesional_a4:"Profesional A4", profesional_a5:"Profesional A5" };
-        var cursoLabel = cursoLabels[String(data.tipo_curso || "")] || data.tipo_curso || "Clase B";
-        var inicial = document.getElementById("alumno-inicial");
-        var nombreEl = document.getElementById("alumno-nombre");
-        var rutCursoEl = document.getElementById("alumno-rut-curso");
-        if (inicial) inicial.textContent = nombreCompleto.charAt(0).toUpperCase();
-        if (nombreEl) nombreEl.textContent = nombreCompleto;
-        if (rutCursoEl) rutCursoEl.textContent = (data.rut || "") + " • " + cursoLabel;
-        if (data.esMenor === true) {
-          esMenorFlag = true;
-          document.getElementById("menor-edad-banner").classList.remove("hidden");
-          document.getElementById("autorizacion-notarial-wrap").classList.remove("hidden");
+  // Accesibilidad: Enter/Space en slots disponibles
+  document.addEventListener("astro:page-load", () => {
+    document.querySelectorAll("#vista-clase-b .slot-disponible").forEach((el) => {
+      el.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          seleccionarHorario(el);
         }
-        if (data.esProfesional === true) {
-          esProfesionalFlag = true;
-          document.getElementById("docs-profesional-wrap").classList.remove("hidden");
-        }
-      }
-    } catch(_) {}
-
-    // RF-082.3: HVC > 30 días
-    document.getElementById("hvc-fecha-emision").addEventListener("change", function() {
-      var alert30 = document.getElementById("hvc-alert-30dias");
-      if (!this.value) return;
-      var dias = Math.floor((new Date() - new Date(this.value)) / 86400000);
-      if (alert30) alert30.classList.toggle("hidden", dias <= 30);
-    });
-
-    /* pendiente de definición — resultado psicológico:
-    document.querySelectorAll('input[name="psico_resultado"]').forEach(function(r) {
-      r.addEventListener("change", function() {
-        psicoApto = this.value === "apto";
-        var el = document.getElementById("psico-no-apto-alert");
-        if (el) el.classList.toggle("hidden", psicoApto);
-        checkCanContinue();
       });
     });
-    */
-
-    // Documentos opcionales/condicionales
-    document.getElementById("autorizacion-notarial").addEventListener("change", function(e) {
-      uploaded.autorizacion = (e.target.files && e.target.files.length > 0);
-      var span = document.getElementById("autorizacion-nombre");
-      if (span) span.textContent = uploaded.autorizacion ? e.target.files[0].name : "Ningún archivo seleccionado";
-      var fb = document.getElementById("autorizacion-feedback");
-      if (fb) fb.classList.toggle("hidden", uploaded.autorizacion);
-      checkCanContinue();
-    });
-    document.getElementById("hoja-vida-conductor").addEventListener("change", function(e) {
-      uploaded.hojaVida = (e.target.files && e.target.files.length > 0);
-      var span = document.getElementById("hvc-nombre");
-      if (span) span.textContent = uploaded.hojaVida ? e.target.files[0].name : "Ningún archivo seleccionado";
-      var fb = document.getElementById("hvc-feedback");
-      if (fb) fb.classList.toggle("hidden", uploaded.hojaVida);
-      checkCanContinue();
-    });
-    // Cédula de identidad (opcional — no bloquea continuación)
-    document.getElementById("cedula-identidad").addEventListener("change", function(e) {
-      uploaded.cedula = (e.target.files && e.target.files.length > 0);
-      var span = document.getElementById("cedula-nombre");
-      if (span) span.textContent = uploaded.cedula ? e.target.files[0].name : "Ningún archivo seleccionado";
-    });
-    // Licencia de conducir (opcional — no bloquea continuación)
-    document.getElementById("licencia-conducir").addEventListener("change", function(e) {
-      uploaded.licencia = (e.target.files && e.target.files.length > 0);
-      var span = document.getElementById("licencia-nombre");
-      if (span) span.textContent = uploaded.licencia ? e.target.files[0].name : "Ningún archivo seleccionado";
-    });
-    /* pendiente de definición — psico interno:
-    document.getElementById("psico-interno").addEventListener("change", function(e) {
-      uploaded.psicoInterno = (e.target.files && e.target.files.length > 0);
-      var fb = document.getElementById("psico-feedback");
-      if (fb) fb.classList.toggle("hidden", uploaded.psicoInterno);
-      checkCanContinue();
-    });
-    */
   });
+
+  function validarPasoFinal() {
+    let ok = false;
+    if (esProfesionalState) {
+      const selectObj = document.getElementById("select-promocion");
+      if (selectObj && selectObj.value !== "") ok = true;
+    } else {
+      ok = horarioSeleccionado;
+    }
+
+    const btn = document.getElementById("btn-continuar");
+    if (btn) {
+      btn.disabled = !ok;
+    }
+  }
+
+  window.nextStep = function () {
+    const p1 = sessionStorage.getItem("matricula_paso1");
+    if (!p1) return;
+
+    const data = JSON.parse(p1);
+
+    // Inyectar contexto al alumno
+    if (esSingularState) {
+      data.horario_inicial_asignado = false;
+    } else if (esProfesionalState) {
+      data.promocion_asignada_id =
+        document.getElementById("select-promocion")?.value || "";
+    } else {
+      data.horario_inicial_asignado = true; // Flag
+    }
+
+    sessionStorage.setItem("matricula_paso1", JSON.stringify(data));
+
+    // Navegar al anterior paso 2: Documentación (ahora paso-3)
+    window.location.href = "/secretaria/matricula/nueva/paso-3";
+  };
 </script>

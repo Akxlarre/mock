@@ -1,0 +1,284 @@
+---
+/**
+ * Wizard Matrícula - Paso 5: Contrato y Firmas
+ */
+import DashboardLayout from "../../../../layouts/DashboardLayout.astro";
+import Card from "../../../../components/ui/Card.astro";
+import Button from "../../../../components/ui/Button.astro";
+import MatriculaWizardSteps from "../../../../components/matricula/MatriculaWizardSteps.astro";
+import { ESCUELA_ACTUAL } from "../../../../lib/mockData";
+
+const basePath = "/secretaria";
+---
+
+<DashboardLayout
+    title="Matrícula - Contrato"
+    escuela={ESCUELA_ACTUAL}
+    userRole="secretaria"
+>
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">Nueva Matrícula</h1>
+        <p class="text-secondary mt-1">Paso 5: Contrato y Firmas</p>
+    </div>
+    <MatriculaWizardSteps pasoActual={5} basePath={basePath} />
+
+    <Card class="max-w-4xl mx-auto">
+        <h2 class="text-xl font-semibold text-gray-900 mb-6">
+            Firma de Contrato
+        </h2>
+
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-5 mb-8">
+            <div class="flex items-start gap-4">
+                <div
+                    class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0"
+                >
+                    <svg
+                        class="w-6 h-6 text-blue-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        ></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="font-medium text-blue-900">
+                        Paso Legal Obligatorio
+                    </h3>
+                    <p class="text-sm text-blue-800 mt-1">
+                        Por normativa del Ministerio de Transportes / Ley del
+                        Consumidor, el alumno debe firmar presencialmente su
+                        contrato de prestación de servicios para dar por válida
+                        la matrícula.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8">
+            <!-- Columna 1: Generar PDF -->
+            <div>
+                <h3
+                    class="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wide"
+                >
+                    Paso A: Imprimir Contrato
+                </h3>
+
+                <div
+                    class="p-6 border-2 border-gray-200 rounded-lg bg-gray-50 text-center"
+                >
+                    <div
+                        class="w-16 h-16 bg-white rounded-xl shadow-sm border border-gray-200 flex items-center justify-center mx-auto mb-4"
+                    >
+                        <svg
+                            class="w-8 h-8 text-red-500"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
+                            ></path>
+                        </svg>
+                    </div>
+                    <p class="text-sm text-gray-700 mb-6 px-4">
+                        El sistema ha autocompletado el borrador del contrato
+                        con los datos del alumno y del pago.
+                    </p>
+
+                    <Button
+                        variant="secondary"
+                        onClick="generarPDFMock()"
+                        class="w-full justify-center bg-white"
+                    >
+                        <svg
+                            class="w-4 h-4 mr-2"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                            ></path>
+                        </svg>
+                        1. Generar e Imprimir Borrador
+                    </Button>
+                </div>
+            </div>
+
+            <!-- Columna 2: Upload Escáner -->
+            <div>
+                <h3
+                    class="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wide"
+                >
+                    Paso B: Subir Digitalizado
+                </h3>
+
+                <div
+                    id="dropzone-contrato"
+                    class="p-8 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors text-center cursor-pointer min-h-[220px] flex flex-col items-center justify-center"
+                >
+                    <div id="dropzone-content">
+                        <svg
+                            class="w-12 h-12 text-gray-400 mx-auto mb-3"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+                            ></path>
+                        </svg>
+                        <p class="text-sm font-medium text-gray-900">
+                            Haz clic para subir el contrato firmado
+                        </p>
+                        <p class="text-xs text-gray-500 mt-1">
+                            Soporta PDF, JPG o PNG hasta 10MB
+                        </p>
+                    </div>
+
+                    <!-- Estado éxito (Hidden por defecto) -->
+                    <div
+                        id="dropzone-success"
+                        class="hidden flex-col items-center"
+                    >
+                        <div
+                            class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-3"
+                        >
+                            <svg
+                                class="w-6 h-6 text-green-600"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                ><path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M5 13l4 4L19 7"></path></svg
+                            >
+                        </div>
+                        <p class="text-sm font-semibold text-green-800">
+                            Contrato cargado con éxito
+                        </p>
+                        <p class="text-xs text-green-600">
+                            archivo_firmado.pdf
+                        </p>
+                    </div>
+                </div>
+                <p
+                    id="error-upload"
+                    class="hidden text-sm text-red-600 mt-2 font-medium"
+                >
+                    ⚠️ Debes adjuntar el contrato firmado para continuar.
+                </p>
+            </div>
+        </div>
+
+        <!-- Navegación -->
+        <div
+            class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-8 pt-6 border-t border-gray-200"
+        >
+            <Button
+                variant="secondary"
+                onClick={`window.location.href='${basePath}/matricula/nueva/paso-4'`}
+            >
+                ← Volver al Pago
+            </Button>
+            <Button
+                id="btn-next"
+                variant="primary"
+                onClick="validarContinuar()"
+            >
+                Confirmar Matrícula →
+            </Button>
+        </div>
+    </Card>
+</DashboardLayout>
+
+<script is:inline define:vars={{ basePath }}>
+    let isContratoSubido = false;
+
+    document.addEventListener("astro:page-load", () => {
+        // Interactividad UI de Subir documento
+        const dropzone = document.getElementById("dropzone-contrato");
+        const contentEl = document.getElementById("dropzone-content");
+        const successEl = document.getElementById("dropzone-success");
+        const errorEl = document.getElementById("error-upload");
+
+        dropzone?.addEventListener("click", () => {
+            // Simular que abre un file input y carga algo válido
+            const confirm = window.confirm(
+                "Carga simulada: ¿Deseas subir el archivo 'contrato_firmado.pdf' a los servidores?",
+            );
+            if (confirm) {
+                isContratoSubido = true;
+                dropzone.classList.replace(
+                    "border-gray-300",
+                    "border-green-400",
+                );
+                dropzone.classList.replace(
+                    "hover:border-blue-500",
+                    "hover:border-green-500",
+                );
+                dropzone.classList.add("bg-green-50");
+
+                contentEl?.classList.add("hidden");
+                successEl?.classList.remove("hidden");
+                successEl?.classList.add("flex");
+                errorEl?.classList.add("hidden");
+            }
+        });
+
+        // Validar antes de Continuar
+        window.validarContinuar = () => {
+            if (!isContratoSubido) {
+                errorEl?.classList.remove("hidden");
+                dropzone?.classList.add("animate-pulse", "border-red-400");
+                setTimeout(
+                    () =>
+                        dropzone?.classList.remove(
+                            "animate-pulse",
+                            "border-red-400",
+                        ),
+                    1000,
+                );
+                return;
+            }
+
+            // Pasar datos extra al sessionStorage (marcando que el expediente tiene contrato) y despachar al backend mock
+            try {
+                const raw = sessionStorage.getItem("matricula_data");
+                if (raw) {
+                    let info = JSON.parse(raw);
+                    info.contratoAdjunto = true;
+                    sessionStorage.setItem(
+                        "matricula_data",
+                        JSON.stringify(info),
+                    );
+                }
+            } catch (e) {}
+
+            // Avanzamos al último paso: Success Feedback.
+            window.location.href =
+                (typeof basePath !== "undefined" ? basePath : "") +
+                "/matricula/nueva/paso-6";
+        };
+    });
+
+    // Mock función imprimir
+    window.generarPDFMock = () => {
+        alert(
+            "🖨️ Generando PDF del Contrato de Prestación de Servicios...\n\n(En un sistema real, esto despachará el archivo PDF autocompletado a la impresora para que el alumno lo firme físicamente).",
+        );
+    };
+</script>

@@ -1,7 +1,11 @@
 ---
 /**
- * Wizard Matrícula - Paso 3: Pago y Descuentos
- * RF-010: Matrícula manual con descuentos
+ * Wizard Matrícula - Paso 2: Documentos (secretaria)
+ * Módulo 2: No se solicita foto de cédula, certificado médico ni SEMEP.
+ * Solo se requiere foto para carnet (cámara o subir archivo).
+ * RF-082.1: Upload Autorización Notarial condicional (menores 17)
+ * Clase Profesional: Hoja de Vida obligatoria; cédula y licencia opcionales (se permite
+ * comenzar el curso aunque no tengan la licencia físicamente).
  */
 import DashboardLayout from "../../../../layouts/DashboardLayout.astro";
 import Card from "../../../../components/ui/Card.astro";
@@ -9,311 +13,862 @@ import Button from "../../../../components/ui/Button.astro";
 import MatriculaWizardSteps from "../../../../components/matricula/MatriculaWizardSteps.astro";
 import { ESCUELA_ACTUAL } from "../../../../lib/mockData";
 
+const basePath = "/secretaria";
 const alumnoData = {
   nombre: "María González Pérez",
   rut: "18.234.567-8",
   curso: "Clase B",
 };
-
-const PRECIO_BASE = 280000;
-const basePath = "/secretaria";
 ---
 
-<DashboardLayout title="Matrícula - Pago" escuela={ESCUELA_ACTUAL} userRole="secretaria">
-  <MatriculaWizardSteps pasoActual={3} basePath={basePath} />
+<DashboardLayout
+  title="Matrícula - Documentación"
+  escuela={ESCUELA_ACTUAL}
+  userRole="secretaria"
+>
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-900">Nueva Matrícula</h1>
+    <p class="text-secondary mt-1">Paso 3: Recepción de documentos y firma</p>
+  </div>
+
+  <MatriculaWizardSteps pasoActual={3} basePath="/secretaria" />
 
   <Card class="max-w-4xl mx-auto">
-    <!-- Alumno info (se actualiza desde sessionStorage si viene del flujo) -->
-    <div id="alumno-info-paso3" class="bg-blue-50 rounded-lg p-4 mb-6 flex items-center gap-3">
-      <div id="alumno-inicial-paso3" class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+    <div
+      id="alumno-info"
+      class="bg-blue-50 rounded-lg p-4 mb-6 flex items-center gap-3"
+    >
+      <div
+        id="alumno-inicial"
+        class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold"
+      >
         {alumnoData.nombre.charAt(0)}
       </div>
       <div>
-        <p id="alumno-nombre-paso3" class="text-sm font-semibold text-gray-900">{alumnoData.nombre}</p>
-        <p id="alumno-rut-curso-paso3" class="text-xs text-secondary">{alumnoData.rut} • {alumnoData.curso}</p>
+        <p id="alumno-nombre" class="text-sm font-semibold text-gray-900">
+          {alumnoData.nombre}
+        </p>
+        <p id="alumno-rut-curso" class="text-xs text-secondary">
+          {alumnoData.rut} • {alumnoData.curso}
+        </p>
+      </div>
+    </div>
+
+    <!-- RF-082.1: Banner menor de edad -->
+    <div
+      id="menor-edad-banner"
+      class="hidden mb-6 p-4 rounded-lg border-2 border-yellow-300 bg-yellow-50"
+    >
+      <div class="flex items-start gap-3">
+        <svg
+          class="w-6 h-6 text-yellow-600 shrink-0 mt-0.5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          ><path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+          ></path></svg
+        >
+        <div>
+          <p class="text-sm font-bold text-yellow-900">
+            ⚠️ Alumno menor de edad — Documentación adicional requerida
+          </p>
+          <p class="text-xs text-yellow-800 mt-1">
+            Se requiere <strong>Autorización Notarial firmada</strong> por el apoderado.
+          </p>
+        </div>
       </div>
     </div>
 
     <h2 class="text-xl font-semibold text-gray-900 mb-6">
-      Método de Pago y Descuentos
+      Documentos Requeridos
     </h2>
 
-    <!-- Resumen según requerimientos (RF-009, RF-010) -->
-    <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
-      <p class="text-sm font-medium text-amber-900 mb-1">Opciones de pago según requisitos</p>
-      <ul class="text-xs text-amber-800 space-y-1">
-        <li><strong>Todo de una:</strong> pagar matrícula completa ahora (efectivo, transferencia o tarjeta).</li>
-        <li><strong>Pagos parciales (RF-010):</strong> pagar solo una parte ahora; el saldo se calcula y queda pendiente.</li>
-        <li><strong>Pago pendiente:</strong> omitir pago inmediato y registrar la matrícula para cobrar después.</li>
-      </ul>
-      <p class="text-xs text-amber-700 mt-2">En contabilidad se distingue "Matrícula Clase B" y "Clases Clase B (pagos adicionales)" para el cierre diario.</p>
-    </div>
-
-    <!-- Precio base -->
-    <div class="bg-gray-50 rounded-lg p-6 mb-6">
-      <div class="flex justify-between items-center">
-        <div>
-          <p class="text-sm text-secondary mb-1">
-            Matrícula <span id="curso-label-paso3">{alumnoData.curso}</span>
-          </p>
-          <p class="text-xs text-muted">12 clases prácticas incluidas</p>
+    <form id="documentos-form" class="space-y-6">
+      <!-- Módulo 2: Foto para Carnet (cámara o subir archivo) -->
+      <div class="border border-gray-200 rounded-lg overflow-hidden">
+        <div
+          class="px-4 py-3 border-b border-gray-200 bg-gray-50 flex items-center gap-2"
+        >
+          <span class="text-sm font-medium text-gray-900">Foto para Carnet</span
+          >
+          <span class="text-xs font-medium text-red-500">*</span>
+          <span class="ml-auto text-xs text-gray-500"
+            >Frontal, fondo blanco</span
+          >
         </div>
-        <p class="text-3xl font-bold text-gray-900">
-          ${PRECIO_BASE.toLocaleString("es-CL")}
-        </p>
+        <div class="p-4 space-y-4">
+          <!-- Tabs -->
+          <div class="flex gap-2">
+            <button
+              type="button"
+              id="tab-camara"
+              class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md border border-gray-900 bg-gray-900 text-white transition-colors"
+            >
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"
+                ></path>
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z"
+                ></path>
+              </svg>
+              Tomar foto
+            </button>
+            <button
+              type="button"
+              id="tab-subir"
+              class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
+            >
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
+                ></path>
+              </svg>
+              Subir foto
+            </button>
+          </div>
+
+          <!-- Sección cámara -->
+          <div id="seccion-camara">
+            <div
+              id="camara-idle"
+              class="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200"
+            >
+              <svg
+                class="w-10 h-10 text-gray-300 mx-auto mb-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                stroke-width="1"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"
+                ></path>
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z"
+                ></path>
+              </svg>
+              <p class="text-sm text-gray-500 mb-3">
+                Usa la cámara del dispositivo para tomar la foto
+              </p>
+              <button
+                type="button"
+                id="btn-activar-camara"
+                class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-700 transition-colors"
+              >
+                Activar cámara
+              </button>
+              <p class="text-xs text-gray-400 mt-2">
+                Se solicitará permiso para acceder a la cámara
+              </p>
+            </div>
+            <div id="camara-activa" class="hidden space-y-3">
+              <div
+                class="relative rounded-lg overflow-hidden bg-black max-w-xs mx-auto"
+              >
+                <video
+                  id="camara-video"
+                  class="w-full object-cover"
+                  autoplay
+                  playsinline
+                  muted
+                  style="aspect-ratio:4/3"></video>
+                <div
+                  class="absolute inset-0 border-2 border-dashed border-white/30 rounded-lg pointer-events-none m-2"
+                >
+                </div>
+              </div>
+              <div class="text-center">
+                <button
+                  type="button"
+                  id="btn-capturar"
+                  class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-700 transition-colors"
+                >
+                  📸 Capturar foto
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sección subir archivo -->
+          <div id="seccion-subir" class="hidden">
+            <div
+              class="border-2 border-dashed border-gray-200 rounded-lg p-8 text-center hover:border-gray-300 transition-colors"
+            >
+              <svg
+                class="w-8 h-8 text-gray-300 mx-auto mb-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
+                ></path>
+              </svg>
+              <p class="text-sm text-gray-600 mb-3">
+                Selecciona o arrastra una foto
+              </p>
+              <input
+                type="file"
+                id="foto-upload-input"
+                accept=".jpg,.jpeg,.png"
+                class="hidden"
+              />
+              <label
+                for="foto-upload-input"
+                class="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-md shadow-sm hover:bg-gray-50 transition-colors"
+              >
+                Elegir archivo
+              </label>
+              <p class="text-xs text-gray-400 mt-2">JPG, PNG · Máx: 2MB</p>
+            </div>
+          </div>
+
+          <!-- Preview compartido -->
+          <div id="foto-preview-wrap" class="hidden">
+            <div
+              class="flex items-start gap-4 p-4 bg-green-50 border border-green-200 rounded-lg"
+            >
+              <img
+                id="foto-preview-img"
+                class="w-20 h-20 object-cover rounded-lg border border-gray-200 shrink-0"
+                alt="Foto carnet"
+              />
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-green-800">
+                  ✓ Foto lista para el carnet
+                </p>
+                <p class="text-xs text-green-700 mt-1">
+                  La foto fue capturada/subida correctamente.
+                </p>
+                <button
+                  type="button"
+                  id="btn-reset-foto"
+                  class="mt-2 text-xs text-gray-500 underline hover:text-gray-700"
+                >
+                  Volver a tomar o cambiar
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <canvas id="camara-canvas" class="hidden"></canvas>
+          <p id="foto-feedback" class="text-xs text-red-600 hidden">
+            ⚠️ La foto para el carnet es obligatoria
+          </p>
+        </div>
       </div>
-    </div>
 
-    <!-- Descuento -->
-    <Card class="mb-6 border-2 border-dashed border-gray-300">
-      <label class="flex items-center gap-2 mb-4 cursor-pointer">
-        <input
-          type="checkbox"
-          id="tiene-descuento"
-          class="checkbox checkbox-primary"
-        />
-        <span class="font-medium text-gray-900">Aplicar descuento</span>
-      </label>
+      <!-- RF-062/RF-063: Documentos Clase Profesional -->
+      <div id="docs-profesional-wrap" class="hidden space-y-4">
+        <div class="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+          <div class="flex items-start gap-3">
+            <svg
+              class="w-5 h-5 text-orange-600 shrink-0 mt-0.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              ></path>
+            </svg>
+            <div>
+              <p class="text-sm font-bold text-orange-900">
+                Clase Profesional — Documentación requerida
+              </p>
+              <p class="text-xs text-orange-800 mt-1">
+                Solo la <strong>Hoja de Vida del Conductor</strong> es obligatoria.
+                La cédula y licencia pueden adjuntarse si están disponibles — el alumno
+                puede comenzar el curso aunque no las tenga físicamente.
+              </p>
+            </div>
+          </div>
+        </div>
 
-      <div id="descuento-fields" class="space-y-4 hidden">
-        <div>
-          <label class="label">
-            <span class="label-text font-medium">Monto descuento (CLP) *</span>
+        <!-- Hoja de Vida del Conductor (RF-082.3) — OBLIGATORIA -->
+        <div
+          class="p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300"
+          id="hvc-wrap"
+        >
+          <label class="block mb-2">
+            <span class="text-sm font-medium text-gray-900"
+              >📋 Hoja de Vida del Conductor *</span
+            >
+            <span class="ml-2 text-xs text-gray-500"
+              >(emitida por el Registro Civil)</span
+            >
+          </label>
+          <div class="flex items-center gap-3">
+            <input
+              type="file"
+              id="hoja-vida-conductor"
+              accept=".pdf,.jpg,.png"
+              class="hidden"
+            />
+            <label
+              for="hoja-vida-conductor"
+              class="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-md shadow-sm hover:bg-gray-50 transition-colors"
+            >
+              Elegir archivo
+            </label>
+            <span
+              id="hvc-nombre"
+              class="text-sm text-gray-500 truncate max-w-xs"
+              >Ningún archivo seleccionado</span
+            >
+          </div>
+          <div class="mt-3">
+            <label class="block text-xs text-gray-600 mb-1"
+              >Fecha de emisión del documento <span class="text-red-500">*</span
+              ></label
+            >
+            <input
+              type="date"
+              id="hvc-fecha-emision"
+              class="h-9 px-3 text-sm bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-1 w-48"
+            />
+          </div>
+          <!-- RF-082.3: Alerta si > 30 días -->
+          <div
+            id="hvc-alert-30dias"
+            class="hidden mt-2 p-3 bg-yellow-50 border border-yellow-300 rounded-lg"
+          >
+            <p class="text-xs font-semibold text-yellow-900">
+              ⚠️ Documento con más de 30 días de emisión
+            </p>
+            <p class="text-xs text-yellow-800 mt-0.5">
+              La Hoja de Vida tiene más de 30 días. Se requiere una versión más
+              reciente (RF-082.3).
+            </p>
+          </div>
+          <p id="hvc-feedback" class="text-xs text-red-600 mt-1 hidden">
+            ⚠️ Este documento es obligatorio para clase profesional
+          </p>
+          <p class="text-xs text-gray-500 mt-2">
+            Formatos: PDF, JPG, PNG · Máx: 5MB
+          </p>
+        </div>
+
+        <!-- Cédula de Identidad — opcional -->
+        <div
+          class="p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300"
+          id="cedula-wrap"
+        >
+          <label class="block mb-2">
+            <span class="text-sm font-medium text-gray-900"
+              >🪪 Cédula de Identidad</span
+            >
+            <span class="ml-2 text-xs text-gray-400">opcional</span>
+          </label>
+          <div class="flex items-center gap-3">
+            <input
+              type="file"
+              id="cedula-identidad"
+              accept=".pdf,.jpg,.png"
+              class="hidden"
+            />
+            <label
+              for="cedula-identidad"
+              class="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-md shadow-sm hover:bg-gray-50 transition-colors"
+            >
+              Elegir archivo
+            </label>
+            <span
+              id="cedula-nombre"
+              class="text-sm text-gray-500 truncate max-w-xs"
+              >Ningún archivo seleccionado</span
+            >
+          </div>
+          <p class="text-xs text-gray-500 mt-2">
+            Formatos: PDF, JPG, PNG · Máx: 5MB
+          </p>
+        </div>
+
+        <!-- Licencia de Conducir — opcional -->
+        <div
+          class="p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300"
+          id="licencia-wrap"
+        >
+          <label class="block mb-2">
+            <span class="text-sm font-medium text-gray-900"
+              >🚗 Licencia de Conducir</span
+            >
+            <span class="ml-2 text-xs text-gray-400">opcional</span>
+          </label>
+          <div class="mb-3 p-2 bg-blue-50 border border-blue-200 rounded-md">
+            <p class="text-xs text-blue-800">
+              ℹ️ El alumno puede realizar el curso aunque no disponga de la
+              licencia físicamente.
+            </p>
+          </div>
+          <div class="flex items-center gap-3">
+            <input
+              type="file"
+              id="licencia-conducir"
+              accept=".pdf,.jpg,.png"
+              class="hidden"
+            />
+            <label
+              for="licencia-conducir"
+              class="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-md shadow-sm hover:bg-gray-50 transition-colors"
+            >
+              Elegir archivo
+            </label>
+            <span
+              id="licencia-nombre"
+              class="text-sm text-gray-500 truncate max-w-xs"
+              >Ningún archivo seleccionado</span
+            >
+          </div>
+          <p class="text-xs text-gray-500 mt-2">
+            Formatos: PDF, JPG, PNG · Máx: 5MB
+          </p>
+        </div>
+
+        <!-- Resultado Examen Psicológico Interno — PENDIENTE DE DEFINICIÓN -->
+        <!--
+        <div class="p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300" id="psico-interno-wrap">
+          <label class="block mb-2">
+            <span class="text-sm font-medium text-gray-900">🧠 Resultado Examen Psicológico Interno *</span>
           </label>
           <input
-            type="number"
-            id="monto-descuento"
-            class="input input-bordered w-full min-h-11"
-            placeholder="50000"
-            min="0"
-            max={PRECIO_BASE}
+            type="file"
+            id="psico-interno"
+            accept=".pdf"
+            class="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer"
           />
+          <div class="mt-2 flex items-center gap-4">
+            <label class="block text-xs text-gray-600">Resultado:</label>
+            <div class="flex gap-4">
+              <label class="flex items-center gap-1.5 cursor-pointer">
+                <input type="radio" name="psico_resultado" value="apto" class="w-3.5 h-3.5" />
+                <span class="text-xs text-green-700 font-medium">Apto</span>
+              </label>
+              <label class="flex items-center gap-1.5 cursor-pointer">
+                <input type="radio" name="psico_resultado" value="no_apto" class="w-3.5 h-3.5" />
+                <span class="text-xs text-red-700 font-medium">No apto</span>
+              </label>
+            </div>
+          </div>
+          <div id="psico-no-apto-alert" class="hidden mt-2 p-3 bg-red-50 border border-red-300 rounded-lg">
+            <p class="text-xs font-semibold text-red-900">⛔ Alumno no apto</p>
+            <p class="text-xs text-red-800 mt-0.5">El alumno no puede continuar el proceso de matrícula con resultado "No apto".</p>
+          </div>
+          <p id="psico-feedback" class="text-xs text-red-600 mt-1 hidden">⚠️ Este documento es obligatorio para clase profesional</p>
+          <p class="text-xs text-gray-500 mt-2">Formato: PDF · Máx: 5MB</p>
         </div>
+        -->
+      </div>
 
-        <div>
-          <label class="label">
-            <span class="label-text font-medium">Motivo del descuento *</span>
-          </label>
-          <textarea
-            id="motivo-descuento"
-            class="textarea textarea-bordered w-full h-24"
-            placeholder="Ej: Promoción febrero 2026, Cliente referido..."
-          ></textarea>
-          <p class="text-xs text-secondary mt-1">
-            ⚠️ Quedará registrado en log de auditoría
+      <!-- RF-082.1: Upload Autorización Notarial (condicional) -->
+      <div id="autorizacion-notarial-wrap" class="hidden">
+        <div
+          class="p-4 bg-yellow-50 rounded-lg border-2 border-dashed border-yellow-400"
+        >
+          <label class="block mb-2"
+            ><span class="text-sm font-medium text-yellow-900"
+              >📋 Autorización Notarial Firmada *</span
+            ></label
+          >
+          <div class="flex items-center gap-3">
+            <input
+              type="file"
+              id="autorizacion-notarial"
+              accept=".jpg,.png,.pdf"
+              class="hidden"
+            />
+            <label
+              for="autorizacion-notarial"
+              class="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-yellow-700 bg-yellow-50 border border-yellow-300 rounded-md shadow-sm hover:bg-yellow-100 transition-colors"
+            >
+              Elegir archivo
+            </label>
+            <span
+              id="autorizacion-nombre"
+              class="text-sm text-gray-500 truncate max-w-xs"
+              >Ningún archivo seleccionado</span
+            >
+          </div>
+          <p class="text-xs text-yellow-800 mt-2">
+            Documento notarial que autoriza al menor. Formatos: JPG, PNG, PDF ·
+            Máx: 5MB
+          </p>
+          <p
+            id="autorizacion-feedback"
+            class="text-xs text-red-600 mt-1 hidden"
+          >
+            ⚠️ Este documento es obligatorio para menores de edad
           </p>
         </div>
       </div>
-    </Card>
 
-    <!-- Total -->
-    <div
-      class="bg-linear-to-r from-blue-50 to-blue-100 rounded-lg p-6 mb-6 border-2 border-blue-200"
-    >
-      <div class="flex justify-between items-center">
-        <div>
-          <p class="text-sm text-blue-900 font-medium">Total a Pagar</p>
-          <p id="descuento-aplicado" class="text-xs text-blue-700 hidden">
-            Descuento: <span id="descuento-monto-label">$0</span>
-          </p>
+      <div class="bg-gray-50 rounded-lg p-4">
+        <div class="flex gap-3">
+          <svg
+            class="w-5 h-5 text-blue-600 shrink-0 mt-0.5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            ></path></svg
+          >
+          <div>
+            <p class="text-sm font-medium text-gray-900 mb-1">
+              💡 Consejos para la foto
+            </p>
+            <ul class="text-xs text-gray-700 space-y-1">
+              <li>• Usa buena iluminación y fondo blanco o claro</li>
+              <li>• El rostro debe estar completamente visible y frontal</li>
+              <li>• Formato JPEG o PNG · Máximo 2MB</li>
+            </ul>
+          </div>
         </div>
-        <p id="total-pagar" class="text-4xl font-bold text-blue-600">
-          ${PRECIO_BASE.toLocaleString("es-CL")}
-        </p>
       </div>
-    </div>
+    </form>
 
-    <!-- Método pago -->
-    <div class="space-y-3">
-      <h3 class="text-lg font-semibold text-gray-900 mb-4">Método de Pago</h3>
-
-      <label
-        class="flex items-start gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 cursor-pointer transition-all"
+    <div class="flex gap-3 pt-6 mt-6 border-t border-gray-200">
+      <a
+        href={`${basePath}/matricula/nueva/paso-2`}
+        class="btn btn-ghost min-h-11">← Anterior</a
       >
-        <input
-          type="radio"
-          name="metodo-pago"
-          value="efectivo"
-          class="radio radio-primary mt-1"
-          checked
-        />
-        <div>
-          <p class="font-semibold text-gray-900">💵 Efectivo</p>
-          <p class="text-sm text-secondary">Pago en caja</p>
-        </div>
-      </label>
-
-      <label
-        class="flex items-start gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 cursor-pointer transition-all"
+      <Button id="btn-siguiente" variant="primary" onClick="continuarPaso3()"
+        >Siguiente</Button
       >
-        <input
-          type="radio"
-          name="metodo-pago"
-          value="transferencia"
-          class="radio radio-primary mt-1"
-        />
-        <div>
-          <p class="font-semibold text-gray-900">🏦 Transferencia</p>
-          <p class="text-sm text-secondary">Upload comprobante</p>
-        </div>
-      </label>
-
-      <label
-        class="flex items-start gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 cursor-pointer transition-all"
-      >
-        <input
-          type="radio"
-          name="metodo-pago"
-          value="tarjeta"
-          class="radio radio-primary mt-1"
-        />
-        <div>
-          <p class="font-semibold text-gray-900">💳 Débito/Crédito</p>
-          <p class="text-sm text-secondary">Terminal POS</p>
-        </div>
-      </label>
-
-      <label
-        class="flex items-start gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-amber-300 cursor-pointer transition-all"
-      >
-        <input
-          type="radio"
-          name="metodo-pago"
-          value="pendiente"
-          class="radio radio-primary mt-1"
-        />
-        <div>
-          <p class="font-semibold text-gray-900">⏳ Dejar pago pendiente</p>
-          <p class="text-sm text-secondary">Cobrar después (RF-010: payment_status = pending)</p>
-        </div>
-      </label>
-    </div>
-
-    <div class="flex gap-3 pt-6 mt-6 border-t">
-      <a href={`${basePath}/matricula/nueva/paso-2`} class="btn btn-ghost min-h-11"
-        >← Anterior</a
-      >
-      <Button
-        id="btn-confirmar"
-        variant="primary"
-        onClick="confirmarMatricula()"
-      >
-        Confirmar Matrícula
-      </Button>
     </div>
   </Card>
 </DashboardLayout>
 
-<script define:vars={{ PRECIO_BASE, basePath }}>
-  document.addEventListener('DOMContentLoaded', () => {
-    try {
-      const raw = sessionStorage.getItem('matricula_paso1');
-      if (raw) {
-        const data = JSON.parse(raw);
-        const nombreCompleto = [data.nombres, data.apellidos].filter(Boolean).join(' ') || 'Alumno';
-        const cursoLabels = { clase_b: 'Clase B', clase_b_sence: 'Clase B + SENCE', profesional_a2: 'Profesional A2', profesional_a3: 'Profesional A3', profesional_a4: 'Profesional A4', profesional_a5: 'Profesional A5' };
-        const cursoLabel = cursoLabels[data.tipo_curso] || data.tipo_curso || 'Clase B';
-        const inicial = document.getElementById('alumno-inicial-paso3');
-        const nombreEl = document.getElementById('alumno-nombre-paso3');
-        const rutCursoEl = document.getElementById('alumno-rut-curso-paso3');
-        const cursoLabelEl = document.getElementById('curso-label-paso3');
-        if (inicial) inicial.textContent = nombreCompleto.charAt(0).toUpperCase();
-        if (nombreEl) nombreEl.textContent = nombreCompleto;
-        if (rutCursoEl) rutCursoEl.textContent = `${data.rut || ''} • ${cursoLabel}`;
-        if (cursoLabelEl) cursoLabelEl.textContent = cursoLabel;
-      }
-    } catch (_) {}
-  });
+<script is:inline define:vars={{ basePath }}>
+  // ─── Estado ───────────────────────────────────────────────────────────────
+  var streamActivo = null;
+  var tabActual = "camara";
+  var esMenorFlag = false;
+  var esProfesionalFlag = false;
+  /* var psicoApto = true; */ // pendiente de definición
+  var uploaded = {
+    fotoAlumno: false,
+    autorizacion: false,
+    hojaVida: false,
+    cedula: false,
+    licencia: false /*, psicoInterno: false */,
+  };
 
-  const checkboxDescuento = document.getElementById("tiene-descuento");
-  const descuentoFields = document.getElementById("descuento-fields");
-  const montoDescuento = document.getElementById("monto-descuento");
-  const motivoDescuento = document.getElementById("motivo-descuento");
-  const totalPagar = document.getElementById("total-pagar");
-  const descuentoAplicado = document.getElementById("descuento-aplicado");
-  const descuentoMontoLabel = document.getElementById("descuento-monto-label");
-
-  checkboxDescuento?.addEventListener("change", (e) => {
-    const checked = e.target?.checked ?? false;
-    descuentoFields?.classList.toggle("hidden", !checked);
-    if (!checked) {
-      if (montoDescuento) montoDescuento.value = "";
-      if (motivoDescuento) motivoDescuento.value = "";
-      updateTotal(0);
-    }
-  });
-
-  montoDescuento?.addEventListener("input", (e) => {
-    const descuento = parseInt(e.target?.value || "0") || 0;
-    updateTotal(descuento);
-  });
-
-  function updateTotal(descuento) {
-    const total = Math.max(PRECIO_BASE - descuento, 0);
-    if (totalPagar)
-      totalPagar.textContent = `$${total.toLocaleString("es-CL")}`;
-
-    if (descuento > 0) {
-      descuentoAplicado?.classList.remove("hidden");
-      if (descuentoMontoLabel)
-        descuentoMontoLabel.textContent = `$${descuento.toLocaleString("es-CL")}`;
-    } else {
-      descuentoAplicado?.classList.add("hidden");
+  // ─── Tabs foto ────────────────────────────────────────────────────────────
+  function switchTab(tab) {
+    tabActual = tab;
+    var base =
+      "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md border transition-colors";
+    var active = base + " border-gray-900 bg-gray-900 text-white";
+    var inactive =
+      base + " border-gray-200 bg-white text-gray-600 hover:bg-gray-50";
+    document.getElementById("tab-camara").className =
+      tab === "camara" ? active : inactive;
+    document.getElementById("tab-subir").className =
+      tab === "subir" ? active : inactive;
+    document
+      .getElementById("seccion-camara")
+      .classList.toggle("hidden", tab !== "camara");
+    document
+      .getElementById("seccion-subir")
+      .classList.toggle("hidden", tab !== "subir");
+    if (tab !== "camara" && streamActivo) {
+      streamActivo.getTracks().forEach(function (t) {
+        t.stop();
+      });
+      streamActivo = null;
+      document.getElementById("camara-idle").classList.remove("hidden");
+      document.getElementById("camara-activa").classList.add("hidden");
     }
   }
 
-  window.confirmarMatricula = function () {
-    if (checkboxDescuento?.checked) {
-      const monto = parseInt(montoDescuento?.value || "0");
-      const motivo = motivoDescuento?.value.trim();
+  // ─── Cámara ───────────────────────────────────────────────────────────────
+  function iniciarCamara() {
+    navigator.mediaDevices
+      .getUserMedia({ video: { facingMode: "user", width: { ideal: 640 } } })
+      .then(function (stream) {
+        streamActivo = stream;
+        var video = document.getElementById("camara-video");
+        video.srcObject = stream;
+        document.getElementById("camara-idle").classList.add("hidden");
+        document.getElementById("camara-activa").classList.remove("hidden");
+      })
+      .catch(function () {
+        alert(
+          'No se pudo acceder a la cámara. Usa la opción "Subir foto" en su lugar.',
+        );
+      });
+  }
 
-      if (!monto || monto <= 0 || !motivo) {
-        alert("⚠️ Completa monto y motivo del descuento");
-        return;
-      }
+  function capturarFoto() {
+    var video = document.getElementById("camara-video");
+    var canvas = document.getElementById("camara-canvas");
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+    canvas.getContext("2d").drawImage(video, 0, 0);
+    var dataUrl = canvas.toDataURL("image/jpeg", 0.9);
+    if (streamActivo) {
+      streamActivo.getTracks().forEach(function (t) {
+        t.stop();
+      });
+      streamActivo = null;
     }
+    mostrarPreviewFoto(dataUrl);
+  }
 
-    const metodoPagoEl = document.querySelector('input[name="metodo-pago"]:checked');
-    const metodoPago = metodoPagoEl?.value;
-    const descuento = checkboxDescuento?.checked
-      ? parseInt(montoDescuento?.value || "0")
-      : 0;
-    const total = PRECIO_BASE - descuento;
+  function mostrarPreviewFoto(dataUrl) {
+    document.getElementById("foto-preview-img").src = dataUrl;
+    document.getElementById("foto-preview-wrap").classList.remove("hidden");
+    document.getElementById("camara-activa").classList.add("hidden");
+    document.getElementById("camara-idle").classList.add("hidden");
+    document.getElementById("seccion-subir").classList.add("hidden");
+    document.getElementById("foto-feedback").classList.add("hidden");
+    uploaded.fotoAlumno = true;
+    checkCanContinue();
+  }
 
-    let alumno = { nombre: "María González Pérez", rut: "18.234.567-8", curso: "Clase B", email: "", telefono: "" };
-    try {
-      const raw = sessionStorage.getItem("matricula_paso1");
-      if (raw) {
-        const d = JSON.parse(raw);
-        alumno = {
-          nombre: [d.nombres, d.apellidos].filter(Boolean).join(" ") || "Alumno",
-          rut: d.rut || "",
-          curso: { clase_b: "Clase B", clase_b_sence: "Clase B + SENCE", profesional_a2: "Profesional A2", profesional_a3: "Profesional A3", profesional_a4: "Profesional A4", profesional_a5: "Profesional A5" }[d.tipo_curso] || d.tipo_curso || "Clase B",
-          email: d.email || "",
-          telefono: d.telefono || "",
+  function resetFoto() {
+    document.getElementById("foto-preview-wrap").classList.add("hidden");
+    uploaded.fotoAlumno = false;
+    checkCanContinue();
+    if (tabActual === "camara") {
+      document.getElementById("camara-idle").classList.remove("hidden");
+      document.getElementById("seccion-camara").classList.remove("hidden");
+      document.getElementById("seccion-subir").classList.add("hidden");
+    } else {
+      document.getElementById("seccion-subir").classList.remove("hidden");
+      var input = document.getElementById("foto-upload-input");
+      if (input) input.value = "";
+    }
+  }
+
+  // ─── Validación continuar ─────────────────────────────────────────────────
+  function checkCanContinue() {
+    var btn = document.getElementById("btn-siguiente");
+    var ok = uploaded.fotoAlumno;
+    if (esMenorFlag && !uploaded.autorizacion) ok = false;
+    if (esProfesionalFlag) {
+      if (!uploaded.hojaVida) ok = false;
+      /* pendiente de definición:
+      if (!uploaded.psicoInterno) ok = false;
+      if (!psicoApto) ok = false;
+      */
+    }
+    if (btn) {
+      btn.disabled = !ok;
+      btn.classList.toggle("opacity-50", !ok);
+    }
+  }
+
+  window.continuarPaso3 = function () {
+    if (!uploaded.fotoAlumno) {
+      document.getElementById("foto-feedback").classList.remove("hidden");
+      return;
+    }
+    if (esMenorFlag && !uploaded.autorizacion) {
+      alert("⚠️ Debe adjuntar la Autorización Notarial.");
+      return;
+    }
+    if (esProfesionalFlag && !uploaded.hojaVida) {
+      alert("⚠️ Debe adjuntar la Hoja de Vida del Conductor.");
+      return;
+    }
+    sessionStorage.setItem("matricula_paso2", "ok");
+    window.location.href = (basePath || "") + "/matricula/nueva/paso-4";
+  };
+
+  // ─── Init ─────────────────────────────────────────────────────────────────
+  document.addEventListener("astro:page-load", function () {
+    checkCanContinue();
+
+    // Widget foto: event listeners
+    document
+      .getElementById("tab-camara")
+      .addEventListener("click", function () {
+        switchTab("camara");
+      });
+    document.getElementById("tab-subir").addEventListener("click", function () {
+      switchTab("subir");
+    });
+    document
+      .getElementById("btn-activar-camara")
+      .addEventListener("click", iniciarCamara);
+    document
+      .getElementById("btn-capturar")
+      .addEventListener("click", capturarFoto);
+    document
+      .getElementById("btn-reset-foto")
+      .addEventListener("click", resetFoto);
+    document
+      .getElementById("foto-upload-input")
+      .addEventListener("change", function (e) {
+        var file = e.target.files && e.target.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function (ev) {
+          mostrarPreviewFoto(ev.target.result);
         };
+        reader.readAsDataURL(file);
+      });
+
+    // Cargar datos del paso 1
+    try {
+      var raw = sessionStorage.getItem("matricula_paso1");
+      if (raw) {
+        var data = JSON.parse(raw);
+        var nombreCompleto =
+          [data.nombres, data.apellidos].filter(Boolean).join(" ") || "Alumno";
+        var cursoLabels = {
+          clase_b: "Clase B",
+          clase_b_sence: "Clase B + SENCE",
+          profesional_a2: "Profesional A2",
+          profesional_a3: "Profesional A3",
+          profesional_a4: "Profesional A4",
+          profesional_a5: "Profesional A5",
+        };
+        var cursoLabel =
+          cursoLabels[String(data.tipo_curso || "")] ||
+          data.tipo_curso ||
+          "Clase B";
+        var inicial = document.getElementById("alumno-inicial");
+        var nombreEl = document.getElementById("alumno-nombre");
+        var rutCursoEl = document.getElementById("alumno-rut-curso");
+        if (inicial)
+          inicial.textContent = nombreCompleto.charAt(0).toUpperCase();
+        if (nombreEl) nombreEl.textContent = nombreCompleto;
+        if (rutCursoEl)
+          rutCursoEl.textContent = (data.rut || "") + " • " + cursoLabel;
+        if (data.esMenor === true) {
+          esMenorFlag = true;
+          document
+            .getElementById("menor-edad-banner")
+            .classList.remove("hidden");
+          document
+            .getElementById("autorizacion-notarial-wrap")
+            .classList.remove("hidden");
+        }
+        if (data.esProfesional === true) {
+          esProfesionalFlag = true;
+          document
+            .getElementById("docs-profesional-wrap")
+            .classList.remove("hidden");
+        }
       }
     } catch (_) {}
 
-    sessionStorage.setItem(
-      "matricula_data",
-      JSON.stringify({
-        alumno,
-        pago: {
-          precioBase: PRECIO_BASE,
-          descuento,
-          motivo: motivoDescuento?.value || "",
-          total,
-          metodo: metodoPago,
-        },
-      }),
-    );
+    // RF-082.3: HVC > 30 días
+    document
+      .getElementById("hvc-fecha-emision")
+      .addEventListener("change", function () {
+        var alert30 = document.getElementById("hvc-alert-30dias");
+        if (!this.value) return;
+        var dias = Math.floor((new Date() - new Date(this.value)) / 86400000);
+        if (alert30) alert30.classList.toggle("hidden", dias <= 30);
+      });
 
-    alert(
-      `✓ Matrícula confirmada\n\nTotal: $${total.toLocaleString("es-CL")}\n\nGenerando confirmación...`,
-    );
-    setTimeout(() => {
-      window.location.href = (typeof basePath !== 'undefined' ? basePath : '') + "/matricula/nueva/paso-4";
-    }, 1000);
-  };
+    /* pendiente de definición — resultado psicológico:
+    document.querySelectorAll('input[name="psico_resultado"]').forEach(function(r) {
+      r.addEventListener("change", function() {
+        psicoApto = this.value === "apto";
+        var el = document.getElementById("psico-no-apto-alert");
+        if (el) el.classList.toggle("hidden", psicoApto);
+        checkCanContinue();
+      });
+    });
+    */
+
+    // Documentos opcionales/condicionales
+    document
+      .getElementById("autorizacion-notarial")
+      .addEventListener("change", function (e) {
+        uploaded.autorizacion = e.target.files && e.target.files.length > 0;
+        var span = document.getElementById("autorizacion-nombre");
+        if (span)
+          span.textContent = uploaded.autorizacion
+            ? e.target.files[0].name
+            : "Ningún archivo seleccionado";
+        var fb = document.getElementById("autorizacion-feedback");
+        if (fb) fb.classList.toggle("hidden", uploaded.autorizacion);
+        checkCanContinue();
+      });
+    document
+      .getElementById("hoja-vida-conductor")
+      .addEventListener("change", function (e) {
+        uploaded.hojaVida = e.target.files && e.target.files.length > 0;
+        var span = document.getElementById("hvc-nombre");
+        if (span)
+          span.textContent = uploaded.hojaVida
+            ? e.target.files[0].name
+            : "Ningún archivo seleccionado";
+        var fb = document.getElementById("hvc-feedback");
+        if (fb) fb.classList.toggle("hidden", uploaded.hojaVida);
+        checkCanContinue();
+      });
+    // Cédula de identidad (opcional — no bloquea continuación)
+    document
+      .getElementById("cedula-identidad")
+      .addEventListener("change", function (e) {
+        uploaded.cedula = e.target.files && e.target.files.length > 0;
+        var span = document.getElementById("cedula-nombre");
+        if (span)
+          span.textContent = uploaded.cedula
+            ? e.target.files[0].name
+            : "Ningún archivo seleccionado";
+      });
+    // Licencia de conducir (opcional — no bloquea continuación)
+    document
+      .getElementById("licencia-conducir")
+      .addEventListener("change", function (e) {
+        uploaded.licencia = e.target.files && e.target.files.length > 0;
+        var span = document.getElementById("licencia-nombre");
+        if (span)
+          span.textContent = uploaded.licencia
+            ? e.target.files[0].name
+            : "Ningún archivo seleccionado";
+      });
+    /* pendiente de definición — psico interno:
+    document.getElementById("psico-interno").addEventListener("change", function(e) {
+      uploaded.psicoInterno = (e.target.files && e.target.files.length > 0);
+      var fb = document.getElementById("psico-feedback");
+      if (fb) fb.classList.toggle("hidden", uploaded.psicoInterno);
+      checkCanContinue();
+    });
+    */
+  });
 </script>

@@ -1,7 +1,7 @@
 ---
 /**
- * Wizard Matrícula - Paso 4: Confirmación
- * RF-010: Confirmación exitosa de matrícula
+ * Wizard Matrícula - Paso 3: Pago y Descuentos
+ * RF-010: Matrícula manual con descuentos
  */
 import DashboardLayout from "../../../../layouts/DashboardLayout.astro";
 import Card from "../../../../components/ui/Card.astro";
@@ -9,406 +9,427 @@ import Button from "../../../../components/ui/Button.astro";
 import MatriculaWizardSteps from "../../../../components/matricula/MatriculaWizardSteps.astro";
 import { ESCUELA_ACTUAL } from "../../../../lib/mockData";
 
-// En producción, estos datos vendrían de sessionStorage o backend
-const matriculaData = {
-  numero: `2026-${String(Math.floor(Math.random() * 1000) + 200).padStart(4, "0")}`,
-  alumno: {
-    nombre: "María González Pérez",
-    rut: "18.234.567-8",
-    email: "maria.gonzalez@email.cl",
-    telefono: "+56 9 1234 5678",
-    curso: "Clase B",
-  },
-  pago: {
-    precioBase: 280000,
-    descuento: 50000,
-    total: 230000,
-    metodo: "efectivo",
-    fecha: new Date().toLocaleDateString("es-CL"),
-  },
+const alumnoData = {
+  nombre: "María González Pérez",
+  rut: "18.234.567-8",
+  curso: "Clase B",
 };
 
-const metodosLabels: Record<string, string> = {
-  efectivo: "Efectivo",
-  transferencia: "Transferencia Bancaria",
-  tarjeta: "Débito/Crédito",
-  pendiente: "Pago pendiente (cobrar después)",
-};
+const PRECIO_BASE = 280000;
 const basePath = "/secretaria";
 ---
 
-<DashboardLayout title="Matrícula Confirmada" escuela={ESCUELA_ACTUAL} userRole="secretaria">
+<DashboardLayout
+  title="Matrícula - Pago"
+  escuela={ESCUELA_ACTUAL}
+  userRole="secretaria"
+>
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-900">Nueva Matrícula</h1>
+    <p class="text-secondary mt-1">Paso 4: Pago y Descuentos</p>
+  </div>
+
   <MatriculaWizardSteps pasoActual={4} basePath={basePath} />
 
   <Card class="max-w-4xl mx-auto">
-    <!-- Success icon -->
-    <div class="text-center mb-8">
+    <!-- Alumno info (se actualiza desde sessionStorage si viene del flujo) -->
+    <div
+      id="alumno-info-paso3"
+      class="bg-blue-50 rounded-lg p-4 mb-6 flex items-center gap-3"
+    >
       <div
-        class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce"
+        id="alumno-inicial-paso3"
+        class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold"
       >
-        <svg
-          class="w-12 h-12 text-green-600"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="3"
-            d="M5 13l4 4L19 7"></path>
-        </svg>
+        {alumnoData.nombre.charAt(0)}
       </div>
-      <h2 class="text-3xl font-bold text-gray-900 mb-2">
-        ¡Matrícula Confirmada!
-      </h2>
-      <p class="text-lg text-secondary">
-        Matrícula N° <span class="font-mono font-semibold text-blue-600"
-          >{matriculaData.numero}</span>
+      <div>
+        <p id="alumno-nombre-paso3" class="text-sm font-semibold text-gray-900">
+          {alumnoData.nombre}
+        </p>
+        <p id="alumno-rut-curso-paso3" class="text-xs text-secondary">
+          {alumnoData.rut} • {alumnoData.curso}
+        </p>
+      </div>
+    </div>
+
+    <h2 class="text-xl font-semibold text-gray-900 mb-6">
+      Método de Pago y Descuentos
+    </h2>
+
+    <!-- Resumen según requerimientos (RF-009, RF-010) -->
+    <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+      <p class="text-sm font-medium text-amber-900 mb-1">
+        Opciones de pago según requisitos
+      </p>
+      <ul class="text-xs text-amber-800 space-y-1">
+        <li>
+          <strong>Todo de una:</strong> pagar matrícula completa ahora (efectivo,
+          transferencia o tarjeta).
+        </li>
+        <li>
+          <strong>Pagos parciales (RF-010):</strong> pagar solo una parte ahora; el
+          saldo se calcula y queda pendiente.
+        </li>
+        <li>
+          <strong>Pago pendiente:</strong> omitir pago inmediato y registrar la matrícula
+          para cobrar después.
+        </li>
+      </ul>
+      <p class="text-xs text-amber-700 mt-2">
+        En contabilidad se distingue "Matrícula Clase B" y "Clases Clase B
+        (pagos adicionales)" para el cierre diario.
       </p>
     </div>
 
-    <!-- Resumen de Matrícula -->
-    <div class="bg-gray-50 rounded-lg p-6 mb-6">
-      <h3 class="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-        <svg
-          class="w-5 h-5 text-gray-600"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-          ></path>
-        </svg>
-        Resumen de Matrícula
-      </h3>
-
-      <div class="grid md:grid-cols-2 gap-4">
-        <!-- Columna 1: Datos Alumno (se actualizan desde sessionStorage) -->
-        <div class="space-y-3">
-          <div>
-            <p class="text-xs text-secondary uppercase tracking-wide">Alumno</p>
-            <p id="resumen-alumno-nombre" class="text-sm font-semibold text-gray-900">
-              {matriculaData.alumno.nombre}
-            </p>
-          </div>
-          <div>
-            <p class="text-xs text-secondary uppercase tracking-wide">RUT</p>
-            <p id="resumen-alumno-rut" class="text-sm font-medium text-gray-900">
-              {matriculaData.alumno.rut}
-            </p>
-          </div>
-          <div>
-            <p class="text-xs text-secondary uppercase tracking-wide">Email</p>
-            <p id="resumen-alumno-email" class="text-sm font-medium text-gray-900">
-              {matriculaData.alumno.email}
-            </p>
-          </div>
-          <div>
-            <p class="text-xs text-secondary uppercase tracking-wide">
-              Teléfono
-            </p>
-            <p id="resumen-alumno-telefono" class="text-sm font-medium text-gray-900">
-              {matriculaData.alumno.telefono}
-            </p>
-          </div>
-        </div>
-
-        <!-- Columna 2: Datos Matrícula (se actualizan desde sessionStorage) -->
-        <div class="space-y-3">
-          <div>
-            <p class="text-xs text-secondary uppercase tracking-wide">Curso</p>
-            <p id="resumen-curso" class="text-sm font-semibold text-gray-900">
-              {matriculaData.alumno.curso}
-            </p>
-          </div>
-          <div>
-            <p class="text-xs text-secondary uppercase tracking-wide">
-              Método de Pago
-            </p>
-            <p id="resumen-metodo" class="text-sm font-medium text-gray-900">
-              {metodosLabels[matriculaData.pago.metodo]}
-            </p>
-          </div>
-          <div>
-            <p class="text-xs text-secondary uppercase tracking-wide">
-              Fecha Matrícula
-            </p>
-            <p id="resumen-fecha" class="text-sm font-medium text-gray-900">
-              {matriculaData.pago.fecha}
-            </p>
-          </div>
-          <div id="resumen-descuento-wrap" class={matriculaData.pago.descuento > 0 ? "" : "hidden"}>
-            <p class="text-xs text-secondary uppercase tracking-wide">
-              Descuento Aplicado
-            </p>
-            <p id="resumen-descuento" class="text-sm font-medium text-green-600">
-              -${matriculaData.pago.descuento.toLocaleString("es-CL")}
-            </p>
-          </div>
-          <div class="pt-2 border-t border-gray-200">
-            <p class="text-xs text-secondary uppercase tracking-wide">
-              Total Pagado
-            </p>
-            <p id="resumen-total" class="text-2xl font-bold text-blue-600">
-              ${matriculaData.pago.total.toLocaleString("es-CL")}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Próximos pasos -->
-    <div class="border-l-4 border-blue-600 bg-blue-50 rounded-lg p-5 mb-6">
-      <h4 class="font-semibold text-blue-900 mb-3 flex items-center gap-2">
-        <svg
-          class="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-        </svg>
-        📧 Próximos Pasos
-      </h4>
-      <ul class="space-y-2 text-sm text-blue-800">
-        <li class="flex items-start gap-2">
-          <svg
-            class="w-4 h-4 mt-0.5 shrink-0 text-blue-600"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-              clip-rule="evenodd"></path>
-          </svg>
-          <span
-            >Se enviará un <strong>email con credenciales de acceso</strong> al portal
-            del alumno a <strong>{matriculaData.alumno.email}</strong></span
-          >
-        </li>
-        <li class="flex items-start gap-2">
-          <svg
-            class="w-4 h-4 mt-0.5 shrink-0 text-blue-600"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-              clip-rule="evenodd"></path>
-          </svg>
-          <span
-            >El alumno podrá <strong>agendar su primera clase</strong> desde el portal
-            en las próximas 24 horas</span
-          >
-        </li>
-        <li class="flex items-start gap-2">
-          <svg
-            class="w-4 h-4 mt-0.5 shrink-0 text-blue-600"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-              clip-rule="evenodd"></path>
-          </svg>
-          <span
-            >Recibirá <strong>recordatorios automáticos 24hrs antes</strong> de cada
-            clase programada por WhatsApp y email</span
-          >
-        </li>
-        <li class="flex items-start gap-2">
-          <svg
-            class="w-4 h-4 mt-0.5 shrink-0 text-blue-600"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-              clip-rule="evenodd"></path>
-          </svg>
-          <span
-            >El <strong>certificado</strong> estará disponible para descarga al completar
-            las 12 clases</span
-          >
-        </li>
-      </ul>
-    </div>
-
-    <!-- Documentos pendientes (si aplica) -->
-    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-      <div class="flex gap-3">
-        <svg
-          class="w-5 h-5 text-yellow-600 shrink-0 mt-0.5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-          ></path>
+    <!-- Banner informativo Singular: pago total obligatorio -->
+    <div id="singular-pago-banner" class="hidden mb-6 p-4 rounded-lg bg-teal-50 border border-teal-200">
+      <div class="flex items-start gap-3">
+        <svg class="w-5 h-5 text-teal-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
         </svg>
         <div>
-          <p class="text-sm font-semibold text-yellow-900 mb-1">
-            📄 Documentos Opcionales Pendientes
-          </p>
-          <p class="text-xs text-yellow-800">
-            Recuerda que el <strong>certificado médico psicosensométrico</strong
-            > puede presentarse en las instalaciones de la escuela antes de la primera
-            clase.
-          </p>
+          <p class="text-sm font-semibold text-teal-900">Curso Singular — Pago total obligatorio</p>
+          <p class="text-xs text-teal-800 mt-1">Para los Cursos Singulares, el alumno debe pagar el valor completo al momento de la matrícula. No se permite dejar pagos pendientes.</p>
         </div>
       </div>
     </div>
 
-    <!-- Acciones -->
-    <div class="flex flex-col sm:flex-row gap-3">
-      <Button
-        href={`${basePath}/matricula`}
-        variant="secondary"
-        class="flex-1 justify-center"
-      >
-        <svg
-          class="w-4 h-4 mr-2"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-          ></path>
-        </svg>
-        Ver Todas las Matrículas
-      </Button>
-      <Button
-        href={`${basePath}/matricula/nueva/paso-1`}
-        variant="primary"
-        class="flex-1 justify-center"
-      >
-        <svg
-          class="w-4 h-4 mr-2"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 4v16m8-8H4"></path>
-        </svg>
-        Nueva Matrícula
-      </Button>
+    <!-- Precio base -->
+    <div class="bg-gray-50 rounded-lg p-6 mb-6">
+      <div class="flex justify-between items-center">
+        <div>
+          <p class="text-sm text-secondary mb-1">
+            Matrícula <span id="curso-label-paso3">{alumnoData.curso}</span>
+          </p>
+          <p id="precio-descripcion" class="text-xs text-muted">12 clases prácticas incluidas</p>
+        </div>
+        <p id="precio-base-display" class="text-3xl font-bold text-gray-900">
+          ${PRECIO_BASE.toLocaleString("es-CL")}
+        </p>
+      </div>
     </div>
 
-    <!-- Imprimir comprobante -->
-    <div class="text-center mt-6 pt-6 border-t border-gray-200">
-      <button
-        onclick="window.print()"
-        class="text-sm text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-2"
+    <!-- Descuento -->
+    <Card class="mb-6 border-2 border-dashed border-gray-300">
+      <label class="flex items-center gap-2 mb-4 cursor-pointer">
+        <input
+          type="checkbox"
+          id="tiene-descuento"
+          class="checkbox checkbox-primary"
+        />
+        <span class="font-medium text-gray-900">Aplicar descuento</span>
+      </label>
+
+      <div id="descuento-fields" class="space-y-4 hidden">
+        <div>
+          <label class="label">
+            <span class="label-text font-medium">Monto descuento (CLP) *</span>
+          </label>
+          <input
+            type="number"
+            id="monto-descuento"
+            class="input input-bordered w-full min-h-11"
+            placeholder="50000"
+            min="0"
+            max={PRECIO_BASE}
+          />
+        </div>
+
+        <div>
+          <label class="label">
+            <span class="label-text font-medium">Motivo del descuento *</span>
+          </label>
+          <textarea
+            id="motivo-descuento"
+            class="textarea textarea-bordered w-full h-24"
+            placeholder="Ej: Promoción febrero 2026, Cliente referido..."
+          ></textarea>
+          <p class="text-xs text-secondary mt-1">
+            ⚠️ Quedará registrado en log de auditoría
+          </p>
+        </div>
+      </div>
+    </Card>
+
+    <!-- Total -->
+    <div
+      class="bg-linear-to-r from-blue-50 to-blue-100 rounded-lg p-6 mb-6 border-2 border-blue-200"
+    >
+      <div class="flex justify-between items-center">
+        <div>
+          <p class="text-sm text-blue-900 font-medium">Total a Pagar</p>
+          <p id="descuento-aplicado" class="text-xs text-blue-700 hidden">
+            Descuento: <span id="descuento-monto-label">$0</span>
+          </p>
+        </div>
+        <p id="total-pagar" class="text-4xl font-bold text-blue-600">
+          ${PRECIO_BASE.toLocaleString("es-CL")}
+        </p>
+      </div>
+    </div>
+
+    <!-- Método pago -->
+    <div class="space-y-3">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Método de Pago</h3>
+
+      <label
+        class="flex items-start gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 cursor-pointer transition-all"
       >
-        <svg
-          class="w-4 h-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-          ></path>
-        </svg>
-        Imprimir Comprobante
-      </button>
+        <input
+          type="radio"
+          name="metodo-pago"
+          value="efectivo"
+          class="radio radio-primary mt-1"
+          checked
+        />
+        <div>
+          <p class="font-semibold text-gray-900">💵 Efectivo</p>
+          <p class="text-sm text-secondary">Pago en caja</p>
+        </div>
+      </label>
+
+      <label
+        class="flex items-start gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 cursor-pointer transition-all"
+      >
+        <input
+          type="radio"
+          name="metodo-pago"
+          value="transferencia"
+          class="radio radio-primary mt-1"
+        />
+        <div>
+          <p class="font-semibold text-gray-900">🏦 Transferencia</p>
+          <p class="text-sm text-secondary">Upload comprobante</p>
+        </div>
+      </label>
+
+      <label
+        class="flex items-start gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 cursor-pointer transition-all"
+      >
+        <input
+          type="radio"
+          name="metodo-pago"
+          value="tarjeta"
+          class="radio radio-primary mt-1"
+        />
+        <div>
+          <p class="font-semibold text-gray-900">💳 Débito/Crédito</p>
+          <p class="text-sm text-secondary">Terminal POS</p>
+        </div>
+      </label>
+
+      <label
+        id="opcion-pendiente"
+        class="flex items-start gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-amber-300 cursor-pointer transition-all"
+      >
+        <input
+          type="radio"
+          name="metodo-pago"
+          value="pendiente"
+          class="radio radio-primary mt-1"
+        />
+        <div>
+          <p class="font-semibold text-gray-900">⏳ Dejar pago pendiente</p>
+          <p class="text-sm text-secondary">
+            Cobrar después (RF-010: payment_status = pending)
+          </p>
+        </div>
+      </label>
+    </div>
+
+    <!-- Navegación -->
+    <div
+      class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-8 pt-6 border-t border-gray-200"
+    >
+      <Button
+        variant="secondary"
+        onClick={`window.location.href='${basePath}/matricula/nueva/paso-3'`}
+      >
+        Volver a Documentación
+      </Button>
+      <Button
+        id="btn-continuar"
+        variant="primary"
+        onClick={`window.location.href='${basePath}/matricula/nueva/paso-5'`}
+        class="opacity-50 pointer-events-none"
+      >
+        Siguiente: Contrato y Firma →
+      </Button>
     </div>
   </Card>
 </DashboardLayout>
 
-<style>
-  @keyframes bounce {
-    0%,
-    100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(-10px);
-    }
-  }
+<script is:inline define:vars={{ PRECIO_BASE, basePath }}>
+  let precioActual = PRECIO_BASE;
 
-  .animate-bounce {
-    animation: bounce 1s ease-in-out 3;
-  }
-
-  @media print {
-    header,
-    button,
-    .btn {
-      display: none !important;
-    }
-  }
-</style>
-
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("astro:page-load", () => {
     try {
-      const raw = sessionStorage.getItem("matricula_data");
+      const raw = sessionStorage.getItem("matricula_paso1");
       if (raw) {
         const data = JSON.parse(raw);
-        const a = data.alumno || {};
-        const p = data.pago || {};
-        const metodos: Record<string, string> = {
-          efectivo: "Efectivo",
-          transferencia: "Transferencia Bancaria",
-          tarjeta: "Débito/Crédito",
-          pendiente: "Pago pendiente (cobrar después)",
+        const nombreCompleto =
+          [data.nombres, data.apellidos].filter(Boolean).join(" ") || "Alumno";
+        const cursoLabels = {
+          clase_b: "Clase B",
+          clase_b_sence: "Clase B + SENCE",
+          profesional_a2: "Profesional A2",
+          profesional_a3: "Profesional A3",
+          profesional_a4: "Profesional A4",
+          profesional_a5: "Profesional A5",
         };
-        const set = (id: string, text: string) => {
-          const el = document.getElementById(id);
-          if (el) el.textContent = text;
-        };
-        set("resumen-alumno-nombre", a.nombre || "");
-        set("resumen-alumno-rut", a.rut || "");
-        set("resumen-alumno-email", a.email || "");
-        set("resumen-alumno-telefono", a.telefono || "");
-        set("resumen-curso", a.curso || "");
-        set("resumen-metodo", metodos[p.metodo] || p.metodo || "");
-        set("resumen-fecha", p.fecha || new Date().toLocaleDateString("es-CL"));
-        const totalPagado = p.metodo === "pendiente" ? "Pendiente ($" + (p.total ?? 0).toLocaleString("es-CL") + " a cobrar)" : `$${(p.total ?? 0).toLocaleString("es-CL")}`;
-        set("resumen-total", totalPagado);
-        const descWrap = document.getElementById("resumen-descuento-wrap");
-        const descEl = document.getElementById("resumen-descuento");
-        if (descWrap && descEl) {
-          if ((p.descuento ?? 0) > 0) {
-            descWrap.classList.remove("hidden");
-            descEl.textContent = `-$${(p.descuento ?? 0).toLocaleString("es-CL")}`;
-          } else {
-            descWrap.classList.add("hidden");
+        let cursoLabel =
+          cursoLabels[data.tipo_curso] || data.tipo_curso || "Clase B";
+
+        // Singular: precio dinámico y UI específica
+        if (data.esSingular && data.cursoSingularNombre) {
+          cursoLabel = data.cursoSingularNombre;
+          precioActual = data.cursoSingularPrecio || PRECIO_BASE;
+          // Actualizar precio mostrado
+          const precioEl = document.getElementById("precio-base-display");
+          if (precioEl) precioEl.textContent = `$${precioActual.toLocaleString("es-CL")}`;
+          updateTotal(0);
+          // Actualizar descripción
+          const descEl = document.getElementById("precio-descripcion");
+          if (descEl) descEl.textContent = "Pago único — incluye diploma, certificado y carnet";
+          // Mostrar banner singular
+          document.getElementById("singular-pago-banner")?.classList.remove("hidden");
+          // Ocultar opción pago pendiente
+          const pendienteLabel = document.getElementById("opcion-pendiente");
+          if (pendienteLabel) {
+            pendienteLabel.classList.add("hidden");
+            // Si estaba seleccionado, resetear a efectivo
+            const radioEfectivo = document.querySelector('input[name="metodo-pago"][value="efectivo"]');
+            if (radioEfectivo) radioEfectivo.checked = true;
           }
         }
+
+        const inicial = document.getElementById("alumno-inicial-paso3");
+        const nombreEl = document.getElementById("alumno-nombre-paso3");
+        const rutCursoEl = document.getElementById("alumno-rut-curso-paso3");
+        const cursoLabelEl = document.getElementById("curso-label-paso3");
+        if (inicial)
+          inicial.textContent = nombreCompleto.charAt(0).toUpperCase();
+        if (nombreEl) nombreEl.textContent = nombreCompleto;
+        if (rutCursoEl)
+          rutCursoEl.textContent = `${data.rut || ""} • ${cursoLabel}`;
+        if (cursoLabelEl) cursoLabelEl.textContent = cursoLabel;
       }
     } catch (_) {}
-    sessionStorage.removeItem("matricula_data");
-    sessionStorage.removeItem("matricula_paso1");
-    sessionStorage.removeItem("matricula_paso2");
   });
+
+  const checkboxDescuento = document.getElementById("tiene-descuento");
+  const descuentoFields = document.getElementById("descuento-fields");
+  const montoDescuento = document.getElementById("monto-descuento");
+  const motivoDescuento = document.getElementById("motivo-descuento");
+  const totalPagar = document.getElementById("total-pagar");
+  const descuentoAplicado = document.getElementById("descuento-aplicado");
+  const descuentoMontoLabel = document.getElementById("descuento-monto-label");
+
+  checkboxDescuento?.addEventListener("change", (e) => {
+    const checked = e.target?.checked ?? false;
+    descuentoFields?.classList.toggle("hidden", !checked);
+    if (!checked) {
+      if (montoDescuento) montoDescuento.value = "";
+      if (motivoDescuento) motivoDescuento.value = "";
+      updateTotal(0);
+    }
+  });
+
+  montoDescuento?.addEventListener("input", (e) => {
+    const descuento = parseInt(e.target?.value || "0") || 0;
+    updateTotal(descuento);
+  });
+
+  function updateTotal(descuento) {
+    const base = typeof precioActual !== "undefined" ? precioActual : PRECIO_BASE;
+    const total = Math.max(base - descuento, 0);
+    if (totalPagar)
+      totalPagar.textContent = `$${total.toLocaleString("es-CL")}`;
+
+    if (descuento > 0) {
+      descuentoAplicado?.classList.remove("hidden");
+      if (descuentoMontoLabel)
+        descuentoMontoLabel.textContent = `$${descuento.toLocaleString("es-CL")}`;
+    } else {
+      descuentoAplicado?.classList.add("hidden");
+    }
+  }
+
+  window.confirmarMatricula = function () {
+    if (checkboxDescuento?.checked) {
+      const monto = parseInt(montoDescuento?.value || "0");
+      const motivo = motivoDescuento?.value.trim();
+
+      if (!monto || monto <= 0 || !motivo) {
+        alert("⚠️ Completa monto y motivo del descuento");
+        return;
+      }
+    }
+
+    const metodoPagoEl = document.querySelector(
+      'input[name="metodo-pago"]:checked',
+    );
+    const metodoPago = metodoPagoEl?.value;
+    const descuento = checkboxDescuento?.checked
+      ? parseInt(montoDescuento?.value || "0")
+      : 0;
+    const base = typeof precioActual !== "undefined" ? precioActual : PRECIO_BASE;
+    const total = base - descuento;
+
+    let alumno = {
+      nombre: "María González Pérez",
+      rut: "18.234.567-8",
+      curso: "Clase B",
+      email: "",
+      telefono: "",
+    };
+    try {
+      const raw = sessionStorage.getItem("matricula_paso1");
+      if (raw) {
+        const d = JSON.parse(raw);
+        alumno = {
+          nombre:
+            [d.nombres, d.apellidos].filter(Boolean).join(" ") || "Alumno",
+          rut: d.rut || "",
+          curso:
+            {
+              clase_b: "Clase B",
+              clase_b_sence: "Clase B + SENCE",
+              profesional_a2: "Profesional A2",
+              profesional_a3: "Profesional A3",
+              profesional_a4: "Profesional A4",
+              profesional_a5: "Profesional A5",
+            }[d.tipo_curso] ||
+            d.tipo_curso ||
+            "Clase B",
+          email: d.email || "",
+          telefono: d.telefono || "",
+        };
+      }
+    } catch (_) {}
+
+    sessionStorage.setItem(
+      "matricula_data",
+      JSON.stringify({
+        alumno,
+        pago: {
+          precioBase: PRECIO_BASE,
+          descuento,
+          motivo: motivoDescuento?.value || "",
+          total,
+          metodo: metodoPago,
+        },
+      }),
+    );
+
+    alert(
+      `✓ Pago registrado exitosamente.\n\nTotal pagado/pendiente: $${total.toLocaleString("es-CL")}\n\nA continuación, debe imprimir el contrato para la firma del alumno.`,
+    );
+    setTimeout(() => {
+      window.location.href =
+        (typeof basePath !== "undefined" ? basePath : "") +
+        "/matricula/nueva/paso-5";
+    }, 1000);
+  };
 </script>

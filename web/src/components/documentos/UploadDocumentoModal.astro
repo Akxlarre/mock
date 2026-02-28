@@ -1,0 +1,95 @@
+---
+/**
+ * Modal de subida de documento - DMS
+ * Reutilizable para documentos de alumno o de escuela
+ */
+import Modal from "../ui/Modal.astro";
+
+export interface Props {
+  id: string;
+  titulo: string;
+  tipo: "alumno" | "escuela";
+  alumnoId?: number;
+  alumnoNombre?: string;
+  alumnosOpciones?: { id: number; nombre: string }[];
+}
+
+const { id, titulo, tipo, alumnoId, alumnoNombre, alumnosOpciones } = Astro.props;
+---
+
+<Modal id={id} title={titulo}>
+  <form id={`${id}-form`} class="space-y-4">
+    {tipo === "alumno" && alumnoNombre && (
+      <p class="text-sm text-secondary">
+        Alumno: <strong>{alumnoNombre}</strong>
+      </p>
+    )}
+    {tipo === "alumno" && alumnosOpciones && alumnosOpciones.length > 0 && (
+      <div>
+        <label for={`${id}-alumno`} class="block text-sm font-medium text-gray-700 mb-1">Alumno</label>
+        <select
+          id={`${id}-alumno`}
+          name="alumnoId"
+          class="w-full h-11 px-4 text-sm bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        >
+          <option value="">Seleccionar alumno...</option>
+          {alumnosOpciones.map((a) => (
+            <option value={a.id}>{a.nombre}</option>
+          ))}
+        </select>
+      </div>
+    )}
+    <div>
+      <label for={`${id}-tipo`} class="block text-sm font-medium text-gray-700 mb-1">Tipo de documento</label>
+      <select
+        id={`${id}-tipo`}
+        name="tipo"
+        class="w-full h-11 px-4 text-sm bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+      >
+        {tipo === "alumno" ? (
+          <>
+            <option value="contrato">Contrato firmado</option>
+            <option value="foto_licencia">Foto licencia</option>
+            <option value="hoja_vida">Hoja de vida conductor</option>
+            <option value="cedula">Cédula identidad</option>
+            <option value="certificado_antecedentes">Certificado antecedentes</option>
+            <option value="autorizacion_notarial">Autorización notarial</option>
+            <option value="foto_carnet">Foto carnet</option>
+          </>
+        ) : (
+          <>
+            <option value="factura_folios">Factura compra folios</option>
+            <option value="resolucion_mtt">Resolución MTT</option>
+            <option value="decreto">Decreto</option>
+            <option value="otro">Otro</option>
+          </>
+        )}
+      </select>
+    </div>
+    <div>
+      <label for={`${id}-archivo`} class="block text-sm font-medium text-gray-700 mb-1">Archivo</label>
+      <div class="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center hover:border-gray-300 transition-colors">
+        <input
+          type="file"
+          id={`${id}-archivo`}
+          name="archivo"
+          accept=".pdf,.jpg,.jpeg,.png"
+          class="hidden"
+        />
+        <label for={`${id}-archivo`} class="cursor-pointer">
+          <svg class="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+          </svg>
+          <p class="text-sm text-gray-600">Haz clic o arrastra un archivo</p>
+          <p class="text-xs text-gray-400 mt-1">PDF, JPG, PNG · Máx. 5MB</p>
+        </label>
+      </div>
+    </div>
+  </form>
+  <div slot="footer" class="flex gap-2 justify-end">
+    <a href="#" class="btn btn-ghost">Cancelar</a>
+    <a href="#" class="btn btn-primary" onclick="alert('Documento subido (mockup)');">
+      Subir documento
+    </a>
+  </div>
+</Modal>

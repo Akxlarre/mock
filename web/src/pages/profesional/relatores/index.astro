@@ -7,7 +7,7 @@ import DashboardLayout from '../../../layouts/DashboardLayout.astro';
 import Card from '../../../components/ui/Card.astro';
 import Button from '../../../components/ui/Button.astro';
 import { ESCUELA_ACTUAL } from '../../../lib/mockData';
-import { RELATORES } from '../../../lib/mockRelatores';
+import { RELATORES, PROMOCIONES, countPromocionesActivasByRelator } from '../../../lib/mockRelatores';
 
 const totalRelatores = RELATORES.length;
 const activos = RELATORES.filter(r => r.activo).length;
@@ -128,9 +128,18 @@ const especialidadColors: Record<string, string> = {
                     </div>
                   </td>
                   <td class="py-4 px-4 text-center">
-                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-800 text-sm font-medium">
-                      {relator.promocionesAsignadas}
-                    </span>
+                    {(() => {
+                      const cnt = countPromocionesActivasByRelator(relator.id);
+                      return (
+                        <span class={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium ${
+                          cnt >= 3 ? 'bg-red-100 text-red-800' :
+                          cnt >= 2 ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-blue-100 text-blue-800'
+                        }`} title={`${cnt} promoción(es) activa(s)`}>
+                          {cnt}
+                        </span>
+                      );
+                    })()}
                   </td>
                   <td class="py-4 px-4">
                     {relator.activo ? (

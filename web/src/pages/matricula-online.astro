@@ -13,92 +13,102 @@ import PublicNavbar from "../components/layout/PublicNavbar.astro";
 import Card from "../components/ui/Card.astro";
 import Button from "../components/ui/Button.astro";
 import Input from "../components/ui/Input.astro";
+import SelectorHorarios from "../components/matricula/SelectorHorarios.astro";
 
 const cursosBasicos = [
-  { 
-    id: "clase-b", 
-    nombre: "Clase B", 
-    precio: 280000, 
-    descripcion: "Licencia para conducir vehículos particulares", 
-    duracion: "8 semanas", 
-    clasesPracticas: 12, 
+  {
+    id: "clase-b",
+    nombre: "Clase B",
+    precio: 280000,
+    descripcion: "Licencia para conducir vehículos particulares",
+    duracion: "8 semanas",
+    clasesPracticas: 12,
     clasesTeoricas: 12,
     color: "blue",
     icono: "🚗",
     badge: null,
     requisitos: "Mínimo 17 años",
   },
-  { 
-    id: "clase-b-sence", 
-    nombre: "Clase B + SENCE", 
-    precio: 280000, 
-    descripcion: "Con código SENCE vigente", 
-    duracion: "8 semanas", 
-    clasesPracticas: 12, 
+  {
+    id: "clase-b-sence",
+    nombre: "Clase B + SENCE",
+    precio: 280000,
+    descripcion: "Con código SENCE vigente",
+    duracion: "8 semanas",
+    clasesPracticas: 12,
     clasesTeoricas: 12,
     color: "green",
     icono: "🎓",
-    badge: "SENCE",
+    badge: "SENCE Presencial",
     requisitos: "Mínimo 17 años + Código SENCE",
   },
 ];
 
 const cursosProfesionales = [
-  { 
-    id: "a2", 
-    nombre: "Clase A2 - Transporte Público", 
-    precio: 450000, 
-    descripcion: "Para transporte público de pasajeros", 
-    duracion: "30 días hábiles", 
-    clasesPracticas: 60, 
+  {
+    id: "a2",
+    nombre: "Clase A2 - Transporte Público",
+    precio: 450000,
+    descripcion: "Para transporte público de pasajeros",
+    duracion: "30 días hábiles",
+    clasesPracticas: 60,
     clasesTeoricas: 90,
     color: "purple",
     icono: "🚌",
-    badge: "A2",
+    badge: "A2 Presencial",
     requisitos: "20 años + Licencia B (2 años antigüedad)",
   },
-  { 
-    id: "a4", 
-    nombre: "Clase A4 - Transporte Remunerado", 
-    precio: 450000, 
-    descripcion: "Para transporte remunerado de pasajeros", 
-    duracion: "30 días hábiles", 
-    clasesPracticas: 60, 
+  {
+    id: "a4",
+    nombre: "Clase A4 - Transporte Remunerado",
+    precio: 450000,
+    descripcion: "Para transporte remunerado de pasajeros",
+    duracion: "30 días hábiles",
+    clasesPracticas: 60,
     clasesTeoricas: 90,
     color: "orange",
     icono: "🚕",
-    badge: "A4",
+    badge: "A4 Presencial",
     requisitos: "20 años + Licencia B (2 años antigüedad)",
   },
-  { 
-    id: "a3", 
-    nombre: "Clase A3 - Vehículos Pesados", 
-    precio: 500000, 
-    descripcion: "Para conducir vehículos pesados", 
-    duracion: "30 días hábiles", 
-    clasesPracticas: 60, 
+  {
+    id: "a3",
+    nombre: "Clase A3 - Vehículos Pesados",
+    precio: 500000,
+    descripcion: "Para conducir vehículos pesados",
+    duracion: "30 días hábiles",
+    clasesPracticas: 60,
     clasesTeoricas: 90,
     color: "indigo",
     icono: "🚛",
-    badge: "A3",
+    badge: "A3 Presencial",
     requisitos: "Licencia A2 o A4 (2 años antigüedad)",
   },
-  { 
-    id: "a5", 
-    nombre: "Clase A5 - Vehículos Articulados", 
-    precio: 500000, 
-    descripcion: "Para conducir vehículos articulados", 
-    duracion: "30 días hábiles", 
-    clasesPracticas: 60, 
+  {
+    id: "a5",
+    nombre: "Clase A5 - Vehículos Articulados",
+    precio: 500000,
+    descripcion: "Para conducir vehículos articulados",
+    duracion: "30 días hábiles",
+    clasesPracticas: 60,
     clasesTeoricas: 90,
     color: "red",
     icono: "🚚",
-    badge: "A5",
+    badge: "A5 Presencial",
     requisitos: "Licencia A2 o A4 (2 años antigüedad)",
   },
 ];
 
-const cursoStyles: Record<string, { border: string; bg: string; hoverBg: string; badgeBg: string; badgeText: string }> = {
+const cursoStyles: Record<
+  string,
+  {
+    border: string;
+    bg: string;
+    hoverBg: string;
+    badgeBg: string;
+    badgeText: string;
+  }
+> = {
   blue: {
     border: "border-blue-600",
     bg: "bg-blue-50",
@@ -158,52 +168,112 @@ const pasoActual = 1; // En producción vendría de query params o estado
       <div class="mb-8">
         <div class="flex items-center justify-center gap-2 lg:gap-4 mb-6">
           <div class="flex items-center gap-2">
-            <div class={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-colors ${
-              pasoActual >= 1 ? "bg-blue-600 text-white shadow-md" : "bg-gray-200 text-gray-600"
-            }`}>
-              {pasoActual > 1 ? (
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-              ) : (
-                "1"
-              )}
+            <div
+              class={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-colors ${
+                pasoActual >= 1
+                  ? "bg-blue-600 text-white shadow-md"
+                  : "bg-gray-200 text-gray-600"
+              }`}
+            >
+              {
+                pasoActual > 1 ? (
+                  <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                ) : (
+                  "1"
+                )
+              }
             </div>
-            <span class={`text-sm font-medium hidden sm:block ${pasoActual >= 1 ? "text-gray-900" : "text-gray-500"}`}>
+            <span
+              class={`text-sm font-medium hidden sm:block ${pasoActual >= 1 ? "text-gray-900" : "text-gray-500"}`}
+            >
               Datos Personales
             </span>
           </div>
-          <div class={`h-1 flex-1 max-w-24 transition-colors ${pasoActual >= 2 ? "bg-blue-600" : "bg-gray-300"}`}></div>
+          <div
+            class={`h-1 flex-1 max-w-24 transition-colors ${pasoActual >= 2 ? "bg-blue-600" : "bg-gray-300"}`}
+          >
+          </div>
           <div class="flex items-center gap-2">
-            <div class={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-colors ${
-              pasoActual >= 2 ? "bg-blue-600 text-white shadow-md" : "bg-gray-200 text-gray-600"
-            }`}>
-              {pasoActual > 2 ? (
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-              ) : (
-                "2"
-              )}
+            <div
+              class={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-colors ${
+                pasoActual >= 2
+                  ? "bg-blue-600 text-white shadow-md"
+                  : "bg-gray-200 text-gray-600"
+              }`}
+            >
+              {
+                pasoActual > 2 ? (
+                  <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                ) : (
+                  "2"
+                )
+              }
             </div>
-            <span class={`text-sm font-medium hidden sm:block ${pasoActual >= 2 ? "text-gray-900" : "text-gray-500"}`}>
+            <span
+              class={`text-sm font-medium hidden sm:block ${pasoActual >= 2 ? "text-gray-900" : "text-gray-500"}`}
+            >
               Pago Seguro
             </span>
           </div>
-          <div class={`h-1 flex-1 max-w-24 transition-colors ${pasoActual >= 3 ? "bg-blue-600" : "bg-gray-300"}`}></div>
+          <div
+            class={`h-1 flex-1 max-w-24 transition-colors ${pasoActual >= 3 ? "bg-blue-600" : "bg-gray-300"}`}
+          >
+          </div>
           <div class="flex items-center gap-2">
-            <div class={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-colors ${
-              pasoActual >= 3 ? "bg-blue-600 text-white shadow-md" : "bg-gray-200 text-gray-600"
-            }`}>
-              {pasoActual > 3 ? (
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-              ) : (
-                "3"
-              )}
+            <div
+              class={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-colors ${
+                pasoActual >= 3
+                  ? "bg-blue-600 text-white shadow-md"
+                  : "bg-gray-200 text-gray-600"
+              }`}
+            >
+              {
+                pasoActual > 3 ? (
+                  <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                ) : (
+                  "3"
+                )
+              }
             </div>
-            <span class={`text-sm font-medium hidden sm:block ${pasoActual >= 3 ? "text-gray-900" : "text-gray-500"}`}>
+            <span
+              class={`text-sm font-medium hidden sm:block ${pasoActual >= 3 ? "text-gray-900" : "text-gray-500"}`}
+            >
               Confirmación
             </span>
           </div>
@@ -212,7 +282,8 @@ const pasoActual = 1; // En producción vendría de query params o estado
           <div
             class="bg-blue-600 h-2 rounded-full transition-all duration-500"
             style={`width: ${(pasoActual / 3) * 100}%`}
-          ></div>
+          >
+          </div>
         </div>
       </div>
 
@@ -226,7 +297,8 @@ const pasoActual = 1; // En producción vendría de query params o estado
                 Matrícula Online
               </h1>
               <p class="text-gray-600">
-                Completa tus datos para matricularte. El proceso toma menos de 5 minutos.
+                Completa tus datos para matricularte. El proceso toma menos de 5
+                minutos.
               </p>
             </div>
 
@@ -236,19 +308,21 @@ const pasoActual = 1; // En producción vendría de query params o estado
                 <label class="block text-sm font-semibold text-gray-900 mb-4">
                   Selecciona tu curso *
                 </label>
-                
-                <!-- Tabs para categorías -->
-                <div class="mb-6 border-b border-gray-200">
-                  <div class="flex gap-1" role="tablist">
+
+                <!-- Segmented Control para categorías -->
+                <div class="mb-8 flex justify-center">
+                  <div
+                    class="inline-flex p-1 bg-gray-100 rounded-xl shadow-inner w-full sm:w-auto"
+                  >
                     <button
                       type="button"
                       id="tab-basico"
                       role="tab"
                       aria-selected="true"
                       aria-controls="panel-basico"
-                      class="tab-categoria px-6 py-3 text-sm font-medium text-gray-900 border-b-2 border-blue-600 transition-colors"
+                      class="tab-categoria flex-1 sm:flex-none sm:px-8 py-2.5 text-sm font-bold rounded-lg bg-white text-gray-900 shadow-sm transition-all duration-200"
                     >
-                      Clase Básica
+                      🚗 No Profesional
                     </button>
                     <button
                       type="button"
@@ -256,390 +330,686 @@ const pasoActual = 1; // En producción vendría de query params o estado
                       role="tab"
                       aria-selected="false"
                       aria-controls="panel-profesional"
-                      class="tab-categoria px-6 py-3 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-gray-900 transition-colors"
+                      class="tab-categoria flex-1 sm:flex-none sm:px-8 py-2.5 text-sm font-bold rounded-lg text-gray-500 hover:text-gray-900 transition-all duration-200"
                     >
-                      Clase Profesional
+                      🚛 Profesional
                     </button>
                   </div>
                 </div>
 
                 <!-- Panel Clase Básica -->
-                <div id="panel-basico" role="tabpanel" aria-labelledby="tab-basico" class="tab-panel">
+                <div
+                  id="panel-basico"
+                  role="tabpanel"
+                  aria-labelledby="tab-basico"
+                  class="tab-panel"
+                >
                   <div class="grid md:grid-cols-2 gap-4">
-                    {cursosBasicos.map((curso) => {
-                      const styles = cursoStyles[curso.color];
-                      const isChecked = curso.id === "clase-b";
-                      return (
-                        <label class={`group relative flex flex-col p-5 border-2 rounded-lg cursor-pointer transition-all hover:shadow-md ${
-                          isChecked 
-                            ? `${styles.border} ${styles.bg} shadow-sm` 
-                            : `border-gray-200 hover:border-gray-300 bg-white`
-                        } has-[:checked]:${styles.border} has-[:checked]:${styles.bg} has-checked:shadow-sm`}>
-                          <div class="flex items-start gap-3 mb-3">
-                            <div class={`w-10 h-10 rounded-lg flex items-center justify-center text-xl shrink-0 ${
-                              isChecked ? styles.bg : "bg-gray-100"
-                            } group-hover:${styles.bg} transition-colors`}>
-                              {curso.icono}
-                            </div>
-                            <div class="flex-1 min-w-0">
-                              <div class="flex items-center gap-2 mb-1">
-                                <p class="text-base font-bold text-gray-900">
-                                  {curso.nombre}
+                    {
+                      cursosBasicos.map((curso) => {
+                        const styles = cursoStyles[curso.color];
+                        const isChecked = curso.id === "clase-b";
+                        return (
+                          <label
+                            data-curso-color={curso.color}
+                            class={`group relative flex flex-col p-5 border-2 rounded-lg cursor-pointer transition-all hover:shadow-md curso-card ${
+                              isChecked
+                                ? `${styles.border} ${styles.bg} shadow-sm`
+                                : `border-gray-200 hover:border-gray-300 bg-white`
+                            }`}
+                          >
+                            <div class="flex items-start gap-3 mb-3">
+                              <div
+                                class={`w-10 h-10 rounded-lg flex items-center justify-center text-xl shrink-0 ${
+                                  isChecked ? styles.bg : "bg-gray-100"
+                                } group-hover:${styles.bg} transition-colors`}
+                              >
+                                {curso.icono}
+                              </div>
+                              <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 mb-1">
+                                  <p class="text-base font-bold text-gray-900">
+                                    {curso.nombre}
+                                  </p>
+                                  {curso.badge && (
+                                    <span
+                                      class={`text-xs px-2 py-0.5 rounded-full font-semibold ${styles.badgeBg} ${styles.badgeText}`}
+                                    >
+                                      {curso.badge}
+                                    </span>
+                                  )}
+                                </div>
+                                <p class="text-xs text-gray-600 mb-2">
+                                  {curso.descripcion}
                                 </p>
-                                {curso.badge && (
-                                  <span class={`text-xs px-2 py-0.5 rounded-full font-semibold ${styles.badgeBg} ${styles.badgeText}`}>
-                                    {curso.badge}
+                              </div>
+                              <input
+                                type="radio"
+                                name="curso"
+                                value={curso.id}
+                                class="mt-1 w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-600"
+                                checked={isChecked}
+                              />
+                            </div>
+                            <div class="flex items-center justify-between pt-3 border-t border-gray-200">
+                              <div class="flex flex-col gap-1">
+                                <p class="text-xs text-gray-500">
+                                  📋 {curso.requisitos}
+                                </p>
+                                <div class="flex items-center gap-3 text-xs text-gray-600">
+                                  <span>{curso.duracion}</span>
+                                  <span>•</span>
+                                  <span>
+                                    {curso.clasesPracticas}p +{" "}
+                                    {curso.clasesTeoricas}t
                                   </span>
-                                )}
+                                </div>
                               </div>
-                              <p class="text-xs text-gray-600 mb-2">
-                                {curso.descripcion}
-                              </p>
-                            </div>
-                            <input
-                              type="radio"
-                              name="curso"
-                              value={curso.id}
-                              class="mt-1 w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-600"
-                              checked={isChecked}
-                            />
-                          </div>
-                          <div class="flex items-center justify-between pt-3 border-t border-gray-200">
-                            <div class="flex flex-col gap-1">
-                              <p class="text-xs text-gray-500">
-                                📋 {curso.requisitos}
-                              </p>
-                              <div class="flex items-center gap-3 text-xs text-gray-600">
-                                <span>{curso.duracion}</span>
-                                <span>•</span>
-                                <span>{curso.clasesPracticas}p + {curso.clasesTeoricas}t</span>
+                              <div class="text-right">
+                                <p class="text-xl font-bold text-gray-900">
+                                  ${curso.precio.toLocaleString("es-CL")}
+                                </p>
+                                <p class="text-xs text-gray-500">CLP</p>
                               </div>
                             </div>
-                            <div class="text-right">
-                              <p class="text-xl font-bold text-gray-900">
-                                ${curso.precio.toLocaleString("es-CL")}
-                              </p>
-                              <p class="text-xs text-gray-500">CLP</p>
-                            </div>
-                          </div>
-                        </label>
-                      );
-                    })}
+                          </label>
+                        );
+                      })
+                    }
                   </div>
                 </div>
 
                 <!-- Panel Clase Profesional -->
-                <div id="panel-profesional" role="tabpanel" aria-labelledby="tab-profesional" class="tab-panel hidden">
-                  <div class="grid md:grid-cols-2 gap-4">
-                    {cursosProfesionales.map((curso) => {
-                      const styles = cursoStyles[curso.color];
-                      return (
-                        <label class={`group relative flex flex-col p-5 border-2 rounded-lg cursor-pointer transition-all hover:shadow-md border-gray-200 hover:border-gray-300 bg-white has-[:checked]:${styles.border} has-[:checked]:${styles.bg} has-checked:shadow-sm`}>
-                          <div class="flex items-start gap-3 mb-3">
-                            <div class={`w-10 h-10 rounded-lg flex items-center justify-center text-xl shrink-0 bg-gray-100 group-hover:${styles.bg} transition-colors`}>
-                              {curso.icono}
-                            </div>
-                            <div class="flex-1 min-w-0">
-                              <div class="flex items-center gap-2 mb-1">
-                                <p class="text-base font-bold text-gray-900">
-                                  {curso.nombre}
-                                </p>
-                                {curso.badge && (
-                                  <span class={`text-xs px-2 py-0.5 rounded-full font-semibold ${styles.badgeBg} ${styles.badgeText}`}>
-                                    {curso.badge}
-                                  </span>
-                                )}
-                              </div>
-                              <p class="text-xs text-gray-600 mb-2">
-                                {curso.descripcion}
-                              </p>
-                            </div>
-                            <input
-                              type="radio"
-                              name="curso"
-                              value={curso.id}
-                              class="mt-1 w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-600"
-                            />
-                          </div>
-                          <div class="flex items-center justify-between pt-3 border-t border-gray-200">
-                            <div class="flex flex-col gap-1">
-                              <p class="text-xs text-gray-500">
-                                📋 {curso.requisitos}
-                              </p>
-                              <div class="flex items-center gap-3 text-xs text-gray-600">
-                                <span>{curso.duracion}</span>
-                                <span>•</span>
-                                <span>{curso.clasesPracticas}p + {curso.clasesTeoricas}t</span>
-                              </div>
-                            </div>
-                            <div class="text-right">
-                              <p class="text-xl font-bold text-gray-900">
-                                ${curso.precio.toLocaleString("es-CL")}
-                              </p>
-                              <p class="text-xs text-gray-500">CLP</p>
-                            </div>
-                          </div>
-                        </label>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-
-              <!-- Datos personales -->
-              <div class="border-t border-gray-200 pt-8">
-                <h3 class="text-lg font-semibold text-gray-900 mb-6">
-                  Tus Datos Personales
-                </h3>
-
-                <div class="space-y-5">
-                  <div class="grid md:grid-cols-2 gap-5">
-                    <Input
-                      label="Nombres"
-                      id="nombres"
-                      name="nombres"
-                      type="text"
-                      placeholder="Juan Pablo"
-                    />
-                    <Input
-                      label="Apellidos"
-                      id="apellidos"
-                      name="apellidos"
-                      type="text"
-                      placeholder="González Pérez"
-                    />
-                  </div>
-
-                  <div>
-                    <Input
-                      label="RUT"
-                      id="rut"
-                      name="rut"
-                      type="text"
-                      placeholder="12.345.678-9"
-                      class="rut-input"
-                    />
-                    <p id="rut-error" class="hidden text-sm text-red-600 mt-1.5" role="alert"></p>
-                    <p id="rut-success" class="hidden text-sm text-green-600 mt-1.5" role="alert">✓ RUT válido</p>
-                  </div>
-
-                  <div>
-                    <Input
-                      label="Fecha de Nacimiento"
-                      id="fecha-nacimiento"
-                      name="fecha_nacimiento"
-                      type="date"
-                      class="fecha-nacimiento-input"
-                    />
-                    <p id="edad-error" class="hidden text-sm text-red-600 mt-1.5" role="alert"></p>
-                    <p id="edad-warning" class="hidden text-sm text-orange-600 mt-1.5" role="alert"></p>
-                  </div>
-
-                  <div class="grid md:grid-cols-2 gap-5">
-                    <Input
-                      label="Email"
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="tu@email.cl"
-                      class="email-input"
-                    />
-                    <Input
-                      label="Teléfono / WhatsApp"
-                      id="telefono"
-                      name="telefono"
-                      type="tel"
-                      placeholder="+56 9 1234 5678"
-                    />
-                  </div>
-
-                  <!-- SENCE (opcional) -->
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1.5">
-                      Código SENCE (opcional)
-                    </label>
-                    <select
-                      name="sence_code"
-                      id="sence_code"
-                      class="h-11 px-4 w-full text-sm bg-white rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-1"
-                    >
-                      <option value="">No aplica</option>
-                      <option value="SENCE-2024-001">SENCE-2024-001</option>
-                      <option value="SENCE-2024-002">SENCE-2024-002</option>
-                      <option value="SENCE-2025-001">SENCE-2025-001</option>
-                    </select>
-                    <p class="text-xs text-gray-500 mt-1.5">
-                      Si tienes un código SENCE vigente, selecciónalo para aplicar el beneficio
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Foto para Carnet (Módulo 2) -->
-              <div class="border-t border-gray-200 pt-8">
-                <h3 class="text-lg font-semibold text-gray-900 mb-1">
-                  Foto para tu Carnet
-                </h3>
-                <p class="text-sm text-gray-600 mb-6">
-                  Para que tu carnet esté listo al llegar a tu primera clase, necesitamos una foto tuya.
-                </p>
-
-                <div class="border border-gray-200 rounded-lg overflow-hidden">
-                  <div class="px-4 py-3 border-b border-gray-200 bg-gray-50 flex items-center gap-2">
-                    <span class="text-sm font-medium text-gray-900">Foto para Carnet</span>
-                    <span class="text-xs font-medium text-red-500">*</span>
-                    <span class="ml-auto text-xs text-gray-500">Frontal, fondo blanco</span>
-                  </div>
-                  <div class="p-4 space-y-4">
-                    <!-- Tabs -->
-                    <div class="flex gap-2">
-                      <button type="button" id="foto-tab-camara"
-                        class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md border border-gray-900 bg-gray-900 text-white transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
-                        </svg>
-                        Tomar foto
-                      </button>
-                      <button type="button" id="foto-tab-subir"
-                        class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                        </svg>
-                        Subir foto
-                      </button>
-                    </div>
-
-                    <!-- Sección cámara -->
-                    <div id="foto-seccion-camara">
-                      <div id="foto-camara-idle" class="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
-                        <svg class="w-10 h-10 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
-                        </svg>
-                        <p class="text-sm text-gray-500 mb-3">Usa la cámara de tu dispositivo para tomarte la foto</p>
-                        <button type="button" id="foto-btn-activar"
-                          class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-700 transition-colors">
-                          Activar cámara
-                        </button>
-                        <p class="text-xs text-gray-400 mt-2">Se solicitará permiso para acceder a la cámara</p>
-                      </div>
-                      <div id="foto-camara-activa" class="hidden space-y-3">
-                        <div class="relative rounded-lg overflow-hidden bg-black max-w-xs mx-auto">
-                          <video id="foto-camara-video" class="w-full object-cover" autoplay playsinline muted style="aspect-ratio:4/3"></video>
-                          <div class="absolute inset-0 border-2 border-dashed border-white/30 rounded-lg pointer-events-none m-2"></div>
-                        </div>
-                        <div class="text-center">
-                          <button type="button" id="foto-btn-capturar"
-                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-700 transition-colors">
-                            📸 Capturar foto
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- Sección subir -->
-                    <div id="foto-seccion-subir" class="hidden">
-                      <div class="border-2 border-dashed border-gray-200 rounded-lg p-8 text-center hover:border-gray-300 transition-colors">
-                        <svg class="w-8 h-8 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                        </svg>
-                        <p class="text-sm text-gray-600 mb-3">Selecciona o arrastra una foto tuya</p>
-                        <input type="file" id="foto-upload-input" accept=".jpg,.jpeg,.png" class="hidden" />
-                        <label for="foto-upload-input"
-                          class="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-md shadow-sm hover:bg-gray-50 transition-colors">
-                          Elegir archivo
-                        </label>
-                        <p class="text-xs text-gray-400 mt-2">JPG, PNG · Máx: 2MB</p>
-                      </div>
-                    </div>
-
-                    <!-- Preview -->
-                    <div id="foto-preview-wrap" class="hidden">
-                      <div class="flex items-start gap-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                        <img id="foto-preview-img" class="w-20 h-20 object-cover rounded-lg border border-gray-200 shrink-0" alt="Foto carnet" />
-                        <div class="flex-1 min-w-0">
-                          <p class="text-sm font-medium text-green-800">✓ Foto lista para el carnet</p>
-                          <p class="text-xs text-green-700 mt-1">Tu foto quedará registrada y el carnet estará listo al llegar a tu primera clase.</p>
-                          <button type="button" id="foto-btn-reset"
-                            class="mt-2 text-xs text-gray-500 underline hover:text-gray-700">
-                            Volver a tomar o cambiar
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    <canvas id="foto-camara-canvas" class="hidden"></canvas>
-                    <p id="foto-feedback" class="text-xs text-red-600 hidden">⚠️ La foto para el carnet es obligatoria</p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Términos -->
-              <div class="border-t border-gray-200 pt-6">
-                <label class="flex items-start gap-3 cursor-pointer group">
-                  <input
-                    type="checkbox"
-                    id="acepta-terminos"
-                    name="acepta_terminos"
-                    class="mt-1 w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-600"
-                  />
-                  <span class="text-sm text-gray-700 group-hover:text-gray-900">
-                    Acepto los{" "}
-                    <a
-                      href="/terminos"
-                      target="_blank"
-                      class="text-blue-600 hover:text-blue-800 hover:underline font-medium"
-                    >
-                      términos y condiciones
-                    </a>{" "}
-                    y autorizo el uso de mis datos personales según la{" "}
-                    <a
-                      href="/privacidad"
-                      target="_blank"
-                      class="text-blue-600 hover:text-blue-800 hover:underline font-medium"
-                    >
-                      política de privacidad
-                    </a>
-                    . *
-                  </span>
-                </label>
-              </div>
-
-              <!-- Botones -->
-              <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200">
-                <Button href="/" variant="ghost" class="flex-1">
-                  ← Volver
-                </Button>
-                <Button
-                  type="submit"
-                  variant="primary"
-                  class="flex-1"
-                  id="btn-continuar"
+                <div
+                  id="panel-profesional"
+                  role="tabpanel"
+                  aria-labelledby="tab-profesional"
+                  class="tab-panel hidden"
                 >
-                  Continuar al Pago →
-                </Button>
+                  <div class="grid md:grid-cols-2 gap-4">
+                    {
+                      cursosProfesionales.map((curso) => {
+                        const styles = cursoStyles[curso.color];
+                        return (
+                          <label
+                            data-curso-color={curso.color}
+                            class="group relative flex flex-col p-5 border-2 rounded-lg cursor-pointer transition-all hover:shadow-md border-gray-200 hover:border-gray-300 bg-white curso-card"
+                          >
+                            <div class="flex items-start gap-3 mb-3">
+                              <div
+                                class={`w-10 h-10 rounded-lg flex items-center justify-center text-xl shrink-0 bg-gray-100 group-hover:${styles.bg} transition-colors`}
+                              >
+                                {curso.icono}
+                              </div>
+                              <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 mb-1">
+                                  <p class="text-base font-bold text-gray-900">
+                                    {curso.nombre}
+                                  </p>
+                                  {curso.badge && (
+                                    <span
+                                      class={`text-xs px-2 py-0.5 rounded-full font-semibold ${styles.badgeBg} ${styles.badgeText}`}
+                                    >
+                                      {curso.badge}
+                                    </span>
+                                  )}
+                                </div>
+                                <p class="text-xs text-gray-600 mb-2">
+                                  {curso.descripcion}
+                                </p>
+                              </div>
+                              <input
+                                type="radio"
+                                name="curso"
+                                value={curso.id}
+                                class="mt-1 w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-600"
+                              />
+                            </div>
+                            <div class="flex items-center justify-between pt-3 border-t border-gray-200">
+                              <div class="flex flex-col gap-1">
+                                <p class="text-xs text-gray-500">
+                                  📋 {curso.requisitos}
+                                </p>
+                                <div class="flex items-center gap-3 text-xs text-gray-600">
+                                  <span>{curso.duracion}</span>
+                                  <span>•</span>
+                                  <span>
+                                    {curso.clasesPracticas}p +{" "}
+                                    {curso.clasesTeoricas}t
+                                  </span>
+                                </div>
+                              </div>
+                              <div class="text-right">
+                                <p class="text-xl font-bold text-gray-900">
+                                  ${curso.precio.toLocaleString("es-CL")}
+                                </p>
+                                <p class="text-xs text-gray-500">CLP</p>
+                              </div>
+                            </div>
+                          </label>
+                        );
+                      })
+                    }
+                  </div>
+                </div>
               </div>
+
+              <!-- Aviso de Matrícula Presencial (Oculto por defecto) -->
+              <div
+                id="aviso-presencial"
+                class="hidden mt-8 p-6 bg-blue-50 border border-blue-200 rounded-xl relative overflow-hidden"
+              >
+                <!-- Decorative background elements -->
+                <div
+                  class="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-blue-100 opacity-50 blur-2xl"
+                >
+                </div>
+                <div
+                  class="absolute bottom-0 right-16 w-24 h-24 rounded-full bg-blue-200 opacity-40 blur-xl"
+                >
+                </div>
+
+                <div
+                  class="relative z-10 flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left"
+                >
+                  <div
+                    class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center shrink-0"
+                  >
+                    <svg
+                      class="w-6 h-6 text-blue-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                      ></path>
+                    </svg>
+                  </div>
+                  <div class="flex-1">
+                    <h3
+                      id="aviso-presencial-titulo"
+                      class="text-lg font-bold text-blue-900 mb-1"
+                    >
+                      Aviso de Matrícula
+                    </h3>
+                    <p
+                      id="aviso-presencial-texto"
+                      class="text-sm text-blue-800 mb-4"
+                    >
+                      Para continuar con el proceso, necesitamos validar algunos
+                      datos de forma presencial.
+                    </p>
+                    <div
+                      class="flex flex-wrap gap-3 justify-center sm:justify-start"
+                    >
+                      <Button
+                        href="https://wa.me/56912345678"
+                        variant="primary"
+                        class="bg-blue-600 border-blue-600"
+                      >
+                        Consultar por WhatsApp
+                      </Button>
+                      <Button
+                        href="/contacto"
+                        variant="secondary"
+                        class="bg-white text-blue-900 border-blue-200"
+                      >
+                        Ver ubicación
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Formulario contenedor (Se oculta para Profesional y SENCE y oculta los datos inicialmente) -->
+              <div
+                id="formulario-contenedor"
+                class="hidden opacity-0 transform translate-y-4 transition-all duration-500 ease-out"
+              >
+                <!-- Datos personales -->
+                <div class="border-t border-gray-200 pt-8 mt-8">
+                  <h3 class="text-lg font-semibold text-gray-900 mb-6">
+                    Paso 2: Tus Datos Personales
+                  </h3>
+
+                  <div class="space-y-5">
+                    <div class="grid md:grid-cols-2 gap-5">
+                      <Input
+                        label="Nombres"
+                        id="nombres"
+                        name="nombres"
+                        type="text"
+                        placeholder="Juan Pablo"
+                      />
+                      <Input
+                        label="Apellidos"
+                        id="apellidos"
+                        name="apellidos"
+                        type="text"
+                        placeholder="González Pérez"
+                      />
+                    </div>
+
+                    <div>
+                      <Input
+                        label="RUT"
+                        id="rut"
+                        name="rut"
+                        type="text"
+                        placeholder="12.345.678-9"
+                        class="rut-input"
+                      />
+                      <p
+                        id="rut-error"
+                        class="hidden text-sm text-red-600 mt-1.5"
+                        role="alert"
+                      >
+                      </p>
+                      <p
+                        id="rut-success"
+                        class="hidden text-sm text-green-600 mt-1.5"
+                        role="alert"
+                      >
+                        ✓ RUT válido
+                      </p>
+                    </div>
+
+                    <div>
+                      <Input
+                        label="Fecha de Nacimiento"
+                        id="fecha-nacimiento"
+                        name="fecha_nacimiento"
+                        type="date"
+                        class="fecha-nacimiento-input"
+                      />
+                      <p
+                        id="edad-error"
+                        class="hidden text-sm text-red-600 mt-1.5"
+                        role="alert"
+                      >
+                      </p>
+                      <p
+                        id="edad-warning"
+                        class="hidden text-sm text-orange-600 mt-1.5"
+                        role="alert"
+                      >
+                      </p>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-5">
+                      <Input
+                        label="Email"
+                        id="email"
+                        name="email"
+                        type="email"
+                        placeholder="tu@email.cl"
+                        class="email-input"
+                      />
+                      <Input
+                        label="Teléfono / WhatsApp"
+                        id="telefono"
+                        name="telefono"
+                        type="tel"
+                        placeholder="+56 9 1234 5678"
+                      />
+                    </div>
+
+                    <!-- SENCE (opcional) -->
+                    <div>
+                      <label
+                        class="block text-sm font-medium text-gray-700 mb-1.5"
+                      >
+                        Código SENCE (opcional)
+                      </label>
+                      <select
+                        name="sence_code"
+                        id="sence_code"
+                        class="h-11 px-4 w-full text-sm bg-white rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-1"
+                      >
+                        <option value="">No aplica</option>
+                        <option value="SENCE-2024-001">SENCE-2024-001</option>
+                        <option value="SENCE-2024-002">SENCE-2024-002</option>
+                        <option value="SENCE-2025-001">SENCE-2025-001</option>
+                      </select>
+                      <p class="text-xs text-gray-500 mt-1.5">
+                        Si tienes un código SENCE vigente, selecciónalo para
+                        aplicar el beneficio
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="pasos-adicionales-online">
+                  <!-- Paso 3: Selección de Horarios -->
+                  <SelectorHorarios />
+
+                  <!-- Foto para Carnet (Módulo 2) -->
+                  <div class="border-t border-gray-200 pt-8 mt-8">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-1">
+                      Foto para tu Carnet
+                    </h3>
+                    <p class="text-sm text-gray-600 mb-6">
+                      Para que tu carnet esté listo al llegar a tu primera
+                      clase, necesitamos una foto tuya.
+                    </p>
+
+                    <div
+                      class="border border-gray-200 rounded-lg overflow-hidden"
+                    >
+                      <div
+                        class="px-4 py-3 border-b border-gray-200 bg-gray-50 flex items-center gap-2"
+                      >
+                        <span class="text-sm font-medium text-gray-900"
+                          >Foto para Carnet</span
+                        >
+                        <span class="text-xs font-medium text-red-500">*</span>
+                        <span class="ml-auto text-xs text-gray-500"
+                          >Frontal, fondo blanco</span
+                        >
+                      </div>
+                      <div class="p-4 space-y-4">
+                        <!-- Tabs -->
+                        <div class="flex gap-2">
+                          <button
+                            type="button"
+                            id="foto-tab-camara"
+                            class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md border border-gray-900 bg-gray-900 text-white transition-colors"
+                          >
+                            <svg
+                              class="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                              stroke-width="1.5"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"
+                              ></path>
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z"
+                              ></path>
+                            </svg>
+                            Tomar foto
+                          </button>
+                          <button
+                            type="button"
+                            id="foto-tab-subir"
+                            class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
+                          >
+                            <svg
+                              class="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                              stroke-width="1.5"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
+                              ></path>
+                            </svg>
+                            Subir foto
+                          </button>
+                        </div>
+
+                        <!-- Sección cámara -->
+                        <div id="foto-seccion-camara">
+                          <div
+                            id="foto-camara-idle"
+                            class="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200"
+                          >
+                            <svg
+                              class="w-10 h-10 text-gray-300 mx-auto mb-3"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                              stroke-width="1"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"
+                              ></path>
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z"
+                              ></path>
+                            </svg>
+                            <p class="text-sm text-gray-500 mb-3">
+                              Usa la cámara de tu dispositivo para tomarte la
+                              foto
+                            </p>
+                            <button
+                              type="button"
+                              id="foto-btn-activar"
+                              class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-700 transition-colors"
+                            >
+                              Activar cámara
+                            </button>
+                            <p class="text-xs text-gray-400 mt-2">
+                              Se solicitará permiso para acceder a la cámara
+                            </p>
+                          </div>
+                          <div id="foto-camara-activa" class="hidden space-y-3">
+                            <div
+                              class="relative rounded-lg overflow-hidden bg-black max-w-xs mx-auto"
+                            >
+                              <video
+                                id="foto-camara-video"
+                                class="w-full object-cover"
+                                autoplay
+                                playsinline
+                                muted
+                                style="aspect-ratio:4/3"></video>
+                              <div
+                                class="absolute inset-0 border-2 border-dashed border-white/30 rounded-lg pointer-events-none m-2"
+                              >
+                              </div>
+                            </div>
+                            <div class="text-center">
+                              <button
+                                type="button"
+                                id="foto-btn-capturar"
+                                class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-700 transition-colors"
+                              >
+                                📸 Capturar foto
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Sección subir -->
+                        <div id="foto-seccion-subir" class="hidden">
+                          <div
+                            class="border-2 border-dashed border-gray-200 rounded-lg p-8 text-center hover:border-gray-300 transition-colors"
+                          >
+                            <svg
+                              class="w-8 h-8 text-gray-300 mx-auto mb-3"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                              stroke-width="1.5"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
+                              ></path>
+                            </svg>
+                            <p class="text-sm text-gray-600 mb-3">
+                              Selecciona o arrastra una foto tuya
+                            </p>
+                            <input
+                              type="file"
+                              id="foto-upload-input"
+                              accept=".jpg,.jpeg,.png"
+                              class="hidden"
+                            />
+                            <label
+                              for="foto-upload-input"
+                              class="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-md shadow-sm hover:bg-gray-50 transition-colors"
+                            >
+                              Elegir archivo
+                            </label>
+                            <p class="text-xs text-gray-400 mt-2">
+                              JPG, PNG · Máx: 2MB
+                            </p>
+                          </div>
+                        </div>
+
+                        <!-- Preview -->
+                        <div id="foto-preview-wrap" class="hidden">
+                          <div
+                            class="flex items-start gap-4 p-4 bg-green-50 border border-green-200 rounded-lg"
+                          >
+                            <img
+                              id="foto-preview-img"
+                              class="w-20 h-20 object-cover rounded-lg border border-gray-200 shrink-0"
+                              alt="Foto carnet"
+                            />
+                            <div class="flex-1 min-w-0">
+                              <p class="text-sm font-medium text-green-800">
+                                ✓ Foto lista para el carnet
+                              </p>
+                              <p class="text-xs text-green-700 mt-1">
+                                Tu foto quedará registrada y el carnet estará
+                                listo al llegar a tu primera clase.
+                              </p>
+                              <button
+                                type="button"
+                                id="foto-btn-reset"
+                                class="mt-2 text-xs text-gray-500 underline hover:text-gray-700"
+                              >
+                                Volver a tomar o cambiar
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <canvas id="foto-camara-canvas" class="hidden"></canvas>
+                        <p
+                          id="foto-feedback"
+                          class="text-xs text-red-600 hidden"
+                        >
+                          ⚠️ La foto para el carnet es obligatoria
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Términos -->
+                <div class="border-t border-gray-200 pt-6">
+                  <label class="flex items-start gap-3 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      id="acepta-terminos"
+                      name="acepta_terminos"
+                      class="mt-1 w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-600"
+                    />
+                    <span
+                      class="text-sm text-gray-700 group-hover:text-gray-900"
+                    >
+                      Acepto los{" "}
+                      <a
+                        href="/terminos"
+                        target="_blank"
+                        class="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                      >
+                        términos y condiciones
+                      </a>{" "}
+                      y autorizo el uso de mis datos personales según la{" "}
+                      <a
+                        href="/privacidad"
+                        target="_blank"
+                        class="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                      >
+                        política de privacidad
+                      </a>
+                      . *
+                    </span>
+                  </label>
+                </div>
+
+                <!-- Botones -->
+                <div
+                  class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200"
+                  id="seccion-botones"
+                >
+                  <Button href="/" variant="ghost" class="flex-1">
+                    ← Cancelar
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    class="flex-1"
+                    id="btn-continuar"
+                  >
+                    Continuar al Pago →
+                  </Button>
+                </div>
+              </div>
+              <!-- Fin #formulario-contenedor -->
             </form>
           </Card>
 
           <!-- Trust badges mejorados -->
-          <div class="mt-6 flex flex-wrap items-center justify-center gap-6 text-sm text-gray-600">
+          <div
+            class="mt-6 flex flex-wrap items-center justify-center gap-6 text-sm text-gray-600 trust-badges-container"
+          >
             <div class="flex items-center gap-2">
-              <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+              <svg
+                class="w-5 h-5 text-green-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                ></path>
               </svg>
               <span class="font-medium">Pago 100% Seguro</span>
             </div>
             <div class="flex items-center gap-2">
-              <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              <svg
+                class="w-5 h-5 text-green-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
               <span class="font-medium">Confirmación Inmediata</span>
             </div>
             <div class="flex items-center gap-2">
-              <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+              <svg
+                class="w-5 h-5 text-blue-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13 10V3L4 14h7v7l9-11h-7z"></path>
               </svg>
               <span class="font-medium">Proceso Rápido</span>
             </div>
@@ -647,7 +1017,7 @@ const pasoActual = 1; // En producción vendría de query params o estado
         </div>
 
         <!-- Sidebar mejorado -->
-        <div class="space-y-6">
+        <div class="space-y-6" id="sidebar-contenedor">
           <!-- Resumen dinámico -->
           <Card class="sticky top-4">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">
@@ -656,24 +1026,35 @@ const pasoActual = 1; // En producción vendría de query params o estado
             <div class="space-y-3 text-sm" id="resumen-contenido">
               <div class="flex justify-between">
                 <span class="text-gray-600">Curso:</span>
-                <span class="font-medium text-gray-900" id="resumen-curso">Clase B</span>
+                <span class="font-medium text-gray-900" id="resumen-curso"
+                  >Clase B</span
+                >
               </div>
               <div class="flex justify-between">
                 <span class="text-gray-600">Duración:</span>
-                <span class="font-medium text-gray-900" id="resumen-duracion">8 semanas</span>
+                <span class="font-medium text-gray-900" id="resumen-duracion"
+                  >8 semanas</span
+                >
               </div>
               <div class="flex justify-between">
                 <span class="text-gray-600">Clases prácticas:</span>
-                <span class="font-medium text-gray-900" id="resumen-practicas">12 horas</span>
+                <span class="font-medium text-gray-900" id="resumen-practicas"
+                  >12 horas</span
+                >
               </div>
               <div class="flex justify-between">
                 <span class="text-gray-600">Clases teóricas:</span>
-                <span class="font-medium text-gray-900" id="resumen-teoricas">12 horas</span>
+                <span class="font-medium text-gray-900" id="resumen-teoricas"
+                  >12 horas</span
+                >
               </div>
               <hr class="border-gray-200 my-3" />
               <div class="flex justify-between items-baseline pt-2">
                 <span class="font-semibold text-gray-900">Total:</span>
-                <span class="text-2xl font-bold text-gray-900" id="resumen-total">
+                <span
+                  class="text-2xl font-bold text-gray-900"
+                  id="resumen-total"
+                >
                   $280.000
                 </span>
               </div>
@@ -682,43 +1063,95 @@ const pasoActual = 1; // En producción vendría de query params o estado
 
           <!-- Qué incluye -->
           <Card>
-            <h3 class="text-sm font-semibold text-gray-900 mb-3">
-              ✨ Incluye
-            </h3>
+            <h3 class="text-sm font-semibold text-gray-900 mb-3">✨ Incluye</h3>
             <ul class="space-y-2.5 text-sm text-gray-700">
               <li class="flex items-start gap-2">
-                <svg class="w-5 h-5 text-green-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                <svg
+                  class="w-5 h-5 text-green-600 shrink-0 mt-0.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 13l4 4L19 7"></path>
                 </svg>
                 <span>Material de estudio digital</span>
               </li>
               <li class="flex items-start gap-2">
-                <svg class="w-5 h-5 text-green-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                <svg
+                  class="w-5 h-5 text-green-600 shrink-0 mt-0.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 13l4 4L19 7"></path>
                 </svg>
                 <span>Acceso a simulador online</span>
               </li>
               <li class="flex items-start gap-2">
-                <svg class="w-5 h-5 text-green-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                <svg
+                  class="w-5 h-5 text-green-600 shrink-0 mt-0.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 13l4 4L19 7"></path>
                 </svg>
                 <span>Vehículos con doble mando</span>
               </li>
               <li class="flex items-start gap-2">
-                <svg class="w-5 h-5 text-green-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                <svg
+                  class="w-5 h-5 text-green-600 shrink-0 mt-0.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 13l4 4L19 7"></path>
                 </svg>
                 <span>Instructores certificados</span>
               </li>
               <li class="flex items-start gap-2">
-                <svg class="w-5 h-5 text-green-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                <svg
+                  class="w-5 h-5 text-green-600 shrink-0 mt-0.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 13l4 4L19 7"></path>
                 </svg>
                 <span>Horarios flexibles</span>
               </li>
               <li class="flex items-start gap-2">
-                <svg class="w-5 h-5 text-green-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                <svg
+                  class="w-5 h-5 text-green-600 shrink-0 mt-0.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 13l4 4L19 7"></path>
                 </svg>
                 <span>Portal de alumno con seguimiento</span>
               </li>
@@ -728,15 +1161,26 @@ const pasoActual = 1; // En producción vendría de query params o estado
           <!-- Garantía -->
           <Card class="bg-green-50 border-green-200">
             <div class="flex gap-3">
-              <svg class="w-6 h-6 text-green-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+              <svg
+                class="w-6 h-6 text-green-600 shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                ></path>
               </svg>
               <div>
                 <p class="text-sm font-semibold text-green-900 mb-1">
                   Garantía de Aprobación
                 </p>
                 <p class="text-xs text-green-800">
-                  Si no apruebas en el primer intento, te damos clases adicionales gratis hasta que apruebes.
+                  Si no apruebas en el primer intento, te damos clases
+                  adicionales gratis hasta que apruebes.
                 </p>
               </div>
             </div>
@@ -756,7 +1200,9 @@ const pasoActual = 1; // En producción vendría de query params o estado
               class="w-full text-sm"
             >
               <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.304-1.654a11.882 11.882 0 005.703 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"></path>
+                <path
+                  d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.304-1.654a11.882 11.882 0 005.703 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"
+                ></path>
               </svg>
               Chatear por WhatsApp
             </Button>
@@ -771,30 +1217,30 @@ const pasoActual = 1; // En producción vendría de query params o estado
   // RF-008: Validación RUT Chileno (Módulo 11)
   function validarRUT(rut: string): boolean {
     if (!rut || rut.trim() === "") return false;
-    
+
     // Limpiar formato
     const rutLimpio = rut.replace(/[^0-9kK-]/g, "");
     const partes = rutLimpio.split("-");
     if (partes.length !== 2) return false;
-    
+
     const numero = partes[0];
     const dv = partes[1].toUpperCase();
-    
+
     if (numero.length < 7 || numero.length > 8) return false;
-    
+
     // Calcular dígito verificador
     let suma = 0;
     let multiplicador = 2;
-    
+
     for (let i = numero.length - 1; i >= 0; i--) {
       suma += parseInt(numero[i]) * multiplicador;
       multiplicador = multiplicador === 7 ? 2 : multiplicador + 1;
     }
-    
+
     const resto = suma % 11;
     const dvCalculado = resto < 2 ? resto.toString() : (11 - resto).toString();
     const dvEsperado = dvCalculado === "10" ? "K" : dvCalculado;
-    
+
     return dv === dvEsperado;
   }
 
@@ -802,13 +1248,13 @@ const pasoActual = 1; // En producción vendría de query params o estado
   function formatearRUT(valor: string): string {
     const limpio = valor.replace(/[^0-9kK-]/g, "");
     if (limpio.length <= 1) return limpio;
-    
+
     const sinGuion = limpio.replace(/-/g, "");
     const numero = sinGuion.slice(0, -1);
     const dv = sinGuion.slice(-1).toUpperCase();
-    
+
     if (numero.length <= 1) return numero + (dv ? "-" + dv : "");
-    
+
     // Formato: XX.XXX.XXX-X
     let formateado = numero.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     return formateado + "-" + dv;
@@ -835,7 +1281,9 @@ const pasoActual = 1; // En producción vendría de query params o estado
 
   // Event listeners
   const rutInput = document.getElementById("rut") as HTMLInputElement;
-  const fechaNacimientoInput = document.getElementById("fecha-nacimiento") as HTMLInputElement;
+  const fechaNacimientoInput = document.getElementById(
+    "fecha-nacimiento",
+  ) as HTMLInputElement;
   const emailInput = document.getElementById("email") as HTMLInputElement;
   const form = document.getElementById("matriculaForm") as HTMLFormElement;
 
@@ -844,11 +1292,11 @@ const pasoActual = 1; // En producción vendría de query params o estado
     const valor = (e.target as HTMLInputElement).value;
     const formateado = formatearRUT(valor);
     (e.target as HTMLInputElement).value = formateado;
-    
+
     // Feedback visual opcional (no bloquea)
     const errorEl = document.getElementById("rut-error");
     const successEl = document.getElementById("rut-success");
-    
+
     if (valor.length >= 9 && validarRUT(formateado)) {
       errorEl?.classList.add("hidden");
       successEl?.classList.remove("hidden");
@@ -864,70 +1312,405 @@ const pasoActual = 1; // En producción vendría de query params o estado
     const edad = calcularEdad(fecha);
     const errorEl = document.getElementById("edad-error");
     const warningEl = document.getElementById("edad-warning");
-    
+
     if (edad === null) return;
-    
+
     if (edad < 17) {
       warningEl?.classList.add("hidden");
       errorEl?.classList.remove("hidden");
-      errorEl!.textContent = "Nota: Debe tener al menos 17 años (demo permite continuar)";
+      errorEl!.textContent =
+        "Nota: Debe tener al menos 17 años (demo permite continuar)";
     } else if (edad === 17) {
       errorEl?.classList.add("hidden");
       warningEl?.classList.remove("hidden");
-      warningEl!.textContent = "⚠️ Al tener 17 años, deberás presentar autorización notarial presencial antes de agendar clases.";
+      warningEl!.textContent =
+        "⚠️ Al tener 17 años, deberás presentar autorización notarial presencial antes de agendar clases.";
     } else {
       errorEl?.classList.add("hidden");
       warningEl?.classList.add("hidden");
     }
   });
 
-  // Manejo de tabs
+  // Manejo de tabs (Segmented Control)
   const tabBasico = document.getElementById("tab-basico");
   const tabProfesional = document.getElementById("tab-profesional");
   const panelBasico = document.getElementById("panel-basico");
   const panelProfesional = document.getElementById("panel-profesional");
 
-  tabBasico?.addEventListener("click", () => {
-    tabBasico.setAttribute("aria-selected", "true");
-    tabBasico.classList.remove("text-gray-500", "border-transparent");
-    tabBasico.classList.add("text-gray-900", "border-blue-600");
-    tabProfesional?.setAttribute("aria-selected", "false");
-    tabProfesional?.classList.remove("text-gray-900", "border-blue-600");
-    tabProfesional?.classList.add("text-gray-500", "border-transparent");
-    panelBasico?.classList.remove("hidden");
-    panelProfesional?.classList.add("hidden");
-  });
+  // Elementos UI a ocultar/mostrar dependiendo de la restricción
+  const formularioContenedor = document.getElementById("formulario-contenedor");
+  const sidebarContenedor = document.getElementById("sidebar-contenedor");
+  const trustBadges = document.querySelector(".trust-badges-container"); // Asume que agregaremos esta clase luego o usa otro selector
+  const seccionBotones = document.getElementById("seccion-botones");
+  const avisoPresencial = document.getElementById("aviso-presencial");
+  const avisoTitulo = document.getElementById("aviso-presencial-titulo");
+  const avisoTexto = document.getElementById("aviso-presencial-texto");
+  const pasosAdicionales = document.getElementById("pasos-adicionales-online");
+  const btnContinuar = document.getElementById("btn-continuar");
 
-  tabProfesional?.addEventListener("click", () => {
-    tabProfesional.setAttribute("aria-selected", "true");
-    tabProfesional.classList.remove("text-gray-500", "border-transparent");
-    tabProfesional.classList.add("text-gray-900", "border-blue-600");
-    tabBasico?.setAttribute("aria-selected", "false");
-    tabBasico?.classList.remove("text-gray-900", "border-blue-600");
-    tabBasico?.classList.add("text-gray-500", "border-transparent");
-    panelProfesional?.classList.remove("hidden");
-    panelBasico?.classList.add("hidden");
-  });
+  function setAvisoPresencial(tipo: "profesional" | "sence") {
+    if (tipo === "profesional") {
+      // Para Profesional: habilitamos form de datos, pero bloqueamos resto (Pre-inscripción)
+      if (formularioContenedor) {
+        formularioContenedor.style.display = "block";
+        setTimeout(() => {
+          formularioContenedor.classList.remove(
+            "hidden",
+            "opacity-0",
+            "translate-y-4",
+          );
+          formularioContenedor.classList.add("opacity-100", "translate-y-0");
+        }, 50);
+      }
+      if (pasosAdicionales) pasosAdicionales.classList.add("hidden");
+      if (sidebarContenedor) sidebarContenedor.style.display = "none";
+      if (trustBadges) (trustBadges as HTMLElement).style.display = "none";
+      if (avisoPresencial) {
+        avisoPresencial.classList.remove(
+          "hidden",
+          "bg-yellow-50",
+          "border-yellow-200",
+        );
+        avisoPresencial.classList.add("bg-blue-50", "border-blue-200");
+        if (avisoTitulo) {
+          avisoTitulo.textContent = "Pre-inscripción Profesional";
+          avisoTitulo.classList.remove("text-yellow-800");
+          avisoTitulo.classList.add("text-blue-900");
+        }
+        if (avisoTexto) {
+          avisoTexto.textContent =
+            "Las matrículas para cursos profesionales requieren la validación física de documentación. Adelanta el trámite completando tus datos e iniciando tu Test Psicológico Online ahora.";
+          avisoTexto.classList.remove("text-yellow-700");
+          avisoTexto.classList.add("text-blue-800");
+        }
+      }
+      if (btnContinuar)
+        btnContinuar.textContent = "Ir al Test Psicológico Online →";
+
+      const selectorHorarios = document.getElementById(
+        "selector-horarios-container",
+      );
+      if (selectorHorarios) selectorHorarios.style.display = "none";
+    } else {
+      // SENCE (Ocultamos todo como estaba originalmente)
+      if (formularioContenedor) {
+        formularioContenedor.classList.remove("opacity-100", "translate-y-0");
+        formularioContenedor.classList.add("opacity-0", "translate-y-4");
+        setTimeout(() => {
+          formularioContenedor.style.display = "none";
+        }, 300);
+      }
+      if (sidebarContenedor) sidebarContenedor.style.display = "none";
+      if (trustBadges) (trustBadges as HTMLElement).style.display = "none";
+      if (avisoPresencial) {
+        avisoPresencial.classList.remove(
+          "hidden",
+          "bg-blue-50",
+          "border-blue-200",
+        );
+        avisoPresencial.classList.add("bg-yellow-50", "border-yellow-200");
+        if (avisoTitulo) {
+          avisoTitulo.textContent = "Matrícula SENCE Presencial";
+          avisoTitulo.classList.remove("text-blue-900");
+          avisoTitulo.classList.add("text-yellow-800");
+        }
+        if (avisoTexto) {
+          avisoTexto.textContent =
+            "Para utilizar tu franquicia tributaria SENCE, la matrícula debe procesarse directamente en nuestra sucursal. Te ayudaremos con toda la gestión.";
+          avisoTexto.classList.remove("text-blue-800");
+          avisoTexto.classList.add("text-yellow-700");
+        }
+      }
+
+      const selectorHorarios = document.getElementById(
+        "selector-horarios-container",
+      );
+      if (selectorHorarios) selectorHorarios.style.display = "none";
+    }
+  }
+
+  function setFlujoOnline() {
+    if (formularioContenedor) {
+      formularioContenedor.style.display = "block";
+      setTimeout(() => {
+        formularioContenedor.classList.remove(
+          "hidden",
+          "opacity-0",
+          "translate-y-4",
+        );
+        formularioContenedor.classList.add("opacity-100", "translate-y-0");
+      }, 50);
+    }
+    if (pasosAdicionales) pasosAdicionales.classList.remove("hidden");
+
+    if (sidebarContenedor) sidebarContenedor.style.display = "block";
+    if (trustBadges) (trustBadges as HTMLElement).style.display = "flex"; // Cast to HTMLElement
+    if (avisoPresencial) avisoPresencial.classList.add("hidden");
+    if (btnContinuar) btnContinuar.textContent = "Continuar al Pago →";
+
+    const selectorHorarios = document.getElementById(
+      "selector-horarios-container",
+    );
+    if (selectorHorarios) selectorHorarios.style.display = "block";
+  }
+
+  function switchTab(target: "basico" | "profesional") {
+    if (target === "basico") {
+      tabBasico?.setAttribute("aria-selected", "true");
+      tabBasico?.classList.add("bg-white", "text-gray-900", "shadow-sm");
+      tabBasico?.classList.remove("text-gray-500");
+
+      tabProfesional?.setAttribute("aria-selected", "false");
+      tabProfesional?.classList.remove(
+        "bg-white",
+        "text-gray-900",
+        "shadow-sm",
+      );
+      tabProfesional?.classList.add("text-gray-500");
+
+      panelBasico?.classList.remove("hidden");
+      panelProfesional?.classList.add("hidden");
+
+      // Comprobar qué radio button de Clase Básica está seleccionado
+      const cursoBasicoSeleccionado = document.querySelector(
+        '#panel-basico input[type="radio"]:checked',
+      ) as HTMLInputElement;
+      if (
+        cursoBasicoSeleccionado &&
+        cursoBasicoSeleccionado.value === "clase-b-sence"
+      ) {
+        setAvisoPresencial("sence");
+      } else {
+        setFlujoOnline();
+      }
+    } else {
+      tabProfesional?.setAttribute("aria-selected", "true");
+      tabProfesional?.classList.add("bg-white", "text-gray-900", "shadow-sm");
+      tabProfesional?.classList.remove("text-gray-500");
+
+      tabBasico?.setAttribute("aria-selected", "false");
+      tabBasico?.classList.remove("bg-white", "text-gray-900", "shadow-sm");
+      tabBasico?.classList.add("text-gray-500");
+
+      panelProfesional?.classList.remove("hidden");
+      panelBasico?.classList.add("hidden");
+
+      // Mostrar siempre el aviso para profesional
+      setAvisoPresencial("profesional");
+
+      // Asegurar que haya un radio button seleccionado por defecto
+      const primerRadioProf = document.querySelector(
+        '#panel-profesional input[type="radio"]',
+      ) as HTMLInputElement;
+      if (primerRadioProf) primerRadioProf.checked = true;
+    }
+  }
+
+  tabBasico?.addEventListener("click", () => switchTab("basico"));
+  tabProfesional?.addEventListener("click", () => switchTab("profesional"));
 
   const cursosData = [
-    { id: "clase-b", nombre: "Clase B", precio: 280000, duracion: "8 semanas", clasesPracticas: 12, clasesTeoricas: 12 },
-    { id: "clase-b-sence", nombre: "Clase B + SENCE", precio: 280000, duracion: "8 semanas", clasesPracticas: 12, clasesTeoricas: 12 },
-    { id: "a2", nombre: "Clase A2 - Transporte Público", precio: 450000, duracion: "30 días hábiles", clasesPracticas: 60, clasesTeoricas: 90 },
-    { id: "a4", nombre: "Clase A4 - Transporte Remunerado", precio: 450000, duracion: "30 días hábiles", clasesPracticas: 60, clasesTeoricas: 90 },
-    { id: "a3", nombre: "Clase A3 - Vehículos Pesados", precio: 500000, duracion: "30 días hábiles", clasesPracticas: 60, clasesTeoricas: 90 },
-    { id: "a5", nombre: "Clase A5 - Vehículos Articulados", precio: 500000, duracion: "30 días hábiles", clasesPracticas: 60, clasesTeoricas: 90 },
+    {
+      id: "clase-b",
+      nombre: "Clase B",
+      precio: 280000,
+      duracion: "8 semanas",
+      clasesPracticas: 12,
+      clasesTeoricas: 12,
+    },
+    {
+      id: "clase-b-sence",
+      nombre: "Clase B + SENCE",
+      precio: 280000,
+      duracion: "8 semanas",
+      clasesPracticas: 12,
+      clasesTeoricas: 12,
+    },
+    {
+      id: "a2",
+      nombre: "Clase A2 - Transporte Público",
+      precio: 450000,
+      duracion: "30 días hábiles",
+      clasesPracticas: 60,
+      clasesTeoricas: 90,
+    },
+    {
+      id: "a4",
+      nombre: "Clase A4 - Transporte Remunerado",
+      precio: 450000,
+      duracion: "30 días hábiles",
+      clasesPracticas: 60,
+      clasesTeoricas: 90,
+    },
+    {
+      id: "a3",
+      nombre: "Clase A3 - Vehículos Pesados",
+      precio: 500000,
+      duracion: "30 días hábiles",
+      clasesPracticas: 60,
+      clasesTeoricas: 90,
+    },
+    {
+      id: "a5",
+      nombre: "Clase A5 - Vehículos Articulados",
+      precio: 500000,
+      duracion: "30 días hábiles",
+      clasesPracticas: 60,
+      clasesTeoricas: 90,
+    },
   ];
 
+  // Ocultar al cambiar selección específica
+  const radioInputs = document.querySelectorAll('input[name="curso"]');
+  radioInputs.forEach((radio) => {
+    radio.addEventListener("change", (e) => {
+      const cursoId = (e.target as HTMLInputElement).value;
+      const curso = cursosData.find((c) => c.id === cursoId);
+
+      if (cursoId === "clase-b-sence") {
+        setAvisoPresencial("sence");
+      } else if (["a2", "a3", "a4", "a5"].includes(cursoId)) {
+        setAvisoPresencial("profesional");
+      } else {
+        setFlujoOnline();
+        if (curso) {
+          document.getElementById("resumen-curso")!.textContent = curso.nombre;
+          document.getElementById("resumen-duracion")!.textContent =
+            curso.duracion;
+          document.getElementById("resumen-practicas")!.textContent =
+            curso.clasesPracticas + " horas";
+          document.getElementById("resumen-teoricas")!.textContent =
+            curso.clasesTeoricas + " horas";
+          document.getElementById("resumen-total")!.textContent =
+            `$${curso.precio.toLocaleString("es-CL")}`;
+        }
+      }
+    });
+  });
+
+  // Listener para capturar el horario seleccionado emitido por SelectorHorarios.astro
+  document.addEventListener("horarioSeleccionado", ((e: CustomEvent) => {
+    const { dia, hora, id } = e.detail;
+    // Buscamos o creamos el div de resumen de horario en el sidebar
+    let resumenHorario = document.getElementById("resumen-horario-row");
+    if (!resumenHorario) {
+      // Creamos la fila si no existe (se inserta arriba del total)
+      const container = document.querySelector(".space-y-4.mb-6");
+      if (container) {
+        container.insertAdjacentHTML(
+          "beforeend",
+          `
+          <div class="flex justify-between items-center text-sm" id="resumen-horario-row">
+            <span class="text-gray-500 font-medium">Horario</span>
+            <span class="text-gray-900 font-bold text-right" id="resumen-horario-val">${dia}, ${hora}</span>
+          </div>
+        `,
+        );
+      }
+    } else {
+      document.getElementById("resumen-horario-val")!.textContent =
+        `${dia}, ${hora}`;
+    }
+  }) as EventListener);
+
+  function validarHorario(): boolean {
+    const isOnlineBasico = !document
+      .getElementById("pasos-adicionales-online")
+      ?.classList.contains("hidden");
+
+    const selectorHorarios = document.getElementById(
+      "selector-horarios-container",
+    );
+    const isSelectorVisible = selectorHorarios?.style.display !== "none";
+
+    // Si no es un usuario web estándar o el selector de horario está oculto, ignorar la validación
+    if (!isOnlineBasico || !isSelectorVisible) return true;
+
+    const radioCheckeado = document.querySelector(
+      'input[name="horario_seleccionado"]:checked',
+    );
+    if (!radioCheckeado) {
+      document
+        .getElementById("error-horario-online")
+        ?.classList.remove("hidden");
+      // Scroll hasta el selector para advertirle
+      document
+        .getElementById("selector-horarios-container")
+        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return false;
+    }
+    document.getElementById("error-horario-online")?.classList.add("hidden");
+    return true;
+  }
+
+  // Interceptar Submit del formulario para obligar el Horario
+  document.getElementById("btn-continuar")?.addEventListener("click", (e) => {
+    e.preventDefault();
+
+    const isProfesional =
+      !document
+        .getElementById("pasos-adicionales-online")
+        ?.classList.contains("hidden") === false;
+    const isSence = document
+      .getElementById("aviso-presencial-titulo")
+      ?.textContent?.includes("SENCE");
+
+    if (isSence && !isProfesional) {
+      alert("Enviando comprobante para gestionar en sucursal con SENCE...");
+      const form = document.getElementById("matriculaForm") as HTMLFormElement;
+      form.submit();
+      return;
+    }
+
+    if (isProfesional && !isSence) {
+      alert(
+        "¡Pre-inscripción exitosa! Redirigiéndote al Test Psicológico Online simulado...",
+      );
+      return;
+    }
+
+    if (validarHorario()) {
+      const form = document.getElementById("matriculaForm") as HTMLFormElement;
+      form.submit(); // En producción usar fetch u otro handler
+    }
+  });
+
+  // Inicializar estado: mostrar formulario según curso seleccionado
+  // Usar astro:page-load para View Transitions; DOMContentLoaded para carga directa
+  function initFormularioMatricula() {
+    const checkedRadio = document.querySelector(
+      'input[name="curso"]:checked',
+    ) as HTMLInputElement;
+    if (checkedRadio) {
+      checkedRadio.dispatchEvent(new Event("change"));
+    }
+  }
+  document.addEventListener("DOMContentLoaded", initFormularioMatricula);
+  document.addEventListener("astro:page-load", initFormularioMatricula);
+
+  // Ocultar al cambiar selección específica
   document.querySelectorAll('input[name="curso"]').forEach((radio) => {
     radio.addEventListener("change", (e) => {
       const cursoId = (e.target as HTMLInputElement).value;
       const curso = cursosData.find((c) => c.id === cursoId);
-      if (curso) {
-        document.getElementById("resumen-curso")!.textContent = curso.nombre;
-        document.getElementById("resumen-duracion")!.textContent = curso.duracion;
-        document.getElementById("resumen-practicas")!.textContent = curso.clasesPracticas + " horas";
-        document.getElementById("resumen-teoricas")!.textContent = curso.clasesTeoricas + " horas";
-        document.getElementById("resumen-total")!.textContent = `$${curso.precio.toLocaleString("es-CL")}`;
+
+      if (cursoId === "clase-b-sence") {
+        setAvisoPresencial("sence");
+      } else if (["a2", "a3", "a4", "a5"].includes(cursoId)) {
+        setAvisoPresencial("profesional");
+      } else {
+        setFlujoOnline();
+        if (curso) {
+          document.getElementById("resumen-curso")!.textContent = curso.nombre;
+          document.getElementById("resumen-duracion")!.textContent =
+            curso.duracion;
+          document.getElementById("resumen-practicas")!.textContent =
+            curso.clasesPracticas + " horas";
+          document.getElementById("resumen-teoricas")!.textContent =
+            curso.clasesTeoricas + " horas";
+          document.getElementById("resumen-total")!.textContent =
+            `$${curso.precio.toLocaleString("es-CL")}`;
+        }
       }
     });
   });
@@ -939,17 +1722,23 @@ const pasoActual = 1; // En producción vendría de query params o estado
 
   function fotoSwitchTab(tab: string) {
     fotoTab = tab;
-    const base = "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md border transition-colors";
+    const base =
+      "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md border transition-colors";
     const active = base + " border-gray-900 bg-gray-900 text-white";
-    const inactive = base + " border-gray-200 bg-white text-gray-600 hover:bg-gray-50";
+    const inactive =
+      base + " border-gray-200 bg-white text-gray-600 hover:bg-gray-50";
     const tabCam = document.getElementById("foto-tab-camara");
     const tabSub = document.getElementById("foto-tab-subir");
     if (tabCam) tabCam.className = tab === "camara" ? active : inactive;
     if (tabSub) tabSub.className = tab === "subir" ? active : inactive;
-    document.getElementById("foto-seccion-camara")?.classList.toggle("hidden", tab !== "camara");
-    document.getElementById("foto-seccion-subir")?.classList.toggle("hidden", tab !== "subir");
+    document
+      .getElementById("foto-seccion-camara")
+      ?.classList.toggle("hidden", tab !== "camara");
+    document
+      .getElementById("foto-seccion-subir")
+      ?.classList.toggle("hidden", tab !== "subir");
     if (tab !== "camara" && fotoStream) {
-      fotoStream.getTracks().forEach(t => t.stop());
+      fotoStream.getTracks().forEach((t) => t.stop());
       fotoStream = null;
       document.getElementById("foto-camara-idle")?.classList.remove("hidden");
       document.getElementById("foto-camara-activa")?.classList.add("hidden");
@@ -957,7 +1746,9 @@ const pasoActual = 1; // En producción vendría de query params o estado
   }
 
   function fotoMostrarPreview(dataUrl: string) {
-    const img = document.getElementById("foto-preview-img") as HTMLImageElement | null;
+    const img = document.getElementById(
+      "foto-preview-img",
+    ) as HTMLImageElement | null;
     if (img) img.src = dataUrl;
     document.getElementById("foto-preview-wrap")?.classList.remove("hidden");
     document.getElementById("foto-camara-activa")?.classList.add("hidden");
@@ -967,50 +1758,78 @@ const pasoActual = 1; // En producción vendría de query params o estado
     fotoCapturada = true;
   }
 
-  document.getElementById("foto-tab-camara")?.addEventListener("click", () => fotoSwitchTab("camara"));
-  document.getElementById("foto-tab-subir")?.addEventListener("click", () => fotoSwitchTab("subir"));
+  document
+    .getElementById("foto-tab-camara")
+    ?.addEventListener("click", () => fotoSwitchTab("camara"));
+  document
+    .getElementById("foto-tab-subir")
+    ?.addEventListener("click", () => fotoSwitchTab("subir"));
 
   document.getElementById("foto-btn-activar")?.addEventListener("click", () => {
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: { ideal: 640 } } })
-      .then(stream => {
+    navigator.mediaDevices
+      .getUserMedia({ video: { facingMode: "user", width: { ideal: 640 } } })
+      .then((stream) => {
         fotoStream = stream;
-        const video = document.getElementById("foto-camara-video") as HTMLVideoElement | null;
+        const video = document.getElementById(
+          "foto-camara-video",
+        ) as HTMLVideoElement | null;
         if (video) video.srcObject = stream;
         document.getElementById("foto-camara-idle")?.classList.add("hidden");
-        document.getElementById("foto-camara-activa")?.classList.remove("hidden");
+        document
+          .getElementById("foto-camara-activa")
+          ?.classList.remove("hidden");
       })
-      .catch(() => alert('No se pudo acceder a la cámara. Usa la opción "Subir foto" en su lugar.'));
+      .catch(() =>
+        alert(
+          'No se pudo acceder a la cámara. Usa la opción "Subir foto" en su lugar.',
+        ),
+      );
   });
 
-  document.getElementById("foto-btn-capturar")?.addEventListener("click", () => {
-    const video = document.getElementById("foto-camara-video") as HTMLVideoElement;
-    const canvas = document.getElementById("foto-camara-canvas") as HTMLCanvasElement;
-    canvas.width = video.videoWidth || 640;
-    canvas.height = video.videoHeight || 480;
-    canvas.getContext("2d")?.drawImage(video, 0, 0);
-    const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
-    if (fotoStream) { fotoStream.getTracks().forEach(t => t.stop()); fotoStream = null; }
-    fotoMostrarPreview(dataUrl);
-  });
+  document
+    .getElementById("foto-btn-capturar")
+    ?.addEventListener("click", () => {
+      const video = document.getElementById(
+        "foto-camara-video",
+      ) as HTMLVideoElement;
+      const canvas = document.getElementById(
+        "foto-camara-canvas",
+      ) as HTMLCanvasElement;
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+      canvas.getContext("2d")?.drawImage(video, 0, 0);
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
+      if (fotoStream) {
+        fotoStream.getTracks().forEach((t) => t.stop());
+        fotoStream = null;
+      }
+      fotoMostrarPreview(dataUrl);
+    });
 
-  document.getElementById("foto-upload-input")?.addEventListener("change", (e) => {
-    const file = (e.target as HTMLInputElement).files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => fotoMostrarPreview(ev.target?.result as string);
-    reader.readAsDataURL(file);
-  });
+  document
+    .getElementById("foto-upload-input")
+    ?.addEventListener("change", (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => fotoMostrarPreview(ev.target?.result as string);
+      reader.readAsDataURL(file);
+    });
 
   document.getElementById("foto-btn-reset")?.addEventListener("click", () => {
     document.getElementById("foto-preview-wrap")?.classList.add("hidden");
     fotoCapturada = false;
     if (fotoTab === "camara") {
       document.getElementById("foto-camara-idle")?.classList.remove("hidden");
-      document.getElementById("foto-seccion-camara")?.classList.remove("hidden");
+      document
+        .getElementById("foto-seccion-camara")
+        ?.classList.remove("hidden");
       document.getElementById("foto-seccion-subir")?.classList.add("hidden");
     } else {
       document.getElementById("foto-seccion-subir")?.classList.remove("hidden");
-      const input = document.getElementById("foto-upload-input") as HTMLInputElement | null;
+      const input = document.getElementById(
+        "foto-upload-input",
+      ) as HTMLInputElement | null;
       if (input) input.value = "";
     }
   });
@@ -1018,11 +1837,16 @@ const pasoActual = 1; // En producción vendría de query params o estado
   // Submit del formulario (demo - sin validaciones bloqueantes)
   form?.addEventListener("submit", (e) => {
     e.preventDefault();
-    
+
     // Obtener datos del formulario
     const formData = new FormData(form);
-    const cursoSeleccionado = (document.querySelector('input[name="curso"]:checked') as HTMLInputElement)?.value || "clase-b";
-    
+    const cursoSeleccionado =
+      (
+        document.querySelector(
+          'input[name="curso"]:checked',
+        ) as HTMLInputElement
+      )?.value || "clase-b";
+
     // Guardar datos en sessionStorage para el siguiente paso
     const datos = {
       curso: cursoSeleccionado,
@@ -1035,7 +1859,7 @@ const pasoActual = 1; // En producción vendría de query params o estado
       sence_code: formData.get("sence_code") || "",
     };
     sessionStorage.setItem("matriculaDatos", JSON.stringify(datos));
-    
+
     // Redirigir al paso 2 (pago)
     window.location.href = `/matricula-online/pago?curso=${cursoSeleccionado}`;
   });
@@ -1123,5 +1947,34 @@ const pasoActual = 1; // En producción vendría de query params o estado
 
   input[type="checkbox"]:hover {
     border-color: rgb(37, 99, 235);
+  }
+
+  /* Estado seleccionado del selector de curso (cuando el radio está checked) */
+  .curso-card:has(input:checked) {
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  }
+  .curso-card[data-curso-color="blue"]:has(input:checked) {
+    border-color: rgb(37 99 235);
+    background-color: rgb(239 246 255);
+  }
+  .curso-card[data-curso-color="green"]:has(input:checked) {
+    border-color: rgb(22 163 74);
+    background-color: rgb(240 253 244);
+  }
+  .curso-card[data-curso-color="purple"]:has(input:checked) {
+    border-color: rgb(147 51 234);
+    background-color: rgb(250 245 255);
+  }
+  .curso-card[data-curso-color="orange"]:has(input:checked) {
+    border-color: rgb(234 88 12);
+    background-color: rgb(255 247 237);
+  }
+  .curso-card[data-curso-color="indigo"]:has(input:checked) {
+    border-color: rgb(99 102 241);
+    background-color: rgb(238 242 255);
+  }
+  .curso-card[data-curso-color="red"]:has(input:checked) {
+    border-color: rgb(220 38 38);
+    background-color: rgb(254 242 242);
   }
 </style>

@@ -1,401 +1,774 @@
 ---
 /**
- * Portal de Alumno - Dashboard principal
- * RF-011: Auto-servicio para alumnos
+ * Portal de Alumno — Dashboard Dinámico
+ * RF-008: El perfil "muta" según el tipo de alumno matriculado
+ *
+ *   tipoAlumno = "clase_b"     → progreso 12 clases, teoría, instructor
+ *   tipoAlumno = "profesional" → promoción, asistencia, notas, documentos
+ *   tipoAlumno = "ambos"       → tabs [Resumen][Clase B][Profesional][Pagos]
+ *
+ * ⚠️  MOCKUP: cambia la constante tipoAlumno para simular cada perfil.
  */
 import DashboardLayout from '../../layouts/DashboardLayout.astro';
 import Card from '../../components/ui/Card.astro';
 import Button from '../../components/ui/Button.astro';
 
-// Mock data - en producción vendría de la sesión del usuario
+// ── Simula el tipo de alumno ─────────────────────────────────────────
+type TipoAlumno = "clase_b" | "profesional" | "ambos";
+const tipoAlumno: TipoAlumno = "ambos";
+// ────────────────────────────────────────────────────────────────────
+
 const alumno = {
-  nombre: 'María González',
-  rut: '12.345.678-9',
-  email: 'maria.gonzalez@email.cl',
-  telefono: '+56 9 1234 5678',
-  curso: 'Clase B',
-  escuela: 'Conductores Chillán'
+  nombre:   "María González",
+  rut:      "12.345.678-9",
+  email:    "maria.gonzalez@email.cl",
+  telefono: "+56 9 1234 5678",
 };
 
-// RF-055: Progreso de clases prácticas y teóricas
-const progresoPracticas = {
-  clasesCompletadas: 8,
-  clasesTotal: 12,
-  porcentaje: 67
+// ── Datos Clase B ─────────────────────────────────────────────────────
+const claseB = {
+  progresoPracticas: { completadas: 8, total: 12 },
+  progresoTeorica:   { completadas: 5, total: 8  },
+  instructor: { nombre: "Carlos Rojas", vehiculo: "ABC-123", rating: 4.8 },
+  proximasClases: [
+    { id: 1, dia: "Lun", fecha: "02 Mar 2026", hora: "14:00", tipo: "Clase Práctica #9",  cancelable: true },
+    { id: 2, dia: "Mié", fecha: "04 Mar 2026", hora: "10:30", tipo: "Clase Práctica #10", cancelable: true },
+  ],
+  historial: [
+    { numero: 8, fecha: "21 Feb", instructor: "Carlos Rojas" },
+    { numero: 7, fecha: "19 Feb", instructor: "Carlos Rojas" },
+    { numero: 6, fecha: "17 Feb", instructor: "Carlos Rojas" },
+  ],
 };
 
-const progresoTeoricas = {
-  clasesCompletadas: 6,
-  clasesTotal: 8,
-  porcentaje: 75
-};
-
-const proximasClases = [
-  {
-    id: 1,
-    dia: 'Lunes',
-    numero: '5',
-    fecha: '2026-02-05',
-    hora: '14:00',
-    instructor: 'Carlos Rojas',
-    vehiculo: 'ABC-123',
-    tipo: 'Clase Práctica #9',
-    cancelable: true // >24hrs
+// ── Datos Clase Profesional ───────────────────────────────────────────
+const profesional = {
+  promocion: {
+    nombre:       "Promoción Enero II",
+    categoria:    "A3 — Vehículos de Carga",
+    relator:      "Francisco Herrera López",
+    inicio:       "13 Ene 2026",
+    fin:          "28 Mar 2026",
+    totalAlumnos: 18,
   },
-  {
-    id: 2,
-    dia: 'Miércoles',
-    numero: '7',
-    fecha: '2026-02-07',
-    hora: '10:30',
-    instructor: 'Ana Martínez',
-    vehiculo: 'XYZ-789',
-    tipo: 'Clase Práctica #10',
-    cancelable: true
-  },
-  {
-    id: 3,
-    dia: 'Viernes',
-    numero: '9',
-    fecha: '2026-02-09',
-    hora: '16:00',
-    instructor: 'Luis Torres',
-    vehiculo: 'DEF-456',
-    tipo: 'Clase Práctica #11',
-    cancelable: true
-  }
-];
+  asistencia: [
+    { semana: 1, fechas: "13–17 Ene", presente: true  },
+    { semana: 2, fechas: "20–24 Ene", presente: true  },
+    { semana: 3, fechas: "27–31 Ene", presente: false },
+    { semana: 4, fechas: "03–07 Feb", presente: true  },
+    { semana: 5, fechas: "10–14 Feb", presente: true  },
+    { semana: 6, fechas: "17–21 Feb", presente: null  },
+    { semana: 7, fechas: "24–28 Feb", presente: null  },
+    { semana: 8, fechas: "03–07 Mar", presente: null  },
+  ],
+  modulos: [
+    { nombre: "Módulo 1",     descripcion: "Legislación de Transporte", nota: 5.5  },
+    { nombre: "Módulo 2",     descripcion: "Mecánica Básica",            nota: 4.8  },
+    { nombre: "Módulo 3",     descripcion: "Conducción Defensiva",       nota: null },
+    { nombre: "Módulo 4",     descripcion: "Primeros Auxilios",          nota: null },
+    { nombre: "Examen Final", descripcion: "Evaluación Integrada A3",    nota: null },
+  ],
+  documentos: [
+    { nombre: "Hoja de Vida del Conductor", estado: "ok",        obligatorio: true  },
+    { nombre: "Cédula de Identidad",        estado: "ok",        obligatorio: true  },
+    { nombre: "Foto Licencia de Conducir",  estado: "pendiente", obligatorio: false },
+  ],
+};
 
-const historialReciente = [
-  { fecha: '2026-02-02', numero: 8, instructor: 'Carlos Rojas', estado: 'completada' },
-  { fecha: '2026-01-31', numero: 7, instructor: 'Ana Martínez', estado: 'completada' },
-  { fecha: '2026-01-29', numero: 6, instructor: 'Luis Torres', estado: 'completada' },
-];
+// ── Datos Pagos ───────────────────────────────────────────────────────
+const pagos = {
+  saldoPendiente: 95000,
+  cuotas: [
+    { num: 1, monto: 50000, fecha: "01 Ene 2026", estado: "pagada"    },
+    { num: 2, monto: 50000, fecha: "01 Feb 2026", estado: "pagada"    },
+    { num: 3, monto: 50000, fecha: "01 Mar 2026", estado: "pendiente" },
+    { num: 4, monto: 45000, fecha: "01 Abr 2026", estado: "pendiente" },
+  ],
+};
+
+// ── Helpers ───────────────────────────────────────────────────────────
+const pctPracticas  = Math.round((claseB.progresoPracticas.completadas / claseB.progresoPracticas.total) * 100);
+const pctTeorica    = Math.round((claseB.progresoTeorica.completadas   / claseB.progresoTeorica.total)   * 100);
+const notasReales   = profesional.modulos.filter(m => m.nota !== null);
+const promedio      = notasReales.length
+  ? Math.round(notasReales.reduce((s, m) => s + m.nota!, 0) / notasReales.length * 10) / 10
+  : null;
+const asistidas     = profesional.asistencia.filter(a => a.presente === true).length;
+const evaluadas     = profesional.asistencia.filter(a => a.presente !== null).length;
+const pctAsistencia = evaluadas ? Math.round(asistidas / evaluadas * 100) : 0;
+const docsFaltantes = profesional.documentos.filter(d => d.estado !== "ok" && d.obligatorio).length;
+
+const tipoBadgeClass = tipoAlumno === "ambos"
+  ? "bg-purple-100 text-purple-800"
+  : tipoAlumno === "profesional"
+  ? "bg-amber-100 text-amber-800"
+  : "bg-blue-100 text-blue-800";
+
+const labelTipo: Record<TipoAlumno, string> = {
+  clase_b:     "Clase B",
+  profesional: "Clase Profesional",
+  ambos:       "Clase B + Profesional",
+};
 ---
 
-<DashboardLayout title="Mi Portal - Escuela de Conductores" userRole="alumno">
-    <div class="max-w-7xl mx-auto">
-      <!-- Header -->
-      <div class="mb-8">
-        <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
-          Hola, {alumno.nombre.split(' ')[0]} 👋
+<DashboardLayout title="Mi Portal" userRole="alumno">
+  <div class="max-w-5xl mx-auto">
+
+    <!-- ── Header ──────────────────────────────────────────────────── -->
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">
+          Hola, {alumno.nombre.split(" ")[0]} 👋
         </h1>
-        <p class="text-secondary text-lg">Bienvenida a tu portal de alumno</p>
+        <p class="text-secondary mt-1 flex items-center gap-2 flex-wrap">
+          <span>{alumno.rut}</span>
+          <span class={`px-2 py-0.5 rounded-full text-xs font-semibold ${tipoBadgeClass}`}>
+            {labelTipo[tipoAlumno]}
+          </span>
+        </p>
       </div>
+      <a href="/alumno/pagos"
+        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        Saldo pendiente: <strong class="text-red-600">${pagos.saldoPendiente.toLocaleString("es-CL")}</strong>
+      </a>
+    </div>
 
-      <div class="grid lg:grid-cols-3 gap-6">
-        <!-- Columna principal -->
-        <div class="lg:col-span-2 space-y-6">
-          <!-- RF-055: Progreso de Clases Prácticas y Teóricas -->
-          <div class="grid sm:grid-cols-2 gap-4">
-            <!-- Progreso Clases Prácticas -->
+    <!-- ═══════════════════════════════════════════════════════════════
+         CASO: SOLO CLASE B
+    ═══════════════════════════════════════════════════════════════ -->
+    {tipoAlumno === "clase_b" && (
+      <div class="space-y-6">
+        <!-- Progreso -->
+        <div class="grid sm:grid-cols-2 gap-4">
+          <Card>
+            <div class="flex items-center justify-between mb-3">
+              <div>
+                <h2 class="text-base font-semibold text-gray-900">Clases Prácticas</h2>
+                <p class="text-xs text-secondary">De {claseB.progresoPracticas.total} requeridas</p>
+              </div>
+              <span class="text-3xl font-bold text-blue-600">{pctPracticas}%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-4 mb-2">
+              <div class="h-4 bg-blue-500 rounded-full flex items-center justify-end px-2 transition-all"
+                style={`width:${pctPracticas}%`}>
+                <span class="text-[10px] font-bold text-white">{claseB.progresoPracticas.completadas}/{claseB.progresoPracticas.total}</span>
+              </div>
+            </div>
+            <p class="text-xs text-secondary">{claseB.progresoPracticas.total - claseB.progresoPracticas.completadas} clases restantes</p>
+          </Card>
+          <Card>
+            <div class="flex items-center justify-between mb-3">
+              <div>
+                <h2 class="text-base font-semibold text-gray-900">Teoría Online</h2>
+                <p class="text-xs text-secondary">Módulos completados</p>
+              </div>
+              <span class="text-3xl font-bold text-green-600">{pctTeorica}%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-4 mb-2">
+              <div class="h-4 bg-green-500 rounded-full flex items-center justify-end px-2 transition-all"
+                style={`width:${pctTeorica}%`}>
+                <span class="text-[10px] font-bold text-white">{claseB.progresoTeorica.completadas}/{claseB.progresoTeorica.total}</span>
+              </div>
+            </div>
+            <p class="text-xs text-secondary">{claseB.progresoTeorica.total - claseB.progresoTeorica.completadas} módulos restantes</p>
+          </Card>
+        </div>
+
+        <!-- Instructor -->
+        <Card>
+          <h2 class="text-base font-semibold text-gray-900 mb-3">Mi Instructor</h2>
+          <div class="flex items-center gap-4">
+            <div class="w-14 h-14 bg-gray-200 rounded-full flex items-center justify-center shrink-0">
+              <svg class="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+              </svg>
+            </div>
+            <div class="flex-1">
+              <p class="font-semibold text-gray-900">{claseB.instructor.nombre}</p>
+              <p class="text-xs text-secondary mt-0.5">Vehículo asignado: <span class="font-medium">{claseB.instructor.vehiculo}</span></p>
+              <div class="flex items-center gap-1 mt-1">
+                <span class="text-amber-400 text-sm">★</span>
+                <span class="text-xs font-semibold text-gray-700">{claseB.instructor.rating}</span>
+                <span class="text-xs text-secondary">/ 5.0</span>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        <!-- Próximas clases -->
+        <Card>
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-base font-semibold text-gray-900">Próximas Clases</h2>
+            <span class="text-xs text-secondary">{claseB.proximasClases.length} agendadas</span>
+          </div>
+          <div class="space-y-3">
+            {claseB.proximasClases.map(c => (
+              <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                <div class="w-14 h-14 bg-blue-600 rounded-lg flex flex-col items-center justify-center text-white shrink-0">
+                  <span class="text-[10px] uppercase font-medium">{c.dia}</span>
+                  <span class="text-lg font-bold">{c.hora.slice(0,2)}</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="font-semibold text-gray-900 text-sm">{c.tipo}</p>
+                  <p class="text-xs text-secondary mt-0.5">{c.fecha} · {claseB.instructor.nombre} · {claseB.instructor.vehiculo}</p>
+                </div>
+                {c.cancelable && (
+                  <button type="button" onclick="alert('Reagendar (mockup)')"
+                    class="text-xs font-medium text-blue-600 hover:text-blue-800 shrink-0">
+                    Reagendar
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        <!-- Historial -->
+        <Card>
+          <h2 class="text-base font-semibold text-gray-900 mb-3">Historial Reciente</h2>
+          <div class="space-y-2">
+            {claseB.historial.map(c => (
+              <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 bg-green-100 rounded-full flex items-center justify-center shrink-0">
+                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="text-sm font-medium text-gray-900">Clase #{c.numero}</p>
+                    <p class="text-xs text-secondary">{c.fecha} · {c.instructor}</p>
+                  </div>
+                </div>
+                <span class="text-xs px-2 py-0.5 bg-green-100 text-green-800 rounded-full font-medium">Completada</span>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
+    )}
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         CASO: SOLO PROFESIONAL
+    ═══════════════════════════════════════════════════════════════ -->
+    {tipoAlumno === "profesional" && (
+      <div class="space-y-6">
+        <!-- Banner promoción -->
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-5">
+          <p class="text-xs font-semibold text-amber-600 uppercase tracking-wider mb-1">Mi Promoción</p>
+          <h2 class="text-xl font-bold text-gray-900">{profesional.promocion.nombre}</h2>
+          <p class="text-sm text-gray-700 mt-1">{profesional.promocion.categoria}</p>
+          <div class="flex flex-wrap gap-4 mt-3 text-xs text-gray-600">
+            <span>Relator: <strong>{profesional.promocion.relator}</strong></span>
+            <span>Inicio: <strong>{profesional.promocion.inicio}</strong></span>
+            <span>Término: <strong>{profesional.promocion.fin}</strong></span>
+            <span>Grupo: <strong>{profesional.promocion.totalAlumnos} alumnos</strong></span>
+          </div>
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-6">
+          <!-- Asistencia / Firma de Libro -->
+          <Card>
+            <h2 class="text-base font-semibold text-gray-900 mb-1">Asistencia Semanal</h2>
+            <p class="text-xs text-secondary mb-4">Registro de firma de libro presencial</p>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead>
+                  <tr class="border-b border-gray-200">
+                    <th class="text-left pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">Semana</th>
+                    <th class="text-left pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">Fechas</th>
+                    <th class="text-center pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">Firma</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                  {profesional.asistencia.map(a => (
+                    <tr>
+                      <td class="py-2.5 text-gray-700 font-medium">S{a.semana}</td>
+                      <td class="py-2.5 text-gray-500 text-xs">{a.fechas}</td>
+                      <td class="py-2.5 text-center">
+                        {a.presente === true  && <span class="inline-block px-2 py-0.5 bg-green-100 text-green-700 text-xs font-semibold rounded-full">✓ Firmado</span>}
+                        {a.presente === false && <span class="inline-block px-2 py-0.5 bg-red-100 text-red-700 text-xs font-semibold rounded-full">✗ Ausente</span>}
+                        {a.presente === null  && <span class="inline-block px-2 py-0.5 bg-gray-100 text-gray-400 text-xs font-medium rounded-full">Pendiente</span>}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div class="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-secondary">
+              <span>{asistidas}/{evaluadas} semanas presentes</span>
+              <span class={`font-semibold ${pctAsistencia >= 75 ? "text-green-600" : "text-red-600"}`}>{pctAsistencia}% asistencia</span>
+            </div>
+          </Card>
+
+          <!-- Notas y documentos -->
+          <div class="space-y-4">
             <Card>
-              <div class="flex items-center justify-between mb-4">
-                <div>
-                  <h2 class="text-lg font-semibold text-gray-900">Clases Prácticas</h2>
-                  <p class="text-xs text-secondary mt-0.5">De 12 requeridas</p>
-                </div>
-                <div class="text-right">
-                  <p class="text-4xl font-bold text-blue-600">{progresoPracticas.porcentaje}%</p>
-                </div>
+              <h2 class="text-base font-semibold text-gray-900 mb-3">Notas por Módulo</h2>
+              <div class="space-y-2">
+                {profesional.modulos.map(m => {
+                  const pendiente = m.nota === null;
+                  const aprobado  = !pendiente && m.nota! >= 4.0;
+                  return (
+                    <div class={`flex items-center justify-between p-3 rounded-lg border ${pendiente ? "bg-gray-50 border-gray-200" : aprobado ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"}`}>
+                      <div>
+                        <p class={`text-sm font-medium ${pendiente ? "text-gray-600" : aprobado ? "text-green-900" : "text-red-900"}`}>{m.nombre}</p>
+                        <p class="text-xs text-gray-400">{m.descripcion}</p>
+                      </div>
+                      <span class={`text-xl font-bold ${pendiente ? "text-gray-300" : aprobado ? "text-green-700" : "text-red-700"}`}>
+                        {pendiente ? "—" : m.nota!.toFixed(1)}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
-
-              <!-- Progress bar -->
-              <div class="relative w-full bg-gray-200 rounded-full h-6 mb-3">
-                <div
-                  class="absolute inset-y-0 left-0 bg-linear-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-end px-3 transition-all duration-500"
-                  style={`width: ${progresoPracticas.porcentaje}%`}
-                >
-                  <span class="text-xs font-semibold text-white">
-                    {progresoPracticas.clasesCompletadas}/{progresoPracticas.clasesTotal}
-                  </span>
-                </div>
-              </div>
-
-              <div class="flex items-center justify-between text-sm">
-                <span class="text-secondary">
-                  {progresoPracticas.clasesCompletadas} completadas
-                </span>
-                <span class="font-semibold text-gray-900">
-                  {progresoPracticas.clasesTotal - progresoPracticas.clasesCompletadas} restantes
-                </span>
-              </div>
+              {promedio !== null && (
+                <p class="text-xs text-right text-secondary mt-2">Promedio actual: <strong class="text-gray-900">{promedio.toFixed(1)}</strong></p>
+              )}
             </Card>
 
-            <!-- Progreso Clases Teóricas -->
+            <!-- Documentos -->
             <Card>
-              <div class="flex items-center justify-between mb-4">
-                <div>
-                  <h2 class="text-lg font-semibold text-gray-900">Clases Teóricas</h2>
-                  <p class="text-xs text-secondary mt-0.5">De 8 requeridas</p>
-                </div>
-                <div class="text-right">
-                  <p class="text-4xl font-bold text-green-600">{progresoTeoricas.porcentaje}%</p>
-                </div>
+              <h2 class="text-base font-semibold text-gray-900 mb-3">Validación de Documentos</h2>
+              <div class="space-y-2">
+                {profesional.documentos.map(d => (
+                  <div class="flex items-center justify-between text-sm">
+                    <div class="flex items-center gap-2">
+                      {d.obligatorio && <span class="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" title="Obligatorio"></span>}
+                      <span class={`${d.obligatorio ? "font-medium text-gray-900" : "text-gray-600"}`}>{d.nombre}</span>
+                    </div>
+                    {d.estado === "ok"
+                      ? <span class="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-medium">✓ OK</span>
+                      : <span class="text-xs px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full font-medium">Pendiente</span>
+                    }
+                  </div>
+                ))}
               </div>
+              {docsFaltantes > 0 && (
+                <p class="text-xs text-red-600 mt-3 font-medium">⚠ {docsFaltantes} documento(s) obligatorio(s) pendiente(s)</p>
+              )}
+            </Card>
+          </div>
+        </div>
+      </div>
+    )}
 
-              <!-- Progress bar -->
-              <div class="relative w-full bg-gray-200 rounded-full h-6 mb-3">
-                <div
-                  class="absolute inset-y-0 left-0 bg-linear-to-r from-green-500 to-green-600 rounded-full flex items-center justify-end px-3 transition-all duration-500"
-                  style={`width: ${progresoTeoricas.porcentaje}%`}
-                >
-                  <span class="text-xs font-semibold text-white">
-                    {progresoTeoricas.clasesCompletadas}/{progresoTeoricas.clasesTotal}
-                  </span>
-                </div>
-              </div>
+    <!-- ═══════════════════════════════════════════════════════════════
+         CASO: AMBOS — TABS [Resumen][Clase B][Profesional][Pagos]
+    ═══════════════════════════════════════════════════════════════ -->
+    {tipoAlumno === "ambos" && (
+      <div>
+        <!-- Tab nav -->
+        <div class="border-b border-gray-200 mb-6">
+          <nav class="flex gap-1" aria-label="Secciones del perfil">
+            {[
+              { id: "resumen",     label: "Resumen" },
+              { id: "claseb",      label: "Clase B" },
+              { id: "profesional", label: "Profesional" },
+              { id: "pagos",       label: "Pagos" },
+            ].map((t, i) => (
+              <button
+                type="button"
+                id={`tab-${t.id}-link`}
+                data-tab={t.id}
+                class={`tab-btn px-4 py-3 text-sm font-medium border-b-2 transition-colors ${i === 0 ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700"}`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </nav>
+        </div>
 
-              <div class="flex items-center justify-between text-sm">
-                <span class="text-secondary">
-                  {progresoTeoricas.clasesCompletadas} asistidas
-                </span>
-                <span class="font-semibold text-gray-900">
-                  {progresoTeoricas.clasesTotal - progresoTeoricas.clasesCompletadas} restantes
+        <!-- ── Panel: Resumen ──────────────────────────────────── -->
+        <div id="panel-resumen" class="space-y-6">
+          {docsFaltantes > 0 && (
+            <div class="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
+              <svg class="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+              </svg>
+              <div>
+                <p class="text-sm font-semibold text-red-900">Documentos obligatorios pendientes</p>
+                <p class="text-xs text-red-700 mt-0.5">Tienes {docsFaltantes} documento(s) sin subir en tu perfil Profesional. Acércate a la secretaría.</p>
+              </div>
+            </div>
+          )}
+
+          <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- KPI Prácticas -->
+            <Card>
+              <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Clases Prácticas</p>
+              <div class="flex items-end gap-2 mb-2">
+                <span class="text-3xl font-bold text-blue-600">{claseB.progresoPracticas.completadas}</span>
+                <span class="text-base text-gray-400 mb-0.5">/ {claseB.progresoPracticas.total}</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-1.5">
+                <div class="h-1.5 bg-blue-500 rounded-full" style={`width:${pctPracticas}%`}></div>
+              </div>
+              <p class="text-xs text-secondary mt-1">{pctPracticas}% completado</p>
+            </Card>
+
+            <!-- KPI Teoría -->
+            <Card>
+              <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Teoría Online</p>
+              <div class="flex items-end gap-2 mb-2">
+                <span class="text-3xl font-bold text-green-600">{pctTeorica}%</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-1.5">
+                <div class="h-1.5 bg-green-500 rounded-full" style={`width:${pctTeorica}%`}></div>
+              </div>
+              <p class="text-xs text-secondary mt-1">{claseB.progresoTeorica.completadas}/{claseB.progresoTeorica.total} módulos</p>
+            </Card>
+
+            <!-- KPI Asistencia Prof -->
+            <Card>
+              <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Asistencia Prof.</p>
+              <div class="flex items-end gap-2 mb-2">
+                <span class={`text-3xl font-bold ${pctAsistencia >= 75 ? "text-amber-600" : "text-red-600"}`}>{pctAsistencia}%</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-1.5">
+                <div class={`h-1.5 rounded-full ${pctAsistencia >= 75 ? "bg-amber-500" : "bg-red-500"}`} style={`width:${pctAsistencia}%`}></div>
+              </div>
+              <p class="text-xs text-secondary mt-1">{asistidas}/{evaluadas} semanas</p>
+            </Card>
+
+            <!-- KPI Notas Prof -->
+            <Card>
+              <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Promedio Prof.</p>
+              <div class="flex items-end gap-2 mb-2">
+                <span class={`text-3xl font-bold ${promedio === null ? "text-gray-300" : promedio >= 4.0 ? "text-purple-600" : "text-red-600"}`}>
+                  {promedio !== null ? promedio.toFixed(1) : "—"}
                 </span>
               </div>
+              <div class="w-full bg-gray-200 rounded-full h-1.5">
+                <div class="h-1.5 bg-purple-500 rounded-full" style={`width:${promedio ? (promedio/7)*100 : 0}%`}></div>
+              </div>
+              <p class="text-xs text-secondary mt-1">{notasReales.length}/{profesional.modulos.length} evaluados</p>
             </Card>
           </div>
 
-          {/* Banner de éxito al completar todas las clases */}
-          {(progresoPracticas.clasesCompletadas >= 12 && progresoTeoricas.clasesCompletadas >= 8) && (
-            <Card class="bg-green-50 border-2 border-green-200">
-              <div class="flex items-start gap-3">
-                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center shrink-0">
-                  <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
+          <!-- Accesos rápidos -->
+          <div class="grid sm:grid-cols-3 gap-4">
+            <button type="button" data-goto="claseb"
+              class="goto-tab flex items-center gap-3 p-4 bg-blue-50 border border-blue-200 rounded-xl hover:bg-blue-100 transition-colors text-left">
+              <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"></path>
+                </svg>
+              </div>
+              <div>
+                <p class="font-semibold text-blue-900 text-sm">Clase B</p>
+                <p class="text-xs text-blue-700">Próxima clase: {claseB.proximasClases[0]?.fecha}</p>
+              </div>
+            </button>
+            <button type="button" data-goto="profesional"
+              class="goto-tab flex items-center gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl hover:bg-amber-100 transition-colors text-left">
+              <div class="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                </svg>
+              </div>
+              <div>
+                <p class="font-semibold text-amber-900 text-sm">Profesional</p>
+                <p class="text-xs text-amber-700">{profesional.promocion.nombre}</p>
+              </div>
+            </button>
+            <button type="button" data-goto="pagos"
+              class="goto-tab flex items-center gap-3 p-4 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 transition-colors text-left">
+              <div class="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <div>
+                <p class="font-semibold text-gray-900 text-sm">Pagos</p>
+                <p class="text-xs text-red-600 font-medium">Saldo: ${pagos.saldoPendiente.toLocaleString("es-CL")}</p>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- ── Panel: Clase B ──────────────────────────────────── -->
+        <div id="panel-claseb" class="hidden space-y-6">
+          <div class="grid sm:grid-cols-2 gap-4">
+            <Card>
+              <div class="flex items-center justify-between mb-3">
+                <div>
+                  <h2 class="text-base font-semibold text-gray-900">Clases Prácticas</h2>
+                  <p class="text-xs text-secondary">De {claseB.progresoPracticas.total} requeridas</p>
                 </div>
-                <div class="flex-1">
-                  <p class="text-green-900 font-semibold mb-1">¡Felicitaciones! Completaste todas tus clases</p>
-                  <p class="text-sm text-green-700 mb-3">Ya puedes descargar tu certificado y presentarte al examen municipal.</p>
-                  <Button href="/alumno/certificado" variant="primary" class="w-full sm:w-auto">
-                    📄 Descargar Certificado
-                  </Button>
+                <span class="text-3xl font-bold text-blue-600">{pctPracticas}%</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-4 mb-2">
+                <div class="h-4 bg-blue-500 rounded-full flex items-center justify-end px-2"
+                  style={`width:${pctPracticas}%`}>
+                  <span class="text-[10px] font-bold text-white">{claseB.progresoPracticas.completadas}/{claseB.progresoPracticas.total}</span>
                 </div>
               </div>
+              <p class="text-xs text-secondary">{claseB.progresoPracticas.total - claseB.progresoPracticas.completadas} clases restantes</p>
             </Card>
-          )}
+            <Card>
+              <div class="flex items-center justify-between mb-3">
+                <div>
+                  <h2 class="text-base font-semibold text-gray-900">Teoría Online</h2>
+                  <p class="text-xs text-secondary">Módulos completados</p>
+                </div>
+                <span class="text-3xl font-bold text-green-600">{pctTeorica}%</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-4 mb-2">
+                <div class="h-4 bg-green-500 rounded-full flex items-center justify-end px-2"
+                  style={`width:${pctTeorica}%`}>
+                  <span class="text-[10px] font-bold text-white">{claseB.progresoTeorica.completadas}/{claseB.progresoTeorica.total}</span>
+                </div>
+              </div>
+              <p class="text-xs text-secondary">{claseB.progresoTeorica.total - claseB.progresoTeorica.completadas} módulos restantes</p>
+            </Card>
+          </div>
 
-          <!-- Próximas clases -->
+          <Card>
+            <h2 class="text-base font-semibold text-gray-900 mb-3">Mi Instructor</h2>
+            <div class="flex items-center gap-4">
+              <div class="w-14 h-14 bg-gray-200 rounded-full flex items-center justify-center shrink-0">
+                <svg class="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+              </div>
+              <div>
+                <p class="font-semibold text-gray-900">{claseB.instructor.nombre}</p>
+                <p class="text-xs text-secondary mt-0.5">Vehículo asignado: <span class="font-medium">{claseB.instructor.vehiculo}</span></p>
+                <div class="flex items-center gap-1 mt-1">
+                  <span class="text-amber-400 text-sm">★</span>
+                  <span class="text-xs font-semibold text-gray-700">{claseB.instructor.rating}</span>
+                  <span class="text-xs text-secondary">/ 5.0</span>
+                </div>
+              </div>
+            </div>
+          </Card>
+
           <Card>
             <div class="flex items-center justify-between mb-4">
-              <h2 class="text-xl font-semibold text-gray-900">Próximas Clases</h2>
-              <span class="text-sm text-secondary">{proximasClases.length} agendadas</span>
+              <h2 class="text-base font-semibold text-gray-900">Próximas Clases</h2>
+              <span class="text-xs text-secondary">{claseB.proximasClases.length} agendadas</span>
             </div>
-            
             <div class="space-y-3">
-              {proximasClases.map((clase) => (
-                <div class="group relative flex items-start gap-4 p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-all">
-                  <!-- Fecha -->
-                  <div class="shrink-0">
-                    <div class="w-16 h-16 bg-linear-to-br from-blue-500 to-blue-600 rounded-lg flex flex-col items-center justify-center text-white shadow-md">
-                      <span class="text-xs uppercase font-medium">{clase.dia.substring(0, 3)}</span>
-                      <span class="text-2xl font-bold">{clase.numero}</span>
-                    </div>
+              {claseB.proximasClases.map(c => (
+                <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                  <div class="w-14 h-14 bg-blue-600 rounded-lg flex flex-col items-center justify-center text-white shrink-0">
+                    <span class="text-[10px] uppercase font-medium">{c.dia}</span>
+                    <span class="text-lg font-bold">{c.hora.slice(0,2)}</span>
                   </div>
-                  
-                  <!-- Info -->
                   <div class="flex-1 min-w-0">
-                    <div class="flex items-start justify-between gap-2 mb-2">
-                      <div>
-                        <p class="text-base font-semibold text-gray-900">{clase.tipo}</p>
-                        <p class="text-sm text-secondary mt-0.5">{clase.fecha}</p>
-                      </div>
-                      <span class="text-lg font-bold text-blue-600">{clase.hora}</span>
-                    </div>
-                    
-                    <div class="flex flex-wrap items-center gap-3 text-xs text-secondary">
-                      <div class="flex items-center gap-1">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                        </svg>
-                        <span>{clase.instructor}</span>
-                      </div>
-                      <div class="flex items-center gap-1">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                        </svg>
-                        <span>{clase.vehiculo}</span>
-                      </div>
-                    </div>
-
-                    <!-- Acciones -->
-                    {clase.cancelable && (
-                      <div class="flex gap-2 mt-3">
-                        <button 
-                          onclick={`reagendarClase(${clase.id})`}
-                          class="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
-                        >
-                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                          </svg>
-                          Reagendar
-                        </button>
-                        <button 
-                          onclick={`cancelarClase(${clase.id})`}
-                          class="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 rounded-md transition-colors"
-                        >
-                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                          </svg>
-                          Cancelar
-                        </button>
-                      </div>
-                    )}
+                    <p class="font-semibold text-gray-900 text-sm">{c.tipo}</p>
+                    <p class="text-xs text-secondary mt-0.5">{c.fecha} · {claseB.instructor.nombre} · {claseB.instructor.vehiculo}</p>
                   </div>
+                  {c.cancelable && (
+                    <div class="flex gap-2 shrink-0">
+                      <button type="button" onclick="alert('Reagendar (mockup)')" class="text-xs font-medium text-blue-600 hover:text-blue-800">Reagendar</button>
+                      <button type="button" onclick="alert('Cancelar (mockup)')" class="text-xs font-medium text-red-500 hover:text-red-700">Cancelar</button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
-            
-            <Button href="/alumno/horario" variant="primary" class="w-full mt-4">
-              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-              </svg>
-              Ver Mi Horario
-            </Button>
           </Card>
 
-          <!-- Historial reciente -->
           <Card>
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Historial Reciente</h3>
+            <h2 class="text-base font-semibold text-gray-900 mb-3">Historial Reciente</h2>
             <div class="space-y-2">
-              {historialReciente.map((clase) => (
+              {claseB.historial.map(c => (
                 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                    <div class="w-9 h-9 bg-green-100 rounded-full flex items-center justify-center shrink-0">
                       <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                       </svg>
                     </div>
                     <div>
-                      <p class="text-sm font-medium text-gray-900">Clase #{clase.numero}</p>
-                      <p class="text-xs text-secondary">{clase.fecha} • {clase.instructor}</p>
+                      <p class="text-sm font-medium text-gray-900">Clase #{c.numero}</p>
+                      <p class="text-xs text-secondary">{c.fecha} · {c.instructor}</p>
                     </div>
                   </div>
-                  <span class="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full font-medium">
-                    Completada
-                  </span>
+                  <span class="text-xs px-2 py-0.5 bg-green-100 text-green-800 rounded-full font-medium">Completada</span>
                 </div>
               ))}
             </div>
-            <Button href="/alumno/historial" variant="ghost" class="w-full mt-3 text-sm">
-              Ver Historial Completo →
-            </Button>
           </Card>
         </div>
 
-        <!-- Sidebar -->
-        <div class="space-y-6">
-          <!-- Información personal -->
+        <!-- ── Panel: Profesional ──────────────────────────────── -->
+        <div id="panel-profesional" class="hidden space-y-6">
+          <!-- Banner promoción -->
+          <div class="bg-amber-50 border border-amber-200 rounded-xl p-5">
+            <p class="text-xs font-semibold text-amber-600 uppercase tracking-wider mb-1">Mi Promoción</p>
+            <h2 class="text-xl font-bold text-gray-900">{profesional.promocion.nombre}</h2>
+            <p class="text-sm text-gray-700 mt-1">{profesional.promocion.categoria}</p>
+            <div class="flex flex-wrap gap-4 mt-3 text-xs text-gray-600">
+              <span>Relator: <strong>{profesional.promocion.relator}</strong></span>
+              <span>Inicio: <strong>{profesional.promocion.inicio}</strong></span>
+              <span>Término: <strong>{profesional.promocion.fin}</strong></span>
+              <span>Grupo: <strong>{profesional.promocion.totalAlumnos} alumnos</strong></span>
+            </div>
+          </div>
+
+          <div class="grid lg:grid-cols-2 gap-6">
+            <!-- Firma de Libro -->
+            <Card>
+              <h2 class="text-base font-semibold text-gray-900 mb-1">Asistencia Semanal</h2>
+              <p class="text-xs text-secondary mb-4">Firma de libro presencial</p>
+              <table class="w-full text-sm">
+                <thead>
+                  <tr class="border-b border-gray-200">
+                    <th class="text-left pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">Sem.</th>
+                    <th class="text-left pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">Fechas</th>
+                    <th class="text-center pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">Firma</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                  {profesional.asistencia.map(a => (
+                    <tr>
+                      <td class="py-2.5 text-gray-700 font-medium">S{a.semana}</td>
+                      <td class="py-2.5 text-gray-500 text-xs">{a.fechas}</td>
+                      <td class="py-2.5 text-center">
+                        {a.presente === true  && <span class="inline-block px-2 py-0.5 bg-green-100 text-green-700 text-xs font-semibold rounded-full">✓ Firmado</span>}
+                        {a.presente === false && <span class="inline-block px-2 py-0.5 bg-red-100 text-red-700 text-xs font-semibold rounded-full">✗ Ausente</span>}
+                        {a.presente === null  && <span class="inline-block px-2 py-0.5 bg-gray-100 text-gray-400 text-xs font-medium rounded-full">Pendiente</span>}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div class="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-secondary">
+                <span>{asistidas}/{evaluadas} semanas presentes</span>
+                <span class={`font-semibold ${pctAsistencia >= 75 ? "text-green-600" : "text-red-600"}`}>{pctAsistencia}%</span>
+              </div>
+            </Card>
+
+            <div class="space-y-4">
+              <!-- Notas -->
+              <Card>
+                <h2 class="text-base font-semibold text-gray-900 mb-3">Notas por Módulo</h2>
+                <div class="space-y-2">
+                  {profesional.modulos.map(m => {
+                    const pendiente = m.nota === null;
+                    const aprobado  = !pendiente && m.nota! >= 4.0;
+                    return (
+                      <div class={`flex items-center justify-between p-3 rounded-lg border ${pendiente ? "bg-gray-50 border-gray-200" : aprobado ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"}`}>
+                        <div>
+                          <p class={`text-sm font-medium ${pendiente ? "text-gray-600" : aprobado ? "text-green-900" : "text-red-900"}`}>{m.nombre}</p>
+                          <p class="text-xs text-gray-400">{m.descripcion}</p>
+                        </div>
+                        <span class={`text-xl font-bold ${pendiente ? "text-gray-300" : aprobado ? "text-green-700" : "text-red-700"}`}>
+                          {pendiente ? "—" : m.nota!.toFixed(1)}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+                {promedio !== null && (
+                  <p class="text-xs text-right text-secondary mt-2">Promedio: <strong class="text-gray-900">{promedio.toFixed(1)}</strong></p>
+                )}
+              </Card>
+
+              <!-- Documentos -->
+              <Card>
+                <h2 class="text-base font-semibold text-gray-900 mb-3">Validación de Documentos</h2>
+                <div class="space-y-2">
+                  {profesional.documentos.map(d => (
+                    <div class="flex items-center justify-between text-sm">
+                      <div class="flex items-center gap-2">
+                        {d.obligatorio && <span class="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" title="Obligatorio"></span>}
+                        <span class={d.obligatorio ? "font-medium text-gray-900" : "text-gray-600"}>{d.nombre}</span>
+                      </div>
+                      {d.estado === "ok"
+                        ? <span class="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-medium">✓ OK</span>
+                        : <span class="text-xs px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full font-medium">Pendiente</span>
+                      }
+                    </div>
+                  ))}
+                </div>
+                {docsFaltantes > 0 && (
+                  <p class="text-xs text-red-600 mt-3 font-medium">⚠ {docsFaltantes} obligatorio(s) pendiente(s)</p>
+                )}
+              </Card>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Panel: Pagos ────────────────────────────────────── -->
+        <div id="panel-pagos" class="hidden space-y-6">
+          <div class="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+            <p class="text-sm text-red-700 font-medium mb-1">Saldo pendiente total</p>
+            <p class="text-5xl font-bold text-red-600">${pagos.saldoPendiente.toLocaleString("es-CL")}</p>
+            <button type="button" onclick="alert('Ir a pagar (mockup)')"
+              class="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors">
+              Pagar en línea
+            </button>
+          </div>
+
           <Card>
-            <h3 class="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wide">Mi Información</h3>
+            <h2 class="text-base font-semibold text-gray-900 mb-4">Detalle de Cuotas</h2>
             <div class="space-y-3">
-              <div>
-                <label class="text-xs text-secondary uppercase tracking-wide">RUT</label>
-                <p class="text-sm font-medium text-gray-900 mt-0.5">{alumno.rut}</p>
-              </div>
-              <div>
-                <label class="text-xs text-secondary uppercase tracking-wide">Email</label>
-                <p class="text-sm font-medium text-gray-900 mt-0.5">{alumno.email}</p>
-              </div>
-              <div>
-                <label class="text-xs text-secondary uppercase tracking-wide">Teléfono</label>
-                <p class="text-sm font-medium text-gray-900 mt-0.5">{alumno.telefono}</p>
-              </div>
-              <div>
-                <label class="text-xs text-secondary uppercase tracking-wide">Curso</label>
-                <p class="text-sm font-medium text-gray-900 mt-0.5">{alumno.curso}</p>
-              </div>
-            </div>
-            <Button href="/alumno/perfil" variant="ghost" class="w-full mt-4 text-sm justify-center">
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-              </svg>
-              Editar Perfil
-            </Button>
-          </Card>
-
-          <!-- Acceso rápido -->
-          <Card>
-            <h3 class="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wide">Acceso Rápido</h3>
-            <div class="space-y-2">
-               <a href="/alumno/documentos" class="flex items-center gap-3 p-3 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-                <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                  <span class="text-base">📄</span>
+              {pagos.cuotas.map(c => (
+                <div class="flex items-center justify-between p-3 rounded-lg border border-gray-100 bg-gray-50">
+                  <div class="flex items-center gap-3">
+                    <div class={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${c.estado === "pagada" ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-500"}`}>
+                      {c.num}
+                    </div>
+                    <div>
+                      <p class="text-sm font-medium text-gray-900">Cuota {c.num}</p>
+                      <p class="text-xs text-secondary">{c.fecha}</p>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <p class="text-sm font-semibold text-gray-900">${c.monto.toLocaleString("es-CL")}</p>
+                    <span class={`text-xs px-2 py-0.5 rounded-full font-medium ${c.estado === "pagada" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}`}>
+                      {c.estado === "pagada" ? "Pagada" : "Pendiente"}
+                    </span>
+                  </div>
                 </div>
-                <span class="font-medium">Mis Documentos</span>
-              </a>
-              <a href="/alumno/pagos" class="flex items-center gap-3 p-3 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-                <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                  <span class="text-base">💳</span>
-                </div>
-                <span class="font-medium">Estados de Pago</span>
-              </a>
-              <a href="/alumno/soporte" class="flex items-center gap-3 p-3 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-                <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                  <span class="text-base">💬</span>
-                </div>
-                <span class="font-medium">Contacto Escuela</span>
-              </a>
+              ))}
             </div>
           </Card>
-
-          <!-- Ayuda WhatsApp -->
-          <Card class="bg-linear-to-br from-green-50 to-emerald-50 border-green-200">
-            <div class="flex gap-3">
-              <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center shrink-0">
-                <svg class="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-                </svg>
-              </div>
-              <div>
-                <p class="text-sm font-semibold text-green-900 mb-1">¿Necesitas ayuda?</p>
-                <p class="text-xs text-green-800 mb-3">
-                  Chatea con nosotros por WhatsApp y te responderemos al instante
-                </p>
-                <a 
-                  href="https://wa.me/56912345678?text=Hola,%20necesito%20ayuda%20con%20mi%20portal%20de%20alumno"
-                  target="_blank"
-                  class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
-                >
-                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-                  </svg>
-                  Abrir WhatsApp
-                </a>
-              </div>
-            </div>
-          </Card>
-
-          <!-- Cerrar sesión -->
-          <Button href="/login" variant="ghost" class="w-full text-red-600 hover:bg-red-50">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-            </svg>
-            Cerrar Sesión
-          </Button>
         </div>
       </div>
-    </div>
+    )}
+
+  </div>
 </DashboardLayout>
 
 <script>
-  function cancelarClase(id: number) {
-    if (confirm('¿Estás seguro de que deseas cancelar esta clase?\n\n⚠️ Nota: Puedes can celar hasta 24 horas antes sin penalización.\n\nAl confirmar:\n• Se liberará el horario\n• Podrás reagendarla más adelante\n• Recibirás un email de confirmación')) {
-      alert(`✓ Clase cancelada exitosamente\n\n• Se envió email de confirmación\n• Puedes reagendar desde "Agendar Nueva Clase"\n• El instructor fue notificado`);
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
+  document.addEventListener("astro:page-load", () => {
+    // ── Tab switching ────────────────────────────────────────────────
+    const tabBtns  = document.querySelectorAll<HTMLButtonElement>(".tab-btn");
+    const panels: Record<string, HTMLElement | null> = {
+      resumen:     document.getElementById("panel-resumen"),
+      claseb:      document.getElementById("panel-claseb"),
+      profesional: document.getElementById("panel-profesional"),
+      pagos:       document.getElementById("panel-pagos"),
+    };
+
+    function activateTab(id: string) {
+      tabBtns.forEach(btn => {
+        const isActive = btn.dataset.tab === id;
+        btn.classList.toggle("border-blue-600", isActive);
+        btn.classList.toggle("text-blue-600",   isActive);
+        btn.classList.toggle("border-transparent", !isActive);
+        btn.classList.toggle("text-gray-500",    !isActive);
+      });
+      Object.entries(panels).forEach(([key, el]) => {
+        el?.classList.toggle("hidden", key !== id);
+      });
     }
-  }
-  
-  function reagendarClase(id: number) {
-    alert('🗓️ Redirigiendo a selector de horarios disponibles...\n\n• Verás solo horarios con el mismo instructor\n• Puedes elegir cualquier fecha futura\n• La confirmación es automática');
-    
-    // Simular navegación
-    setTimeout(() => {
-      window.location.href = `/alumno/reagendar/${id}`;
-    }, 1500);
-  }
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener("click", () => activateTab(btn.dataset.tab!));
+    });
+
+    // Botones "Ir a tab" desde el Resumen
+    document.querySelectorAll<HTMLElement>(".goto-tab").forEach(btn => {
+      btn.addEventListener("click", () => activateTab(btn.dataset.goto!));
+    });
+  });
 </script>
