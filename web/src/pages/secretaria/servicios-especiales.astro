@@ -1,0 +1,13 @@
+---
+/**
+ * Servicios Especiales — Secretaría
+ * RF-037 (Módulo 6): Punto de venta de servicios complementarios
+ */
+import DashboardLayout from "../../layouts/DashboardLayout.astro";
+import ServiciosEspecialesContent from "../../components/servicios-especiales/ServiciosEspecialesContent.astro";
+import { ESCUELA_ACTUAL } from "../../lib/mockData";
+---
+
+<DashboardLayout title="Servicios Especiales" escuela={ESCUELA_ACTUAL} userRole="secretaria">
+  <ServiciosEspecialesContent basePath="/secretaria" />
+</DashboardLayout>

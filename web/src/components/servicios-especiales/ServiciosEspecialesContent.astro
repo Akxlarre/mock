@@ -1,0 +1,593 @@
+---
+/**
+ * Contenido de Venta de Servicios Especiales.
+ * Reutilizable para admin y secretaria con basePath.
+ * RF-037 (Módulo 6 - Evolución Psicotécnico): Punto de venta de servicios complementarios
+ */
+import Card from "../ui/Card.astro";
+import Button from "../ui/Button.astro";
+
+interface Props {
+  basePath?: string;
+}
+
+const { basePath = "" } = Astro.props;
+
+/** RF-037: Catálogo de servicios disponibles */
+const catalogoServicios = [
+  {
+    id: "psicotecnico",
+    nombre: "Examen Psicotécnico",
+    descripcion: "Registro de aptitud psicosensométrica y cobro. Evaluación requerida para obtención y renovación de licencias.",
+    precio: 40000,
+    icono: "brain",
+    color: "indigo",
+    activo: true,
+  },
+  {
+    id: "arriendo-maquinaria",
+    nombre: "Arriendo de Maquinaria Pesada",
+    descripcion: "Arriendo de vehículos pesados para prácticas externas, validaciones y cursos. Precio por jornada.",
+    precio: 85000,
+    icono: "truck",
+    color: "orange",
+    activo: true,
+  },
+  {
+    id: "informe-psicotecnico",
+    nombre: "Informe Psicotécnico Detallado",
+    descripcion: "Venta del documento físico/digital con resultados detallados para trámites externos ante organismos reguladores.",
+    precio: 15000,
+    icono: "document",
+    color: "green",
+    activo: true,
+  },
+];
+
+/** Ventas registradas (mix de alumnos y clientes externos) */
+const ventasRegistradas = [
+  {
+    id: 1,
+    cliente: "Juan Pérez González",
+    rut: "12.345.678-9",
+    esAlumno: true,
+    servicio: "Examen Psicotécnico",
+    servicioId: "psicotecnico",
+    precio: 40000,
+    fecha: "2026-02-25",
+    estado: "completado",
+    resultado: "Apto",
+    cobrado: true,
+  },
+  {
+    id: 2,
+    cliente: "Transportes del Sur Ltda.",
+    rut: "76.123.456-7",
+    esAlumno: false,
+    servicio: "Arriendo de Maquinaria Pesada",
+    servicioId: "arriendo-maquinaria",
+    precio: 85000,
+    fecha: "2026-02-24",
+    estado: "completado",
+    resultado: null,
+    cobrado: true,
+  },
+  {
+    id: 3,
+    cliente: "María López Silva",
+    rut: "18.765.432-1",
+    esAlumno: true,
+    servicio: "Examen Psicotécnico",
+    servicioId: "psicotecnico",
+    precio: 40000,
+    fecha: "2026-02-23",
+    estado: "pendiente",
+    resultado: null,
+    cobrado: false,
+  },
+  {
+    id: 4,
+    cliente: "Roberto Fuentes Castillo",
+    rut: "14.890.123-4",
+    esAlumno: false,
+    servicio: "Informe Psicotécnico Detallado",
+    servicioId: "informe-psicotecnico",
+    precio: 15000,
+    fecha: "2026-02-22",
+    estado: "completado",
+    resultado: null,
+    cobrado: true,
+  },
+  {
+    id: 5,
+    cliente: "Carlos Rojas Muñoz",
+    rut: "15.234.567-8",
+    esAlumno: true,
+    servicio: "Examen Psicotécnico",
+    servicioId: "psicotecnico",
+    precio: 40000,
+    fecha: "2026-02-21",
+    estado: "completado",
+    resultado: "No Apto",
+    cobrado: true,
+  },
+  {
+    id: 6,
+    cliente: "Constructora Norte S.A.",
+    rut: "89.456.789-3",
+    esAlumno: false,
+    servicio: "Arriendo de Maquinaria Pesada",
+    servicioId: "arriendo-maquinaria",
+    precio: 170000,
+    fecha: "2026-02-20",
+    estado: "completado",
+    resultado: null,
+    cobrado: false,
+  },
+];
+
+const totalVentas = ventasRegistradas.length;
+const totalCobrado = ventasRegistradas.filter((v) => v.cobrado).reduce((sum, v) => sum + v.precio, 0);
+const pendientesCobro = ventasRegistradas.filter((v) => !v.cobrado).reduce((sum, v) => sum + v.precio, 0);
+const ventasMes = ventasRegistradas.filter((v) => v.fecha.startsWith("2026-02")).length;
+---
+
+<div class="mb-8">
+  <div class="flex items-center gap-2 text-sm text-secondary mb-2">
+    <a href={`${basePath}/dashboard`} class="hover:text-gray-900">Inicio</a>
+    <span>/</span>
+    <span class="text-gray-900 font-medium">Servicios Especiales</span>
+  </div>
+  <div class="flex items-start justify-between gap-4">
+    <div>
+      <h1 class="text-3xl font-semibold text-gray-900 tracking-tight text-balance">
+        Servicios Especiales
+      </h1>
+      <p class="text-secondary mt-1">
+        Punto de venta de servicios complementarios — alumnos y clientes externos
+      </p>
+    </div>
+    <button
+      type="button"
+      onclick="abrirModalVenta()"
+      class="shrink-0 inline-flex items-center gap-2 px-4 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+      </svg>
+      Registrar Venta
+    </button>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+  <Card>
+    <p class="text-sm text-secondary mb-1">Ventas del mes</p>
+    <p class="text-3xl font-bold text-gray-900">{ventasMes}</p>
+    <p class="text-xs text-secondary mt-1">Febrero 2026</p>
+  </Card>
+  <Card>
+    <p class="text-sm text-secondary mb-1">Total recaudado</p>
+    <p class="text-2xl font-bold text-green-700">${totalCobrado.toLocaleString("es-CL")}</p>
+    <p class="text-xs text-green-600 mt-1">{ventasRegistradas.filter((v) => v.cobrado).length} ventas cobradas</p>
+  </Card>
+  <Card>
+    <p class="text-sm text-secondary mb-1">Pendiente de cobro</p>
+    <p class="text-2xl font-bold text-yellow-700">${pendientesCobro.toLocaleString("es-CL")}</p>
+    <p class="text-xs text-yellow-600 mt-1">{ventasRegistradas.filter((v) => !v.cobrado).length} ventas sin cobrar</p>
+  </Card>
+  <Card>
+    <p class="text-sm text-secondary mb-1">Total registros</p>
+    <p class="text-3xl font-bold text-gray-900">{totalVentas}</p>
+    <p class="text-xs text-secondary mt-1">Todos los servicios</p>
+  </Card>
+</div>
+
+<!-- Catálogo de Servicios -->
+<div class="mb-8">
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-lg font-semibold text-gray-900">Catálogo de Servicios</h2>
+    <button
+      type="button"
+      onclick="abrirModalNuevoServicio()"
+      class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+      </svg>
+      Agregar servicio
+    </button>
+  </div>
+  <div class="grid sm:grid-cols-3 gap-4">
+    {catalogoServicios.map((servicio) => (
+      <div class={`border border-gray-200 rounded-lg p-5 bg-white hover:border-gray-300 hover:shadow-sm transition-all`}>
+        <div class="flex items-start justify-between mb-3">
+          <div class={`w-10 h-10 rounded-lg flex items-center justify-center ${
+            servicio.color === "indigo" ? "bg-indigo-100" :
+            servicio.color === "orange" ? "bg-orange-100" :
+            "bg-green-100"
+          }`}>
+            {servicio.icono === "brain" && (
+              <svg class={`w-5 h-5 ${servicio.color === "indigo" ? "text-indigo-700" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+            )}
+            {servicio.icono === "truck" && (
+              <svg class="w-5 h-5 text-orange-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
+              </svg>
+            )}
+            {servicio.icono === "document" && (
+              <svg class="w-5 h-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            )}
+          </div>
+          <span class={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full ${
+            servicio.activo ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
+          }`}>
+            {servicio.activo ? "Activo" : "Inactivo"}
+          </span>
+        </div>
+        <h3 class="font-semibold text-gray-900 mb-1">{servicio.nombre}</h3>
+        <p class="text-xs text-secondary mb-3 leading-relaxed">{servicio.descripcion}</p>
+        <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+          <span class="text-lg font-bold text-gray-900">
+            ${servicio.precio.toLocaleString("es-CL")}
+          </span>
+          <button
+            type="button"
+            onclick={`venderServicio('${servicio.id}', '${servicio.nombre}', ${servicio.precio})`}
+            class="text-sm font-medium text-gray-900 border border-gray-300 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            Vender
+          </button>
+        </div>
+      </div>
+    ))}
+
+    <!-- Tarjeta "agregar nuevo servicio" -->
+    <button
+      type="button"
+      onclick="abrirModalNuevoServicio()"
+      class="border-2 border-dashed border-gray-300 rounded-lg p-5 flex flex-col items-center justify-center gap-2 text-gray-400 hover:border-gray-400 hover:text-gray-600 transition-colors min-h-[180px]"
+    >
+      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4" />
+      </svg>
+      <span class="text-sm font-medium">Agregar servicio</span>
+      <span class="text-xs text-center">Ej. "Uso de Simulador"</span>
+    </button>
+  </div>
+</div>
+
+<!-- Historial de Ventas -->
+<Card>
+  <div class="flex flex-wrap items-center justify-between gap-4 mb-5">
+    <h2 class="text-lg font-semibold text-gray-900">Historial de Ventas</h2>
+    <div class="flex items-center gap-3">
+      <select
+        id="filtro-servicio"
+        class="h-9 px-3 text-sm border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-black focus:ring-offset-1"
+      >
+        <option value="todos">Todos los servicios</option>
+        <option value="psicotecnico">Examen Psicotécnico</option>
+        <option value="arriendo-maquinaria">Arriendo Maquinaria</option>
+        <option value="informe-psicotecnico">Informe Detallado</option>
+      </select>
+      <button
+        type="button"
+        onclick="exportarHistorial()"
+        class="h-9 px-3 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+      >
+        Exportar
+      </button>
+    </div>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="w-full" id="tabla-ventas">
+      <thead>
+        <tr class="border-b border-gray-200">
+          <th class="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase tracking-wide">Cliente</th>
+          <th class="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase tracking-wide">RUT</th>
+          <th class="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase tracking-wide">Servicio</th>
+          <th class="text-right py-3 px-4 text-xs font-semibold text-gray-600 uppercase tracking-wide">Monto</th>
+          <th class="text-center py-3 px-4 text-xs font-semibold text-gray-600 uppercase tracking-wide">Estado</th>
+          <th class="text-center py-3 px-4 text-xs font-semibold text-gray-600 uppercase tracking-wide">Cobro</th>
+          <th class="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase tracking-wide">Fecha</th>
+          <th class="text-center py-3 px-4 text-xs font-semibold text-gray-600 uppercase tracking-wide">Acción</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {ventasRegistradas.map((venta) => (
+          <tr
+            class="hover:bg-gray-50 transition-colors"
+            data-servicio={venta.servicioId}
+            data-tipo={venta.esAlumno ? "alumno" : "externo"}
+          >
+            <td class="py-3 px-4">
+              <div>
+                <p class="text-sm font-medium text-gray-900">{venta.cliente}</p>
+                {venta.resultado && (
+                  <span class={`inline-flex items-center gap-1 text-xs font-medium ${
+                    venta.resultado === "Apto" ? "text-green-700" : "text-red-700"
+                  }`}>
+                    {venta.resultado === "Apto" ? "✓" : "✗"} {venta.resultado}
+                  </span>
+                )}
+              </div>
+            </td>
+            <td class="py-3 px-4 text-sm text-secondary font-mono">{venta.rut}</td>
+            <td class="py-3 px-4 text-sm text-gray-700">{venta.servicio}</td>
+            <td class="py-3 px-4 text-sm font-semibold text-gray-900 text-right">
+              ${venta.precio.toLocaleString("es-CL")}
+            </td>
+            <td class="py-3 px-4 text-center">
+              {venta.estado === "completado" ? (
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
+                  Completado
+                </span>
+              ) : (
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
+                  Pendiente
+                </span>
+              )}
+            </td>
+            <td class="py-3 px-4 text-center">
+              {venta.cobrado ? (
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-green-50 text-green-700 rounded text-xs font-medium border border-green-200">
+                  Cobrado
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  class="text-xs font-medium text-gray-900 border border-gray-300 px-2.5 py-1 rounded hover:bg-gray-50 transition-colors"
+                  onclick={`registrarCobro(${venta.id}, '${venta.cliente}', ${venta.precio})`}
+                >
+                  Cobrar ${venta.precio.toLocaleString("es-CL")}
+                </button>
+              )}
+            </td>
+            <td class="py-3 px-4 text-sm text-secondary">{venta.fecha}</td>
+            <td class="py-3 px-4 text-center">
+              <button
+                type="button"
+                class="text-xs text-gray-500 hover:text-gray-900 font-medium transition-colors"
+                onclick={`verDetalle(${venta.id})`}
+              >
+                Ver
+              </button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</Card>
+
+<!-- Modal: Registrar Venta -->
+<div
+  id="modal-venta"
+  class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+  onclick="cerrarModalVenta(event)"
+>
+  <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 p-6" onclick="event.stopPropagation()">
+    <div class="flex items-center justify-between mb-5">
+      <h3 class="text-lg font-semibold text-gray-900">Registrar Venta de Servicio</h3>
+      <button type="button" onclick="cerrarModalVenta()" class="text-gray-400 hover:text-gray-700">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    <form id="form-venta" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1.5" for="venta-servicio">Servicio</label>
+        <select id="venta-servicio" name="servicio" required
+          class="w-full h-10 px-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:ring-offset-1">
+          <option value="">Seleccionar servicio...</option>
+          <option value="psicotecnico" data-precio="40000">Examen Psicotécnico — $40.000</option>
+          <option value="arriendo-maquinaria" data-precio="85000">Arriendo de Maquinaria Pesada — $85.000</option>
+          <option value="informe-psicotecnico" data-precio="15000">Informe Psicotécnico Detallado — $15.000</option>
+        </select>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5" for="venta-nombre">Nombre del cliente</label>
+          <input id="venta-nombre" name="nombre" type="text" required placeholder="Ej. Juan Pérez"
+            class="w-full h-10 px-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:ring-offset-1" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5" for="venta-rut">RUT</label>
+          <input id="venta-rut" name="rut" type="text" required placeholder="12.345.678-9"
+            class="w-full h-10 px-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:ring-offset-1" />
+        </div>
+      </div>
+      <div id="campo-tipo-cliente" class="hidden">
+        <label class="block text-sm font-medium text-gray-700 mb-1.5" for="venta-tipo">Tipo de cliente</label>
+        <select id="venta-tipo" name="tipo"
+          class="w-full h-10 px-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:ring-offset-1">
+          <option value="externo">Cliente externo</option>
+          <option value="alumno">Alumno de la escuela</option>
+        </select>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5" for="venta-fecha">Fecha</label>
+          <input id="venta-fecha" name="fecha" type="date" required
+            class="w-full h-10 px-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:ring-offset-1" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5" for="venta-precio">Monto ($)</label>
+          <input id="venta-precio" name="precio" type="number" required placeholder="40000"
+            class="w-full h-10 px-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:ring-offset-1" />
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <input id="venta-cobrado" name="cobrado" type="checkbox" class="rounded border-gray-300" />
+        <label for="venta-cobrado" class="text-sm text-gray-700 cursor-pointer">Cobrado al registrar</label>
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button type="submit" class="flex-1 h-10 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors">
+          Registrar venta
+        </button>
+        <button type="button" onclick="cerrarModalVenta()" class="h-10 px-4 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Agregar Nuevo Servicio al Catálogo -->
+<div
+  id="modal-nuevo-servicio"
+  class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+  onclick="cerrarModalNuevoServicio(event)"
+>
+  <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6" onclick="event.stopPropagation()">
+    <div class="flex items-center justify-between mb-5">
+      <h3 class="text-lg font-semibold text-gray-900">Agregar Nuevo Servicio</h3>
+      <button type="button" onclick="cerrarModalNuevoServicio()" class="text-gray-400 hover:text-gray-700">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    <form id="form-nuevo-servicio" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1.5" for="ns-nombre">Nombre del servicio</label>
+        <input id="ns-nombre" name="nombre" type="text" required placeholder="Ej. Uso de Simulador"
+          class="w-full h-10 px-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:ring-offset-1" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1.5" for="ns-descripcion">Descripción</label>
+        <textarea id="ns-descripcion" name="descripcion" rows="2" required
+          placeholder="Describe brevemente en qué consiste el servicio..."
+          class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:ring-offset-1 resize-none"></textarea>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1.5" for="ns-precio">Precio ($)</label>
+        <input id="ns-precio" name="precio" type="number" required placeholder="Ej. 25000"
+          class="w-full h-10 px-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:ring-offset-1" />
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button type="submit" class="flex-1 h-10 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors">
+          Agregar al catálogo
+        </button>
+        <button type="button" onclick="cerrarModalNuevoServicio()" class="h-10 px-4 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script is:inline>
+  // --- Filtro tabla ---
+  const filtroServicio = document.getElementById("filtro-servicio");
+  const tablaVentas = document.getElementById("tabla-ventas");
+
+  filtroServicio?.addEventListener("change", function () {
+    const servicio = filtroServicio.value;
+    tablaVentas?.querySelectorAll("tbody tr").forEach(function (fila) {
+      const fs = fila.getAttribute("data-servicio");
+      fila.style.display = servicio === "todos" || fs === servicio ? "" : "none";
+    });
+  });
+
+  // --- Modal Venta ---
+  window.abrirModalVenta = function () {
+    const modal = document.getElementById("modal-venta");
+    if (modal) {
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+      // Setear fecha de hoy
+      const fechaInput = document.getElementById("venta-fecha");
+      if (fechaInput) fechaInput.value = new Date().toISOString().split("T")[0];
+    }
+  };
+  window.cerrarModalVenta = function (e) {
+    if (e && e.target !== document.getElementById("modal-venta") && !e.target.closest) return;
+    const modal = document.getElementById("modal-venta");
+    if (modal) {
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+  };
+  // Autocompletar precio y mostrar/ocultar "Tipo de cliente" según servicio
+  const SERVICIOS_CON_TIPO = ["psicotecnico", "informe-psicotecnico"];
+  document.getElementById("venta-servicio")?.addEventListener("change", function () {
+    const opt = this.options[this.selectedIndex];
+    const precio = opt.getAttribute("data-precio");
+    if (precio) document.getElementById("venta-precio").value = precio;
+    const campoTipo = document.getElementById("campo-tipo-cliente");
+    if (campoTipo) {
+      if (SERVICIOS_CON_TIPO.includes(this.value)) {
+        campoTipo.classList.remove("hidden");
+      } else {
+        campoTipo.classList.add("hidden");
+      }
+    }
+  });
+  document.getElementById("form-venta")?.addEventListener("submit", function (e) {
+    e.preventDefault();
+    alert("Venta registrada exitosamente. El registro se integra al módulo de ingresos.");
+    cerrarModalVenta();
+    this.reset();
+  });
+
+  // --- Modal Nuevo Servicio ---
+  window.abrirModalNuevoServicio = function () {
+    const modal = document.getElementById("modal-nuevo-servicio");
+    if (modal) {
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+  };
+  window.cerrarModalNuevoServicio = function (e) {
+    const modal = document.getElementById("modal-nuevo-servicio");
+    if (modal) {
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+  };
+  document.getElementById("form-nuevo-servicio")?.addEventListener("submit", function (e) {
+    e.preventDefault();
+    const nombre = document.getElementById("ns-nombre").value;
+    const precio = document.getElementById("ns-precio").value;
+    alert(`Servicio "${nombre}" ($${Number(precio).toLocaleString("es-CL")}) agregado al catálogo.`);
+    cerrarModalNuevoServicio();
+    this.reset();
+  });
+
+  // --- Acciones tabla ---
+  window.venderServicio = function (servicioId, nombre, precio) {
+    abrirModalVenta();
+    setTimeout(function () {
+      const sel = document.getElementById("venta-servicio");
+      if (sel) {
+        for (let i = 0; i < sel.options.length; i++) {
+          if (sel.options[i].value === servicioId) {
+            sel.selectedIndex = i;
+            document.getElementById("venta-precio").value = precio;
+            break;
+          }
+        }
+      }
+    }, 50);
+  };
+  window.registrarCobro = function (ventaId, cliente, monto) {
+    if (confirm("¿Registrar cobro de $" + monto.toLocaleString("es-CL") + " para " + cliente + "?")) {
+      alert("Cobro registrado. Se integra automáticamente a Cuadratura de Caja.");
+    }
+  };
+  window.verDetalle = function (ventaId) {
+    alert("Detalle de la venta #" + ventaId + ".\nEn producción mostraría el comprobante completo.");
+  };
+  window.exportarHistorial = function () {
+    alert("Exportando historial de ventas a Excel...");
+  };
+</script>
