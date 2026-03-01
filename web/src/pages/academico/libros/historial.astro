@@ -1,0 +1,170 @@
+---
+import DashboardLayout from "../../../layouts/DashboardLayout.astro";
+import Button from "../../../components/ui/Button.astro";
+---
+
+<DashboardLayout title="Historial de Libros de Clases">
+  <div class="space-y-8">
+    <!-- Header -->
+    <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+      <h1 class="text-3xl font-bold text-gray-900 tracking-tighter">
+        Historial de Libros de Clases
+      </h1>
+      <Button variant="secondary" href="/libro-de-clases">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Volver al Libro Actual
+      </Button>
+    </header>
+
+    <!-- Barra de Filtros -->
+    <section class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+      <div class="flex flex-col md:flex-row gap-4 items-end">
+        <!-- Año -->
+        <div class="w-full md:w-48">
+          <label for="filter-year" class="block text-sm font-medium text-gray-700 mb-1.5">Año</label>
+          <select id="filter-year" class="w-full h-11 px-3 text-sm border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-shadow">
+            <option value="2026">2026</option>
+            <option value="2025">2025</option>
+            <option value="2024">2024</option>
+          </select>
+        </div>
+
+        <!-- Mes -->
+        <div class="w-full md:w-48">
+          <label for="filter-month" class="block text-sm font-medium text-gray-700 mb-1.5">Mes</label>
+          <select id="filter-month" class="w-full h-11 px-3 text-sm border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-shadow">
+            <option value="">Todos</option>
+            <option value="01">Enero</option>
+            <option value="02">Febrero</option>
+            <option value="03">Marzo</option>
+            <option value="04">Abril</option>
+            <option value="05">Mayo</option>
+            <option value="06">Junio</option>
+            <option value="07">Julio</option>
+            <option value="08">Agosto</option>
+            <option value="09">Septiembre</option>
+            <option value="10">Octubre</option>
+            <option value="11">Noviembre</option>
+            <option value="12">Diciembre</option>
+          </select>
+        </div>
+
+        <!-- Tipo de Curso -->
+        <div class="w-full md:w-56">
+          <label for="filter-course" class="block text-sm font-medium text-gray-700 mb-1.5">Tipo de Curso</label>
+          <select id="filter-course" class="w-full h-11 px-3 text-sm border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-shadow">
+            <option value="">Todos</option>
+            <option value="clase-b">Clase B</option>
+            <option value="clase-a2">Clase A2</option>
+            <option value="clase-a3">Clase A3</option>
+            <option value="clase-a4">Clase A4</option>
+            <option value="clase-a5">Clase A5</option>
+          </select>
+        </div>
+
+        <!-- Botón Buscar -->
+        <Button variant="primary" class="w-full md:w-auto">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          Buscar
+        </Button>
+      </div>
+    </section>
+
+    <!-- Tabla de Registro Histórico -->
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <table class="w-full text-left border-collapse">
+        <thead class="bg-gray-50 border-b border-gray-200">
+          <tr>
+            <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Periodo</th>
+            <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Nombre del Curso</th>
+            <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Alumnos Finales</th>
+            <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Fecha de Cierre</th>
+            <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Estado</th>
+            <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          <!-- Fila 1 -->
+          <tr class="hover:bg-gray-50 transition-colors">
+            <td class="px-6 py-4 text-sm text-gray-600">Enero 2026</td>
+            <td class="px-6 py-4 text-sm font-medium text-gray-900">Curso Clase B - 10 de Enero</td>
+            <td class="px-6 py-4 text-sm text-gray-600">25 Alumnos</td>
+            <td class="px-6 py-4 text-sm text-gray-600">17/01/2026</td>
+            <td class="px-6 py-4">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-100">
+                Cerrado/Histórico
+              </span>
+            </td>
+            <td class="px-6 py-4 text-right space-x-2">
+              <button class="p-2 text-gray-400 hover:text-blue-600 transition-colors" title="Ver Detalle">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              </button>
+              <button class="p-2 text-gray-400 hover:text-red-600 transition-colors" title="Exportar PDF">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+              </button>
+            </td>
+          </tr>
+          <!-- Fila 2 -->
+          <tr class="hover:bg-gray-50 transition-colors">
+            <td class="px-6 py-4 text-sm text-gray-600">Febrero 2026</td>
+            <td class="px-6 py-4 text-sm font-medium text-gray-900">Curso Clase A2 - 05 de Febrero</td>
+            <td class="px-6 py-4 text-sm text-gray-600">12 Alumnos</td>
+            <td class="px-6 py-4 text-sm text-gray-600">12/02/2026</td>
+            <td class="px-6 py-4">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-100">
+                Cerrado/Histórico
+              </span>
+            </td>
+            <td class="px-6 py-4 text-right space-x-2">
+              <button class="p-2 text-gray-400 hover:text-blue-600 transition-colors" title="Ver Detalle">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              </button>
+              <button class="p-2 text-gray-400 hover:text-red-600 transition-colors" title="Exportar PDF">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+              </button>
+            </td>
+          </tr>
+          <!-- Fila 3 -->
+          <tr class="hover:bg-gray-50 transition-colors">
+            <td class="px-6 py-4 text-sm text-gray-600">Diciembre 2025</td>
+            <td class="px-6 py-4 text-sm font-medium text-gray-900">Curso Clase B - 01 de Diciembre</td>
+            <td class="px-6 py-4 text-sm text-gray-600">30 Alumnos</td>
+            <td class="px-6 py-4 text-sm text-gray-600">20/12/2025</td>
+            <td class="px-6 py-4">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
+                Cerrado/Histórico
+              </span>
+            </td>
+            <td class="px-6 py-4 text-right space-x-2">
+              <button class="p-2 text-gray-400 hover:text-blue-600 transition-colors" title="Ver Detalle">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              </button>
+              <button class="p-2 text-gray-400 hover:text-red-600 transition-colors" title="Exportar PDF">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</DashboardLayout>
