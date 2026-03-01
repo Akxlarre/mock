@@ -1,11 +1,240 @@
 ---
 /**
- * Gestión de Ex-Alumnos y Reportes
- * RF-101 (Reportes Aprobación) y RF-102 (Encuestas)
+ * Gestión de Ex-Alumnos — Archivo Histórico
+ * RF-101 (Reportes Aprobación), RF-102 (Encuestas), RF-Módulo9 (Archivo Histórico, Búsqueda, Estado de Cuenta)
  */
 import DashboardLayout from "../../layouts/DashboardLayout.astro";
 import Card from "../../components/ui/Card.astro";
 import Button from "../../components/ui/Button.astro";
+
+/** Datos mock ex-alumnos — Clase B y Profesional, múltiples años
+ *  Nota: Certificado Casa de Moneda SOLO para licencias de Clase Profesional (A2-A5)
+ *  Estados de cuenta: solo "al_dia" o "pendiente"
+ */
+const exAlumnos = [
+  {
+    id: 1,
+    nombre: "Carlos Soto Muñoz",
+    rut: "15.432.198-7",
+    sede: "Conductores Chillán",
+    tipoLicencia: "A2",
+    anoEgreso: 2025,
+    fechaEgreso: "27 Dic 2025",
+    nroCertCasaMoneda: "CM-2026-00342",
+    estadoCuenta: {
+      estado: "pendiente",
+      monto: 45000,
+      detalle: [
+        { concepto: "Cuota 3/4 matrícula", monto: 45000, estado: "pendiente", fecha: "15 Ene 2026" },
+      ],
+    },
+  },
+  {
+    id: 2,
+    nombre: "Patricia Vargas Silva",
+    rut: "15.678.901-2",
+    sede: "Conductores Chillán",
+    tipoLicencia: "A3",
+    anoEgreso: 2025,
+    fechaEgreso: "27 Dic 2025",
+    nroCertCasaMoneda: "CM-2026-00344",
+    estadoCuenta: {
+      estado: "al_dia",
+      monto: 0,
+      detalle: [],
+    },
+  },
+  {
+    id: 3,
+    nombre: "Roberto Núñez Díaz",
+    rut: "13.456.789-1",
+    sede: "Conductores Chillán",
+    tipoLicencia: "A3",
+    anoEgreso: 2025,
+    fechaEgreso: "27 Dic 2025",
+    nroCertCasaMoneda: "CM-2026-00341",
+    estadoCuenta: {
+      estado: "al_dia",
+      monto: 0,
+      detalle: [],
+    },
+  },
+  {
+    id: 4,
+    nombre: "Valentina Ríos Lagos",
+    rut: "15.234.567-4",
+    sede: "Conductores Chillán",
+    tipoLicencia: "A4",
+    anoEgreso: 2025,
+    fechaEgreso: "27 Dic 2025",
+    nroCertCasaMoneda: "CM-2026-00346",
+    estadoCuenta: {
+      estado: "al_dia",
+      monto: 0,
+      detalle: [],
+    },
+  },
+  {
+    id: 5,
+    nombre: "Diego Meza Fuentes",
+    rut: "16.456.789-0",
+    sede: "Conductores Chillán",
+    tipoLicencia: "A5",
+    anoEgreso: 2025,
+    fechaEgreso: "27 Dic 2025",
+    nroCertCasaMoneda: "CM-2026-00347",
+    estadoCuenta: {
+      estado: "pendiente",
+      monto: 90000,
+      detalle: [
+        { concepto: "Cuota 2/3 matrícula", monto: 60000, estado: "pendiente", fecha: "01 Dic 2025" },
+        { concepto: "Cuota 3/3 matrícula", monto: 30000, estado: "pendiente", fecha: "15 Dic 2025" },
+      ],
+    },
+  },
+  {
+    id: 6,
+    nombre: "Camila Rojas Vega",
+    rut: "18.123.456-7",
+    sede: "Conductores Chillán",
+    tipoLicencia: "A2",
+    anoEgreso: 2025,
+    fechaEgreso: "8 Nov 2025",
+    nroCertCasaMoneda: "CM-2025-00318",
+    estadoCuenta: {
+      estado: "al_dia",
+      monto: 0,
+      detalle: [],
+    },
+  },
+  {
+    id: 7,
+    nombre: "María Fernández López",
+    rut: "14.876.543-1",
+    sede: "Conductores Chillán",
+    tipoLicencia: "A4",
+    anoEgreso: 2025,
+    fechaEgreso: "8 Nov 2025",
+    nroCertCasaMoneda: "CM-2025-00321",
+    estadoCuenta: {
+      estado: "al_dia",
+      monto: 0,
+      detalle: [],
+    },
+  },
+  {
+    id: 8,
+    nombre: "Juan Pérez García",
+    rut: "19.234.567-8",
+    sede: "Autoescuela Chillán",
+    tipoLicencia: "B",
+    anoEgreso: 2025,
+    fechaEgreso: "15 Oct 2025",
+    nroCertCasaMoneda: null, // Clase B no requiere certificado Casa de Moneda
+    estadoCuenta: {
+      estado: "al_dia",
+      monto: 0,
+      detalle: [],
+    },
+  },
+  {
+    id: 9,
+    nombre: "Ana Fernández Díaz",
+    rut: "20.123.456-2",
+    sede: "Autoescuela Chillán",
+    tipoLicencia: "B",
+    anoEgreso: 2025,
+    fechaEgreso: "15 Oct 2025",
+    nroCertCasaMoneda: null, // Clase B no requiere certificado Casa de Moneda
+    estadoCuenta: {
+      estado: "pendiente",
+      monto: 30000,
+      detalle: [
+        { concepto: "Clase adicional examen", monto: 30000, estado: "pendiente", fecha: "20 Oct 2025" },
+      ],
+    },
+  },
+  {
+    id: 10,
+    nombre: "Luis Contreras Mora",
+    rut: "17.890.123-4",
+    sede: "Autoescuela Chillán",
+    tipoLicencia: "B",
+    anoEgreso: 2024,
+    fechaEgreso: "20 Ago 2024",
+    nroCertCasaMoneda: null, // Clase B no requiere certificado Casa de Moneda
+    estadoCuenta: {
+      estado: "al_dia",
+      monto: 0,
+      detalle: [],
+    },
+  },
+  {
+    id: 11,
+    nombre: "Sofía Herrera Pinto",
+    rut: "16.345.678-9",
+    sede: "Autoescuela Chillán",
+    tipoLicencia: "B",
+    anoEgreso: 2024,
+    fechaEgreso: "12 Mar 2024",
+    nroCertCasaMoneda: null, // Clase B no requiere certificado Casa de Moneda
+    estadoCuenta: {
+      estado: "al_dia",
+      monto: 0,
+      detalle: [],
+    },
+  },
+  {
+    id: 12,
+    nombre: "Gonzalo Pinto Muñoz",
+    rut: "15.321.654-3",
+    sede: "Conductores Chillán",
+    tipoLicencia: "A3",
+    anoEgreso: 2024,
+    fechaEgreso: "30 Jun 2024",
+    nroCertCasaMoneda: null,
+    estadoCuenta: {
+      estado: "pendiente",
+      monto: 120000,
+      detalle: [
+        { concepto: "Matrícula curso reprogramado", monto: 80000, estado: "pendiente", fecha: "01 Jul 2024" },
+        { concepto: "Cuota adicional práctica", monto: 40000, estado: "pendiente", fecha: "15 Jul 2024" },
+      ],
+    },
+  },
+  {
+    id: 13,
+    nombre: "Martina Salazar Bravo",
+    rut: "14.678.901-5",
+    sede: "Autoescuela Chillán",
+    tipoLicencia: "B",
+    anoEgreso: 2023,
+    fechaEgreso: "05 Nov 2023",
+    nroCertCasaMoneda: null, // Clase B no requiere certificado Casa de Moneda
+    estadoCuenta: {
+      estado: "al_dia",
+      monto: 0,
+      detalle: [],
+    },
+  },
+  {
+    id: 14,
+    nombre: "Rodrigo Fuentes Campos",
+    rut: "13.987.654-3",
+    sede: "Autoescuela Chillán",
+    tipoLicencia: "B",
+    anoEgreso: 2023,
+    fechaEgreso: "22 Mar 2023",
+    nroCertCasaMoneda: null, // Clase B no requiere certificado Casa de Moneda
+    estadoCuenta: {
+      estado: "pendiente",
+      monto: 55000,
+      detalle: [
+        { concepto: "Cuota pendiente 2023 (sin regularizar)", monto: 55000, estado: "pendiente", fecha: "30 Mar 2023" },
+      ],
+    },
+  },
+];
 
 const comments = [
   { name: "Carlos González", stars: 5, text: "Excelente instructor, muy paciente. Me ayudó mucho con los estacionamientos." },
@@ -13,9 +242,21 @@ const comments = [
   { name: "Pedro Soto", stars: 5, text: "Muy recomendado. Aprobé mi examen a la primera gracias a las clases prácticas." },
   { name: "María Pérez", stars: 5, text: "Todo super bien organizado. La secretaria muy amable." },
 ];
+
+const totalEgresados = exAlumnos.length;
+const conCertCasaMoneda = exAlumnos.filter(a => a.nroCertCasaMoneda).length;
+const egresadosClaseB = exAlumnos.filter(a => a.tipoLicencia === "B").length;
+const egresadosClaseProf = exAlumnos.filter(a => a.tipoLicencia !== "B").length;
+const conSaldoPendiente = exAlumnos.filter(a => a.estadoCuenta.estado === "pendiente").length;
+const anosDisponibles = [...new Set(exAlumnos.map(a => a.anoEgreso))].sort((a, b) => b - a);
+const licenciasDisponibles = [...new Set(exAlumnos.map(a => a.tipoLicencia))].sort();
+
+// Pasar datos al cliente para los filtros JS
+const exAlumnosJSON = JSON.stringify(exAlumnos);
 ---
 
-<DashboardLayout title="Gestión de Ex-Alumnos y Reportes" userRole="secretaria">
+<DashboardLayout title="Gestión de Ex-Alumnos" userRole="secretaria">
+  <!-- Header -->
   <div class="mb-8">
     <div class="flex items-center gap-2 text-sm text-secondary mb-2">
       <a href="/secretaria/dashboard" class="hover:text-gray-900">Inicio</a>
@@ -24,23 +265,322 @@ const comments = [
       <span>/</span>
       <span class="text-gray-900 font-medium">Ex-Alumnos</span>
     </div>
-
-    <div class="flex items-center justify-between">
+    <div class="flex items-start justify-between gap-4">
       <div>
-        <h1 class="text-3xl font-semibold text-gray-900">Gestión de Ex-Alumnos</h1>
-        <p class="text-secondary mt-1">Reportes históricos y feedback</p>
+        <h1 class="text-3xl font-semibold text-gray-900 tracking-tight text-balance">Gestión de Ex-Alumnos</h1>
+        <p class="text-secondary mt-1">Archivo histórico, búsqueda avanzada y estado de cuenta de egresados</p>
       </div>
-      <Button href="/secretaria/alumnos" variant="secondary">
-        ← Volver a Alumnos Activos
-      </Button>
+      <div class="flex gap-2 shrink-0">
+        <Button variant="secondary" onClick="alert('Exportar historial completo (mockup)')">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          Exportar
+        </Button>
+        <Button href="/secretaria/alumnos" variant="secondary">← Activos</Button>
+      </div>
     </div>
   </div>
 
+  <!-- Stats rápidas -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+    <div class="border border-gray-200 rounded-lg bg-white p-4 shadow-sm text-center">
+      <p class="text-2xl font-bold text-gray-900">{totalEgresados}</p>
+      <p class="text-xs text-gray-500 mt-1">Total egresados</p>
+    </div>
+    <div class="border border-indigo-100 rounded-lg bg-indigo-50 p-4 text-center">
+      <p class="text-2xl font-bold text-indigo-700">{egresadosClaseB}</p>
+      <p class="text-xs text-indigo-600 mt-1">Egresados Clase B</p>
+    </div>
+    <div class="border border-violet-100 rounded-lg bg-violet-50 p-4 text-center">
+      <p class="text-2xl font-bold text-violet-700">{egresadosClaseProf}</p>
+      <p class="text-xs text-violet-600 mt-1">Egresados Clase Profesional</p>
+    </div>
+    <div class="border border-amber-100 rounded-lg bg-amber-50 p-4 text-center">
+      <p class="text-2xl font-bold text-amber-700">{conSaldoPendiente}</p>
+      <p class="text-xs text-amber-600 mt-1">Con abono pendiente</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       SECCIÓN PRINCIPAL: ARCHIVO HISTÓRICO
+  ═══════════════════════════════════════════════ -->
+  <div class="mb-10">
+    <h2 class="text-xl font-semibold text-gray-900 mb-4">Archivo Histórico de Egresados</h2>
+
+    <!-- Panel de filtros -->
+    <Card class="mb-4">
+      <div class="flex flex-wrap gap-3 items-end">
+        <!-- Búsqueda libre -->
+        <div class="flex-1 min-w-48">
+          <label class="block text-xs font-medium text-gray-600 mb-1">Buscar por nombre, RUT o Nº Cert. C. Moneda</label>
+          <div class="relative">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <input
+              id="filtro-busqueda"
+              type="text"
+              placeholder="Ej: Carlos Soto, CM-2026-00342..."
+              class="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1"
+              oninput="aplicarFiltros()"
+            />
+          </div>
+        </div>
+
+        <!-- Filtro año egreso -->
+        <div class="min-w-36">
+          <label class="block text-xs font-medium text-gray-600 mb-1">Año de egreso</label>
+          <select
+            id="filtro-ano"
+            class="w-full py-2 pl-3 pr-8 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1 bg-white"
+            onchange="aplicarFiltros()"
+          >
+            <option value="">Todos los años</option>
+            {anosDisponibles.map(ano => <option value={ano}>{ano}</option>)}
+          </select>
+        </div>
+
+        <!-- Filtro tipo licencia -->
+        <div class="min-w-36">
+          <label class="block text-xs font-medium text-gray-600 mb-1">Tipo de licencia</label>
+          <select
+            id="filtro-licencia"
+            class="w-full py-2 pl-3 pr-8 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1 bg-white"
+            onchange="aplicarFiltros()"
+          >
+            <option value="">Todas</option>
+            <option value="B">Clase B (Auto)</option>
+            <option value="A2">A2</option>
+            <option value="A3">A3</option>
+            <option value="A4">A4</option>
+            <option value="A5">A5</option>
+          </select>
+        </div>
+
+        <!-- Filtro estado de cuenta -->
+        <div class="min-w-40">
+          <label class="block text-xs font-medium text-gray-600 mb-1">Estado de cuenta</label>
+          <select
+            id="filtro-estado"
+            class="w-full py-2 pl-3 pr-8 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1 bg-white"
+            onchange="aplicarFiltros()"
+          >
+            <option value="">Todos</option>
+            <option value="al_dia">Al día</option>
+            <option value="pendiente">Con abono pendiente</option>
+          </select>
+        </div>
+
+        <!-- Limpiar -->
+        <button
+          onclick="limpiarFiltros()"
+          class="py-2 px-3 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 shadow-sm transition-colors whitespace-nowrap"
+        >
+          Limpiar filtros
+        </button>
+      </div>
+
+      <!-- Contador resultados -->
+      <div class="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between">
+        <p id="contador-resultados" class="text-xs text-gray-500">Mostrando <span id="count-num" class="font-semibold text-gray-700">{exAlumnos.length}</span> egresados</p>
+        <p class="text-xs text-gray-400">Haz clic en una fila para ver el estado de cuenta detallado</p>
+      </div>
+    </Card>
+
+    <!-- Tabla de egresados -->
+    <div class="border border-gray-200 rounded-lg bg-white shadow-sm overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm" id="tabla-egresados">
+          <thead class="bg-gray-50 border-b border-gray-200">
+            <tr>
+              <th class="text-left py-3 px-4 text-xs font-semibold text-gray-600 uppercase tracking-wide">Egresado</th>
+              <th class="text-center py-3 px-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">Licencia</th>
+              <th class="text-center py-3 px-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">Año</th>
+              <th class="text-left py-3 px-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">Sede</th>
+              <th class="text-left py-3 px-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">Nº Cert. Casa de Moneda</th>
+              <th class="text-center py-3 px-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">Estado Cuenta</th>
+              <th class="text-center py-3 px-3 text-xs font-semibold text-gray-600 uppercase tracking-wide"></th>
+            </tr>
+          </thead>
+          <tbody id="tbody-egresados" class="divide-y divide-gray-100">
+            {exAlumnos.map((alumno) => {
+              const esProfesional = alumno.tipoLicencia !== "B";
+              const estadoBadge =
+                alumno.estadoCuenta.estado === "al_dia"
+                  ? "bg-green-100 text-green-800"
+                  : "bg-amber-100 text-amber-800";
+              const estadoLabel =
+                alumno.estadoCuenta.estado === "al_dia"
+                  ? "Al día"
+                  : `Debe $${alumno.estadoCuenta.monto.toLocaleString("es-CL")}`;
+              const licenseBg =
+                alumno.tipoLicencia === "B" ? "bg-indigo-100 text-indigo-700" : "bg-orange-100 text-orange-700";
+
+              return (
+                <>
+                  <tr
+                    class="hover:bg-gray-50 transition-colors cursor-pointer fila-alumno"
+                    data-id={alumno.id}
+                    data-ano={alumno.anoEgreso}
+                    data-licencia={alumno.tipoLicencia}
+                    data-estado={alumno.estadoCuenta.estado}
+                    data-busqueda={`${alumno.nombre} ${alumno.rut} ${alumno.nroCertCasaMoneda ?? ""}`.toLowerCase()}
+                    onclick={`toggleDetalle(${alumno.id})`}
+                  >
+                    <td class="py-3 px-4">
+                      <p class="font-medium text-gray-900">{alumno.nombre}</p>
+                      <p class="text-xs text-gray-400 font-mono">{alumno.rut}</p>
+                    </td>
+                    <td class="py-3 px-3 text-center">
+                      <span class={`inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded ${licenseBg}`}>
+                        {alumno.tipoLicencia}
+                      </span>
+                    </td>
+                    <td class="py-3 px-3 text-center text-sm text-gray-700 font-medium">{alumno.anoEgreso}</td>
+                    <td class="py-3 px-3">
+                      <p class="text-xs text-gray-600">{alumno.sede}</p>
+                      <p class="text-xs text-gray-400">{alumno.fechaEgreso}</p>
+                    </td>
+                    <td class="py-3 px-3">
+                      {!esProfesional ? (
+                        <span class="text-xs text-gray-300 italic">No aplica</span>
+                      ) : alumno.nroCertCasaMoneda ? (
+                        <span class="text-xs font-mono text-gray-700 bg-gray-100 px-2 py-0.5 rounded">
+                          {alumno.nroCertCasaMoneda}
+                        </span>
+                      ) : (
+                        <span class="text-xs text-orange-500 italic">Pendiente</span>
+                      )}
+                    </td>
+                    <td class="py-3 px-3 text-center">
+                      <span class={`inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-full ${estadoBadge}`}>
+                        {estadoLabel}
+                      </span>
+                    </td>
+                    <td class="py-3 px-3 text-center">
+                      <svg
+                        id={`chevron-${alumno.id}`}
+                        class="w-4 h-4 text-gray-400 mx-auto transition-transform duration-200"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                      >
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-7 7-7-7"/>
+                      </svg>
+                    </td>
+                  </tr>
+
+                  <!-- Fila de detalle estado de cuenta (colapsable) -->
+                  <tr id={`detalle-${alumno.id}`} class="hidden fila-detalle bg-gray-50">
+                    <td colspan="7" class="px-6 py-4">
+                      <div class="flex flex-wrap gap-8 items-start">
+                        <!-- Datos del egresado -->
+                        <div class="min-w-48">
+                          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Datos del egresado</p>
+                          <div class="space-y-1 text-xs text-gray-600">
+                            <p><span class="text-gray-400">Sede:</span> {alumno.sede}</p>
+                            <p><span class="text-gray-400">Egreso:</span> {alumno.fechaEgreso}</p>
+                            <p><span class="text-gray-400">Licencia:</span> Clase {alumno.tipoLicencia}</p>
+                            {esProfesional && alumno.nroCertCasaMoneda && (
+                              <p><span class="text-gray-400">Cert. Casa de Moneda:</span> <span class="font-mono">{alumno.nroCertCasaMoneda}</span></p>
+                            )}
+                            {esProfesional && !alumno.nroCertCasaMoneda && (
+                              <p><span class="text-gray-400">Cert. Casa de Moneda:</span> <span class="text-orange-500">Pendiente</span></p>
+                            )}
+                          </div>
+                        </div>
+
+                        <!-- Estado de cuenta -->
+                        <div class="flex-1 min-w-64">
+                          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Estado de cuenta</p>
+                          {alumno.estadoCuenta.estado === "al_dia" ? (
+                            <div class="flex items-center gap-2 text-green-700 text-sm">
+                              <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                              </svg>
+                              <span class="font-medium">Sin deudas pendientes</span>
+                            </div>
+                          ) : (
+                            <div class="space-y-2">
+                              {alumno.estadoCuenta.detalle.map(item => (
+                                <div class="flex items-center justify-between text-xs px-3 py-2 rounded-lg border bg-amber-50 border-amber-200">
+                                  <div>
+                                    <p class="font-medium text-amber-800">{item.concepto}</p>
+                                    <p class="text-amber-600">Vencimiento: {item.fecha}</p>
+                                  </div>
+                                  <span class="font-bold text-sm ml-4 text-amber-700">
+                                    ${item.monto.toLocaleString("es-CL")}
+                                  </span>
+                                </div>
+                              ))}
+                              <div class="flex justify-between items-center pt-1 text-sm font-semibold text-amber-700">
+                                <span>Total pendiente:</span>
+                                <span>${alumno.estadoCuenta.monto.toLocaleString("es-CL")}</span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        <!-- Acciones -->
+                        <div class="flex flex-col gap-2">
+                          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Acciones</p>
+                          {alumno.estadoCuenta.estado === "pendiente" && (
+                            <button
+                              onclick={`alert('Registrar pago para ${alumno.nombre}\\n(mockup)')`}
+                              class="text-xs px-3 py-1.5 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium"
+                            >
+                              Registrar pago
+                            </button>
+                          )}
+                          {esProfesional && alumno.nroCertCasaMoneda && (
+                            <button
+                              onclick={`alert('Ver certificado ${alumno.nroCertCasaMoneda}\\n(mockup)')`}
+                              class="text-xs px-3 py-1.5 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors shadow-sm"
+                            >
+                              Ver certificado
+                            </button>
+                          )}
+                          {esProfesional && !alumno.nroCertCasaMoneda && (
+                            <button
+                              onclick={`alert('Tramitar certificado Casa de Moneda para ${alumno.nombre}\\n(mockup)')`}
+                              class="text-xs px-3 py-1.5 bg-white border border-orange-200 text-orange-700 rounded-lg hover:bg-orange-50 transition-colors shadow-sm"
+                            >
+                              Tramitar certificado
+                            </button>
+                          )}
+                          <button
+                            onclick={`alert('Abrir ficha completa de ${alumno.nombre}\\n(mockup)')`}
+                            class="text-xs px-3 py-1.5 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors shadow-sm"
+                          >
+                            Ver ficha completa
+                          </button>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mensaje vacío (oculto por defecto) -->
+      <div id="sin-resultados" class="hidden py-12 text-center">
+        <svg class="w-10 h-10 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <p class="text-gray-400 text-sm">Sin resultados para los filtros aplicados</p>
+        <button onclick="limpiarFiltros()" class="mt-3 text-sm text-blue-600 hover:underline">Limpiar filtros</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       SECCIÓN INFERIOR: Tasas + Comentarios
+  ═══════════════════════════════════════════════ -->
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-    <!-- Sección A: Reporte de Aprobación (RF-101) -->
+    <!-- Tasas de Aprobación (RF-101) -->
     <div class="space-y-6">
-      <h2 class="text-xl font-semibold text-gray-900">📊 Tasas de Aprobación</h2>
-      
+      <h2 class="text-xl font-semibold text-gray-900">Tasas de Aprobación</h2>
+
       <Card class="p-6">
         <div class="mb-6">
           <div class="flex justify-between items-end mb-2">
@@ -52,66 +592,131 @@ const comments = [
           </div>
           <p class="text-xs text-secondary mt-2">Basado en 340 exámenes presentados este año</p>
         </div>
-
         <div>
-           <div class="flex justify-between items-end mb-2">
+          <div class="flex justify-between items-end mb-2">
             <h3 class="font-medium text-gray-900">Aprobación Examen Psicotécnico</h3>
             <span class="text-2xl font-bold text-blue-600">92%</span>
           </div>
           <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
             <div class="bg-blue-500 h-4 rounded-full" style="width: 92%"></div>
           </div>
-           <p class="text-xs text-secondary mt-2">Alta tasa de éxito en primera instancia</p>
+          <p class="text-xs text-secondary mt-2">Alta tasa de éxito en primera instancia</p>
         </div>
       </Card>
 
-      <Card class="p-6 bg-gradient-to-br from-indigo-50 to-white border border-indigo-100">
-        <h3 class="font-semibold text-indigo-900 mb-2">Resumen Anual</h3>
+      <Card class="p-6 bg-linear-to-br from-indigo-50 to-white border border-indigo-100">
+        <h3 class="font-semibold text-indigo-900 mb-3">Resumen Anual</h3>
         <div class="grid grid-cols-2 gap-4 text-center">
-            <div class="bg-white p-3 rounded-lg shadow-sm">
-                <p class="text-sm text-gray-500">Total Egresados</p>
-                <p class="text-2xl font-bold text-gray-900">450</p>
-            </div>
-             <div class="bg-white p-3 rounded-lg shadow-sm">
-                <p class="text-sm text-gray-500">Licencias Obtenidas</p>
-                <p class="text-2xl font-bold text-green-600">412</p>
-            </div>
+          <div class="bg-white p-3 rounded-lg shadow-sm">
+            <p class="text-sm text-gray-500">Total Egresados</p>
+            <p class="text-2xl font-bold text-gray-900">450</p>
+          </div>
+          <div class="bg-white p-3 rounded-lg shadow-sm">
+            <p class="text-sm text-gray-500">Licencias Obtenidas</p>
+            <p class="text-2xl font-bold text-green-600">412</p>
+          </div>
         </div>
       </Card>
     </div>
 
-    <!-- Sección B: Encuestas de Satisfacción (RF-102) -->
+    <!-- Encuestas de Satisfacción (RF-102) -->
     <div class="space-y-6">
-        <div class="flex items-center justify-between">
-            <h2 class="text-xl font-semibold text-gray-900">⭐ Últimos Comentarios</h2>
-            <div class="flex items-center gap-1 bg-yellow-50 px-3 py-1 rounded-full border border-yellow-200">
-                <span class="text-yellow-500 font-bold">4.8</span>
-                <span class="text-xs text-yellow-700">Promedio General</span>
-            </div>
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-semibold text-gray-900">Últimos Comentarios</h2>
+        <div class="flex items-center gap-1 bg-yellow-50 px-3 py-1 rounded-full border border-yellow-200">
+          <span class="text-yellow-500 font-bold">4.8</span>
+          <span class="text-xs text-yellow-700">Promedio General</span>
         </div>
+      </div>
 
-        <div class="space-y-4">
-            {comments.map((comment) => (
-                <Card class="p-4">
-                    <div class="flex justify-between items-start mb-2">
-                        <div class="flex items-center gap-2">
-                            <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600">
-                                {comment.name.split(" ").map(n => n[0]).join("")}
-                            </div>
-                            <span class="font-medium text-gray-900">{comment.name}</span>
-                        </div>
-                        <div class="flex text-yellow-400 text-sm">
-                            {[...Array(5)].map((_, i) => (
-                                <span>{i < comment.stars ? "★" : "☆"}</span>
-                            ))}
-                        </div>
-                    </div>
-                    <p class="text-gray-600 text-sm ml-10">"{comment.text}"</p>
-                </Card>
-            ))}
-        </div>
-        
-        <Button variant="secondary" class="w-full justify-center">Ver todas las encuestas</Button>
+      <div class="space-y-4">
+        {comments.map((comment) => (
+          <Card class="p-4">
+            <div class="flex justify-between items-start mb-2">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600">
+                  {comment.name.split(" ").map((n: string) => n[0]).join("")}
+                </div>
+                <span class="font-medium text-gray-900">{comment.name}</span>
+              </div>
+              <div class="flex text-yellow-400 text-sm">
+                {[...Array(5)].map((_, i) => (
+                  <span>{i < comment.stars ? "★" : "☆"}</span>
+                ))}
+              </div>
+            </div>
+            <p class="text-gray-600 text-sm ml-10">"{comment.text}"</p>
+          </Card>
+        ))}
+      </div>
+
+      <Button variant="secondary" class="w-full justify-center">Ver todas las encuestas</Button>
     </div>
   </div>
 </DashboardLayout>
+
+<script>
+  // ─── Lógica de filtros ───────────────────────────────────────────
+  function aplicarFiltros() {
+    const busqueda  = (document.getElementById('filtro-busqueda') as HTMLInputElement).value.toLowerCase().trim();
+    const ano       = (document.getElementById('filtro-ano') as HTMLSelectElement).value;
+    const licencia  = (document.getElementById('filtro-licencia') as HTMLSelectElement).value;
+    const estado    = (document.getElementById('filtro-estado') as HTMLSelectElement).value;
+
+    const filasPrincipales = document.querySelectorAll<HTMLTableRowElement>('.fila-alumno');
+    let visible = 0;
+
+    filasPrincipales.forEach(fila => {
+      const idAlumno = fila.dataset.id!;
+      const filaDetalle = document.getElementById(`detalle-${idAlumno}`);
+
+      const matchBusqueda = !busqueda || fila.dataset.busqueda!.includes(busqueda);
+      const matchAno      = !ano       || fila.dataset.ano === ano;
+      const matchLicencia = !licencia  || fila.dataset.licencia === licencia;
+      const matchEstado   = !estado    || fila.dataset.estado === estado;
+
+      const mostrar = matchBusqueda && matchAno && matchLicencia && matchEstado;
+      fila.classList.toggle('hidden', !mostrar);
+
+      // Ocultar también el detalle si la fila principal se oculta
+      if (filaDetalle && !mostrar) {
+        filaDetalle.classList.add('hidden');
+        const chevron = document.getElementById(`chevron-${idAlumno}`);
+        if (chevron) chevron.style.transform = '';
+      }
+
+      if (mostrar) visible++;
+    });
+
+    // Actualizar contador
+    const countEl = document.getElementById('count-num');
+    if (countEl) countEl.textContent = String(visible);
+
+    // Mostrar/ocultar mensaje vacío
+    const sinResultados = document.getElementById('sin-resultados');
+    if (sinResultados) sinResultados.classList.toggle('hidden', visible > 0);
+  }
+
+  function limpiarFiltros() {
+    (document.getElementById('filtro-busqueda') as HTMLInputElement).value = '';
+    (document.getElementById('filtro-ano') as HTMLSelectElement).value = '';
+    (document.getElementById('filtro-licencia') as HTMLSelectElement).value = '';
+    (document.getElementById('filtro-estado') as HTMLSelectElement).value = '';
+    aplicarFiltros();
+  }
+
+  // ─── Toggle detalle estado de cuenta ────────────────────────────
+  function toggleDetalle(id: number) {
+    const detalle = document.getElementById(`detalle-${id}`);
+    const chevron = document.getElementById(`chevron-${id}`);
+    if (!detalle) return;
+    const abierto = !detalle.classList.contains('hidden');
+    detalle.classList.toggle('hidden', abierto);
+    if (chevron) chevron.style.transform = abierto ? '' : 'rotate(180deg)';
+  }
+
+  // Exponer funciones globalmente para los handlers inline
+  (window as any).aplicarFiltros = aplicarFiltros;
+  (window as any).limpiarFiltros = limpiarFiltros;
+  (window as any).toggleDetalle  = toggleDetalle;
+</script>
