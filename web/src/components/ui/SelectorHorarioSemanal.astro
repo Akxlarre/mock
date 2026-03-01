@@ -1,0 +1,270 @@
+---
+/**
+ * SelectorHorarioSemanal - Componente Reutilizable
+ * Permite seleccionar bloques horarios recurrentes en una semana (ej. disponibilidad de instructor).
+ * Diseñado para ser premium, accesible y responsive.
+ */
+
+interface Props {
+    id?: string;
+    name?: string;
+    /** Arreglo opcional con los IDs de los bloques pre-seleccionados. Ej: ['lun_09:00', 'mar_15:00'] */
+    seleccionInicial?: string[];
+    /** Si es true, muestra Sábado y Domingo */
+    mostrarFinesDeSemana?: boolean;
+}
+
+const { 
+    id = "selector-horario-semanal", 
+    name = "horario_semanal",
+    seleccionInicial = [],
+    mostrarFinesDeSemana = true 
+} = Astro.props;
+
+const diasSemana = [
+    { id: 'lun', nombre: 'Lunes', corto: 'Lun' },
+    { id: 'mar', nombre: 'Martes', corto: 'Mar' },
+    { id: 'mie', nombre: 'Miércoles', corto: 'Mié' },
+    { id: 'jue', nombre: 'Jueves', corto: 'Jue' },
+    { id: 'vie', nombre: 'Viernes', corto: 'Vie' },
+    ...(mostrarFinesDeSemana ? [
+        { id: 'sab', nombre: 'Sábado', corto: 'Sáb' },
+        { id: 'dom', nombre: 'Domingo', corto: 'Dom' }
+    ] : [])
+];
+
+const bloquesHorarios = [
+    "09:00 - 10:00",
+    "10:00 - 11:00",
+    "11:00 - 12:00",
+    "12:00 - 13:00",
+    "13:00 - 14:00",
+    "14:00 - 15:00",
+    "15:00 - 16:00",
+    "16:00 - 17:00",
+    "17:00 - 18:00",
+];
+---
+
+<div class="selector-horario-semanal bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm flex flex-col" id={id}>
+    <!-- Input oculto para recolectar los valores en un formulario tradicional -->
+    <input type="hidden" name={name} id={`${id}-input`} value={seleccionInicial.join(',')} />
+    
+    <!-- Header: Días -->
+    <div class="flex border-b border-gray-200 bg-gray-50 bg-opacity-80">
+        <!-- Espacio en blanco para la columna de horas -->
+        <div class="w-16 md:w-20 shrink-0 border-r border-gray-200"></div>
+        <div class="flex flex-1 overflow-x-auto scrollbar-hide" id={`${id}-header-scroll`}>
+            {diasSemana.map(dia => (
+                <div class="flex-1 min-w-[70px] md:min-w-0 py-3 text-center border-r border-gray-200 last:border-r-0">
+                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:inline">{dia.nombre}</span>
+                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider md:hidden">{dia.corto}</span>
+                </div>
+            ))}
+        </div>
+    </div>
+
+    <!-- Body: Grid de Horarios -->
+    <div class="flex flex-1 max-h-[500px] overflow-y-auto scroll-smooth">
+        <!-- Columna de Horas -->
+        <div class="w-16 md:w-20 shrink-0 border-r border-gray-200 bg-gray-50 bg-opacity-50 py-2">
+            {bloquesHorarios.map(hora => (
+                <div class="h-12 flex items-center justify-center">
+                    <span class="text-[10px] md:text-xs font-medium text-gray-400">{hora.split(' - ')[0]}</span>
+                </div>
+            ))}
+        </div>
+
+        <!-- Celdas Interactivas -->
+        <div class="flex flex-1 overflow-x-auto scrollbar-hide py-2" id={`${id}-body-scroll`}>
+            {diasSemana.map(dia => (
+                <div class="flex-1 min-w-[70px] md:min-w-0 border-r border-gray-100 last:border-r-0 px-1">
+                    {bloquesHorarios.map(hora => {
+                        const cellId = `${dia.id}_${hora.split(' - ')[0]}`;
+                        const isSelected = seleccionInicial.includes(cellId);
+                        return (
+                            <div class="h-12 flex items-center justify-center p-0.5">
+                                <button 
+                                    type="button"
+                                    class={`horario-cell w-full h-full rounded flex items-center justify-center transition-all duration-200 border
+                                        ${isSelected 
+                                            ? 'bg-blue-100 border-blue-400 text-blue-700 shadow-inner' 
+                                            : 'bg-white border-transparent hover:border-gray-300 hover:bg-gray-50 text-gray-300'
+                                        }
+                                        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1
+                                    `}
+                                    data-id={cellId}
+                                    data-selected={isSelected ? "true" : "false"}
+                                    aria-label={`Seleccionar ${dia.nombre} a las ${hora}`}
+                                >
+                                    <!-- Checkmark Icon para estado activo -->
+                                    <svg class={`w-4 h-4 transition-transform duration-200 ${isSelected ? 'scale-100' : 'scale-0 opacity-0'}`} fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                    </svg>
+                                    <!-- Plus Icon para hover en estado inactivo -->
+                                    <svg class={`w-4 h-4 absolute transition-opacity duration-200 ${isSelected ? 'opacity-0' : 'opacity-0 hover:opacity-100 text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    </svg>
+                                </button>
+                            </div>
+                        );
+                    })}
+                </div>
+            ))}
+        </div>
+    </div>
+    
+    <div class="bg-gray-50 border-t border-gray-200 p-3 flex justify-between items-center text-xs text-gray-500">
+        <div>
+            <span id={`${id}-count`} class="font-medium text-gray-900">{seleccionInicial.length}</span> bloques seleccionados
+        </div>
+        <div class="flex gap-2">
+            <button type="button" class="horario-action-btn hover:text-blue-600 transition-colors" data-action="all">Seleccionar Todos</button>
+            <span class="text-gray-300">|</span>
+            <button type="button" class="horario-action-btn hover:text-blue-600 transition-colors" data-action="clear">Limpiar</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Ocultar scrollbar pero permitir scroll en móviles */
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+</style>
+
+<script>
+    function initSelectorHorarioSemanal() {
+        const containers = document.querySelectorAll('.selector-horario-semanal');
+        
+        containers.forEach(container => {
+            const id = container.id;
+            if (!id) return;
+            
+            const inputHidden = document.getElementById(`${id}-input`) as HTMLInputElement;
+            const counterLabel = document.getElementById(`${id}-count`);
+            const cells = container.querySelectorAll('.horario-cell');
+            const actionBtns = container.querySelectorAll('.horario-action-btn');
+            
+            // Sincronizar scroll horizontal entre el header de días y el grid de horas
+            const headerScroll = document.getElementById(`${id}-header-scroll`);
+            const bodyScroll = document.getElementById(`${id}-body-scroll`);
+            
+            if (headerScroll && bodyScroll) {
+                bodyScroll.addEventListener('scroll', () => {
+                    headerScroll.scrollLeft = bodyScroll.scrollLeft;
+                });
+                headerScroll.addEventListener('scroll', () => {
+                    bodyScroll.scrollLeft = headerScroll.scrollLeft;
+                });
+            }
+
+            // Setear estado visual de una celda
+            const setCellState = (cell: Element, isSelected: boolean) => {
+                cell.setAttribute('data-selected', isSelected.toString());
+                
+                if (isSelected) {
+                    cell.classList.remove('bg-white', 'border-transparent', 'hover:border-gray-300', 'hover:bg-gray-50', 'text-gray-300');
+                    cell.classList.add('bg-blue-100', 'border-blue-400', 'text-blue-700', 'shadow-inner');
+                    
+                    const checkIcon = cell.querySelector('svg:first-of-type');
+                    const plusIcon = cell.querySelector('svg:last-of-type');
+                    
+                    if (checkIcon) {
+                        checkIcon.classList.remove('scale-0', 'opacity-0');
+                        checkIcon.classList.add('scale-100');
+                    }
+                    if (plusIcon) {
+                        plusIcon.classList.add('opacity-0');
+                        plusIcon.classList.remove('hover:opacity-100');
+                    }
+                } else {
+                    cell.classList.add('bg-white', 'border-transparent', 'hover:border-gray-300', 'hover:bg-gray-50', 'text-gray-300');
+                    cell.classList.remove('bg-blue-100', 'border-blue-400', 'text-blue-700', 'shadow-inner');
+                    
+                    const checkIcon = cell.querySelector('svg:first-of-type');
+                    const plusIcon = cell.querySelector('svg:last-of-type');
+                    
+                    if (checkIcon) {
+                        checkIcon.classList.add('scale-0', 'opacity-0');
+                        checkIcon.classList.remove('scale-100');
+                    }
+                    if (plusIcon) {
+                        plusIcon.classList.remove('opacity-0');
+                        plusIcon.classList.add('hover:opacity-100');
+                    }
+                }
+            };
+
+            // Actualizar input oculto y contador
+            const updateState = () => {
+                const selectedCells = Array.from(container.querySelectorAll('.horario-cell[data-selected="true"]'));
+                const selectedIds = selectedCells.map(c => c.getAttribute('data-id'));
+                
+                if (inputHidden) {
+                    inputHidden.value = selectedIds.join(',');
+                    // Emitir evento change para integración con form helpers
+                    inputHidden.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+                
+                if (counterLabel) {
+                    counterLabel.textContent = selectedIds.length.toString();
+                }
+
+                // Custom event para frameworks integrados
+                container.dispatchEvent(new CustomEvent('horarioSemanalChange', {
+                    detail: { seleccion: selectedIds },
+                    bubbles: true
+                }));
+            };
+
+            // Event listener delegativo para celdas
+            cells.forEach(cell => {
+                // Prevenir que se vuelva a agregar mútliples listeners si hay re-renders
+                const currentHandler = (cell as any)._clickHandler;
+                if (currentHandler) {
+                    cell.removeEventListener('click', currentHandler);
+                }
+                
+                const handler = () => {
+                    const isSelected = cell.getAttribute('data-selected') === "true";
+                    setCellState(cell, !isSelected);
+                    updateState();
+                };
+                
+                (cell as any)._clickHandler = handler;
+                cell.addEventListener('click', handler);
+            });
+
+            // Botones de acción (Seleccionar Todos / Limpiar)
+            actionBtns.forEach(btn => {
+                const actionHandler = () => {
+                    const action = btn.getAttribute('data-action');
+                    if (action === 'all') {
+                        cells.forEach(cell => setCellState(cell, true));
+                    } else if (action === 'clear') {
+                        cells.forEach(cell => setCellState(cell, false));
+                    }
+                    updateState();
+                };
+                
+                // Limpiar listeners antiguos
+                const currentHandler = (btn as any)._clickHandler;
+                if (currentHandler) {
+                    btn.removeEventListener('click', currentHandler);
+                }
+                
+                (btn as any)._clickHandler = actionHandler;
+                btn.addEventListener('click', actionHandler);
+            });
+        });
+    }
+
+    // Inicializar en la carga inicial y en navegaciones de Astro ViewTransitions
+    document.addEventListener("DOMContentLoaded", initSelectorHorarioSemanal);
+    document.addEventListener("astro:page-load", initSelectorHorarioSemanal);
+</script>
